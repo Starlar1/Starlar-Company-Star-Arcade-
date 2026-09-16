@@ -5,12 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <meta name="theme-color" content="#0a0a0f" />
     <title>STAR ARCADE</title>
-    
-    <!-- Firebase SDK -->
+
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-    
+
     <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -21,7 +20,7 @@
         <p id="loadingText">Processing...</p>
     </div>
 
-    <!-- ========== FIRST LOGIN POPUP - Profile Setup ========== -->
+    <!-- ========== FIRST LOGIN POPUP ========== -->
     <div class="first-login-popup-overlay hidden" id="firstLoginPopup">
         <div class="first-login-popup">
             <div class="first-login-popup-header">
@@ -36,18 +35,16 @@
                     <input type="file" id="firstLoginAvatarInput" accept="image/*" style="display:none" />
                     <span class="first-login-avatar-hint">Tap to change avatar</span>
                 </div>
-                
                 <div class="first-login-input-group">
                     <label>Display Name</label>
                     <input type="text" id="firstLoginNameInput" class="first-login-input" placeholder="Enter your display name..." />
                 </div>
-                
                 <button class="first-login-save-btn" id="firstLoginSaveBtn">Save & Continue</button>
             </div>
         </div>
     </div>
 
-    <!-- ========== LOGIN POPUP (Server No Only) ========== -->
+    <!-- ========== LOGIN POPUP ========== -->
     <div class="login-popup-overlay hidden" id="loginPopup">
         <div class="login-popup">
             <div class="login-popup-header">
@@ -71,19 +68,16 @@
     </div>
 
     <!-- ========== AUTH OVERLAY ========== -->
-    <div class="auth-overlay" id="authOverlay" style="background-image: url('https://i.ibb.co/6ctxjf7x/file-00000000619882108d0e3443b904324b.png'); background-size: cover; background-position: center;">
+    <div class="auth-overlay" id="authOverlay" style="background-image: url('https://i.ibb.co/QF8b56Gj/file-00000000e6fc8211ad946f92b60b511c.png'); background-size: cover; background-position: center;">
         <div class="auth-bg"></div>
         <div class="auth-container">
             <div class="auth-brand">
                 <h2>STAR ARCADE</h2>
                 <p>Connect with gamers worldwide</p>
             </div>
-            
             <div class="auth-card" id="loginCard">
                 <h3>သင့် Google Account ဖြင့်၀င်ပါ</h3>
                 <p class="sub">Sign in to access your account</p>
-                
-                <!-- ===== NEW ACCOUNT BUTTON ===== -->
                 <button class="google-btn" id="newAccountBtn">
                     <svg width="22" height="22" viewBox="0 0 24 24">
                         <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -93,12 +87,7 @@
                     </svg>
                     <span>Create New Account</span>
                 </button>
-                
-                <div class="auth-divider">
-                    <span>or</span>
-                </div>
-                
-                <!-- ===== LOGIN BUTTON ===== -->
+                <div class="auth-divider"><span>or</span></div>
                 <button class="login-btn" id="loginBtn">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
@@ -107,16 +96,13 @@
                     </svg>
                     <span>Login Account</span>
                 </button>
-                
                 <p class="auth-footer">By continuing, you agree to our Terms of Service</p>
             </div>
-            
         </div>
     </div>
 
     <!-- ========== APP WRAPPER ========== -->
     <div class="app-wrapper hidden" id="appWrapper">
-        <!-- TOP BAR -->
         <header class="top-bar">
             <button class="top-icon-btn" id="sidebarToggleBtn">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
@@ -143,10 +129,8 @@
         <main class="main-content">
             <div class="layout-wrapper">
 
-                <!-- Sidebar Overlay -->
                 <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
-                <!-- SIDEBAR -->
                 <aside class="sidebar" id="sidebar">
                     <div class="sidebar-inner">
                         <div class="sidebar-header">
@@ -159,7 +143,7 @@
                             </button>
                         </div>
                         <button class="diamond-card" id="coinCard">
-                            <img src="https://i.ibb.co/39SYGr6M/Grid-Art-20260805-102408042.png" alt="Diamond" class="diamond-img" />
+                            <img src="https://i.ibb.co/nqddpg0t/Grid-Art-20260914-205228786.png" alt="Diamond" class="diamond-img" />
                             <span id="coinDisplay">0</span>
                         </button>
                         <button class="profile-btn" id="profileBtn">
@@ -201,17 +185,39 @@
                     </div>
                 </aside>
 
-                <!-- CONTENT RIGHT -->
                 <div class="content-right">
                     <div class="tab-content" id="tabContent">
-                        <div class="screen" id="screen-chat"><div class="screen-center"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#ff6d1f" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><h3>Chat</h3><p>Messages will appear here</p></div></div>
+                        <div class="screen" id="screen-chat">
+                            <div class="chat-list" id="chatList">
+
+                                <!-- Ai (အတု) -- Name = "STAR", ဘေးမှာ "AI" -->
+                                <div class="chat-list-item disabled" data-chat="ai">
+                                    <div class="chat-list-avatar-wrap">
+                                        <img class="chat-list-avatar" src="https://i.ibb.co/QF8b56Gj/file-00000000e6fc8211ad946f92b60b511c.png" alt="STAR" />
+                                    </div>
+                                    <div class="chat-list-info">
+                                        <div class="chat-list-top">
+                                            <div class="chat-list-name-row">
+                                                <span class="chat-list-name">STAR</span>
+                                                <span class="chat-list-ai-text">AI</span>
+                                            </div>
+                                            <span class="chat-list-time">now</span>
+                                        </div>
+                                        <div class="chat-list-bottom">
+                                            <span class="chat-list-msg">မင်္ဂလာပါ! ကျွန်တော် STAR ပါ။</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+
                         <div class="screen hidden" id="screen-party"><div class="screen-center"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#ff6d1f" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><h3>Party</h3><p>Party members will show here</p></div></div>
                         <div class="screen hidden" id="screen-plus"><div class="screen-center"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#ff6d1f" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg><h3>Create</h3><p>Start something new</p></div></div>
                         <div class="screen hidden" id="screen-game"><div class="screen-center"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#ff6d1f" stroke-width="1.5"><rect x="2" y="5" width="20" height="12" rx="6"/><circle cx="8" cy="11" r="1.5" fill="#ff6d1f"/><circle cx="16" cy="11" r="1.5" fill="#ff6d1f"/><path d="M12 5V7"/><path d="M10 7H14"/><line x1="6" y1="6" x2="6" y2="8"/><line x1="18" y1="6" x2="18" y2="8"/></svg><h3>Game</h3><p>Game lobby will load here</p></div></div>
                         <div class="screen hidden" id="screen-rank"><div class="screen-center"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#ff6d1f" stroke-width="1.5"><path d="M2 4l3 12h14l3-12-6 4-4-8-4 8-6-4z"/><path d="M4 20h16"/><path d="M10 16v4"/><path d="M14 16v4"/></svg><h3>Rank</h3><p>Leaderboard rankings here</p></div></div>
                     </div>
 
-                    <!-- BOTTOM NAV -->
                     <nav class="bottom-nav" id="bottomNav">
                         <button class="nav-btn active" data-tab="chat"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>Chat</span></button>
                         <button class="nav-btn" data-tab="party"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span>Party</span></button>
@@ -225,14 +231,104 @@
 
         <!-- FULLSCREEN OVERLAY -->
         <div class="fullscreen-overlay" id="fullscreenOverlay">
-            <div class="fullscreen-header">
-                <button id="fullscreenBackBtn"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15,18 9,12 15,6"/></svg></button>
+            <div class="fullscreen-header" id="fullscreenHeader">
+                <button id="fullscreenBackBtn">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <polyline points="15,18 9,12 15,6"/>
+                    </svg>
+                </button>
                 <span id="fullscreenTitle">Title</span>
                 <div></div>
             </div>
             <div class="fullscreen-body" id="fullscreenBody">
-                <div class="fs-screen hidden" id="fs-search"><div class="screen-center"><p>Search page content</p></div></div>
+
+                <!-- ===== SEARCH PAGE ===== -->
+                <div class="fs-screen hidden" id="fs-search">
+                    <div class="search-page">
+                        <div class="search-row-single">
+                            <input type="number" id="searchServerNo" class="search-input-single" placeholder="Server" min="1" />
+                            <input type="number" id="searchUserId" class="search-input-single" placeholder="ID" />
+                            <button class="search-btn-single" id="searchBtn">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                    <circle cx="11" cy="11" r="8"/>
+                                    <path d="m21 21-4.35-4.35"/>
+                                </svg>
+                                ရှာမည်
+                            </button>
+                        </div>
+                        <div class="search-result" id="searchResult"></div>
+                    </div>
+                </div>
+
+                <!-- ===== CHAT ROOM ===== -->
+                <div class="fs-screen hidden" id="fs-chat-room">
+                    <div class="chat-room">
+
+                        <div class="chat-room-topbar">
+                            <button class="chat-room-back" id="chatRoomBackBtn">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                    <polyline points="15,18 9,12 15,6"/>
+                                </svg>
+                            </button>
+                            <div class="chat-room-profile">
+                                <div class="chat-room-avatar">
+                                    <img id="chatRoomAvatar" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='38' height='38' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='45' fill='%2322222e'/%3E%3C/svg%3E" alt="avatar" />
+                                    <div class="chat-room-frame" id="chatRoomFrame"></div>
+                                </div>
+                                <div class="chat-room-info">
+                                    <div class="chat-room-name-row">
+                                        <span class="chat-room-name" id="chatRoomName">Name</span>
+                                        <span class="chat-room-mark" id="chatRoomMark"></span>
+                                    </div>
+                                    <span class="chat-room-status" id="chatRoomStatus">offline</span>
+                                </div>
+                            </div>
+                            <button class="chat-room-menu" id="chatRoomMenuBtn">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                    <circle cx="12" cy="5" r="2"/>
+                                    <circle cx="12" cy="12" r="2"/>
+                                    <circle cx="12" cy="19" r="2"/>
+                                </svg>
+                            </button>
+                        </div>
+
+                        <div class="chat-room-messages" id="chatRoomMessages">
+                            <div class="chat-empty-state">
+                                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#5a5a6a" stroke-width="1.5">
+                                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                                </svg>
+                                <span>မက်ဆေ့ချ် စတင်ရန် ရေးပါ</span>
+                            </div>
+                        </div>
+
+                        <!-- ===== INPUT BAR -- 3 Elements ===== -->
+                        <div class="chat-room-input-bar">
+                            <button class="chat-msg-btn" id="chatMsgBtn" title="Message">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                                </svg>
+                            </button>
+
+                            <textarea id="chatMessageInput" class="chat-message-input" placeholder="မက်ဆေ့ချ် ရေးပါ..." rows="1"></textarea>
+
+                            <button class="chat-clip-btn" id="chatClipBtn" title="Attach">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/>
+                                </svg>
+                            </button>
+                            <button class="chat-send-btn hidden" id="chatSendBtn" title="Send">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/>
+                                </svg>
+                            </button>
+                        </div>
+
+                    </div>
+                </div>
+
                 <div class="fs-screen hidden" id="fs-coin"><div class="screen-center"><p>Diamond balance and transactions</p></div></div>
+
+                <!-- PROFILE -->
                 <div class="fs-screen hidden" id="fs-profile">
                     <div class="profile-fullscreen">
                         <div class="profile-banner" id="profileBanner">
@@ -277,6 +373,7 @@
                         </div>
                     </div>
                 </div>
+
                 <div class="fs-screen hidden" id="fs-edit-profile">
                     <div class="edit-profile-container">
                         <div class="edit-avatar-section">
@@ -317,6 +414,7 @@
                         <button class="edit-save-btn" id="saveEditProfileBtn">Save Changes</button>
                     </div>
                 </div>
+
                 <div class="fs-screen hidden" id="fs-role-edit">
                     <div class="role-edit-container">
                         <div class="role-edit-header">
@@ -326,6 +424,7 @@
                         <div class="role-edit-grid" id="roleEditGrid"></div>
                     </div>
                 </div>
+
                 <div class="fs-screen hidden" id="fs-shop">
                     <div class="shop-container">
                         <div class="shop-tabs">
@@ -342,28 +441,27 @@
                         </div>
                     </div>
                 </div>
+
                 <div class="fs-screen hidden" id="fs-mail"><div class="screen-center"><p>No new messages</p></div></div>
                 <div class="fs-screen hidden" id="fs-tasks"><div class="screen-center"><p>Complete tasks to earn rewards</p></div></div>
+
                 <div class="fs-screen hidden" id="fs-settings">
                     <div class="settings-container">
                         <div class="settings-section">
                             <h3 class="settings-section-title">App အကြောင်း</h3>
                             <div class="settings-card">
-                                <p class="settings-text">STAR ARCADE သည် ဂိမ်းကစားသူများအတွက် ဖန်တီးထားသော ဆိုရှယ်မီဒီယာ ပလက်ဖောင်းတစ်ခုဖြစ်ပါသည်။ သင့်အကောင့်ကို Google Account ဖြင့် လုံခြုံစွာ ချိတ်ဆက်ထားနိုင်ပြီး၊ သူငယ်ချင်းများနှင့် ဆက်သွယ်နိုင်ပါသည်။</p>
-                                <p class="settings-text">ကျွန်ုပ်တို့သည် သင့်ကိုယ်ရေးကိုယ်တာ အချက်အလက်များကို လုံခြုံစွာ ထိန်းသိမ်းထားပြီး၊ သင့်ခွင့်ပြုချက်မရှိဘဲ မည်သည့်နေရာကိုမျှ မျှဝေမည်မဟုတ်ပါ။</p>
+                                <p class="settings-text">STAR ARCADE သည် ဂိမ်းကစားသူများအတွက် ဖန်တီးထားသော ဆိုရှယ်မီဒီယာ ပလက်ဖောင်းတစ်ခုဖြစ်ပါသည်။</p>
+                                <p class="settings-text">ကျွန်ုပ်တို့သည် သင့်ကိုယ်ရေးကိုယ်တာ အချက်အလက်များကို လုံခြုံစွာ ထိန်းသိမ်းထားပါသည်။</p>
                                 <p class="settings-text">အကယ်၍ သင့်တွင် ပြဿနာများ သို့မဟုတ် အကြံပြုချက်များ ရှိပါက ကျွန်ုပ်တို့၏ Telegram Group မှတစ်ဆင့် ဆက်သွယ်နိုင်ပါသည်။</p>
                             </div>
                         </div>
-
                         <div class="settings-section">
                             <h3 class="settings-section-title">မူဝါဒများ</h3>
                             <div class="settings-card">
                                 <p class="settings-text">ဤအက်ပ်ကို အသုံးပြုခြင်းဖြင့် သင်သည် ကျွန်ုပ်တို့၏ စည်းကမ်းချက်များနှင့် ကိုယ်ရေးကိုယ်တာ မူဝါဒများကို လက်ခံသည်ဟု မှတ်ယူပါသည်။</p>
-                                <p class="settings-text">မည်သည့် မသင့်လျော်သော အပြုအမူများ၊ စည်းကမ်းချိုးဖောက်မှုများ ပြုလုပ်ပါက သင့်အကောင့်ကို ရပ်ဆိုင်းခြင်း သို့မဟုတ် ဖျက်သိမ်းခြင်းများ ပြုလုပ်နိုင်ပါသည်။</p>
-                                <p class="settings-text">ကျွန်ုပ်တို့သည် ဝန်ဆောင်မှုများကို အချိန်မရွေး ပြောင်းလဲနိုင်ပြီး၊ ရပ်ဆိုင်းနိုင်သည့် အခွင့်အရေးကို ထိန်းသိမ်းထားပါသည်။</p>
+                                <p class="settings-text">မည်သည့် မသင့်လျော်သော အပြုအမူများ ပြုလုပ်ပါက သင့်အကောင့်ကို ရပ်ဆိုင်းခြင်း သို့မဟုတ် ဖျက်သိမ်းခြင်းများ ပြုလုပ်နိုင်ပါသည်။</p>
                             </div>
                         </div>
-
                         <div class="settings-section">
                             <h3 class="settings-section-title">အကောင့်</h3>
                             <div class="settings-card">
@@ -3429,6 +3527,719 @@ body {
     .settings-text {
         font-size: 13px;
     }
+}
+
+/* ============================================================
+   SEARCH PAGE -- Server / ID / ရှာမည် တစ်တန်းတည်း
+   ============================================================ */
+.search-page {
+    width: 100%;
+    height: 100%;
+    padding: 20px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    background: var(--bg-body);
+    overflow-y: auto;
+}
+
+.search-row-single {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    width: 100%;
+}
+
+.search-input-single {
+    flex: 1;
+    min-width: 0;
+    padding: 12px 12px;
+    border: 1.5px solid var(--border-light);
+    border-radius: 10px;
+    background: var(--bg-input);
+    color: var(--text-main);
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s ease;
+    font-family: inherit;
+}
+
+.search-input-single:focus { border-color: var(--accent); }
+
+.search-input-single[type="number"]::-webkit-inner-spin-button,
+.search-input-single[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+.search-input-single[type="number"] { -moz-appearance: textfield; }
+
+.search-btn-single {
+    flex-shrink: 0;
+    padding: 12px 16px;
+    border: none;
+    border-radius: 10px;
+    background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+    color: #fff;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-family: inherit;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.search-btn-single:active { transform: scale(0.95); opacity: 0.9; }
+
+.search-result { margin-top: 8px; }
+
+.search-empty {
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 14px;
+    padding: 30px 10px;
+}
+
+.search-user-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px;
+    background: var(--bg-card);
+    border: 1.5px solid var(--border);
+    border-radius: 14px;
+    animation: popIn 0.25s ease;
+}
+
+.search-user-avatar-wrap {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    border: 2.5px solid var(--accent);
+    flex-shrink: 0;
+    position: relative;
+    background: var(--bg-input);
+    overflow: visible;
+}
+
+.search-user-avatar-wrap img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    display: block;
+}
+
+.search-user-frame {
+    position: absolute;
+    top: -8px;
+    left: -8px;
+    width: calc(100% + 16px);
+    height: calc(100% + 16px);
+    border-radius: 50%;
+    pointer-events: none;
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+.search-user-info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.search-user-name-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.search-user-name {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-main);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.search-user-mark {
+    display: inline-flex;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    align-items: center;
+    justify-content: center;
+}
+.search-user-mark img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+
+.search-user-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    flex-wrap: wrap;
+}
+
+.search-user-server {
+    color: var(--accent);
+    font-weight: 600;
+    background: var(--accent-bg);
+    padding: 1px 8px;
+    border-radius: 8px;
+}
+
+.search-user-play {
+    font-size: 11px;
+    color: var(--text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+
+.search-chat-btn {
+    padding: 9px 16px;
+    border: none;
+    border-radius: 20px;
+    background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+    color: #fff;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    flex-shrink: 0;
+    font-family: inherit;
+    transition: all 0.2s ease;
+}
+
+.search-chat-btn:active { transform: scale(0.95); opacity: 0.9; }
+
+.search-delete-btn {
+    padding: 9px 14px;
+    border: 1.5px solid #ff4444;
+    border-radius: 20px;
+    background: rgba(255, 68, 68, 0.1);
+    color: #ff4444;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    flex-shrink: 0;
+    font-family: inherit;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.search-delete-btn:active {
+    transform: scale(0.95);
+    background: rgba(255, 68, 68, 0.2);
+}
+
+/* ============================================================
+   CHAT LIST
+   ============================================================ */
+.chat-list {
+    width: 100%;
+    height: 100%;
+    overflow-y: auto;
+    background: var(--bg-body);
+    padding-bottom: 8px;
+}
+
+.chat-list-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    cursor: pointer;
+    transition: background 0.15s ease;
+    border-bottom: 1px solid rgba(255,255,255,0.03);
+}
+
+.chat-list-item:active { background: var(--bg-hover); }
+
+.chat-list-item.disabled { cursor: default; opacity: 0.85; }
+.chat-list-item.disabled:active { background: transparent; }
+
+.chat-list-avatar-wrap {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    position: relative;
+    background: var(--bg-card);
+    overflow: visible;
+}
+
+.chat-list-avatar {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    display: block;
+}
+
+.chat-list-frame {
+    position: absolute;
+    top: -7px;
+    left: -7px;
+    width: calc(100% + 14px);
+    height: calc(100% + 14px);
+    border-radius: 50%;
+    pointer-events: none;
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+.chat-list-online-dot {
+    position: absolute;
+    bottom: 1px;
+    right: 1px;
+    width: 13px;
+    height: 13px;
+    border-radius: 50%;
+    background: #44ff88;
+    border: 2px solid var(--bg-body);
+    box-shadow: 0 0 6px rgba(68,255,136,0.7);
+    z-index: 5;
+}
+
+.chat-list-info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.chat-list-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.chat-list-name-row {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    min-width: 0;
+    flex: 1;
+}
+
+.chat-list-name {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-main);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.chat-list-mark {
+    display: inline-flex;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    margin-left: 5px;
+}
+.chat-list-mark img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+
+.chat-list-time {
+    font-size: 11px;
+    color: var(--text-muted);
+    flex-shrink: 0;
+}
+
+.chat-list-bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+}
+
+.chat-list-msg {
+    font-size: 13px;
+    color: var(--text-sub);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 1;
+    min-width: 0;
+}
+
+.chat-list-ai-text {
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--accent);
+    background: var(--accent-bg);
+    padding: 1px 7px;
+    border-radius: 6px;
+    letter-spacing: 0.5px;
+    margin-left: 6px;
+    flex-shrink: 0;
+}
+
+/* ============================================================
+   CHAT ROOM
+   ============================================================ */
+.chat-room {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    background: var(--bg-body);
+}
+
+.chat-room-topbar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    background: var(--bg-header);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+}
+
+.chat-room-back {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    border: none;
+    background: transparent;
+    color: var(--accent);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: background 0.15s ease;
+}
+
+.chat-room-back:active {
+    background: var(--bg-hover);
+    transform: scale(0.92);
+}
+
+.chat-room-profile {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+    min-width: 0;
+}
+
+.chat-room-avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    position: relative;
+    background: var(--bg-card);
+    overflow: visible;
+}
+
+.chat-room-avatar img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    display: block;
+}
+
+.chat-room-frame {
+    position: absolute;
+    top: -5px;
+    left: -5px;
+    width: calc(100% + 10px);
+    height: calc(100% + 10px);
+    border-radius: 50%;
+    pointer-events: none;
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+.chat-room-info {
+    min-width: 0;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+}
+
+.chat-room-name-row {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    min-width: 0;
+}
+
+.chat-room-name {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-main);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.chat-room-mark {
+    display: inline-flex;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+.chat-room-mark img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+
+.chat-room-status {
+    font-size: 11px;
+    color: var(--text-muted);
+}
+.chat-room-status.online { color: #44ff88; }
+
+.chat-room-menu {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    border: none;
+    background: transparent;
+    color: var(--text-sub);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: background 0.15s ease;
+}
+
+.chat-room-menu:active {
+    background: var(--bg-hover);
+    transform: scale(0.92);
+}
+
+.chat-room-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    background: var(--bg-body);
+}
+
+.chat-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: var(--text-muted);
+    gap: 10px;
+    font-size: 13px;
+    text-align: center;
+    padding: 20px;
+}
+
+.chat-message {
+    max-width: 75%;
+    padding: 9px 13px;
+    border-radius: 16px;
+    font-size: 14px;
+    line-height: 1.45;
+    word-break: break-word;
+    animation: msgPop 0.2s ease;
+}
+
+@keyframes msgPop {
+    from { opacity: 0; transform: scale(0.92); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+.chat-message.sent {
+    align-self: flex-end;
+    background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+    color: #fff;
+    border-bottom-right-radius: 4px;
+}
+
+.chat-message.received {
+    align-self: flex-start;
+    background: var(--bg-card);
+    color: var(--text-main);
+    border-bottom-left-radius: 4px;
+    border: 1px solid var(--border);
+}
+
+.chat-message-time {
+    display: block;
+    font-size: 10px;
+    opacity: 0.7;
+    margin-top: 3px;
+    text-align: right;
+}
+
+/* ============================================================
+   CHAT INPUT BAR -- 3 Elements + Multiline Textarea
+   ============================================================ */
+.chat-room-input-bar {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    padding: 8px 10px;
+    padding-bottom: calc(8px + env(safe-area-inset-bottom, 4px));
+    background: var(--bg-header);
+    border-top: 1px solid var(--border);
+    flex-shrink: 0;
+}
+
+.chat-msg-btn {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    border: none;
+    background: var(--bg-input);
+    color: var(--text-sub);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+}
+
+.chat-msg-btn:active {
+    background: var(--bg-hover);
+    transform: scale(0.92);
+}
+
+/* Multiline Textarea */
+.chat-message-input {
+    flex: 1;
+    padding: 10px 16px;
+    border: 1.5px solid var(--border-light);
+    border-radius: 20px;
+    background: var(--bg-input);
+    color: var(--text-main);
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s ease;
+    font-family: inherit;
+    min-width: 0;
+    min-height: 42px;
+    max-height: 84px;
+    resize: none;
+    overflow-y: auto;
+    line-height: 1.45;
+    scrollbar-width: thin;
+}
+
+.chat-message-input:focus { border-color: var(--accent); }
+.chat-message-input::placeholder { color: var(--text-muted); }
+
+.chat-message-input::-webkit-scrollbar {
+    width: 2px;
+}
+.chat-message-input::-webkit-scrollbar-thumb {
+    background: var(--border-light);
+    border-radius: 2px;
+}
+
+.chat-clip-btn {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    border: none;
+    background: var(--bg-input);
+    color: var(--text-sub);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+}
+
+.chat-clip-btn:active {
+    background: var(--bg-hover);
+    transform: scale(0.92);
+}
+
+/* Send Button -- လေးထောင့် */
+.chat-send-btn {
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
+    border: none;
+    background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+    color: #fff;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 3px 14px rgba(255,109,31,0.4);
+    transition: all 0.2s ease;
+}
+
+.chat-send-btn:active {
+    transform: scale(0.92);
+    opacity: 0.9;
+}
+
+.chat-send-btn.hidden,
+.chat-clip-btn.hidden {
+    display: none !important;
+}
+
+.fullscreen-overlay.chat-room-active .fullscreen-header {
+    display: none !important;
+}
+
+.fullscreen-overlay.chat-room-active .fullscreen-body {
+    height: 100% !important;
+}
+
+@media (max-width: 480px) {
+    .search-page { padding: 16px 12px; }
+    .search-row-single { gap: 6px; }
+    .search-input-single { font-size: 13px; padding: 10px 8px; }
+    .search-btn-single { font-size: 11px; padding: 10px 10px; gap: 4px; }
+    .search-btn-single svg { width: 14px; height: 14px; }
+
+    .chat-list-avatar-wrap { width: 46px; height: 46px; }
+    .chat-list-name { font-size: 14px; }
+    .chat-list-msg { font-size: 12px; }
+
+    .chat-room-avatar { width: 34px; height: 34px; }
+    .chat-room-name { font-size: 14px; }
+    .chat-message { font-size: 13px; max-width: 82%; }
+
+    .chat-msg-btn, .chat-clip-btn, .chat-send-btn {
+        width: 38px;
+        height: 38px;
+    }
+    .chat-send-btn { border-radius: 9px; }
+
+    .chat-message-input {
+        font-size: 13px;
+        padding: 9px 14px;
+        min-height: 38px;
+        max-height: 76px;
+    }
 }</style><script>/* ============================================================
    FILE: script.js (FULL VERSION - online inside users only)
    ============================================================ */
@@ -3817,7 +4628,9 @@ function saveUserToDB(user) {
                 roleUse: user.roleUse || '',
                 roleOwned: user.roleOwned || [],
                 online: user.online || false,
-                isFirstLogin: user.isFirstLogin !== undefined ? user.isFirstLogin : true
+                isFirstLogin: user.isFirstLogin !== undefined ? user.isFirstLogin : true,
+                mail: user.mail || '',
+                ban: user.ban || ''
             };
             return setToDB('users', allUsers);
         }).then(function() {
@@ -3925,7 +4738,9 @@ function saveUserToFirebase(userData, serverId) {
                 roleOwned: userData.roleOwned || [],
                 online: true,
                 avatar: userData.avatar || '',
-                isFirstLogin: userData.isFirstLogin !== undefined ? userData.isFirstLogin : true
+                isFirstLogin: userData.isFirstLogin !== undefined ? userData.isFirstLogin : true,
+                mail: userData.mail || '',
+                ban: userData.ban || ''
             }).then(function() {
                 resolve(true);
             }).catch(function(err) {
@@ -4008,6 +4823,8 @@ function listenUserDataChanges(userId, serverId) {
             currentUser.blockList = data.blockList || currentUser.blockList;
             currentUser.isFirstLogin = data.isFirstLogin !== undefined ? data.isFirstLogin : currentUser.isFirstLogin;
             currentUser.online = data.online !== undefined ? data.online : currentUser.online;
+            currentUser.mail = data.mail !== undefined ? data.mail : currentUser.mail;
+            currentUser.ban = data.ban !== undefined ? data.ban : currentUser.ban;
             saveUserToDB(currentUser);
             updateUIAfterDataChange();
         }
@@ -4206,7 +5023,9 @@ if (newAccountBtn) {
                                 roleOwned: [],
                                 avatar: avatar,
                                 serverId: serverId,
-                                isFirstLogin: true
+                                isFirstLogin: true,
+                                mail: '',
+                                ban: ''
                             };
                             
                             return saveUserToFirebase(userData, serverId).then(function(saved) {
@@ -4527,7 +5346,9 @@ function checkSession() {
                         bubbleOwned: localUserData.bubbleOwned || [],
                         roleUse: localUserData.roleUse || '',
                         roleOwned: localUserData.roleOwned || [],
-                        isFirstLogin: localUserData.isFirstLogin !== undefined ? localUserData.isFirstLogin : true
+                        isFirstLogin: localUserData.isFirstLogin !== undefined ? localUserData.isFirstLogin : true,
+                        mail: localUserData.mail || '',
+                        ban: localUserData.ban || ''
                     };
                     
                     currentUser = userData;
@@ -4573,7 +5394,9 @@ function checkSession() {
                                     bubbleOwned: user.bubbleOwned || [],
                                     roleUse: user.roleUse || '',
                                     roleOwned: user.roleOwned || [],
-                                    isFirstLogin: user.isFirstLogin !== undefined ? user.isFirstLogin : true
+                                    isFirstLogin: user.isFirstLogin !== undefined ? user.isFirstLogin : true,
+                                    mail: user.mail || '',
+                                    ban: user.ban || ''
                                 };
                                 saveUserToDB(userData);
                                 currentUser = userData;
@@ -4760,6 +5583,28 @@ var PLAY_CONFIG = {
         { id: 200, name: 'Play 1', image: '', description: 'Play 1 description' },
         { id: 201, name: 'Play 2', image: '', description: 'Play 2 description' },
         { id: 202, name: 'Play 3', image: '', description: 'Play 3 description' }
+    ]
+};
+
+// ============================================================
+//  BAN CONFIGURATION (LIKE MARK_CONFIG - FOR FUTURE USE)
+// ============================================================
+var BAN_CONFIG = {
+    bans: [
+        { id: 300, name: 'Ban 1', image: '', description: 'Ban 1 description' },
+        { id: 301, name: 'Ban 2', image: '', description: 'Ban 2 description' },
+        { id: 302, name: 'Ban 3', image: '', description: 'Ban 3 description' }
+    ]
+};
+
+// ============================================================
+//  MAIL CONFIGURATION (LIKE MARK_CONFIG - FOR FUTURE USE)
+// ============================================================
+var MAIL_CONFIG = {
+    mails: [
+        { id: 400, name: 'Mail 1', image: '', description: 'Mail 1 description' },
+        { id: 401, name: 'Mail 2', image: '', description: 'Mail 2 description' },
+        { id: 402, name: 'Mail 3', image: '', description: 'Mail 3 description' }
     ]
 };
 
@@ -6030,30 +6875,87 @@ function logoutUser() {
     if (!confirm('Are you sure you want to log out? All data will be cleared from this device.')) {
         return;
     }
-    
+
     isProcessing = true;
     showLoading('Logging out...');
-    
-    // Update online status to false (ignore errors)
+
+    // ၁။ Online status false လုပ်
     var logoutPromise = Promise.resolve();
     if (currentUser && currentServerId) {
         logoutPromise = updateUserOnlineStatus(currentUser.userId, currentServerId, false)
             .catch(function() { /* ignore */ });
     }
-    
+
     logoutPromise.then(function() {
-        // Clear all IndexedDB data
-        return deleteFromDB('users');
-    }).then(function() {
-        return deleteFromDB('session');
-    }).then(function() {
-        // Detach all listeners
+        // ============================================================
+        //  ၂။ Listener အားလုံး ဖျက်
+        // ============================================================
+
+        // ၂.၁ -- authListeners (diamond + user data)
         authListeners.forEach(function(ref) {
             try { ref.off(); } catch(e) {}
         });
         authListeners = [];
-        
-        // Reset state
+
+        // ၂.၂ -- friendsListListener (ကိုယ့် friendsList real-time)
+        if (typeof stopFriendsListListener === 'function') {
+            try { stopFriendsListListener(); } catch(e) {}
+        }
+        if (typeof friendsListListener !== 'undefined' && friendsListListener) {
+            try { friendsListListener.off(); } catch(e) {}
+            friendsListListener = null;
+        }
+
+        // ၂.၃ -- chatRoomListener (Full Chat Screen)
+        if (typeof chatRoomListener !== 'undefined' && chatRoomListener) {
+            try { chatRoomListener.off(); } catch(e) {}
+            chatRoomListener = null;
+        }
+
+        // ၂.၄ -- chatListFriendListeners (အရင် version ရှိရင်)
+        if (typeof chatListFriendListeners !== 'undefined' && Array.isArray(chatListFriendListeners)) {
+            chatListFriendListeners.forEach(function(ref) {
+                try { ref.off(); } catch(e) {}
+            });
+            chatListFriendListeners = [];
+        }
+
+        // ၂.၅ -- chatRoom listener variable (အရင် version ရှိရင်)
+        if (typeof chatRoomListener !== 'undefined' && chatRoomListener) {
+            try { chatRoomListener.off(); } catch(e) {}
+            chatRoomListener = null;
+        }
+
+        // ၂.၆ -- currentChatTarget reset
+        if (typeof currentChatTarget !== 'undefined') {
+            currentChatTarget = null;
+        }
+
+        // ၂.၇ -- searchResultUser reset
+        if (typeof searchResultUser !== 'undefined') {
+            searchResultUser = null;
+        }
+
+    }).then(function() {
+        // ============================================================
+        //  ၃။ IndexedDB အားလုံး ရှင်းလင်း
+        // ============================================================
+        return deleteFromDB('users');
+    }).then(function() {
+        return deleteFromDB('session');
+    }).then(function() {
+        // ✅ friendsCache ကိုပါ ရှင်းလင်း
+        return deleteFromDB('friendsCache');
+    }).then(function() {
+        // ✅ FRIENDS_CACHE_KEY (အရင် version သုံးခဲ့ရင်)
+        if (typeof FRIENDS_CACHE_KEY !== 'undefined') {
+            return deleteFromDB(FRIENDS_CACHE_KEY);
+        }
+        return Promise.resolve();
+    }).then(function() {
+        // ============================================================
+        //  ၄။ State reset
+        // ============================================================
         currentUser = null;
         currentServerId = null;
         currentDb = null;
@@ -6061,32 +6963,68 @@ function logoutUser() {
         fullscreenStack = [];
         isProcessing = false;
         isFirstLoginProcessing = false;
-        
-        // Close fullscreen
+
+        // ============================================================
+        //  ၅။ UI Reset
+        // ============================================================
+
+        // ၅.၁ -- Fullscreen ပိတ်
         fullscreenOverlay.classList.remove('active');
+        fullscreenOverlay.classList.remove('chat-room-active');
         document.body.style.overflow = '';
-        
-        // Close sidebar
+
+        // ၅.၂ -- Sidebar ပိတ်
         sidebar.classList.remove('open');
         sidebarOverlay.classList.remove('active');
-        
-        // Hide app wrapper
+
+        // ၅.၃ -- App wrapper ဖျောက်
         appWrapper.classList.add('hidden');
-        
-        // Show auth overlay (ACC Open Screen)
+
+        // ၅.၄ -- Auth overlay ပြ
         authOverlay.style.display = 'flex';
         authOverlay.classList.remove('hidden');
-        
-        // Reset profile UI
+
+        // ၅.၅ -- Profile UI reset
         document.getElementById('profileAvatar').src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 100 100"%3E%3Ccircle cx="50" cy="50" r="45" fill="%2322222e"/%3E%3Ccircle cx="50" cy="35" r="18" fill="%235a5a6a"/%3E%3Cpath d="M20 75c0-18 12-30 30-30s30 12 30 30" fill="%235a5a6a"/%3E%3C/svg%3E';
         document.getElementById('userName').textContent = 'Player';
         document.getElementById('userId').textContent = 'ID 0000000000';
         document.getElementById('userServer').textContent = 'Server 1';
         document.getElementById('coinDisplay').textContent = '0';
-        
+
+        // ၅.၆ -- Chat List reset (Ai row သာ ကျန်)
+        var chatListEl = document.getElementById('chatList');
+        if (chatListEl) {
+            var friendRows = chatListEl.querySelectorAll('.chat-list-item:not([data-chat="ai"])');
+            friendRows.forEach(function(row) { row.remove(); });
+        }
+
+        // ၅.၇ -- Search result reset
+        var searchResultEl = document.getElementById('searchResult');
+        if (searchResultEl) searchResultEl.innerHTML = '';
+
+        // ၅.၈ -- Search input reset
+        var sServer = document.getElementById('searchServerNo');
+        var sId = document.getElementById('searchUserId');
+        if (sServer) sServer.value = '';
+        if (sId) sId.value = '';
+
+        // ၅.၉ -- Chat room UI reset
+        var chatRoomMessages = document.getElementById('chatRoomMessages');
+        if (chatRoomMessages) {
+            chatRoomMessages.innerHTML = '<div class="chat-empty-state"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#5a5a6a" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>မက်ဆေ့ချ် စတင်ရန် ရေးပါ</span></div>';
+        }
+
+        var chatMsgInput = document.getElementById('chatMessageInput');
+        if (chatMsgInput) chatMsgInput.value = '';
+
+        var chatAttach = document.getElementById('chatAttachBtn');
+        var chatSend = document.getElementById('chatSendBtn');
+        if (chatAttach) chatAttach.classList.remove('hidden');
+        if (chatSend) chatSend.classList.add('hidden');
+
         hideLoading();
-        
-        // Show a success message
+
+        // ၆။ အောင်မြင်စွာ logout ဖြစ်ကြောင်း အသိပေး
         setTimeout(function() {
             alert('Logged out successfully.');
         }, 300);
@@ -6105,6 +7043,1074 @@ function logoutUser() {
         btn.addEventListener('click', logoutUser);
     }
 })();
+
+// ============================================================
+//  FRIENDS CACHE (IndexedDB)
+// ============================================================
+var FRIENDS_CACHE_KEY = 'friendsCache';
+
+function getFriendsCache() {
+    return new Promise(function(resolve) {
+        getFromDB(FRIENDS_CACHE_KEY).then(function(cache) {
+            resolve(cache || {});
+        }).catch(function() {
+            resolve({});
+        });
+    });
+}
+
+function saveFriendsCache(cache) {
+    return setToDB(FRIENDS_CACHE_KEY, cache);
+}
+
+function getFriendCacheKey(serverId, userId) {
+    return serverId + ':' + userId;
+}
+
+function saveFriendToCache(friendData) {
+    return getFriendsCache().then(function(cache) {
+        var key = getFriendCacheKey(friendData.serverId, friendData.userId);
+        cache[key] = friendData;
+        return saveFriendsCache(cache);
+    });
+}
+
+function getFriendFromCache(serverId, userId) {
+    return getFriendsCache().then(function(cache) {
+        var key = getFriendCacheKey(serverId, userId);
+        return cache[key] || null;
+    });
+}
+
+function removeFriendFromCache(serverId, userId) {
+    return getFriendsCache().then(function(cache) {
+        var key = getFriendCacheKey(serverId, userId);
+        delete cache[key];
+        return saveFriendsCache(cache);
+    });
+}
+
+function cleanupFriendsCache() {
+    if (!currentUser || !Array.isArray(currentUser.friendsList)) return Promise.resolve();
+    return getFriendsCache().then(function(cache) {
+        var validKeys = {};
+        currentUser.friendsList.forEach(function(friend) {
+            validKeys[getFriendCacheKey(friend.serverId, friend.userId)] = true;
+        });
+        var changed = false;
+        Object.keys(cache).forEach(function(key) {
+            if (!validKeys[key]) {
+                delete cache[key];
+                changed = true;
+            }
+        });
+        if (changed) return saveFriendsCache(cache);
+    }).catch(function() {});
+}
+
+// ============================================================
+//  EXTRACT USE-ONLY DATA
+// ============================================================
+function extractUseOnlyData(data, serverId, serverNo, userId) {
+    return {
+        serverId: serverId,
+        serverNo: serverNo,
+        userId: userId,
+        name: data.name || 'Player',
+        avatar: data.avatar || '',
+        bio: data.bio || '',
+        play: data.play || '',
+        online: data.online === true,
+        frameUse: data.frameUse || '',
+        markUse: data.markUse || '',
+        bannerUse: data.bannerUse || '',
+        backgroundUse: data.backgroundUse || '',
+        roleUse: Array.isArray(data.roleUse) ? data.roleUse : []
+    };
+}
+
+function fetchUserFullData(serverId, userId) {
+    return new Promise(function(resolve, reject) {
+        var db = getDbForServer(serverId);
+        if (!db) { reject(new Error('DB not available')); return; }
+        db.ref('users/' + userId).once('value').then(function(snap) {
+            var data = snap.val();
+            if (!data) { reject(new Error('User not found')); return; }
+            var server = FIREBASE_SERVERS.find(function(s){ return s.id === serverId; });
+            var serverNo = server ? server.number : 1;
+            resolve(extractUseOnlyData(data, serverId, serverNo, userId));
+        }).catch(reject);
+    });
+}
+
+function escapeHtml(s) {
+    if (!s) return '';
+    return String(s).replace(/[&<>"']/g, function(c) {
+        return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c];
+    });
+}
+
+// ============================================================
+//  SEARCH -- Online မပြ | Add ပြီးသားဆိုရင် Delete
+// ============================================================
+var searchResultUser = null;
+
+function performSearch() {
+    var serverNo = parseInt(document.getElementById('searchServerNo').value.trim());
+    var userId = document.getElementById('searchUserId').value.trim();
+    var resultEl = document.getElementById('searchResult');
+
+    if (!serverNo || isNaN(serverNo)) {
+        resultEl.innerHTML = '<div class="search-empty">Server No. ရေးပါ</div>';
+        return;
+    }
+    if (!userId) {
+        resultEl.innerHTML = '<div class="search-empty">ID ရေးပါ</div>';
+        return;
+    }
+
+    var server = FIREBASE_SERVERS.find(function(s){ return s.number === serverNo; });
+    if (!server) {
+        resultEl.innerHTML = '<div class="search-empty">Server ' + serverNo + ' မရှိပါ</div>';
+        return;
+    }
+
+    if (currentUser && currentUser.userId === userId && currentServerId === server.id) {
+        resultEl.innerHTML = '<div class="search-empty">ကိုယ့်ကိုယ်ကို ရှာလို့မရပါ</div>';
+        return;
+    }
+
+    resultEl.innerHTML = '<div class="search-empty">ရှာနေသည်...</div>';
+
+    fetchUserFullData(server.id, userId).then(function(data) {
+        searchResultUser = data;
+        renderSearchResult();
+    }).catch(function() {
+        resultEl.innerHTML = '<div class="search-empty">အကောင့် မတွေ့ပါ</div>';
+    });
+}
+
+function renderSearchResult() {
+    var resultEl = document.getElementById('searchResult');
+    if (!searchResultUser) return;
+    var data = searchResultUser;
+
+    // Frame
+    var frameHtml = '';
+    if (data.frameUse) {
+        var frame = FRAME_CONFIG.frames.find(function(f){ return f.id === data.frameUse; });
+        if (frame) frameHtml = '<div class="search-user-frame" style="background-image:url(\'' + frame.image + '\')"></div>';
+    }
+
+    // Mark
+    var markHtml = '';
+    if (data.markUse) {
+        var mark = MARK_CONFIG.marks.find(function(m){ return String(m.id) === String(data.markUse); });
+        if (mark) markHtml = '<span class="search-user-mark"><img src="' + mark.image + '" /></span>';
+    }
+
+    // Avatar
+    var avatar = data.avatar || 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 100 100"%3E%3Ccircle cx="50" cy="50" r="45" fill="%2322222e"/%3E%3Ccircle cx="50" cy="35" r="18" fill="%235a5a6a"/%3E%3Cpath d="M20 75c0-18 12-30 30-30s30 12 30 30" fill="%235a5a6a"/%3E%3C/svg%3E';
+
+    var alreadyFriend = isFriend(data.serverId, data.userId);
+
+    // ✅ Button -- Add သို့ Delete Friend
+    var buttonHtml = '';
+    if (alreadyFriend) {
+        buttonHtml = '<button class="search-delete-btn" id="searchDeleteBtn">' +
+            '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">' +
+            '<path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>' +
+            ' Delete</button>';
+    } else {
+        buttonHtml = '<button class="search-chat-btn" id="searchChatBtn">Chat</button>';
+    }
+
+    // ✅ Online မပြ -- Play/Server သာ
+    resultEl.innerHTML =
+        '<div class="search-user-card">' +
+            '<div class="search-user-avatar-wrap">' +
+                '<img src="' + avatar + '" alt="avatar" />' + frameHtml +
+            '</div>' +
+            '<div class="search-user-info">' +
+                '<div class="search-user-name-row">' +
+                    '<span class="search-user-name">' + escapeHtml(data.name) + '</span>' + markHtml +
+                '</div>' +
+                '<div class="search-user-meta">' +
+                    '<span class="search-user-server">Server ' + data.serverNo + '</span>' +
+                '</div>' +
+                (data.play ? '<div class="search-user-play">' + escapeHtml(data.play) + '</div>' : '') +
+            '</div>' +
+            buttonHtml +
+        '</div>';
+
+    // Chat btn
+    var chatBtn = document.getElementById('searchChatBtn');
+    if (chatBtn) {
+        chatBtn.addEventListener('click', function() {
+            addFriendAndSync(data);
+        });
+    }
+
+    // Delete btn
+    var delBtn = document.getElementById('searchDeleteBtn');
+    if (delBtn) {
+        delBtn.addEventListener('click', function() {
+            deleteFriendAndSync(data);
+        });
+    }
+}
+
+// ============================================================
+//  FRIEND SYSTEM
+// ============================================================
+function isFriend(serverId, userId) {
+    if (!currentUser || !Array.isArray(currentUser.friendsList)) return false;
+    return currentUser.friendsList.some(function(f) {
+        return f.serverId === serverId && f.userId === userId;
+    });
+}
+
+// ---- Add (2-way) ----
+function addFriendAndSync(targetData) {
+    if (!currentUser || !currentServerId) return;
+    if (isFriend(targetData.serverId, targetData.userId)) return;
+
+    showLoading('ထည့်နေသည်...');
+
+    var myServer = FIREBASE_SERVERS.find(function(s){ return s.id === currentServerId; });
+    var myServerNo = myServer ? myServer.number : 1;
+
+    var theirEntry = {
+        serverId: targetData.serverId,
+        serverNo: targetData.serverNo,
+        userId: targetData.userId,
+        online: targetData.online === true,
+        play: targetData.play || ''
+    };
+
+    var myEntryForThem = {
+        serverId: currentServerId,
+        serverNo: myServerNo,
+        userId: currentUser.userId,
+        online: true,
+        play: currentUser.play || ''
+    };
+
+    var myList = Array.isArray(currentUser.friendsList) ? currentUser.friendsList.slice() : [];
+    if (!myList.some(function(f){ return f.serverId===targetData.serverId && f.userId===targetData.userId; })) {
+        myList.push(theirEntry);
+    }
+
+    var myDb = getDbForServer(currentServerId);
+    var theirDb = getDbForServer(targetData.serverId);
+
+    // ၁။ ကိုယ့် friendsList ထဲ ထည့်
+    myDb.ref('users/' + currentUser.userId + '/friendsList').set(myList)
+    .then(function() {
+        // ၂။ သူ့ friendsList ကို ဖတ်
+        return theirDb.ref('users/' + targetData.userId + '/friendsList').once('value');
+    })
+    .then(function(snap) {
+        var theirList = snap.val();
+        if (!Array.isArray(theirList)) {
+            theirList = theirList ? Object.keys(theirList).map(function(k){ return theirList[k]; }) : [];
+        }
+        // ၃။ သူ့ friendsList ထဲ ကိုယ့်ကို ထည့်
+        if (!theirList.some(function(f){ return f.serverId===currentServerId && f.userId===currentUser.userId; })) {
+            theirList.push(myEntryForThem);
+        } else {
+            theirList = theirList.map(function(f) {
+                if (f.serverId === currentServerId && f.userId === currentUser.userId) {
+                    return myEntryForThem;
+                }
+                return f;
+            });
+        }
+        return theirDb.ref('users/' + targetData.userId + '/friendsList').set(theirList);
+    })
+    .then(function() {
+        return saveFriendToCache(extractUseOnlyData(
+            targetData, targetData.serverId, targetData.serverNo, targetData.userId
+        ));
+    })
+    .then(function() {
+        currentUser.friendsList = myList;
+        saveUserToDB(currentUser);
+        hideLoading();
+
+        renderSearchResult();
+        renderChatList();
+        openChatRoom({
+            serverId: targetData.serverId,
+            userId: targetData.userId,
+            serverNo: targetData.serverNo
+        });
+    })
+    .catch(function(err) {
+        console.error('Add friend error:', err);
+        hideLoading();
+        alert('ထည့်မရပါ။ ထပ်ကြိုးစားပါ');
+    });
+}
+
+// ---- Delete (2-way) ----
+function deleteFriendAndSync(targetData) {
+    if (!currentUser || !currentServerId) return;
+    if (!isFriend(targetData.serverId, targetData.userId)) return;
+
+    if (!confirm('ဒီ friend ကို ဖျက်မှာ သေချာလား? (နှစ်ဖက်လုံးက Friends List ထဲက ဖြတ်ပါမယ်)')) {
+        return;
+    }
+
+    showLoading('ဖျက်နေသည်...');
+
+    var myList = Array.isArray(currentUser.friendsList) ? currentUser.friendsList.slice() : [];
+    myList = myList.filter(function(f) {
+        return !(f.serverId === targetData.serverId && f.userId === targetData.userId);
+    });
+
+    var myDb = getDbForServer(currentServerId);
+    var theirDb = getDbForServer(targetData.serverId);
+
+    // ၁။ ကိုယ့် friendsList ထဲက ဖျက်
+    myDb.ref('users/' + currentUser.userId + '/friendsList').set(myList)
+    .then(function() {
+        // ၂။ သူ့ friendsList ကို ဖတ်
+        return theirDb.ref('users/' + targetData.userId + '/friendsList').once('value');
+    })
+    .then(function(snap) {
+        var theirList = snap.val();
+        if (!Array.isArray(theirList)) {
+            theirList = theirList ? Object.keys(theirList).map(function(k){ return theirList[k]; }) : [];
+        }
+        // ၃။ သူ့ friendsList ထဲက ကိုယ့်ကို ဖျက်
+        theirList = theirList.filter(function(f) {
+            return !(f.serverId === currentServerId && f.userId === currentUser.userId);
+        });
+        return theirDb.ref('users/' + targetData.userId + '/friendsList').set(theirList);
+    })
+    .then(function() {
+        // ၄။ Cache ထဲက ဖျက်
+        return removeFriendFromCache(targetData.serverId, targetData.userId);
+    })
+    .then(function() {
+        currentUser.friendsList = myList;
+        saveUserToDB(currentUser);
+        hideLoading();
+
+        // Search Result ကို ပြန် render (Delete → Chat ပြန်)
+        renderSearchResult();
+
+        // Chat List ပြန် render
+        renderChatList();
+    })
+    .catch(function(err) {
+        console.error('Delete friend error:', err);
+        hideLoading();
+        alert('ဖျက်မရပါ။ ထပ်ကြိုးစားပါ');
+    });
+}
+
+// ============================================================
+//  FRIENDS LIST LISTENER -- Real-time
+// ============================================================
+var friendsListListener = null;
+
+function startFriendsListListener() {
+    if (!currentUser || !currentServerId) return;
+
+    if (friendsListListener) {
+        try { friendsListListener.off(); } catch(e){}
+        friendsListListener = null;
+    }
+
+    var myDb = getDbForServer(currentServerId);
+    if (!myDb) return;
+
+    friendsListListener = myDb.ref('users/' + currentUser.userId + '/friendsList');
+
+    friendsListListener.on('value', function(snap) {
+        var list = snap.val();
+        if (!Array.isArray(list)) {
+            list = list ? Object.keys(list).map(function(k){ return list[k]; }) : [];
+        }
+
+        var oldList = Array.isArray(currentUser.friendsList) ? currentUser.friendsList : [];
+
+        var newOnes = list.filter(function(nf) {
+            return !oldList.some(function(of) {
+                return of.serverId === nf.serverId && of.userId === nf.userId;
+            });
+        });
+
+        var removedOnes = oldList.filter(function(of) {
+            return !list.some(function(nf) {
+                return nf.serverId === of.serverId && nf.userId === of.userId;
+            });
+        });
+
+        var changedOnes = [];
+        list.forEach(function(nf) {
+            var oldEntry = oldList.find(function(of) {
+                return of.serverId === nf.serverId && of.userId === nf.userId;
+            });
+            if (oldEntry) {
+                if (oldEntry.online !== nf.online || oldEntry.play !== nf.play) {
+                    changedOnes.push(nf);
+                }
+            }
+        });
+
+        currentUser.friendsList = list;
+        saveUserToDB(currentUser);
+
+        if (newOnes.length > 0) {
+            newOnes.forEach(function(entry) {
+                fetchUserFullData(entry.serverId, entry.userId).then(function(friendData) {
+                    return saveFriendToCache(friendData);
+                }).then(function() {
+                    renderChatList();
+                }).catch(function() {});
+            });
+        }
+
+        if (removedOnes.length > 0) {
+            getFriendsCache().then(function(cache) {
+                removedOnes.forEach(function(entry) {
+                    var key = getFriendCacheKey(entry.serverId, entry.userId);
+                    delete cache[key];
+                });
+                return saveFriendsCache(cache);
+            }).then(function() {
+                renderChatList();
+            }).catch(function() {});
+        }
+
+        if (changedOnes.length > 0) {
+            getFriendsCache().then(function(cache) {
+                changedOnes.forEach(function(entry) {
+                    var key = getFriendCacheKey(entry.serverId, entry.userId);
+                    if (cache[key]) {
+                        cache[key].online = entry.online === true;
+                        cache[key].play = entry.play || '';
+                    }
+                });
+                return saveFriendsCache(cache);
+            }).then(function() {
+                renderChatList();
+            }).catch(function() {});
+        }
+
+        cleanupFriendsCache();
+
+        if (newOnes.length === 0 && removedOnes.length === 0 && changedOnes.length === 0) {
+            renderChatList();
+        }
+    });
+}
+
+function stopFriendsListListener() {
+    if (friendsListListener) {
+        try { friendsListListener.off(); } catch(e){}
+        friendsListListener = null;
+    }
+}
+
+// ============================================================
+//  CHAT LIST -- IndexedDB ကနေသာ ပြ
+// ============================================================
+function renderChatList() {
+    var listEl = document.getElementById('chatList');
+    if (!listEl) return;
+
+    var existingFriendRows = listEl.querySelectorAll('.chat-list-item:not([data-chat="ai"])');
+    existingFriendRows.forEach(function(row) { row.remove(); });
+
+    if (!currentUser || !Array.isArray(currentUser.friendsList) || currentUser.friendsList.length === 0) {
+        return;
+    }
+
+    getFriendsCache().then(function(cache) {
+        currentUser.friendsList.forEach(function(friend, index) {
+            var key = getFriendCacheKey(friend.serverId, friend.userId);
+            var cached = cache[key];
+
+            var rowId = 'chatRow_' + index;
+            var row = document.createElement('div');
+            row.className = 'chat-list-item';
+            row.id = rowId;
+
+            var name = cached ? cached.name : 'Loading...';
+            var avatar = (cached && cached.avatar) ? cached.avatar : 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'52\' height=\'52\' viewBox=\'0 0 100 100\'%3E%3Ccircle cx=\'50\' cy=\'50\' r=\'45\' fill=\'%2322222e\'/%3E%3C/svg%3E';
+            var play = cached ? (cached.play || '') : '';
+            var online = cached ? cached.online === true : false;
+
+            var frameHtml = '';
+            if (cached && cached.frameUse) {
+                var frame = FRAME_CONFIG.frames.find(function(f){ return f.id === cached.frameUse; });
+                if (frame) frameHtml = '<div class="chat-list-frame" style="background-image:url(\'' + frame.image + '\')"></div>';
+            }
+
+            var markHtml = '';
+            if (cached && cached.markUse) {
+                var mark = MARK_CONFIG.marks.find(function(m){ return String(m.id) === String(cached.markUse); });
+                if (mark) markHtml = '<img src="' + mark.image + '" />';
+            }
+
+            row.innerHTML =
+                '<div class="chat-list-avatar-wrap">' +
+                    '<img class="chat-list-avatar" src="' + avatar + '" alt="avatar" />' +
+                    frameHtml +
+                    (online ? '<span class="chat-list-online-dot"></span>' : '') +
+                '</div>' +
+                '<div class="chat-list-info">' +
+                    '<div class="chat-list-top">' +
+                        '<div class="chat-list-name-row">' +
+                            '<span class="chat-list-name">' + escapeHtml(name) + '</span>' +
+                            '<span class="chat-list-mark">' + markHtml + '</span>' +
+                        '</div>' +
+                        '<span class="chat-list-time">' + (online ? 'online' : '') + '</span>' +
+                    '</div>' +
+                    '<div class="chat-list-bottom">' +
+                        '<span class="chat-list-msg">' + escapeHtml(play || (online ? 'Online' : 'Offline')) + '</span>' +
+                    '</div>' +
+                '</div>';
+
+            row.addEventListener('click', function() {
+                openChatRoom({
+                    serverId: friend.serverId,
+                    userId: friend.userId,
+                    serverNo: friend.serverNo
+                });
+            });
+
+            listEl.appendChild(row);
+        });
+    });
+}
+
+// ============================================================
+//  CHAT ROOM -- On-demand listener
+// ============================================================
+var currentChatTarget = null;
+var chatRoomListener = null;
+
+function openChatRoom(target) {
+    currentChatTarget = target;
+
+    var avatarEl = document.getElementById('chatRoomAvatar');
+    var frameEl = document.getElementById('chatRoomFrame');
+    var nameEl = document.getElementById('chatRoomName');
+    var markEl = document.getElementById('chatRoomMark');
+    var statusEl = document.getElementById('chatRoomStatus');
+    var messagesEl = document.getElementById('chatRoomMessages');
+
+    avatarEl.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="38" height="38" viewBox="0 0 100 100"%3E%3Ccircle cx="50" cy="50" r="45" fill="%2322222e"/%3E%3C/svg%3E';
+    frameEl.style.backgroundImage = 'none';
+    nameEl.textContent = 'Loading...';
+    markEl.innerHTML = '';
+    statusEl.textContent = 'offline';
+    statusEl.classList.remove('online');
+    messagesEl.innerHTML = '<div class="chat-empty-state"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#5a5a6a" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>မက်ဆေ့ချ် စတင်ရန် ရေးပါ</span></div>';
+
+    document.getElementById('fullscreenOverlay').classList.add('chat-room-active');
+    openFullscreen('', 'fs-chat-room');
+
+    var input = document.getElementById('chatMessageInput');
+    var clipBtn = document.getElementById('chatClipBtn');
+    var sendBtn = document.getElementById('chatSendBtn');
+    if (input) {
+        input.value = '';
+        input.style.height = '';
+    }
+    if (clipBtn) clipBtn.classList.remove('hidden');
+    if (sendBtn) sendBtn.classList.add('hidden');
+
+    getFriendFromCache(target.serverId, target.userId).then(function(cached) {
+        if (cached) applyChatRoomData(cached);
+    });
+
+    if (chatRoomListener) { try { chatRoomListener.off(); } catch(e){} chatRoomListener = null; }
+
+    var friendDb = getDbForServer(target.serverId);
+    if (!friendDb) return;
+
+    var server = FIREBASE_SERVERS.find(function(s){ return s.id === target.serverId; });
+    var serverNo = server ? server.number : 1;
+
+    chatRoomListener = friendDb.ref('users/' + target.userId);
+    chatRoomListener.on('value', function(snap) {
+        var data = snap.val();
+        if (!data) return;
+
+        var fullData = extractUseOnlyData(data, target.serverId, serverNo, target.userId);
+        saveFriendToCache(fullData);
+        applyChatRoomData(fullData);
+        updateChatListRowByKey(target.serverId, target.userId, fullData);
+    });
+}
+
+function applyChatRoomData(data) {
+    var avatarEl = document.getElementById('chatRoomAvatar');
+    var frameEl = document.getElementById('chatRoomFrame');
+    var nameEl = document.getElementById('chatRoomName');
+    var markEl = document.getElementById('chatRoomMark');
+    var statusEl = document.getElementById('chatRoomStatus');
+
+    if (data.avatar) avatarEl.src = data.avatar;
+    nameEl.textContent = data.name || 'Player';
+
+    if (data.markUse) {
+        var mark = MARK_CONFIG.marks.find(function(m){ return String(m.id) === String(data.markUse); });
+        if (mark) markEl.innerHTML = '<img src="' + mark.image + '" />';
+        else markEl.innerHTML = '';
+    } else markEl.innerHTML = '';
+
+    if (data.frameUse) {
+        var frame = FRAME_CONFIG.frames.find(function(f){ return f.id === data.frameUse; });
+        if (frame) frameEl.style.backgroundImage = 'url("' + frame.image + '")';
+        else frameEl.style.backgroundImage = 'none';
+    } else frameEl.style.backgroundImage = 'none';
+
+    if (data.online) {
+        statusEl.textContent = 'online';
+        statusEl.classList.add('online');
+    } else {
+        statusEl.textContent = 'offline';
+        statusEl.classList.remove('online');
+    }
+}
+
+function updateChatListRowByKey(serverId, userId, data) {
+    if (!currentUser || !Array.isArray(currentUser.friendsList)) return;
+    var idx = currentUser.friendsList.findIndex(function(f) {
+        return f.serverId === serverId && f.userId === userId;
+    });
+    if (idx === -1) return;
+
+    var rowId = 'chatRow_' + idx;
+    var row = document.getElementById(rowId);
+    if (!row) return;
+
+    var nameEl = row.querySelector('.chat-list-name');
+    var markEl = row.querySelector('.chat-list-mark');
+    var msgEl = row.querySelector('.chat-list-msg');
+    var timeEl = row.querySelector('.chat-list-time');
+    var avatarEl = row.querySelector('.chat-list-avatar');
+    var frameEl = row.querySelector('.chat-list-frame');
+    var wrapEl = row.querySelector('.chat-list-avatar-wrap');
+
+    if (nameEl) nameEl.textContent = data.name || 'Player';
+    if (avatarEl && data.avatar) avatarEl.src = data.avatar;
+
+    if (markEl) {
+        if (data.markUse) {
+            var mark = MARK_CONFIG.marks.find(function(m){ return String(m.id) === String(data.markUse); });
+            markEl.innerHTML = mark ? '<img src="' + mark.image + '" />' : '';
+        } else markEl.innerHTML = '';
+    }
+
+    if (frameEl) {
+        if (data.frameUse) {
+            var frame = FRAME_CONFIG.frames.find(function(f){ return f.id === data.frameUse; });
+            if (frame) frameEl.style.backgroundImage = 'url("' + frame.image + '")';
+        } else frameEl.style.backgroundImage = 'none';
+    } else if (data.frameUse && wrapEl) {
+        var frame2 = FRAME_CONFIG.frames.find(function(f){ return f.id === data.frameUse; });
+        if (frame2) {
+            var newFrame = document.createElement('div');
+            newFrame.className = 'chat-list-frame';
+            newFrame.style.backgroundImage = 'url("' + frame2.image + '")';
+            wrapEl.insertBefore(newFrame, wrapEl.firstChild.nextSibling);
+        }
+    }
+
+    if (msgEl) msgEl.textContent = data.play || (data.online ? 'Online' : 'Offline');
+    if (timeEl) timeEl.textContent = data.online ? 'online' : '';
+
+    var existingDot = row.querySelector('.chat-list-online-dot');
+    if (data.online && !existingDot && wrapEl) {
+        var dot = document.createElement('span');
+        dot.className = 'chat-list-online-dot';
+        wrapEl.appendChild(dot);
+    } else if (!data.online && existingDot) {
+        existingDot.remove();
+    }
+}
+
+// ============================================================
+//  CHAT INPUT -- Multiline Textarea (Max 3 lines, auto-scroll)
+// ============================================================
+(function initChatInput() {
+    var input = document.getElementById('chatMessageInput');
+    var msgBtn = document.getElementById('chatMsgBtn');
+    var clipBtn = document.getElementById('chatClipBtn');
+    var sendBtn = document.getElementById('chatSendBtn');
+    if (!input || !clipBtn || !sendBtn) return;
+
+    var MIN_H = 42;
+    var MAX_H = 84;
+
+    function autoResize() {
+        input.style.height = 'auto';
+        var newH = input.scrollHeight;
+        if (newH < MIN_H) newH = MIN_H;
+        if (newH > MAX_H) newH = MAX_H;
+        input.style.height = newH + 'px';
+    }
+
+    // Input event -- text ရှိလား စစ် + auto resize
+    input.addEventListener('input', function() {
+        var hasText = this.value.trim().length > 0;
+        if (hasText) {
+            clipBtn.classList.add('hidden');
+            sendBtn.classList.remove('hidden');
+        } else {
+            clipBtn.classList.remove('hidden');
+            sendBtn.classList.add('hidden');
+        }
+        autoResize();
+    });
+
+    // Enter နှိပ်ရင် newline (default) -- Send မလုပ်
+    input.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            // Enter က newline ထည့်တယ် (default behavior)
+            // သင်လိုချင်ရင် send ဖို့ e.preventDefault() ခေါ်ပါ
+            // လက်ရှိ -- Enter = newline, Send = Send button
+        }
+    });
+
+    // Send
+    sendBtn.addEventListener('click', function() {
+        var text = input.value.trim();
+        if (!text) return;
+
+        var messagesEl = document.getElementById('chatRoomMessages');
+        var empty = messagesEl.querySelector('.chat-empty-state');
+        if (empty) empty.remove();
+
+        var now = new Date();
+        var timeStr = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
+
+        var msg = document.createElement('div');
+        msg.className = 'chat-message sent';
+        // Newline တွေကို <br> ပြောင်း
+        msg.innerHTML = escapeHtml(text).replace(/\n/g, '<br>') +
+                        '<span class="chat-message-time">' + timeStr + '</span>';
+        messagesEl.appendChild(msg);
+        messagesEl.scrollTop = messagesEl.scrollHeight;
+
+        input.value = '';
+        input.style.height = '';
+        autoResize();
+        clipBtn.classList.remove('hidden');
+        sendBtn.classList.add('hidden');
+    });
+
+    // Reset height when opening chat room
+    window.resetChatInputHeight = function() {
+        input.value = '';
+        input.style.height = '';
+        autoResize();
+        clipBtn.classList.remove('hidden');
+        sendBtn.classList.add('hidden');
+    };
+
+    // Initial resize
+    autoResize();
+
+    if (msgBtn) msgBtn.addEventListener('click', function() {});
+    clipBtn.addEventListener('click', function() {});
+})();
+
+// ============================================================
+//  CHAT ROOM BACK & MENU
+// ============================================================
+(function initChatRoomButtons() {
+    var backBtn = document.getElementById('chatRoomBackBtn');
+    if (backBtn) {
+        backBtn.addEventListener('click', function() {
+            goBackFullscreen();
+        });
+    }
+    var menuBtn = document.getElementById('chatRoomMenuBtn');
+    if (menuBtn) {
+        menuBtn.addEventListener('click', function() {});
+    }
+})();
+
+// ============================================================
+//  SEARCH EVENTS
+// ============================================================
+(function initSearchEvents() {
+    var btn = document.getElementById('searchBtn');
+    var idInput = document.getElementById('searchUserId');
+    if (btn) btn.addEventListener('click', performSearch);
+    if (idInput) {
+        idInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') performSearch();
+        });
+    }
+})();
+
+// ============================================================
+//  ONLINE SYSTEM
+// ============================================================
+function setMyOnlineStatus(isOnline) {
+    if (!currentUser || !currentServerId) return Promise.resolve();
+    var myDb = getDbForServer(currentServerId);
+    if (!myDb) return Promise.resolve();
+
+    return myDb.ref('users/' + currentUser.userId + '/online').set(isOnline === true)
+        .catch(function(err) { console.warn('Set online error:', err); });
+}
+
+function broadcastMyStatusToFriends(isOnline) {
+    if (!currentUser || !currentServerId) return Promise.resolve();
+
+    var myServer = FIREBASE_SERVERS.find(function(s){ return s.id === currentServerId; });
+    var myServerNo = myServer ? myServer.number : 1;
+
+    var friendsList = Array.isArray(currentUser.friendsList) ? currentUser.friendsList : [];
+    if (friendsList.length === 0) return Promise.resolve();
+
+    var myEntry = {
+        serverId: currentServerId,
+        serverNo: myServerNo,
+        userId: currentUser.userId,
+        online: isOnline === true,
+        play: isOnline ? (currentUser.play || '') : ''
+    };
+
+    var promises = friendsList.map(function(friend) {
+        var friendDb = getDbForServer(friend.serverId);
+        if (!friendDb) return Promise.resolve();
+
+        return friendDb.ref('users/' + friend.userId + '/friendsList').once('value')
+        .then(function(snap) {
+            var theirList = snap.val();
+            if (!Array.isArray(theirList)) {
+                theirList = theirList ? Object.keys(theirList).map(function(k){ return theirList[k]; }) : [];
+            }
+            var found = false;
+            theirList = theirList.map(function(f) {
+                if (f.serverId === currentServerId && f.userId === currentUser.userId) {
+                    found = true;
+                    return myEntry;
+                }
+                return f;
+            });
+            if (!found) theirList.push(myEntry);
+            return friendDb.ref('users/' + friend.userId + '/friendsList').set(theirList);
+        })
+        .catch(function(err) { console.warn('Broadcast error:', err); });
+    });
+
+    return Promise.all(promises);
+}
+
+function broadcastMyProfileToFriends() {
+    if (!currentUser || !currentServerId) return Promise.resolve();
+
+    var myServer = FIREBASE_SERVERS.find(function(s){ return s.id === currentServerId; });
+    var myServerNo = myServer ? myServer.number : 1;
+
+    var friendsList = Array.isArray(currentUser.friendsList) ? currentUser.friendsList : [];
+    if (friendsList.length === 0) return Promise.resolve();
+
+    var myEntry = {
+        serverId: currentServerId,
+        serverNo: myServerNo,
+        userId: currentUser.userId,
+        online: true,
+        play: currentUser.play || ''
+    };
+
+    var promises = friendsList.map(function(friend) {
+        var friendDb = getDbForServer(friend.serverId);
+        if (!friendDb) return Promise.resolve();
+        return friendDb.ref('users/' + friend.userId + '/friendsList').once('value')
+        .then(function(snap) {
+            var theirList = snap.val();
+            if (!Array.isArray(theirList)) {
+                theirList = theirList ? Object.keys(theirList).map(function(k){ return theirList[k]; }) : [];
+            }
+            theirList = theirList.map(function(f) {
+                if (f.serverId === currentServerId && f.userId === currentUser.userId) {
+                    return myEntry;
+                }
+                return f;
+            });
+            return friendDb.ref('users/' + friend.userId + '/friendsList').set(theirList);
+        })
+        .catch(function() {});
+    });
+
+    return Promise.all(promises);
+}
+
+function handleBeforeUnload() {
+    if (!currentUser || !currentServerId) return;
+    try {
+        var myDb = getDbForServer(currentServerId);
+        if (myDb) myDb.ref('users/' + currentUser.userId + '/online').set(false);
+    } catch(e) {}
+    try { broadcastMyStatusToFriends(false); } catch(e) {}
+}
+
+function handleVisibilityChange() {
+    if (!currentUser || !currentServerId) return;
+    if (document.visibilityState === 'hidden') {
+        setMyOnlineStatus(false).then(function() { broadcastMyStatusToFriends(false); });
+    } else if (document.visibilityState === 'visible') {
+        setMyOnlineStatus(true).then(function() { broadcastMyStatusToFriends(true); });
+    }
+}
+
+var onlineHeartbeatInterval = null;
+
+function startOnlineHeartbeat() {
+    if (onlineHeartbeatInterval) clearInterval(onlineHeartbeatInterval);
+    onlineHeartbeatInterval = setInterval(function() {
+        if (!currentUser || !currentServerId) return;
+        if (document.visibilityState !== 'visible') return;
+        setMyOnlineStatus(true);
+    }, 30000);
+}
+
+function stopOnlineHeartbeat() {
+    if (onlineHeartbeatInterval) {
+        clearInterval(onlineHeartbeatInterval);
+        onlineHeartbeatInterval = null;
+    }
+}
+
+var onDisconnectRef = null;
+
+function setupOnDisconnect() {
+    if (!currentUser || !currentServerId) return;
+    var myDb = getDbForServer(currentServerId);
+    if (!myDb) return;
+    if (onDisconnectRef) {
+        try { onDisconnectRef.cancel(); } catch(e) {}
+        onDisconnectRef = null;
+    }
+    onDisconnectRef = myDb.ref('users/' + currentUser.userId + '/online');
+    onDisconnectRef.onDisconnect().set(false);
+}
+
+function cancelOnDisconnect() {
+    if (onDisconnectRef) {
+        try { onDisconnectRef.cancel(); } catch(e) {}
+        onDisconnectRef = null;
+    }
+}
+
+function goOnline() {
+    if (!currentUser || !currentServerId) return Promise.resolve();
+    return setMyOnlineStatus(true)
+    .then(function() { return broadcastMyStatusToFriends(true); })
+    .then(function() {
+        setupOnDisconnect();
+        startOnlineHeartbeat();
+    })
+    .catch(function(err) { console.warn('Go online error:', err); });
+}
+
+function goOffline() {
+    if (!currentUser || !currentServerId) return Promise.resolve();
+    stopOnlineHeartbeat();
+    cancelOnDisconnect();
+    return setMyOnlineStatus(false)
+    .then(function() { return broadcastMyStatusToFriends(false); })
+    .catch(function(err) { console.warn('Go offline error:', err); });
+}
+
+function attachOnlineEventListeners() {
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('pagehide', handleBeforeUnload);
+    window.addEventListener('pageshow', function() {
+        if (currentUser && currentServerId) goOnline();
+    });
+}
+
+function detachOnlineEventListeners() {
+    window.removeEventListener('beforeunload', handleBeforeUnload);
+    document.removeEventListener('visibilitychange', handleVisibilityChange);
+    window.removeEventListener('pagehide', handleBeforeUnload);
+}
+
+function updateMyPlay(newPlay) {
+    if (!currentUser || !currentServerId) return;
+    currentUser.play = newPlay || '';
+    saveUserToDB(currentUser);
+    var myDb = getDbForServer(currentServerId);
+    if (!myDb) return;
+    myDb.ref('users/' + currentUser.userId + '/play').set(newPlay || '')
+    .then(function() { return broadcastMyProfileToFriends(); })
+    .catch(function() {});
+}
+
+window.updateMyPlay = updateMyPlay;
+window.goOnline = goOnline;
+window.goOffline = goOffline;
+
+// ============================================================
+//  HOOKS
+// ============================================================
+var _origEnterApp_final = enterApp;
+enterApp = function(user) {
+    _origEnterApp_final(user);
+    setTimeout(function() { renderChatList(); }, 100);
+    setTimeout(function() { startFriendsListListener(); }, 300);
+    setTimeout(function() {
+        goOnline();
+        attachOnlineEventListeners();
+    }, 500);
+};
+
+var _origLogoutUser_final = logoutUser;
+logoutUser = function() {
+    if (currentUser && currentServerId) {
+        try { goOffline(); } catch(e) {}
+    }
+    detachOnlineEventListeners();
+    stopOnlineHeartbeat();
+    cancelOnDisconnect();
+    if (typeof stopFriendsListListener === 'function') {
+        try { stopFriendsListListener(); } catch(e) {}
+    }
+    if (typeof chatRoomListener !== 'undefined' && chatRoomListener) {
+        try { chatRoomListener.off(); } catch(e) {}
+        chatRoomListener = null;
+    }
+    _origLogoutUser_final();
+};
+
+var _origCloseFullscreen_final = closeFullscreen;
+closeFullscreen = function() {
+    if (chatRoomListener) {
+        try { chatRoomListener.off(); } catch(e){}
+        chatRoomListener = null;
+    }
+    document.getElementById('fullscreenOverlay').classList.remove('chat-room-active');
+    _origCloseFullscreen_final();
+};
+
+var _origGoBackFullscreen_final = goBackFullscreen;
+goBackFullscreen = function() {
+    var currentFs = fullscreenStack[fullscreenStack.length - 1];
+    if (currentFs && currentFs.screenId === 'fs-chat-room') {
+        if (chatRoomListener) {
+            try { chatRoomListener.off(); } catch(e){}
+            chatRoomListener = null;
+        }
+        document.getElementById('fullscreenOverlay').classList.remove('chat-room-active');
+    }
+    _origGoBackFullscreen_final();
+};
 
 // ============================================================
 //  INIT
@@ -6129,4 +8135,5 @@ checkSession().then(function(hasSession) {
 });
 
 console.log('All systems loaded: New Account (Google), Login with Server No., Profile, Edit, Shop, Roles, Marks, Play Field, Friends, First Login Popup');
-console.log('Telegram sends to: ' + TELEGRAM_CHAT_USERNAME);</script>
+console.log('Telegram sends to: ' + TELEGRAM_CHAT_USERNAME);
+</script>
