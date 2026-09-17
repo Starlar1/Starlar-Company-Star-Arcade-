@@ -1,4 +1,5 @@
-<meta name='viewport' content='width=device-width, initial-scale=1'/><!DOCTYPE html>
+<meta name='viewport' content='width=device-width, initial-scale=1'/><meta name='viewport' content='width=device-width, initial-scale=1'/>
+<!DOCTYPE html>
 <html lang="my">
 <head>
     <meta charset="UTF-8" />
@@ -6,7 +7,7 @@
     <meta name="theme-color" content="#0a0a0f" />
     <title>STAR ARCADE</title>
 
-    <!-- Firebase SDK (Realtime DB) -->
+    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
@@ -256,11 +257,9 @@
                     </div>
                 </div>
 
-                <!-- ========== CHAT ROOM ========== -->
+                <!-- CHAT ROOM -->
                 <div class="fs-screen hidden" id="fs-chat-room">
                     <div class="chat-room">
-
-                        <!-- Chat Room Top Bar -->
                         <div class="chat-room-topbar">
                             <button class="chat-room-back" id="chatRoomBackBtn">
                                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
@@ -289,7 +288,6 @@
                             </button>
                         </div>
 
-                        <!-- Chat Room Messages -->
                         <div class="chat-room-messages" id="chatRoomMessages">
                             <div class="chat-empty-state">
                                 <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#5a5a6a" stroke-width="1.5">
@@ -299,10 +297,9 @@
                             </div>
                         </div>
 
-                        <!-- ✅ Bubble Picker Panel (JS က ထည့်မယ်) -->
+                        <!-- ✅ Bubble Picker Panel (Input Bar အပေါ်မှာ) -->
                         <div class="bubble-picker" id="bubblePicker"></div>
 
-                        <!-- Chat Room Input Bar -->
                         <div class="chat-room-input-bar">
                             <button class="chat-msg-btn" id="chatMsgBtn" title="Bubble">
                                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -4039,6 +4036,8 @@ body {
     line-height: 1.45;
     word-break: break-word;
     animation: msgPop 0.2s ease;
+    cursor: pointer;
+    position: relative;
 }
 
 @keyframes msgPop {
@@ -4067,6 +4066,17 @@ body {
     opacity: 0.7;
     margin-top: 3px;
     text-align: right;
+}
+
+/* ✅ Highlight (Reply နှိပ်ရင် စာကို highlight) */
+.chat-message.highlight {
+    animation: highlightPulse 1.5s ease;
+}
+
+@keyframes highlightPulse {
+    0%, 100% { box-shadow: none; }
+    30% { box-shadow: 0 0 0 3px rgba(255, 109, 31, 0.6); }
+    60% { box-shadow: 0 0 0 3px rgba(255, 109, 31, 0.3); }
 }
 
 /* ============================================================
@@ -4122,7 +4132,204 @@ body {
 }
 
 /* ============================================================
-   ✅ BUBBLE PICKER PANEL (✓ Checkmark မပါ)
+   ✅ REPLY QUOTE (Message ထဲမှာ ပြတဲ့ အပိုင်း)
+   ============================================================ */
+.msg-reply-quote {
+    background: rgba(255, 255, 255, 0.08);
+    border-left: 3px solid var(--accent);
+    border-radius: 6px;
+    padding: 6px 10px;
+    margin-bottom: 6px;
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+
+.msg-reply-quote:hover {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.msg-reply-name {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--accent);
+    margin-bottom: 2px;
+}
+
+.msg-reply-text {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.75);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+
+.chat-message.sent .msg-reply-quote {
+    background: rgba(0, 0, 0, 0.2);
+    border-left-color: rgba(255, 255, 255, 0.6);
+}
+
+.chat-message.sent .msg-reply-name {
+    color: #fff;
+}
+
+.chat-message.sent .msg-reply-text {
+    color: rgba(255, 255, 255, 0.85);
+}
+
+.chat-message.has-bubble .msg-reply-quote {
+    position: relative;
+    z-index: 1;
+}
+
+/* ============================================================
+   ✅ MESSAGE MENU POPUP (Reply / Copy / Delete)
+   ============================================================ */
+.msg-menu-popup {
+    position: fixed;
+    background: var(--bg-header);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.7);
+    padding: 6px;
+    z-index: 10002;
+    min-width: 180px;
+    animation: msgMenuPop 0.15s ease;
+}
+
+@keyframes msgMenuPop {
+    from { opacity: 0; transform: scale(0.9) translateY(-4px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.msg-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 10px 14px;
+    background: transparent;
+    border: none;
+    border-radius: 8px;
+    color: var(--text-main);
+    font-size: 14px;
+    font-weight: 500;
+    font-family: inherit;
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.15s ease;
+}
+
+.msg-menu-item:hover,
+.msg-menu-item:active {
+    background: var(--bg-hover);
+}
+
+.msg-menu-item.danger {
+    color: #ff4444;
+}
+
+.msg-menu-item.danger:hover,
+.msg-menu-item.danger:active {
+    background: rgba(255, 68, 68, 0.15);
+}
+
+.msg-menu-item svg {
+    flex-shrink: 0;
+    opacity: 0.7;
+}
+
+.msg-menu-item:hover svg {
+    opacity: 1;
+}
+
+/* ============================================================
+   ✅ REPLY PREVIEW BAR (Input အပေါ်မှာ)
+   ============================================================ */
+.reply-preview-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 10px 14px;
+    background: var(--bg-card);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+    animation: slideUp 0.2s ease;
+}
+
+.reply-preview-left {
+    flex: 1;
+    min-width: 0;
+    border-left: 3px solid var(--accent);
+    padding-left: 10px;
+}
+
+.reply-preview-name {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--accent);
+    margin-bottom: 2px;
+}
+
+.reply-preview-text {
+    font-size: 12px;
+    color: var(--text-sub);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.reply-preview-close {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+}
+
+.reply-preview-close:active {
+    background: var(--bg-hover);
+    transform: scale(0.9);
+}
+
+/* ============================================================
+   ✅ TOAST MESSAGE
+   ============================================================ */
+.toast-message {
+    position: fixed;
+    bottom: 100px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: rgba(0, 0, 0, 0.9);
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 24px;
+    font-size: 13px;
+    font-weight: 500;
+    z-index: 10005;
+    opacity: 0;
+    transition: all 0.3s ease;
+    pointer-events: none;
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.toast-message.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+/* ============================================================
+   ✅ BUBBLE PICKER PANEL
    ============================================================ */
 .bubble-picker {
     width: 100%;
@@ -4166,7 +4373,6 @@ body {
     transform: scale(0.95);
 }
 
-/* ✅ Active -- Border highlight သာ (✓ မပါ) */
 .bubble-picker-slot.active {
     border-color: var(--accent);
     box-shadow: 0 0 0 2px rgba(255, 109, 31, 0.3);
@@ -4250,7 +4456,6 @@ body {
     background: var(--bg-hover);
 }
 
-/* ✅ Block -- အနီရောင် */
 .chat-room-menu-popup .menu-item.danger {
     color: #ff4444;
 }
@@ -4259,7 +4464,6 @@ body {
     background: rgba(255, 68, 68, 0.15);
 }
 
-/* ✅ Unblock -- အစိမ်းရောင် */
 .chat-room-menu-popup .menu-item[data-action="unblock"] {
     color: #44ff88;
 }
@@ -4371,6 +4575,35 @@ body {
 .fullscreen-overlay.chat-room-active .fullscreen-body { height: 100% !important; }
 
 /* ============================================================
+   ✅ CHAT BLOCKED BAR
+   ============================================================ */
+.chat-blocked-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 14px 16px;
+    background: rgba(255, 68, 68, 0.08);
+    border-top: 1px solid rgba(255, 68, 68, 0.25);
+    color: #ff6b6b;
+    font-size: 13px;
+    font-weight: 500;
+    text-align: center;
+    flex-shrink: 0;
+    animation: slideUp 0.25s ease;
+}
+
+.chat-blocked-bar svg {
+    flex-shrink: 0;
+    opacity: 0.85;
+}
+
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ============================================================
    RESPONSIVE
    ============================================================ */
 @media (max-width: 480px) {
@@ -4406,7 +4639,6 @@ body {
         max-height: 76px;
     }
 
-    /* Bubble Picker Mobile */
     .bubble-picker.open {
         max-height: 200px;
         padding: 10px 8px;
@@ -4415,7 +4647,6 @@ body {
         gap: 8px;
     }
 
-    /* Bubble 9-slice Mobile */
     .chat-message.has-bubble {
         padding: 12px 14px;
         min-height: 50px;
@@ -4425,7 +4656,6 @@ body {
         font-size: 13px;
     }
 
-    /* Menu Popup Mobile */
     .chat-room-menu-popup {
         min-width: 180px;
     }
@@ -4433,38 +4663,27 @@ body {
         font-size: 13px;
         padding: 9px 12px;
     }
-}
 
-/* ============================================================
-   ✅ CHAT BLOCKED BAR -- သူ ကိုယ့်ကို block ထားရင် ပြ
-   ============================================================ */
-.chat-blocked-bar {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    padding: 14px 16px;
-    background: rgba(255, 68, 68, 0.08);
-    border-top: 1px solid rgba(255, 68, 68, 0.25);
-    color: #ff6b6b;
-    font-size: 13px;
-    font-weight: 500;
-    text-align: center;
-    flex-shrink: 0;
-    animation: slideUp 0.25s ease;
-}
+    .msg-menu-popup {
+        min-width: 160px;
+    }
+    .msg-menu-item {
+        font-size: 13px;
+        padding: 9px 12px;
+    }
 
-.chat-blocked-bar svg {
-    flex-shrink: 0;
-    opacity: 0.85;
-}
+    .reply-preview-bar {
+        padding: 8px 12px;
+    }
+    .reply-preview-name { font-size: 10px; }
+    .reply-preview-text { font-size: 11px; }
 
-@keyframes slideUp {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
+    .toast-message {
+        font-size: 12px;
+        padding: 8px 16px;
+        bottom: 80px;
+    }
 
-@media (max-width: 480px) {
     .chat-blocked-bar {
         padding: 12px 14px;
         font-size: 12px;
@@ -5882,8 +6101,8 @@ var BACKGROUND_CONFIG = {
 
 var BUBBLE_CONFIG = {
     bubbles: [
-        { id: 4001, name: 'Bubble 1', image: 'https://i.ibb.co/n86mRKyY/Grid-Art-20260917-123730123.png', price: 100, limited: false },
-        { id: 4002, name: 'Bubble 2', image: 'https://via.placeholder.com/60x40/4a6cf7/ffffff?text=Bubble+2', price: 150, limited: false },
+        { id: 4001, name: 'Bubble 1', image: 'https://i.ibb.co/bMDnk6YN/Grid-Art-20260917-141243210.png', price: 100, limited: false },
+        { id: 4002, name: 'Bubble 2', image: 'https://i.ibb.co/ymVxDmw6/Grid-Art-20260917-141317904.png', price: 150, limited: false },
         { id: 4003, name: 'Bubble 3', image: 'https://via.placeholder.com/60x40/ff6b6b/ffffff?text=Bubble+3', price: 200, limited: false },
         { id: 4004, name: 'Bubble 4', image: 'https://via.placeholder.com/60x40/51cf66/ffffff?text=Bubble+4', price: 250, limited: false },
         { id: 4005, name: 'Bubble 5', image: 'https://via.placeholder.com/60x40/ffd93d/000000?text=Bubble+5', price: 300, limited: false },
@@ -5892,7 +6111,6 @@ var BUBBLE_CONFIG = {
         { id: 4008, name: 'Bubble Royal', image: 'https://via.placeholder.com/60x40/ff4444/ffffff?text=Royal', price: 0, limited: true }
     ]
 };
-
 // ============================================================
 //  ROLE CONFIGURATION
 // ============================================================
@@ -7737,8 +7955,8 @@ function renderChatList() {
             }
 
             var onlineHtml = online
-                ? '<span class="chat-list-online-text online">• Online</span>'
-                : '<span class="chat-list-online-text">• Offline</span>';
+                ? '<span class="chat-list-online-text online">Online</span>'
+                : '<span class="chat-list-online-text">Offline</span>';
 
             row.innerHTML =
                 '<div class="chat-list-avatar-wrap">' +
@@ -7785,8 +8003,8 @@ function updateChatListPreview(serverId, userId, rowId) {
 var currentChatTarget = null;
 var chatRoomListener = null;
 var chatRoomMessageListeners = [];
-var chatRoomBlockListener = null;  // ✅ သူ့ blockList listener
-var iAmBlockedByThem = false;      // ✅ သူ ကိုယ့်ကို block ထားလား
+var chatRoomBlockListener = null;
+var iAmBlockedByThem = false;
 
 function openChatRoom(target) {
     currentChatTarget = target;
@@ -7822,7 +8040,6 @@ function openChatRoom(target) {
         if (cached) applyChatRoomData(cached);
     });
 
-    // ✅ ① User Data Listener
     if (chatRoomListener) { try { chatRoomListener.off(); } catch(e){} chatRoomListener = null; }
     var friendDb = getDbForServer(target.serverId);
     if (friendDb) {
@@ -7838,7 +8055,6 @@ function openChatRoom(target) {
         });
     }
 
-    // ✅ ② သူ့ blockList Listener -- Real-time
     if (chatRoomBlockListener) { try { chatRoomBlockListener.off(); } catch(e){} chatRoomBlockListener = null; }
     if (friendDb) {
         chatRoomBlockListener = friendDb.ref('users/' + target.userId + '/blockList');
@@ -7847,7 +8063,6 @@ function openChatRoom(target) {
             if (!Array.isArray(blockList)) {
                 blockList = blockList ? Object.keys(blockList).map(function(k){ return blockList[k]; }) : [];
             }
-            // ✅ သူ့ block list ထဲ ကိုယ့် ID ရှိလား?
             var blocked = blockList.some(function(b) {
                 return b.userId === currentUser.userId && b.serverId === currentServerId;
             });
@@ -7856,7 +8071,7 @@ function openChatRoom(target) {
         });
     }
 
-    // ✅ ③ IndexedDB ကနေ messages ဆွဲ
+    // ✅ IndexedDB ကနေ messages ဆွဲ
     getMessagesWith(target.serverId, target.userId).then(function(messages) {
         messagesEl.innerHTML = '';
         if (messages.length === 0) {
@@ -7866,6 +8081,7 @@ function openChatRoom(target) {
         messages.forEach(function(msg) { displayMessage(msg); });
         messagesEl.scrollTop = messagesEl.scrollHeight;
 
+        // ✅ Received message များသာ Seen ပြ
         messages.forEach(function(msg) {
             if (msg.type === 'received' && !msg.seen) {
                 markAsSeenAndDelete(msg.messageId, msg.serverId, target.serverId, target.userId);
@@ -7876,21 +8092,13 @@ function openChatRoom(target) {
     startChatRoomMessageListeners(target);
 }
 
-// ✅ Block UI Update -- Send ကို Disable
 function updateChatBlockUI() {
-    var input = document.getElementById('chatMessageInput');
-    var clipBtn = document.getElementById('chatClipBtn');
-    var sendBtn = document.getElementById('chatSendBtn');
     var inputBar = document.querySelector('.chat-room-input-bar');
-
-    // ✅ အရင် Blocked Bar ဖျက်
     var existing = document.getElementById('blockedBar');
     if (existing) existing.remove();
 
     if (iAmBlockedByThem) {
-        // Input bar ကို ဖျောက်
         if (inputBar) inputBar.style.display = 'none';
-        // Blocked bar ထည့်
         var messagesEl = document.getElementById('chatRoomMessages');
         if (messagesEl && messagesEl.parentNode) {
             var blockedBar = document.createElement('div');
@@ -7903,7 +8111,6 @@ function updateChatBlockUI() {
             messagesEl.parentNode.insertBefore(blockedBar, messagesEl.nextSibling);
         }
     } else {
-        // Input bar ကို ပြန်ပြ
         if (inputBar) inputBar.style.display = 'flex';
     }
 }
@@ -7957,7 +8164,6 @@ function stopChatRoomBlockListener() {
         chatRoomBlockListener = null;
     }
     iAmBlockedByThem = false;
-    // Input bar ပြန်ပြ
     var inputBar = document.querySelector('.chat-room-input-bar');
     if (inputBar) inputBar.style.display = 'flex';
     var existing = document.getElementById('blockedBar');
@@ -8199,7 +8405,9 @@ function fallbackCopyText(text) {
 }
 
 // ============================================================
-//  DELETE ONE MESSAGE
+//  ✅ DELETE ONE MESSAGE
+//  -- Sent message (ကိုယ်ပို့) → IndexedDB + Firestore ဖျက်
+//  -- Received message (သူပို့) → IndexedDB သာ ဖျက်
 // ============================================================
 function deleteOneMessage(msg) {
     if (!confirm('ဒီ message ကို ဖျက်မှာ သေချာလား?')) return;
@@ -8207,20 +8415,33 @@ function deleteOneMessage(msg) {
     var target = currentChatTarget;
     if (!target) return;
 
+    // ① ကိုယ့် IndexedDB ကနေ အဲ့စာ တစ်ခုတည်း ဖျက်
     deleteMessageFromLocalDB(target.serverId, target.userId, msg.messageId)
     .then(function() {
+        // ② UI ကနေ အဲ့စာ တစ်ခုတည်း ဖျက်
         var el = document.querySelector('[data-message-id="' + msg.messageId + '"]');
         if (el) el.remove();
 
+        // ③ Sent message ဖြစ်ရင် Firestore ပါ ဖျက်
+        //    → Receiver ဆီက listener "removed" ဖြစ်
+        //    → Receiver IndexedDB မထိ (သူ့စာ သူ့မှာ ကျန်)
         if (msg.type === 'sent' && msg.serverId) {
             var fsdb = getFirestoreForServer(msg.serverId);
             if (fsdb) {
                 fsdb.collection('messages').doc(msg.messageId).delete()
-                .then(function() { console.log('✅ Deleted from Firestore:', msg.messageId); })
+                .then(function() {
+                    console.log('✅ Sender: IndexedDB + Firestore delete:', msg.messageId);
+                })
                 .catch(function(err) { console.warn(err); });
             }
         }
+
         renderChatList();
+        showToast('Deleted!');
+    })
+    .catch(function(err) {
+        console.error('Delete error:', err);
+        showToast('ဖျက်မရပါ');
     });
 }
 
@@ -8244,10 +8465,13 @@ function showToast(message) {
 }
 
 // ============================================================
-//  SEND MESSAGE -- ✅ Block Check
+//  ✅ SEND MESSAGE
+//  ① Sender IndexedDB သိမ်း
+//  ② UI ချက်ချင်းပြ
+//  ③ Firestore ပို့ (receiver ဆီ)
+//  ⚠️ Sender ကို Seen မပြ -- receiver သာ Seen လုပ်
 // ============================================================
 function sendMessage() {
-    // ✅ သူ ကိုယ့်ကို block ထားလား?
     if (iAmBlockedByThem) {
         showToast('သင်သည် ဒီသူ့ကို စာ ပို့လို့မရပါ');
         return;
@@ -8299,10 +8523,13 @@ function sendMessage() {
         timestamp: timestamp,
         serverId: chosenServerId,
         type: 'sent',
-        replyTo: replyTo
+        replyTo: replyTo,
+        seen: false   // ⚠️ Sender က Seen မလုပ် -- receiver သာ
     };
 
+    // ① Sender IndexedDB သိမ်း
     saveMessageToLocalDB(localMsg).then(function() {
+        // ② UI ချက်ချင်းပြ
         displayMessage(localMsg);
         var messagesEl = document.getElementById('chatRoomMessages');
         messagesEl.scrollTop = messagesEl.scrollHeight;
@@ -8317,15 +8544,18 @@ function sendMessage() {
         clearReplyState();
         renderChatList();
 
+        // ③ Firestore ပို့ -- receiver ဆီ
         fsdb.collection('messages').doc(messageId).set(messageData)
         .then(function() {
-            console.log('✅ Sent:', messageId);
+            console.log('✅ Sent to Firestore:', messageId);
         })
         .catch(function(err) {
             console.error('Firestore send error:', err);
+            showToast('Firestore ပို့မရပါ');
         });
     }).catch(function(err) {
         console.error('Local save error:', err);
+        showToast('IndexedDB သိမ်းမရပါ');
     });
 }
 
@@ -8337,19 +8567,28 @@ function generateMessageId() {
 }
 
 // ============================================================
-//  SEEN + DELETE
+//  ✅ SEEN + DELETE -- Receiver သာ
+//  ⚠️ Receiver က Seen ပြ → Firestore ဖျက်
+//  ⚠️ Sender ရဲ့ IndexedDB မှာ -- စာ ကျန် (သူ့စာ သူ့မှာ)
 // ============================================================
 function markAsSeenAndDelete(messageId, serverId, friendServer, friendId) {
+    // ✅ Receiver IndexedDB -- seen: true
     updateMessageSeen(friendServer, friendId, messageId);
+
+    // ✅ Receiver ကိုယ်တိုင် Firestore ဖျက်
     var fsdb = getFirestoreForServer(serverId);
     if (!fsdb) return;
     fsdb.collection('messages').doc(messageId).delete()
-    .then(function() { console.log('✅ Deleted:', messageId); })
+    .then(function() {
+        console.log('✅ Receiver: Seen + Firestore delete:', messageId);
+    })
     .catch(function(err) { console.warn(err); });
 }
 
 // ============================================================
 //  APP MESSAGE LISTENERS
+//  -- Receiver: IndexedDB သိမ်း + Seen + Firestore ဖျက်
+//  -- Sender: Firestore ဖျက်ခံရရင် ဘာမှ မလုပ် (IndexedDB ကျန်)
 // ============================================================
 var appMessageListeners = [];
 
@@ -8361,6 +8600,7 @@ function startAppMessageListeners() {
         var fsdb = getFirestoreForServer(sid);
         if (!fsdb) return;
 
+        // ① Receiver -- ကိုယ့်ဆီ ရောက်တဲ့ စာ
         var unsub1 = fsdb.collection('messages')
             .where('receiverId', '==', currentUser.userId)
             .where('receiverServer', '==', currentServerId)
@@ -8389,21 +8629,17 @@ function startAppMessageListeners() {
             }, function(err) { console.warn(err); });
         appMessageListeners.push(unsub1);
 
+        // ② Sender listener -- Firestore ဖျက်ခံရလား စစ်
+        //    ⚠️ Sender IndexedDB ကို လုံးဝ မထိ -- စာ Sender မှာ ကျန်
         var unsub2 = fsdb.collection('messages')
             .where('senderId', '==', currentUser.userId)
             .where('senderServer', '==', currentServerId)
             .onSnapshot(function(snapshot) {
                 snapshot.docChanges().forEach(function(change) {
                     if (change.type === 'removed') {
-                        var msg = change.doc.data();
-                        deleteMessageFromLocalDB(msg.receiverServer, msg.receiverId, change.doc.id);
-                        renderChatList();
-                        if (currentChatTarget &&
-                            currentChatTarget.userId === msg.receiverId &&
-                            currentChatTarget.serverId === msg.receiverServer) {
-                            var el = document.querySelector('[data-message-id="' + change.doc.id + '"]');
-                            if (el) el.remove();
-                        }
+                        // ✅ Receiver က Seen ပြပြီ → Firestore ဖျက်ခံရ
+                        // ⚠️ Sender IndexedDB ကို မထိ -- Sender စာ Sender မှာ ကျန်
+                        console.log('✅ Sender: Firestore ဖျက်ခံရ -- IndexedDB ကျန်:', change.doc.id);
                     }
                 });
             }, function(err) { console.warn(err); });
@@ -8623,7 +8859,7 @@ function closeMenuOnOutsideClick(e) {
 function deleteAllMessages() {
     var target = currentChatTarget;
     if (!target) return;
-    if (!confirm('ဒီသူနဲ့ ဆိုင်တဲ့ message အားလုံး ဖျက်မှာ သေချာလား?')) return;
+    if (!confirm('ဒီသူနဲ့ ဆိုင်တဲ့ message အားလုံး ဖျက်မှာ သေချာလား? (ကိုယ်ပို့တဲ့စာ + သူပို့တဲ့စာ)')) return;
 
     deleteAllMessagesWith(target.serverId, target.userId).then(function() {
         var messagesEl = document.getElementById('chatRoomMessages');
@@ -8810,7 +9046,7 @@ goBackFullscreen = function() {
     _origGoBackFullscreen_final();
 };
 
-console.log('✅ STAR ARCADE -- Block List Sync + Reply System Loaded');
+console.log('✅ STAR ARCADE -- Sender Save + Seen Fix + Delete Fix Loaded');
 
 // ============================================================
 //  INIT
