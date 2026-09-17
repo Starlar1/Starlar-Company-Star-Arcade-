@@ -4996,6 +4996,7 @@ body {
     margin-top: 3px;
     max-width: 100%;
     overflow: hidden;
+    position: relative;
 }
 
 .chat-list-play-img {
@@ -5006,6 +5007,17 @@ body {
     flex-shrink: 0;
     background: var(--bg-input);
     border: 1px solid var(--border-light);
+    position: relative;
+    z-index: 2;  /* ✅ ပုံကို အပေါ်ဆုံး */
+}
+
+/* ✅ စာ scroll လုပ်တဲ့ wrapper -- ပုံအောက်မှာ */
+.chat-list-play-name-wrapper {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    position: relative;
+    z-index: 1;
 }
 
 .chat-list-play-name {
@@ -5013,9 +5025,9 @@ body {
     color: var(--accent);
     font-weight: 600;
     white-space: nowrap;
-    overflow: hidden;
+    display: inline-block;
     animation: playScroll 8s linear infinite;
-    padding-right: 20px;
+    padding-right: 40px;
 }
 
 @keyframes playScroll {
@@ -8153,6 +8165,7 @@ function isFriend(serverId, userId) {
     });
 }
 
+// ✅ Add ချိန် -- friendsList ထည့် + သူ့ Server သွား data ဆွဲ + IndexedDB သိမ်း
 function addFriendAndSync(targetData) {
     if (!currentUser || !currentServerId) return;
     if (isFriend(targetData.serverId, targetData.userId)) return;
@@ -8171,7 +8184,9 @@ function addFriendAndSync(targetData) {
     var myDb = getDbForServer(currentServerId);
     var theirDb = getDbForServer(targetData.serverId);
 
+    // ✅ ၁။ ကိုယ့် Firebase friendsList မှာ ထည့်
     myDb.ref('users/' + currentUser.userId + '/friendsList').set(myList)
+    // ✅ ၂။ သူ့ Firebase friendsList မှာ ကိုယ့်ကို ထည့်
     .then(function() { return theirDb.ref('users/' + targetData.userId + '/friendsList').once('value'); })
     .then(function(snap) {
         var theirList = snap.val();
@@ -8181,9 +8196,15 @@ function addFriendAndSync(targetData) {
         }
         return theirDb.ref('users/' + targetData.userId + '/friendsList').set(theirList);
     })
+    // ✅ ၃။ သူ့ Server ကို သွား → data ဆွဲ (အသစ်)
     .then(function() {
-        return saveFriendToCache(extractUseOnlyData(targetData, targetData.serverId, targetData.serverNo, targetData.userId));
+        return fetchUserFullData(targetData.serverId, targetData.userId);
     })
+    // ✅ ၄။ IndexedDB သိမ်း
+    .then(function(freshData) {
+        return saveFriendToCache(freshData);
+    })
+    // ✅ ၅။ UI Update
     .then(function() {
         currentUser.friendsList = myList;
         saveUserToDB(currentUser);
@@ -8231,35 +8252,14 @@ function deleteFriendAndSync(targetData) {
 }
 
 // ============================================================
-//  SYNC FROM FIREBASE
+//  ⚠️ syncFriendsFromFirebase() -- မသုံးတော့ဘူး
 // ============================================================
 function syncFriendsFromFirebase() {
-    if (!currentUser || !currentServerId) return Promise.resolve();
-    var myDb = getDbForServer(currentServerId);
-    if (!myDb) return Promise.resolve();
-
-    return myDb.ref('users/' + currentUser.userId + '/friendsList').once('value')
-    .then(function(snap) {
-        var list = snap.val();
-        if (!Array.isArray(list)) list = list ? Object.keys(list).map(function(k){ return list[k]; }) : [];
-        currentUser.friendsList = list;
-        return saveUserToDB(currentUser);
-    })
-    .then(function() {
-        var list = Array.isArray(currentUser.friendsList) ? currentUser.friendsList : [];
-        if (list.length === 0) return Promise.resolve();
-        return Promise.all(list.map(function(entry) {
-            return fetchUserFullData(entry.serverId, entry.userId)
-                .then(function(d) { return saveFriendToCache(d); })
-                .catch(function() { return null; });
-        }));
-    })
-    .then(function() { renderChatList(); })
-    .catch(function(err) { console.warn(err); renderChatList(); });
+    return Promise.resolve();
 }
 
 // ============================================================
-//  FRIENDS LIST LISTENER
+//  ✅ FRIENDS LIST LISTENER (Real-time push)
 // ============================================================
 var friendsListListener = null;
 
@@ -8352,7 +8352,7 @@ function renderChatList() {
                 ? '<span class="chat-list-online-text online">Online</span>'
                 : '<span class="chat-list-online-text">Offline</span>';
 
-            // ✅ Play -- PNG + Game Name (Scroll)
+            // ✅ Play -- PNG + Game Name (Wrapper နဲ့)
             var playHtml = '';
             if (playId) {
                 var playData = getPlayById(playId);
@@ -8360,7 +8360,9 @@ function renderChatList() {
                     playHtml =
                         '<div class="chat-list-play">' +
                             '<img class="chat-list-play-img" src="' + playData.image + '" alt="play" />' +
-                            '<div class="chat-list-play-name">' + escapeHtml(playData.name) + '</div>' +
+                            '<div class="chat-list-play-name-wrapper">' +
+                                '<div class="chat-list-play-name">' + escapeHtml(playData.name) + '</div>' +
+                            '</div>' +
                         '</div>';
                 }
             }
@@ -9014,9 +9016,7 @@ function markAsSeenAndDelete(messageId, serverId, friendServer, friendId) {
 }
 
 // ============================================================
-//  ✅ APP MESSAGE LISTENERS
-//  App ဝင်တာနဲ့ Server ၂ ခုလုံး Firestore ကို နားထောင်
-//  Chat Room မဖွင့်ထားလည်း Chat List ကို ချက်ချင်း Update
+//  APP MESSAGE LISTENERS
 // ============================================================
 var appMessageListeners = [];
 
@@ -9028,7 +9028,6 @@ function startAppMessageListeners() {
         var fsdb = getFirestoreForServer(sid);
         if (!fsdb) return;
 
-        // ✅ ① Receiver -- ကိုယ့်ဆီ ရောက်တဲ့စာ
         var unsub1 = fsdb.collection('messages')
             .where('receiverId', '==', currentUser.userId)
             .where('receiverServer', '==', currentServerId)
@@ -9041,12 +9040,10 @@ function startAppMessageListeners() {
                         msg.type = 'received';
                         msg.seen = false;
 
-                        // ✅ IndexedDB သိမ်းပြီးမှ UI update
                         saveMessageToLocalDB(msg).then(function() {
                             if (currentChatTarget &&
                                 currentChatTarget.userId === msg.senderId &&
                                 currentChatTarget.serverId === msg.senderServer) {
-                                // Chat Room ဖွင့်ထားရင် → UI ပြ
                                 displayMessage(msg);
                                 setTimeout(function() {
                                     var messagesEl = document.getElementById('chatRoomMessages');
@@ -9056,7 +9053,6 @@ function startAppMessageListeners() {
                                 }, 30);
                                 markAsSeenAndDelete(msg.messageId, sid, msg.senderServer, msg.senderId);
                             } else {
-                                // ✅ Chat Room မဖွင့်ထားရင် → Chat List update
                                 renderChatList();
                             }
                         });
@@ -9065,7 +9061,6 @@ function startAppMessageListeners() {
             }, function(err) { console.warn(err); });
         appMessageListeners.push(unsub1);
 
-        // ✅ ② Sender listener -- Firestore ဖျက်ခံရရင် ဘာမှ မလုပ်
         var unsub2 = fsdb.collection('messages')
             .where('senderId', '==', currentUser.userId)
             .where('senderServer', '==', currentServerId)
@@ -9424,8 +9419,6 @@ window.syncFriendsFromFirebase = syncFriendsFromFirebase;
 
 // ============================================================
 //  ✅ OTHER USER PROFILE -- Cache Only
-//  - ကိုယ့်ကိုယ်ကို နှိပ်ရင် → ကိုယ့် Profile
-//  - သူများကို နှိပ်ရင် → Cache ကနေ
 // ============================================================
 var viewingUserId = null;
 var viewingUserServerId = null;
@@ -9433,7 +9426,6 @@ var viewingUserServerId = null;
 function viewOtherUserProfile(serverId, userId) {
     if (!currentUser || !currentServerId) return;
 
-    // ✅ ကိုယ့်ကိုယ်ကို နှိပ်ရင် → ကိုယ့် Profile
     if (serverId === currentServerId && userId === currentUser.userId) {
         var profileScreen = document.getElementById('fs-profile');
         if (profileScreen) profileScreen.classList.remove('viewing-other');
@@ -9447,7 +9439,6 @@ function viewOtherUserProfile(serverId, userId) {
     viewingUserId = userId;
     viewingUserServerId = serverId;
 
-    // ✅ Cache ကနေ သာ ပြ -- Firebase မဆွဲ
     getFriendFromCache(serverId, userId).then(function(cached) {
         if (cached) {
             renderOtherUserProfile(cached);
@@ -9487,7 +9478,6 @@ function renderOtherUserProfile(data) {
     var server = FIREBASE_SERVERS.find(function(s){ return s.id === data.serverId; });
     document.getElementById('fsProfileServer').textContent = server ? server.name : ('Server ' + data.serverNo);
 
-    // ✅ Friends Count
     var friendsEl = document.getElementById('fsProfileFriends');
     var friendsList = Array.isArray(data.friendsList) ? data.friendsList : [];
     friendsEl.textContent = 'Friends ' + friendsList.length;
@@ -9597,10 +9587,6 @@ function loadOtherUserRoles(roleUse) {
 
 // ============================================================
 //  ✅ VIEW USER'S FRIENDS LIST
-//  - Firebase ကနေ Friends List ဆွဲ
-//  - ကိုယ်ပါနေရင် → "You" (Avatar နှိပ်လို့မရ)
-//  - သူငယ်ချင်းဖြစ်ပြီးသား → "Already" (Avatar နှိပ်လို့ရ)
-//  - မဖြစ်သေး → "Add"
 // ============================================================
 function viewUserFriendsList(serverId, userId, userName) {
     var container = document.getElementById('friendsListContainer');
@@ -9656,7 +9642,6 @@ function viewUserFriendsList(serverId, userId, userName) {
     });
 }
 
-// ✅ Friend Row တစ်ခု Render
 function renderFriendListItem(container, fData, friendServerId, friendUserId) {
     var server = FIREBASE_SERVERS.find(function(s){ return s.id === friendServerId; });
     var serverNo = fData.serverNo || (server ? server.number : 1);
@@ -9672,7 +9657,6 @@ function renderFriendListItem(container, fData, friendServerId, friendUserId) {
 
     var avatar = fData.avatar || 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 100 100"%3E%3Ccircle cx="50" cy="50" r="45" fill="%2322222e"/%3E%3C/svg%3E';
 
-    // ✅ ကိုယ်ပါနေလား စစ်
     var iAmThisFriend = (friendServerId === currentServerId && friendUserId === currentUser.userId);
     var alreadyFriend = isFriend(friendServerId, friendUserId);
 
@@ -9697,11 +9681,9 @@ function renderFriendListItem(container, fData, friendServerId, friendUserId) {
         '</div>' +
         addBtnHtml;
 
-    // ✅ Avatar နှိပ်ရင် Profile ကြည့်
     var avatarWrap = item.querySelector('.friend-list-avatar-wrap');
 
     if (iAmThisFriend) {
-        // ❌ ကိုယ်ကိုယ်တိုင် -- Profile ဝင်ခွင့် ပိတ်
         avatarWrap.style.cursor = 'default';
         avatarWrap.style.opacity = '0.85';
         avatarWrap.addEventListener('click', function(e) {
@@ -9709,14 +9691,12 @@ function renderFriendListItem(container, fData, friendServerId, friendUserId) {
             showToast('ကိုယ့် Profile ကို Sidebar ကနေ ကြည့်ပါ');
         });
     } else {
-        // ✅ သူများ -- Profile ကြည့်ခွင့်ပြု
         avatarWrap.style.cursor = 'pointer';
         avatarWrap.addEventListener('click', function() {
             viewOtherUserProfile(friendServerId, friendUserId);
         });
     }
 
-    // ✅ Add နှိပ်ရင် Friend Add
     var addBtn = item.querySelector('.friend-list-add-btn:not(.already)');
     if (addBtn) {
         addBtn.addEventListener('click', function() {
@@ -9731,11 +9711,10 @@ function renderFriendListItem(container, fData, friendServerId, friendUserId) {
 }
 
 // ============================================================
-//  ✅ OPEN FULLSCREEN -- Chat Room active ဖျက် (Back ပေါ်ဖို့)
+//  ✅ OPEN FULLSCREEN -- Chat Room active ဖျက်
 // ============================================================
 var _origOpenFullscreen = openFullscreen;
 openFullscreen = function(title, screenId) {
-    // ✅ Chat Room မဟုတ်ရင် chat-room-active ဖျက်
     if (screenId !== 'fs-chat-room') {
         document.getElementById('fullscreenOverlay').classList.remove('chat-room-active');
     }
@@ -9764,7 +9743,9 @@ closeFullscreen = function() {
 };
 
 // ============================================================
-//  ✅ GO BACK FULLSCREEN -- Profile / Friends / Chat Room ပြင်ဆင်
+//  ✅ GO BACK FULLSCREEN
+//  Profile / Friends / Chat Room ပြင်ဆင်
+//  Chat Room ကို ပြန်ရောက်ရင် chat-room-active ပြန်ထည့်
 // ============================================================
 var _origGoBackFullscreen_final = goBackFullscreen;
 goBackFullscreen = function() {
@@ -9798,6 +9779,14 @@ goBackFullscreen = function() {
         }
     }
 
+    // ✅ Chat Room ကို ပြန်ရောက်ရင် -- chat-room-active ပြန်ထည့်
+    if (fullscreenStack.length > 1) {
+        var nextFs = fullscreenStack[fullscreenStack.length - 2];
+        if (nextFs && nextFs.screenId === 'fs-chat-room') {
+            document.getElementById('fullscreenOverlay').classList.add('chat-room-active');
+        }
+    }
+
     _origGoBackFullscreen_final();
 };
 
@@ -9808,7 +9797,7 @@ var _origEnterApp_final = enterApp;
 enterApp = function(user) {
     _origEnterApp_final(user);
     setTimeout(function() { renderChatList(); }, 100);
-    setTimeout(function() { syncFriendsFromFirebase(); }, 300);
+    // ✅ syncFriendsFromFirebase() မခေါ်တော့ဘူး
     setTimeout(function() { startFriendsListListener(); }, 500);
     setTimeout(function() { startAppMessageListeners(); }, 700);
     setTimeout(function() {
@@ -9832,7 +9821,7 @@ logoutUser = function() {
     _origLogoutUser_final();
 };
 
-console.log('✅ STAR ARCADE -- Chat List Play + App Listener + Cache Only Loaded');
+console.log('✅ STAR ARCADE -- Add Friend Fetch Fresh + Back Fix + Play Wrapper Loaded');
 
 // ============================================================
 //  INIT
