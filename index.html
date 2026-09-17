@@ -270,14 +270,16 @@
                                     <img id="chatRoomAvatar" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='38' height='38' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='45' fill='%2322222e'/%3E%3C/svg%3E" alt="avatar" />
                                     <div class="chat-room-frame" id="chatRoomFrame"></div>
                                 </div>
-                                <div class="chat-room-info">
-                                    <div class="chat-room-name-row">
-                                        <span class="chat-room-name" id="chatRoomName">Name</span>
-                                        <span class="chat-room-mark" id="chatRoomMark"></span>
-                                    </div>
-                                    <span class="chat-room-status" id="chatRoomStatus">offline</span>
-                                </div>
-                            </div>
+                       <div class="chat-room-info">
+    <div class="chat-room-name-row">
+        <span class="chat-room-name" id="chatRoomName">Name</span>
+        <span class="chat-room-mark" id="chatRoomMark"></span>
+    </div>
+    <div class="chat-room-status-row">
+        <span class="chat-room-status" id="chatRoomStatus">offline</span>
+        <div class="chat-room-play" id="chatRoomPlay"></div>
+    </div>
+</div>
                             <button class="chat-room-menu" id="chatRoomMenuBtn">
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                                     <circle cx="12" cy="5" r="2"/>
@@ -5044,6 +5046,43 @@ body {
     .chat-list-play-name {
         font-size: 10px;
     }
+}
+
+/* ============================================================
+   ✅ CHAT ROOM PLAY (Online ဘေးမှာ)
+   ============================================================ */
+.chat-room-status-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.chat-room-play {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    max-width: 140px;
+    overflow: hidden;
+}
+
+.chat-room-play-img {
+    width: 14px;
+    height: 14px;
+    border-radius: 3px;
+    object-fit: cover;
+    flex-shrink: 0;
+    border: 1px solid var(--border-light);
+    background: var(--bg-input);
+}
+
+.chat-room-play-name {
+    font-size: 10px;
+    color: var(--accent);
+    font-weight: 600;
+    white-space: nowrap;
+    animation: playScroll 6s linear infinite;
+    padding-right: 20px;
 }</style><script>/* ============================================================
    FILE: script.js (FULL VERSION - online inside users only)
    ============================================================ */
@@ -7835,6 +7874,136 @@ function getFirestoreForServer(serverId) {
 }
 
 // ============================================================
+//  ✅ FIRESTORE RANDOM PICK + 5H COOLDOWN (LOCAL TIME ONLY)
+//  ⚠️ Firestore ပေါ် မသိမ်း -- Local Time ပဲ သုံး
+// ============================================================
+var COOLDOWN_MS = 5 * 60 * 60 * 1000;  // ✅ 5 နာရီ
+
+var firestoreStatus = {};
+var firestoreCooldownTimers = {};
+
+function initFirestoreStatus() {
+    firestoreStatus = {};
+    firestoreCooldownTimers = {};
+
+    FIREBASE_SERVERS.forEach(function(server) {
+        firestoreStatus[server.id] = {
+            exhausted: false,
+            exhaustedAt: null,
+            cooldownUntil: null,
+            error: null
+        };
+    });
+    console.log('✅ Firestore status initialized (local):', Object.keys(firestoreStatus));
+}
+
+function pickRandomFirestoreServer() {
+    var available = [];
+    Object.keys(firestoreStatus).forEach(function(sid) {
+        if (!firestoreStatus[sid].exhausted) {
+            available.push(sid);
+        }
+    });
+
+    if (available.length === 0) return null;
+
+    var randomIndex = Math.floor(Math.random() * available.length);
+    return available[randomIndex];
+}
+
+function markServerExhausted(serverId, error) {
+    if (!firestoreStatus[serverId]) return;
+
+    var now = Date.now();
+    firestoreStatus[serverId].exhausted = true;
+    firestoreStatus[serverId].exhaustedAt = now;
+    firestoreStatus[serverId].cooldownUntil = now + COOLDOWN_MS;
+    firestoreStatus[serverId].error = error;
+
+    console.warn('⚠️ Server exhausted:', serverId, '→ Cooldown 5h (local)');
+
+    if (firestoreCooldownTimers[serverId]) {
+        clearTimeout(firestoreCooldownTimers[serverId]);
+    }
+
+    firestoreCooldownTimers[serverId] = setTimeout(function() {
+        console.log('⏰ Cooldown ended (local):', serverId);
+        recheckServerAfterCooldown(serverId);
+    }, COOLDOWN_MS);
+
+    var working = pickRandomFirestoreServer();
+    if (!working) {
+        if (typeof showToast === 'function') {
+            showToast('⚠️ Server အားလုံး ကုန်သွားပါ -- ခဏစောင့်ပါ');
+        }
+    }
+}
+
+function recheckServerAfterCooldown(serverId) {
+    if (!firestoreStatus[serverId]) return;
+
+    var fsdb = getFirestoreForServer(serverId);
+    if (!fsdb) {
+        firestoreStatus[serverId].exhausted = false;
+        firestoreStatus[serverId].cooldownUntil = null;
+        firestoreStatus[serverId].error = null;
+        return;
+    }
+
+    var testRef = fsdb.collection('_healthCheck').doc('test_' + Date.now());
+
+    testRef.set({ timestamp: Date.now() })
+    .then(function() {
+        console.log('✅ Server re-checked OK:', serverId);
+        firestoreStatus[serverId].exhausted = false;
+        firestoreStatus[serverId].exhaustedAt = null;
+        firestoreStatus[serverId].cooldownUntil = null;
+        firestoreStatus[serverId].error = null;
+
+        testRef.delete().catch(function() {});
+
+        if (typeof showToast === 'function') {
+            showToast('✅ Server ' + serverId + ' ပြန်အလုပ်လုပ်ပါပြီ');
+        }
+    })
+    .catch(function(err) {
+        console.warn('⚠️ Server still exhausted:', serverId, err.code);
+        markServerExhausted(serverId, err);
+        if (typeof showToast === 'function') {
+            showToast('⚠️ Server ' + serverId + ' ကုန်နေသေးပါ -- နောက် 5h');
+        }
+    });
+}
+
+function resetFirestoreStatus() {
+    initFirestoreStatus();
+    console.log('✅ Firestore status reset (local)');
+}
+
+function checkExpiredCooldowns() {
+    var now = Date.now();
+    Object.keys(firestoreStatus).forEach(function(sid) {
+        var s = firestoreStatus[sid];
+        if (!s.exhausted) return;
+
+        if (s.cooldownUntil && s.cooldownUntil <= now) {
+            console.log('⏰ Expired cooldown (local):', sid);
+            recheckServerAfterCooldown(sid);
+        } else if (s.cooldownUntil) {
+            var remaining = s.cooldownUntil - now;
+            console.log('⏰ Server', sid, 'cooldown remaining:', Math.round(remaining / 60000), 'min');
+
+            if (firestoreCooldownTimers[sid]) {
+                clearTimeout(firestoreCooldownTimers[sid]);
+            }
+            firestoreCooldownTimers[sid] = setTimeout(function() {
+                recheckServerAfterCooldown(sid);
+            }, remaining);
+        }
+    });
+}
+
+// ============================================================
 //  ✅ PLAY CONFIGURATION (G1-G5)
 // ============================================================
 var PLAY_CONFIG = {
@@ -8165,7 +8334,6 @@ function isFriend(serverId, userId) {
     });
 }
 
-// ✅ Add ချိန် -- friendsList ထည့် + သူ့ Server သွား data ဆွဲ + IndexedDB သိမ်း
 function addFriendAndSync(targetData) {
     if (!currentUser || !currentServerId) return;
     if (isFriend(targetData.serverId, targetData.userId)) return;
@@ -8184,9 +8352,7 @@ function addFriendAndSync(targetData) {
     var myDb = getDbForServer(currentServerId);
     var theirDb = getDbForServer(targetData.serverId);
 
-    // ✅ ၁။ ကိုယ့် Firebase friendsList မှာ ထည့်
     myDb.ref('users/' + currentUser.userId + '/friendsList').set(myList)
-    // ✅ ၂။ သူ့ Firebase friendsList မှာ ကိုယ့်ကို ထည့်
     .then(function() { return theirDb.ref('users/' + targetData.userId + '/friendsList').once('value'); })
     .then(function(snap) {
         var theirList = snap.val();
@@ -8196,15 +8362,12 @@ function addFriendAndSync(targetData) {
         }
         return theirDb.ref('users/' + targetData.userId + '/friendsList').set(theirList);
     })
-    // ✅ ၃။ သူ့ Server ကို သွား → data ဆွဲ (အသစ်)
     .then(function() {
         return fetchUserFullData(targetData.serverId, targetData.userId);
     })
-    // ✅ ၄။ IndexedDB သိမ်း
     .then(function(freshData) {
         return saveFriendToCache(freshData);
     })
-    // ✅ ၅။ UI Update
     .then(function() {
         currentUser.friendsList = myList;
         saveUserToDB(currentUser);
@@ -8252,14 +8415,14 @@ function deleteFriendAndSync(targetData) {
 }
 
 // ============================================================
-//  ⚠️ syncFriendsFromFirebase() -- မသုံးတော့ဘူး
+//  SYNC FROM FIREBASE (မသုံးတော့ဘူး)
 // ============================================================
 function syncFriendsFromFirebase() {
     return Promise.resolve();
 }
 
 // ============================================================
-//  ✅ FRIENDS LIST LISTENER (Real-time push)
+//  FRIENDS LIST LISTENER
 // ============================================================
 var friendsListListener = null;
 
@@ -8310,7 +8473,7 @@ function stopFriendsListListener() {
 }
 
 // ============================================================
-//  ✅ CHAT LIST -- Name + Mark + Online + Play + Last Message
+//  CHAT LIST
 // ============================================================
 function renderChatList() {
     var listEl = document.getElementById('chatList');
@@ -8352,7 +8515,6 @@ function renderChatList() {
                 ? '<span class="chat-list-online-text online">Online</span>'
                 : '<span class="chat-list-online-text">Offline</span>';
 
-            // ✅ Play -- PNG + Game Name (Wrapper နဲ့)
             var playHtml = '';
             if (playId) {
                 var playData = getPlayById(playId);
@@ -8435,6 +8597,7 @@ function openChatRoom(target) {
     var nameEl = document.getElementById('chatRoomName');
     var markEl = document.getElementById('chatRoomMark');
     var statusEl = document.getElementById('chatRoomStatus');
+    var playEl = document.getElementById('chatRoomPlay');
     var messagesEl = document.getElementById('chatRoomMessages');
 
     avatarEl.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="38" height="38" viewBox="0 0 100 100"%3E%3Ccircle cx="50" cy="50" r="45" fill="%2322222e"/%3E%3C/svg%3E';
@@ -8443,6 +8606,7 @@ function openChatRoom(target) {
     markEl.innerHTML = '';
     statusEl.textContent = 'Offline';
     statusEl.classList.remove('online');
+    if (playEl) { playEl.innerHTML = ''; playEl.style.display = 'none'; }
     messagesEl.innerHTML = '<div class="chat-empty-state"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#5a5a6a" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>မက်ဆေ့ချ် စတင်ရန် ရေးပါ</span></div>';
 
     document.getElementById('fullscreenOverlay').classList.add('chat-room-active');
@@ -8552,7 +8716,14 @@ function updateChatBlockUI() {
 function startChatRoomMessageListeners(target) {
     stopChatRoomMessageListeners();
 
-    ['server1', 'server2'].forEach(function(sid) {
+    FIREBASE_SERVERS.forEach(function(server) {
+        var sid = server.id;
+
+        if (firestoreStatus[sid] && firestoreStatus[sid].exhausted) {
+            console.log('⚠️ Skipping exhausted server (chat room):', sid);
+            return;
+        }
+
         var fsdb = getFirestoreForServer(sid);
         if (!fsdb) return;
 
@@ -8587,7 +8758,12 @@ function startChatRoomMessageListeners(target) {
                         }
                     }
                 });
-            }, function(err) { console.warn(err); });
+            }, function(err) {
+                console.warn('Chat room listener error on ' + sid + ':', err);
+                if (err.code === 'resource-exhausted' || err.code === 'permission-denied') {
+                    markServerExhausted(sid, err);
+                }
+            });
 
         chatRoomMessageListeners.push(unsub);
     });
@@ -8616,6 +8792,7 @@ function applyChatRoomData(data) {
     var nameEl = document.getElementById('chatRoomName');
     var markEl = document.getElementById('chatRoomMark');
     var statusEl = document.getElementById('chatRoomStatus');
+    var playEl = document.getElementById('chatRoomPlay');
 
     if (data.avatar) avatarEl.src = data.avatar;
     nameEl.textContent = data.name || 'Player';
@@ -8638,6 +8815,24 @@ function applyChatRoomData(data) {
     } else {
         statusEl.textContent = 'Offline';
         statusEl.classList.remove('online');
+    }
+
+    if (playEl) {
+        if (data.play) {
+            var playData = getPlayById(data.play);
+            if (playData) {
+                playEl.innerHTML =
+                    '<img class="chat-room-play-img" src="' + playData.image + '" alt="play" />' +
+                    '<span class="chat-room-play-name">' + escapeHtml(playData.name) + '</span>';
+                playEl.style.display = 'inline-flex';
+            } else {
+                playEl.innerHTML = '';
+                playEl.style.display = 'none';
+            }
+        } else {
+            playEl.innerHTML = '';
+            playEl.style.display = 'none';
+        }
     }
 }
 
@@ -8901,7 +9096,7 @@ function showToast(message) {
 }
 
 // ============================================================
-//  SEND MESSAGE
+//  SEND MESSAGE -- Random Pick + Auto-switch
 // ============================================================
 function sendMessage() {
     if (iAmBlockedByThem) {
@@ -8913,6 +9108,12 @@ function sendMessage() {
     var text = input.value.trim();
     if (!text) return;
     if (!currentChatTarget) return;
+
+    var chosenServerId = pickRandomFirestoreServer();
+    if (!chosenServerId) {
+        showToast('⚠️ Server အားလုံး ကုန်နေပါ -- ခဏစောင့်ပါ');
+        return;
+    }
 
     var target = currentChatTarget;
     var messageId = generateMessageId();
@@ -8940,7 +9141,6 @@ function sendMessage() {
         replyTo: replyTo
     };
 
-    var chosenServerId = Math.random() < 0.5 ? 'server1' : 'server2';
     var fsdb = getFirestoreForServer(chosenServerId);
     if (!fsdb) { alert('Message server error'); return; }
 
@@ -8981,11 +9181,38 @@ function sendMessage() {
 
         fsdb.collection('messages').doc(messageId).set(messageData)
         .then(function() {
-            console.log('✅ Sent to Firestore:', messageId);
+            console.log('✅ Sent to Firestore (' + chosenServerId + '):', messageId);
         })
         .catch(function(err) {
-            console.error('Firestore send error:', err);
-            showToast('Firestore ပို့မရပါ');
+            console.error('Firestore send error (' + chosenServerId + '):', err);
+
+            if (err.code === 'resource-exhausted' || err.code === 'permission-denied') {
+                markServerExhausted(chosenServerId, err);
+
+                var nextServerId = pickRandomFirestoreServer();
+                if (nextServerId) {
+                    console.log('🔄 Auto-switching to:', nextServerId);
+                    var nextFsdb = getFirestoreForServer(nextServerId);
+                    if (nextFsdb) {
+                        localMsg.serverId = nextServerId;
+                        saveMessageToLocalDB(localMsg);
+
+                        nextFsdb.collection('messages').doc(messageId).set(messageData)
+                        .then(function() {
+                            console.log('✅ Auto-switched sent:', nextServerId, messageId);
+                            showToast('Auto-switched to ' + nextServerId);
+                        })
+                        .catch(function(err2) {
+                            console.error('Auto-switch error:', err2);
+                            if (err2.code === 'resource-exhausted' || err2.code === 'permission-denied') {
+                                markServerExhausted(nextServerId, err2);
+                            }
+                        });
+                    }
+                }
+            } else {
+                showToast('Firestore ပို့မရပါ');
+            }
         });
     }).catch(function(err) {
         console.error('Local save error:', err);
@@ -9024,7 +9251,14 @@ function startAppMessageListeners() {
     stopAppMessageListeners();
     if (!currentUser || !currentServerId) return;
 
-    ['server1', 'server2'].forEach(function(sid) {
+    FIREBASE_SERVERS.forEach(function(server) {
+        var sid = server.id;
+
+        if (firestoreStatus[sid] && firestoreStatus[sid].exhausted) {
+            console.log('⚠️ Skipping exhausted server (app):', sid);
+            return;
+        }
+
         var fsdb = getFirestoreForServer(sid);
         if (!fsdb) return;
 
@@ -9058,7 +9292,12 @@ function startAppMessageListeners() {
                         });
                     }
                 });
-            }, function(err) { console.warn(err); });
+            }, function(err) {
+                console.warn('App listener error on ' + sid + ':', err);
+                if (err.code === 'resource-exhausted' || err.code === 'permission-denied') {
+                    markServerExhausted(sid, err);
+                }
+            });
         appMessageListeners.push(unsub1);
 
         var unsub2 = fsdb.collection('messages')
@@ -9070,7 +9309,12 @@ function startAppMessageListeners() {
                         console.log('✅ Sender: Firestore ဖျက်ခံရ -- IndexedDB ကျန်:', change.doc.id);
                     }
                 });
-            }, function(err) { console.warn(err); });
+            }, function(err) {
+                console.warn('App sender listener error on ' + sid + ':', err);
+                if (err.code === 'resource-exhausted' || err.code === 'permission-denied') {
+                    markServerExhausted(sid, err);
+                }
+            });
         appMessageListeners.push(unsub2);
     });
 }
@@ -9418,7 +9662,7 @@ window.goOffline = goOffline;
 window.syncFriendsFromFirebase = syncFriendsFromFirebase;
 
 // ============================================================
-//  ✅ OTHER USER PROFILE -- Cache Only
+//  OTHER USER PROFILE
 // ============================================================
 var viewingUserId = null;
 var viewingUserServerId = null;
@@ -9586,7 +9830,7 @@ function loadOtherUserRoles(roleUse) {
 }
 
 // ============================================================
-//  ✅ VIEW USER'S FRIENDS LIST
+//  VIEW USER'S FRIENDS LIST
 // ============================================================
 function viewUserFriendsList(serverId, userId, userName) {
     var container = document.getElementById('friendsListContainer');
@@ -9711,7 +9955,7 @@ function renderFriendListItem(container, fData, friendServerId, friendUserId) {
 }
 
 // ============================================================
-//  ✅ OPEN FULLSCREEN -- Chat Room active ဖျက်
+//  OPEN FULLSCREEN
 // ============================================================
 var _origOpenFullscreen = openFullscreen;
 openFullscreen = function(title, screenId) {
@@ -9722,7 +9966,7 @@ openFullscreen = function(title, screenId) {
 };
 
 // ============================================================
-//  ✅ CLOSE FULLSCREEN -- viewing-other + chat-room-active ဖျက်
+//  CLOSE FULLSCREEN
 // ============================================================
 var _origCloseFullscreen_final = closeFullscreen;
 closeFullscreen = function() {
@@ -9743,15 +9987,12 @@ closeFullscreen = function() {
 };
 
 // ============================================================
-//  ✅ GO BACK FULLSCREEN
-//  Profile / Friends / Chat Room ပြင်ဆင်
-//  Chat Room ကို ပြန်ရောက်ရင် chat-room-active ပြန်ထည့်
+//  GO BACK FULLSCREEN -- Back ၂ ခု ပြဿနာ ဖြေရှင်း
 // ============================================================
 var _origGoBackFullscreen_final = goBackFullscreen;
 goBackFullscreen = function() {
     var currentFs = fullscreenStack[fullscreenStack.length - 1];
 
-    // ✅ Chat Room ကနေ ထွက်ရင်
     if (currentFs && currentFs.screenId === 'fs-chat-room') {
         if (chatRoomListener) { try { chatRoomListener.off(); } catch(e){} chatRoomListener = null; }
         try { stopChatRoomMessageListeners(); } catch(e) {}
@@ -9762,7 +10003,6 @@ goBackFullscreen = function() {
         setTimeout(function() { renderChatList(); }, 100);
     }
 
-    // ✅ Profile ကနေ ထွက်ရင်
     if (currentFs && currentFs.screenId === 'fs-profile') {
         var profileScreen = document.getElementById('fs-profile');
         if (profileScreen) profileScreen.classList.remove('viewing-other');
@@ -9770,7 +10010,6 @@ goBackFullscreen = function() {
         viewingUserServerId = null;
     }
 
-    // ✅ Friends List ကနေ ထွက်ရင်
     if (currentFs && currentFs.screenId === 'fs-friends-list') {
         var prev = fullscreenStack[fullscreenStack.length - 2];
         if (prev && prev.screenId === 'fs-profile' && viewingUserId) {
@@ -9779,7 +10018,6 @@ goBackFullscreen = function() {
         }
     }
 
-    // ✅ Chat Room ကို ပြန်ရောက်ရင် -- chat-room-active ပြန်ထည့်
     if (fullscreenStack.length > 1) {
         var nextFs = fullscreenStack[fullscreenStack.length - 2];
         if (nextFs && nextFs.screenId === 'fs-chat-room') {
@@ -9795,9 +10033,14 @@ goBackFullscreen = function() {
 // ============================================================
 var _origEnterApp_final = enterApp;
 enterApp = function(user) {
+    if (Object.keys(firestoreStatus).length === 0) {
+        initFirestoreStatus();
+    } else {
+        checkExpiredCooldowns();
+    }
+
     _origEnterApp_final(user);
     setTimeout(function() { renderChatList(); }, 100);
-    // ✅ syncFriendsFromFirebase() မခေါ်တော့ဘူး
     setTimeout(function() { startFriendsListListener(); }, 500);
     setTimeout(function() { startAppMessageListeners(); }, 700);
     setTimeout(function() {
@@ -9818,10 +10061,16 @@ logoutUser = function() {
     try { closeBubblePicker(); } catch(e) {}
     try { clearReplyState(); } catch(e) {}
     if (chatRoomListener) { try { chatRoomListener.off(); } catch(e) {} chatRoomListener = null; }
+
+    Object.keys(firestoreCooldownTimers).forEach(function(sid) {
+        try { clearTimeout(firestoreCooldownTimers[sid]); } catch(e) {}
+    });
+    firestoreCooldownTimers = {};
+
     _origLogoutUser_final();
 };
 
-console.log('✅ STAR ARCADE -- Add Friend Fetch Fresh + Back Fix + Play Wrapper Loaded');
+console.log('✅ STAR ARCADE -- Random Pick + 5h Local Cooldown + Chat Room Play + Back Fix Loaded');
 
 // ============================================================
 //  INIT
