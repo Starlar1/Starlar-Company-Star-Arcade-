@@ -4433,6 +4433,42 @@ body {
         font-size: 13px;
         padding: 9px 12px;
     }
+}
+
+/* ============================================================
+   ✅ CHAT BLOCKED BAR -- သူ ကိုယ့်ကို block ထားရင် ပြ
+   ============================================================ */
+.chat-blocked-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 14px 16px;
+    background: rgba(255, 68, 68, 0.08);
+    border-top: 1px solid rgba(255, 68, 68, 0.25);
+    color: #ff6b6b;
+    font-size: 13px;
+    font-weight: 500;
+    text-align: center;
+    flex-shrink: 0;
+    animation: slideUp 0.25s ease;
+}
+
+.chat-blocked-bar svg {
+    flex-shrink: 0;
+    opacity: 0.85;
+}
+
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 480px) {
+    .chat-blocked-bar {
+        padding: 12px 14px;
+        font-size: 12px;
+    }
 }</style><script>/* ============================================================
    FILE: script.js (FULL VERSION - online inside users only)
    ============================================================ */
@@ -7257,7 +7293,7 @@ function getFirestoreForServer(serverId) {
 }
 
 // ============================================================
-//  FRIENDS CACHE (IndexedDB)
+//  FRIENDS CACHE
 // ============================================================
 var FRIENDS_CACHE_KEY = 'friendsCache';
 
@@ -7276,20 +7312,17 @@ function saveFriendToCache(friendData) {
         return saveFriendsCache(cache);
     });
 }
-
 function getFriendFromCache(serverId, userId) {
     return getFriendsCache().then(function(cache) {
         return cache[getFriendCacheKey(serverId, userId)] || null;
     });
 }
-
 function removeFriendFromCache(serverId, userId) {
     return getFriendsCache().then(function(cache) {
         delete cache[getFriendCacheKey(serverId, userId)];
         return saveFriendsCache(cache);
     });
 }
-
 function cleanupFriendsCache() {
     if (!currentUser || !Array.isArray(currentUser.friendsList)) return Promise.resolve();
     return getFriendsCache().then(function(cache) {
@@ -7402,7 +7435,6 @@ function isBlockedByUser(blockList, targetUserId, targetServerId) {
         return b.userId === targetUserId && b.serverId === targetServerId;
     });
 }
-
 function isUserInMyBlockList(targetUserId, targetServerId) {
     if (!currentUser || !Array.isArray(currentUser.blockList)) return false;
     return currentUser.blockList.some(function(b) {
@@ -7416,18 +7448,22 @@ function isUserInMyBlockList(targetUserId, targetServerId) {
 var searchResultUser = null;
 
 function performSearch() {
-    var serverNo = parseInt(document.getElementById('searchServerNo').value.trim());
+    var serverNoRaw = document.getElementById('searchServerNo').value.trim();
     var userId = document.getElementById('searchUserId').value.trim();
     var resultEl = document.getElementById('searchResult');
 
-    if (!serverNo || isNaN(serverNo)) {
+    if (!serverNoRaw) {
         resultEl.innerHTML = '<div class="search-empty">Server No. ရေးပါ</div>'; return;
+    }
+    var serverNo = parseInt(serverNoRaw);
+    if (isNaN(serverNo) || serverNo <= 0) {
+        resultEl.innerHTML = '<div class="search-empty">Server No. မှန်ကန်စွာ ရေးပါ</div>'; return;
     }
     if (!userId) {
         resultEl.innerHTML = '<div class="search-empty">ID ရေးပါ</div>'; return;
     }
 
-    var server = FIREBASE_SERVERS.find(function(s){ return s.number === serverNo; });
+    var server = FIREBASE_SERVERS.find(function(s) { return s.number === serverNo; });
     if (!server) {
         resultEl.innerHTML = '<div class="search-empty">Server ' + serverNo + ' မရှိပါ</div>'; return;
     }
@@ -7436,17 +7472,16 @@ function performSearch() {
         resultEl.innerHTML = '<div class="search-empty">ကိုယ့်ကိုယ်ကို ရှာလို့မရပါ</div>'; return;
     }
 
-    resultEl.innerHTML = '<div class="search-empty">ရှာနေသည်...</div>';
+    resultEl.innerHTML = '<div class="search-empty">Server ' + serverNo + ' မှာ ရှာနေသည်...</div>';
 
     fetchUserFullData(server.id, userId).then(function(data) {
-        // သူ ကိုယ့်ကို block ထားလား?
         if (isBlockedByUser(data.blockList, currentUser.userId, currentServerId)) {
             resultEl.innerHTML = '<div class="search-empty">အကောင့် မတွေ့ပါ</div>'; return;
         }
         searchResultUser = data;
         renderSearchResult();
     }).catch(function() {
-        resultEl.innerHTML = '<div class="search-empty">အကောင့် မတွေ့ပါ</div>';
+        resultEl.innerHTML = '<div class="search-empty">Server ' + serverNo + ' မှာ အကောင့် မတွေ့ပါ</div>';
     });
 }
 
@@ -7701,19 +7736,22 @@ function renderChatList() {
                 if (mark) markHtml = '<img src="' + mark.image + '" />';
             }
 
+            var onlineHtml = online
+                ? '<span class="chat-list-online-text online">• Online</span>'
+                : '<span class="chat-list-online-text">• Offline</span>';
+
             row.innerHTML =
                 '<div class="chat-list-avatar-wrap">' +
                     '<img class="chat-list-avatar" src="' + avatar + '" alt="avatar" />' +
                     frameHtml +
-                    (online ? '<span class="chat-list-online-dot"></span>' : '') +
                 '</div>' +
                 '<div class="chat-list-info">' +
                     '<div class="chat-list-top">' +
                         '<div class="chat-list-name-row">' +
                             '<span class="chat-list-name">' + escapeHtml(name) + '</span>' +
                             '<span class="chat-list-mark">' + markHtml + '</span>' +
+                            onlineHtml +
                         '</div>' +
-                        '<span class="chat-list-time">' + (online ? 'online' : '') + '</span>' +
                     '</div>' +
                     '<div class="chat-list-bottom">' +
                         '<span class="chat-list-msg" id="' + rowId + '_msg">Tap to open chat</span>' +
@@ -7747,9 +7785,13 @@ function updateChatListPreview(serverId, userId, rowId) {
 var currentChatTarget = null;
 var chatRoomListener = null;
 var chatRoomMessageListeners = [];
+var chatRoomBlockListener = null;  // ✅ သူ့ blockList listener
+var iAmBlockedByThem = false;      // ✅ သူ ကိုယ့်ကို block ထားလား
 
 function openChatRoom(target) {
     currentChatTarget = target;
+    iAmBlockedByThem = false;
+    clearReplyState();
 
     var avatarEl = document.getElementById('chatRoomAvatar');
     var frameEl = document.getElementById('chatRoomFrame');
@@ -7780,6 +7822,7 @@ function openChatRoom(target) {
         if (cached) applyChatRoomData(cached);
     });
 
+    // ✅ ① User Data Listener
     if (chatRoomListener) { try { chatRoomListener.off(); } catch(e){} chatRoomListener = null; }
     var friendDb = getDbForServer(target.serverId);
     if (friendDb) {
@@ -7795,6 +7838,25 @@ function openChatRoom(target) {
         });
     }
 
+    // ✅ ② သူ့ blockList Listener -- Real-time
+    if (chatRoomBlockListener) { try { chatRoomBlockListener.off(); } catch(e){} chatRoomBlockListener = null; }
+    if (friendDb) {
+        chatRoomBlockListener = friendDb.ref('users/' + target.userId + '/blockList');
+        chatRoomBlockListener.on('value', function(snap) {
+            var blockList = snap.val();
+            if (!Array.isArray(blockList)) {
+                blockList = blockList ? Object.keys(blockList).map(function(k){ return blockList[k]; }) : [];
+            }
+            // ✅ သူ့ block list ထဲ ကိုယ့် ID ရှိလား?
+            var blocked = blockList.some(function(b) {
+                return b.userId === currentUser.userId && b.serverId === currentServerId;
+            });
+            iAmBlockedByThem = blocked;
+            updateChatBlockUI();
+        });
+    }
+
+    // ✅ ③ IndexedDB ကနေ messages ဆွဲ
     getMessagesWith(target.serverId, target.userId).then(function(messages) {
         messagesEl.innerHTML = '';
         if (messages.length === 0) {
@@ -7812,6 +7874,38 @@ function openChatRoom(target) {
     });
 
     startChatRoomMessageListeners(target);
+}
+
+// ✅ Block UI Update -- Send ကို Disable
+function updateChatBlockUI() {
+    var input = document.getElementById('chatMessageInput');
+    var clipBtn = document.getElementById('chatClipBtn');
+    var sendBtn = document.getElementById('chatSendBtn');
+    var inputBar = document.querySelector('.chat-room-input-bar');
+
+    // ✅ အရင် Blocked Bar ဖျက်
+    var existing = document.getElementById('blockedBar');
+    if (existing) existing.remove();
+
+    if (iAmBlockedByThem) {
+        // Input bar ကို ဖျောက်
+        if (inputBar) inputBar.style.display = 'none';
+        // Blocked bar ထည့်
+        var messagesEl = document.getElementById('chatRoomMessages');
+        if (messagesEl && messagesEl.parentNode) {
+            var blockedBar = document.createElement('div');
+            blockedBar.id = 'blockedBar';
+            blockedBar.className = 'chat-blocked-bar';
+            blockedBar.innerHTML =
+                '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
+                '<circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>' +
+                '<span>သင်သည် ဒီသူ့ကို စာ ပို့လို့မရပါ -- သူက သင့်ကို Block ထားပါသည်</span>';
+            messagesEl.parentNode.insertBefore(blockedBar, messagesEl.nextSibling);
+        }
+    } else {
+        // Input bar ကို ပြန်ပြ
+        if (inputBar) inputBar.style.display = 'flex';
+    }
 }
 
 function startChatRoomMessageListeners(target) {
@@ -7857,6 +7951,19 @@ function stopChatRoomMessageListeners() {
     chatRoomMessageListeners = [];
 }
 
+function stopChatRoomBlockListener() {
+    if (chatRoomBlockListener) {
+        try { chatRoomBlockListener.off(); } catch(e) {}
+        chatRoomBlockListener = null;
+    }
+    iAmBlockedByThem = false;
+    // Input bar ပြန်ပြ
+    var inputBar = document.querySelector('.chat-room-input-bar');
+    if (inputBar) inputBar.style.display = 'flex';
+    var existing = document.getElementById('blockedBar');
+    if (existing) existing.remove();
+}
+
 function applyChatRoomData(data) {
     var avatarEl = document.getElementById('chatRoomAvatar');
     var frameEl = document.getElementById('chatRoomFrame');
@@ -7889,7 +7996,7 @@ function applyChatRoomData(data) {
 }
 
 // ============================================================
-//  DISPLAY MESSAGE -- Bubble Background (9-slice)
+//  DISPLAY MESSAGE
 // ============================================================
 function displayMessage(msg) {
     var messagesEl = document.getElementById('chatRoomMessages');
@@ -7917,17 +8024,235 @@ function displayMessage(msg) {
         }
     }
 
+    var replyQuoteHtml = '';
+    if (msg.replyTo && msg.replyTo.messageId) {
+        replyQuoteHtml =
+            '<div class="msg-reply-quote" data-reply-id="' + msg.replyTo.messageId + '">' +
+                '<div class="msg-reply-name">' + escapeHtml(msg.replyTo.name || 'Message') + '</div>' +
+                '<div class="msg-reply-text">' + escapeHtml((msg.replyTo.text || '').substring(0, 80)) + '</div>' +
+            '</div>';
+    }
+
     msgDiv.innerHTML =
+        replyQuoteHtml +
         '<span class="msg-text">' + escapeHtml(msg.text).replace(/\n/g, '<br>') + '</span>' +
         '<span class="chat-message-time">' + timeStr + '</span>';
+
+    msgDiv.addEventListener('click', function(e) {
+        e.stopPropagation();
+        showMessageMenu(msg, msgDiv);
+    });
+
+    var replyQuote = msgDiv.querySelector('.msg-reply-quote');
+    if (replyQuote) {
+        replyQuote.addEventListener('click', function(e) {
+            e.stopPropagation();
+            var replyId = replyQuote.dataset.replyId;
+            var targetMsg = messagesEl.querySelector('[data-message-id="' + replyId + '"]');
+            if (targetMsg) {
+                targetMsg.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                targetMsg.classList.add('highlight');
+                setTimeout(function() { targetMsg.classList.remove('highlight'); }, 1500);
+            }
+        });
+    }
 
     messagesEl.appendChild(msgDiv);
 }
 
 // ============================================================
-//  SEND MESSAGE
+//  MESSAGE MENU
+// ============================================================
+function showMessageMenu(msg, msgEl) {
+    var existing = document.querySelector('.msg-menu-popup');
+    if (existing) existing.remove();
+
+    var popup = document.createElement('div');
+    popup.className = 'msg-menu-popup';
+
+    popup.innerHTML =
+        '<button class="msg-menu-item" data-action="reply">' +
+            '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
+            '<polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 0 0-4-4H4"/></svg>' +
+            '<span>Reply</span></button>' +
+        '<button class="msg-menu-item" data-action="copy">' +
+            '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
+            '<rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>' +
+            '<span>Copy</span></button>' +
+        '<button class="msg-menu-item danger" data-action="delete">' +
+            '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
+            '<path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>' +
+            '<span>Delete</span></button>';
+
+    document.body.appendChild(popup);
+
+    var rect = msgEl.getBoundingClientRect();
+    var popupRect = popup.getBoundingClientRect();
+
+    var top = rect.top - popupRect.height - 6;
+    if (top < 60) top = rect.bottom + 6;
+
+    var left = rect.left + (rect.width / 2) - (popupRect.width / 2);
+    if (left < 10) left = 10;
+    if (left + popupRect.width > window.innerWidth - 10) {
+        left = window.innerWidth - popupRect.width - 10;
+    }
+
+    popup.style.top = top + 'px';
+    popup.style.left = left + 'px';
+
+    popup.addEventListener('click', function(e) {
+        var btn = e.target.closest('.msg-menu-item');
+        if (!btn) return;
+        var action = btn.dataset.action;
+        popup.remove();
+
+        if (action === 'reply') startReply(msg);
+        else if (action === 'copy') copyMessageText(msg.text);
+        else if (action === 'delete') deleteOneMessage(msg);
+    });
+
+    setTimeout(function() {
+        document.addEventListener('click', closeMsgMenuOnOutsideClick);
+    }, 10);
+}
+
+function closeMsgMenuOnOutsideClick(e) {
+    var popup = document.querySelector('.msg-menu-popup');
+    if (popup && !popup.contains(e.target)) {
+        popup.remove();
+        document.removeEventListener('click', closeMsgMenuOnOutsideClick);
+    }
+}
+
+// ============================================================
+//  REPLY SYSTEM
+// ============================================================
+var currentReplyTo = null;
+
+function startReply(msg) {
+    currentReplyTo = {
+        messageId: msg.messageId,
+        text: msg.text,
+        name: msg.type === 'sent' ? 'You' : (currentChatTarget ? 'Them' : 'Message')
+    };
+
+    var inputBar = document.querySelector('.chat-room-input-bar');
+    if (!inputBar) return;
+
+    var existing = document.getElementById('replyPreviewBar');
+    if (existing) existing.remove();
+
+    var previewBar = document.createElement('div');
+    previewBar.id = 'replyPreviewBar';
+    previewBar.className = 'reply-preview-bar';
+    previewBar.innerHTML =
+        '<div class="reply-preview-left">' +
+            '<div class="reply-preview-name">' + escapeHtml(currentReplyTo.name) + '</div>' +
+            '<div class="reply-preview-text">' + escapeHtml(currentReplyTo.text.substring(0, 80)) + '</div>' +
+        '</div>' +
+        '<button class="reply-preview-close" id="replyPreviewClose">' +
+            '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">' +
+            '<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>' +
+        '</button>';
+
+    inputBar.parentNode.insertBefore(previewBar, inputBar);
+
+    document.getElementById('replyPreviewClose').addEventListener('click', function() {
+        clearReplyState();
+    });
+
+    var input = document.getElementById('chatMessageInput');
+    if (input) input.focus();
+}
+
+function clearReplyState() {
+    currentReplyTo = null;
+    var existing = document.getElementById('replyPreviewBar');
+    if (existing) existing.remove();
+}
+
+// ============================================================
+//  COPY
+// ============================================================
+function copyMessageText(text) {
+    if (!text) return;
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function() {
+            showToast('Copied!');
+        }).catch(function() { fallbackCopyText(text); });
+    } else {
+        fallbackCopyText(text);
+    }
+}
+
+function fallbackCopyText(text) {
+    var textarea = document.createElement('textarea');
+    textarea.value = text;
+    textarea.style.position = 'fixed';
+    textarea.style.opacity = '0';
+    document.body.appendChild(textarea);
+    textarea.select();
+    try { document.execCommand('copy'); showToast('Copied!'); }
+    catch(e) { alert('Copy: ' + text); }
+    document.body.removeChild(textarea);
+}
+
+// ============================================================
+//  DELETE ONE MESSAGE
+// ============================================================
+function deleteOneMessage(msg) {
+    if (!confirm('ဒီ message ကို ဖျက်မှာ သေချာလား?')) return;
+
+    var target = currentChatTarget;
+    if (!target) return;
+
+    deleteMessageFromLocalDB(target.serverId, target.userId, msg.messageId)
+    .then(function() {
+        var el = document.querySelector('[data-message-id="' + msg.messageId + '"]');
+        if (el) el.remove();
+
+        if (msg.type === 'sent' && msg.serverId) {
+            var fsdb = getFirestoreForServer(msg.serverId);
+            if (fsdb) {
+                fsdb.collection('messages').doc(msg.messageId).delete()
+                .then(function() { console.log('✅ Deleted from Firestore:', msg.messageId); })
+                .catch(function(err) { console.warn(err); });
+            }
+        }
+        renderChatList();
+    });
+}
+
+// ============================================================
+//  TOAST
+// ============================================================
+function showToast(message) {
+    var existing = document.querySelector('.toast-message');
+    if (existing) existing.remove();
+
+    var toast = document.createElement('div');
+    toast.className = 'toast-message';
+    toast.textContent = message;
+    document.body.appendChild(toast);
+
+    setTimeout(function() { toast.classList.add('show'); }, 10);
+    setTimeout(function() {
+        toast.classList.remove('show');
+        setTimeout(function() { toast.remove(); }, 300);
+    }, 2000);
+}
+
+// ============================================================
+//  SEND MESSAGE -- ✅ Block Check
 // ============================================================
 function sendMessage() {
+    // ✅ သူ ကိုယ့်ကို block ထားလား?
+    if (iAmBlockedByThem) {
+        showToast('သင်သည် ဒီသူ့ကို စာ ပို့လို့မရပါ');
+        return;
+    }
+
     var input = document.getElementById('chatMessageInput');
     var text = input.value.trim();
     if (!text) return;
@@ -7938,6 +8263,15 @@ function sendMessage() {
     var timestamp = Date.now();
     var bubbleId = currentUser.bubbleUse || '';
 
+    var replyTo = null;
+    if (currentReplyTo) {
+        replyTo = {
+            messageId: currentReplyTo.messageId,
+            text: currentReplyTo.text,
+            name: currentReplyTo.name
+        };
+    }
+
     var messageData = {
         senderId: currentUser.userId,
         senderServer: currentServerId,
@@ -7946,31 +8280,30 @@ function sendMessage() {
         text: text,
         bubbleId: bubbleId,
         seen: false,
-        timestamp: timestamp
+        timestamp: timestamp,
+        replyTo: replyTo
     };
 
     var chosenServerId = Math.random() < 0.5 ? 'server1' : 'server2';
     var fsdb = getFirestoreForServer(chosenServerId);
     if (!fsdb) { alert('Message server error'); return; }
 
-    fsdb.collection('messages').doc(messageId).set(messageData)
-    .then(function() {
-        var localMsg = {
-            messageId: messageId,
-            senderId: currentUser.userId,
-            senderServer: currentServerId,
-            receiverId: target.userId,
-            receiverServer: target.serverId,
-            text: text,
-            bubbleId: bubbleId,
-            timestamp: timestamp,
-            serverId: chosenServerId,
-            type: 'sent'
-        };
-        return saveMessageToLocalDB(localMsg);
-    })
-    .then(function() {
-        displayMessage({ messageId: messageId, text: text, bubbleId: bubbleId, timestamp: timestamp, type: 'sent' });
+    var localMsg = {
+        messageId: messageId,
+        senderId: currentUser.userId,
+        senderServer: currentServerId,
+        receiverId: target.userId,
+        receiverServer: target.serverId,
+        text: text,
+        bubbleId: bubbleId,
+        timestamp: timestamp,
+        serverId: chosenServerId,
+        type: 'sent',
+        replyTo: replyTo
+    };
+
+    saveMessageToLocalDB(localMsg).then(function() {
+        displayMessage(localMsg);
         var messagesEl = document.getElementById('chatRoomMessages');
         messagesEl.scrollTop = messagesEl.scrollHeight;
 
@@ -7981,9 +8314,19 @@ function sendMessage() {
         if (clipBtn) clipBtn.classList.remove('hidden');
         if (sendBtn) sendBtn.classList.add('hidden');
 
+        clearReplyState();
         renderChatList();
-    })
-    .catch(function(err) { console.error(err); alert('ပို့မရပါ'); });
+
+        fsdb.collection('messages').doc(messageId).set(messageData)
+        .then(function() {
+            console.log('✅ Sent:', messageId);
+        })
+        .catch(function(err) {
+            console.error('Firestore send error:', err);
+        });
+    }).catch(function(err) {
+        console.error('Local save error:', err);
+    });
 }
 
 function generateMessageId() {
@@ -8106,17 +8449,13 @@ function stopAppMessageListeners() {
     });
 
     sendBtn.addEventListener('click', function() { sendMessage(); });
-
-    if (msgBtn) {
-        msgBtn.addEventListener('click', function() { toggleBubblePicker(); });
-    }
-
+    if (msgBtn) msgBtn.addEventListener('click', function() { toggleBubblePicker(); });
     clipBtn.addEventListener('click', function() {});
     autoResize();
 })();
 
 // ============================================================
-//  BUBBLE PICKER PANEL (✓ မပြ)
+//  BUBBLE PICKER
 // ============================================================
 var bubblePickerOpen = false;
 
@@ -8134,27 +8473,12 @@ function toggleBubblePicker() {
     var currentBubbleUse = currentUser.bubbleUse || '';
 
     var slots = [];
+    slots.push({ id: '', name: 'None', image: '', isNone: true, isUsed: currentBubbleUse === '' });
 
-    // Slot 1: None
-    slots.push({
-        id: '',
-        name: 'None',
-        image: '',
-        isNone: true,
-        isUsed: currentBubbleUse === ''
-    });
-
-    // Slots 2+: Owned bubbles
     ownedBubbles.forEach(function(bubbleId) {
         var bubble = BUBBLE_CONFIG.bubbles.find(function(b) { return b.id === bubbleId; });
         if (bubble) {
-            slots.push({
-                id: bubble.id,
-                name: bubble.name,
-                image: bubble.image,
-                isNone: false,
-                isUsed: currentBubbleUse === bubble.id
-            });
+            slots.push({ id: bubble.id, name: bubble.name, image: bubble.image, isNone: false, isUsed: currentBubbleUse === bubble.id });
         }
     });
 
@@ -8176,10 +8500,6 @@ function toggleBubblePicker() {
         } else {
             html += '<img src="' + slot.image + '" alt="' + escapeHtml(slot.name) + '" class="bubble-slot-image" />';
         }
-
-        // ❌ Checkmark မထည့်တော့
-        // if (slot.isUsed) { html += '<div class="bubble-slot-check">✓</div>'; }
-
         html += '</div>';
     });
     html += '</div>';
@@ -8190,13 +8510,9 @@ function toggleBubblePicker() {
         slotEl.addEventListener('click', function() {
             var bubbleId = slotEl.dataset.bubbleId;
             var isNone = slotEl.dataset.isNone === 'true';
-
-            if (isNone || bubbleId === '') {
-                useBubble(null);
-            } else {
-                var bubble = BUBBLE_CONFIG.bubbles.find(function(b) {
-                    return String(b.id) === String(bubbleId);
-                });
+            if (isNone || bubbleId === '') { useBubble(null); }
+            else {
+                var bubble = BUBBLE_CONFIG.bubbles.find(function(b) { return String(b.id) === String(bubbleId); });
                 if (bubble) useBubble(bubble);
             }
         });
@@ -8208,12 +8524,8 @@ function toggleBubblePicker() {
 
 function useBubble(bubble) {
     if (!currentUser || !currentServerId) return;
-
     var newBubbleId = bubble ? bubble.id : '';
-    if (currentUser.bubbleUse === newBubbleId) {
-        closeBubblePicker();
-        return;
-    }
+    if (currentUser.bubbleUse === newBubbleId) { closeBubblePicker(); return; }
 
     currentUser.bubbleUse = newBubbleId;
     saveUserToDB(currentUser);
@@ -8221,7 +8533,7 @@ function useBubble(bubble) {
     var myDb = getDbForServer(currentServerId);
     if (myDb) {
         myDb.ref('users/' + currentUser.userId + '/bubbleUse').set(newBubbleId).catch(function(err) {
-            console.warn('Bubble update error:', err);
+            console.warn(err);
         });
     }
 
@@ -8231,14 +8543,11 @@ function useBubble(bubble) {
 
 function closeBubblePicker() {
     var picker = document.getElementById('bubblePicker');
-    if (picker) {
-        picker.classList.remove('open');
-        bubblePickerOpen = false;
-    }
+    if (picker) { picker.classList.remove('open'); bubblePickerOpen = false; }
 }
 
 // ============================================================
-//  CHAT ROOM MENU (⋮)
+//  CHAT ROOM MENU
 // ============================================================
 (function initChatRoomMenu() {
     var menuBtn = document.getElementById('chatRoomMenuBtn');
@@ -8258,9 +8567,7 @@ function showChatRoomMenu() {
     var target = currentChatTarget;
     if (!target) return;
 
-    // ✅ Block/Unblock စစ်
     var isBlocked = isUserInMyBlockList(target.userId, target.serverId);
-
     var blockBtnHtml = isBlocked
         ? '<button class="menu-item" data-action="unblock">' +
             '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
@@ -8325,11 +8632,9 @@ function deleteAllMessages() {
     });
 }
 
-// ✅ Block User
 function blockUser(target) {
     if (!currentUser || !currentServerId) return;
     if (!confirm('ဒီသူကို block မှာ သေချာလား?')) return;
-
     var myDb = getDbForServer(currentServerId);
     if (!myDb) return;
 
@@ -8348,11 +8653,9 @@ function blockUser(target) {
     .catch(function(err) { console.error(err); alert('Block မရပါ'); });
 }
 
-// ✅ Unblock User
 function unblockUser(target) {
     if (!currentUser || !currentServerId) return;
     if (!confirm('ဒီသူကို unblock မှာ သေချာလား?')) return;
-
     var myDb = getDbForServer(currentServerId);
     if (!myDb) return;
 
@@ -8373,14 +8676,21 @@ function unblockUser(target) {
 
 (function initChatRoomBack() {
     var backBtn = document.getElementById('chatRoomBackBtn');
-    if (backBtn) backBtn.addEventListener('click', function() { goBackFullscreen(); });
+    if (backBtn) backBtn.addEventListener('click', function() {
+        clearReplyState();
+        goBackFullscreen();
+    });
 })();
 
 (function initSearchEvents() {
     var btn = document.getElementById('searchBtn');
     var idInput = document.getElementById('searchUserId');
+    var serverInput = document.getElementById('searchServerNo');
     if (btn) btn.addEventListener('click', performSearch);
     if (idInput) idInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') performSearch();
+    });
+    if (serverInput) serverInput.addEventListener('keypress', function(e) {
         if (e.key === 'Enter') performSearch();
     });
 })();
@@ -8467,7 +8777,9 @@ logoutUser = function() {
     try { stopFriendsListListener(); } catch(e) {}
     try { stopAppMessageListeners(); } catch(e) {}
     try { stopChatRoomMessageListeners(); } catch(e) {}
+    try { stopChatRoomBlockListener(); } catch(e) {}
     try { closeBubblePicker(); } catch(e) {}
+    try { clearReplyState(); } catch(e) {}
     if (chatRoomListener) { try { chatRoomListener.off(); } catch(e) {} chatRoomListener = null; }
     _origLogoutUser_final();
 };
@@ -8476,7 +8788,9 @@ var _origCloseFullscreen_final = closeFullscreen;
 closeFullscreen = function() {
     if (chatRoomListener) { try { chatRoomListener.off(); } catch(e){} chatRoomListener = null; }
     try { stopChatRoomMessageListeners(); } catch(e) {}
+    try { stopChatRoomBlockListener(); } catch(e) {}
     try { closeBubblePicker(); } catch(e) {}
+    try { clearReplyState(); } catch(e) {}
     document.getElementById('fullscreenOverlay').classList.remove('chat-room-active');
     _origCloseFullscreen_final();
 };
@@ -8487,13 +8801,16 @@ goBackFullscreen = function() {
     if (currentFs && currentFs.screenId === 'fs-chat-room') {
         if (chatRoomListener) { try { chatRoomListener.off(); } catch(e){} chatRoomListener = null; }
         try { stopChatRoomMessageListeners(); } catch(e) {}
+        try { stopChatRoomBlockListener(); } catch(e) {}
         try { closeBubblePicker(); } catch(e) {}
+        try { clearReplyState(); } catch(e) {}
         document.getElementById('fullscreenOverlay').classList.remove('chat-room-active');
+        setTimeout(function() { renderChatList(); }, 100);
     }
     _origGoBackFullscreen_final();
 };
 
-console.log('✅ STAR ARCADE -- Block/Unblock + Clean Bubble Picker Loaded');
+console.log('✅ STAR ARCADE -- Block List Sync + Reply System Loaded');
 
 // ============================================================
 //  INIT
