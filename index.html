@@ -4073,19 +4073,16 @@ body {
    ✅ MESSAGE BUBBLE -- 9-slice PNG background
    ============================================================ */
 .chat-message.has-bubble {
-    /* 9-slice setup */
     border-image-source: var(--bubble-image);
     border-image-slice: 30% 20% 30% 20% fill;
     border-image-width: 30px 20px 30px 20px;
     border-image-repeat: stretch;
     border-image-outset: 0;
 
-    /* Reset background */
     border-style: solid;
     border-color: transparent;
     background: transparent;
 
-    /* Layout */
     padding: 14px 18px;
     min-height: 60px;
     min-width: 80px;
@@ -4125,7 +4122,7 @@ body {
 }
 
 /* ============================================================
-   ✅ BUBBLE PICKER PANEL
+   ✅ BUBBLE PICKER PANEL (✓ Checkmark မပါ)
    ============================================================ */
 .bubble-picker {
     width: 100%;
@@ -4169,6 +4166,7 @@ body {
     transform: scale(0.95);
 }
 
+/* ✅ Active -- Border highlight သာ (✓ မပါ) */
 .bubble-picker-slot.active {
     border-color: var(--accent);
     box-shadow: 0 0 0 2px rgba(255, 109, 31, 0.3);
@@ -4177,6 +4175,12 @@ body {
 .bubble-picker-slot.none-slot {
     background: rgba(255, 255, 255, 0.03);
     border-style: dashed;
+}
+
+.bubble-picker-slot.none-slot.active {
+    border-style: solid;
+    border-color: var(--accent);
+    background: rgba(255, 109, 31, 0.08);
 }
 
 .bubble-slot-none {
@@ -4194,6 +4198,14 @@ body {
     opacity: 0.5;
 }
 
+.bubble-picker-slot.none-slot.active .bubble-slot-none {
+    color: var(--accent);
+}
+
+.bubble-picker-slot.none-slot.active .bubble-slot-none svg {
+    opacity: 1;
+}
+
 .bubble-slot-image {
     width: 100%;
     height: 100%;
@@ -4201,26 +4213,8 @@ body {
     display: block;
 }
 
-.bubble-slot-check {
-    position: absolute;
-    top: 4px;
-    right: 4px;
-    width: 20px;
-    height: 20px;
-    background: var(--accent);
-    color: #fff;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 12px;
-    font-weight: 800;
-    box-shadow: 0 2px 8px rgba(255, 109, 31, 0.5);
-    z-index: 2;
-}
-
 /* ============================================================
-   ✅ CHAT ROOM MENU POPUP (⋮ Menu)
+   ✅ CHAT ROOM MENU POPUP (⋮ Menu -- Block/Unblock)
    ============================================================ */
 .chat-room-menu-popup {
     position: fixed;
@@ -4256,12 +4250,22 @@ body {
     background: var(--bg-hover);
 }
 
+/* ✅ Block -- အနီရောင် */
 .chat-room-menu-popup .menu-item.danger {
     color: #ff4444;
 }
 
 .chat-room-menu-popup .menu-item.danger:hover {
     background: rgba(255, 68, 68, 0.15);
+}
+
+/* ✅ Unblock -- အစိမ်းရောင် */
+.chat-room-menu-popup .menu-item[data-action="unblock"] {
+    color: #44ff88;
+}
+
+.chat-room-menu-popup .menu-item[data-action="unblock"]:hover {
+    background: rgba(68, 255, 136, 0.15);
 }
 
 .chat-room-menu-popup .menu-item svg {
@@ -4419,6 +4423,15 @@ body {
     }
     .chat-message.has-bubble .msg-text {
         font-size: 13px;
+    }
+
+    /* Menu Popup Mobile */
+    .chat-room-menu-popup {
+        min-width: 180px;
+    }
+    .chat-room-menu-popup .menu-item {
+        font-size: 13px;
+        padding: 9px 12px;
     }
 }</style><script>/* ============================================================
    FILE: script.js (FULL VERSION - online inside users only)
@@ -5833,7 +5846,7 @@ var BACKGROUND_CONFIG = {
 
 var BUBBLE_CONFIG = {
     bubbles: [
-        { id: 4001, name: 'Bubble 1', image: 'https://via.placeholder.com/60x40/9b4dff/ffffff?text=Bubble+1', price: 100, limited: false },
+        { id: 4001, name: 'Bubble 1', image: 'https://i.ibb.co/n86mRKyY/Grid-Art-20260917-123730123.png', price: 100, limited: false },
         { id: 4002, name: 'Bubble 2', image: 'https://via.placeholder.com/60x40/4a6cf7/ffffff?text=Bubble+2', price: 150, limited: false },
         { id: 4003, name: 'Bubble 3', image: 'https://via.placeholder.com/60x40/ff6b6b/ffffff?text=Bubble+3', price: 200, limited: false },
         { id: 4004, name: 'Bubble 4', image: 'https://via.placeholder.com/60x40/51cf66/ffffff?text=Bubble+4', price: 250, limited: false },
@@ -7254,9 +7267,7 @@ function getFriendsCache() {
         .catch(function() { resolve({}); });
     });
 }
-
 function saveFriendsCache(cache) { return setToDB(FRIENDS_CACHE_KEY, cache); }
-
 function getFriendCacheKey(serverId, userId) { return serverId + ':' + userId; }
 
 function saveFriendToCache(friendData) {
@@ -7356,6 +7367,7 @@ function extractUseOnlyData(data, serverId, serverNo, userId) {
         bannerUse: data.bannerUse || '',
         backgroundUse: data.backgroundUse || '',
         bubbleUse: data.bubbleUse || '',
+        blockList: Array.isArray(data.blockList) ? data.blockList : [],
         roleUse: Array.isArray(data.roleUse) ? data.roleUse : []
     };
 }
@@ -7382,6 +7394,23 @@ function escapeHtml(s) {
 }
 
 // ============================================================
+//  BLOCK HELPERS
+// ============================================================
+function isBlockedByUser(blockList, targetUserId, targetServerId) {
+    if (!Array.isArray(blockList)) return false;
+    return blockList.some(function(b) {
+        return b.userId === targetUserId && b.serverId === targetServerId;
+    });
+}
+
+function isUserInMyBlockList(targetUserId, targetServerId) {
+    if (!currentUser || !Array.isArray(currentUser.blockList)) return false;
+    return currentUser.blockList.some(function(b) {
+        return b.userId === targetUserId && b.serverId === targetServerId;
+    });
+}
+
+// ============================================================
 //  SEARCH
 // ============================================================
 var searchResultUser = null;
@@ -7391,11 +7420,17 @@ function performSearch() {
     var userId = document.getElementById('searchUserId').value.trim();
     var resultEl = document.getElementById('searchResult');
 
-    if (!serverNo || isNaN(serverNo)) { resultEl.innerHTML = '<div class="search-empty">Server No. ရေးပါ</div>'; return; }
-    if (!userId) { resultEl.innerHTML = '<div class="search-empty">ID ရေးပါ</div>'; return; }
+    if (!serverNo || isNaN(serverNo)) {
+        resultEl.innerHTML = '<div class="search-empty">Server No. ရေးပါ</div>'; return;
+    }
+    if (!userId) {
+        resultEl.innerHTML = '<div class="search-empty">ID ရေးပါ</div>'; return;
+    }
 
     var server = FIREBASE_SERVERS.find(function(s){ return s.number === serverNo; });
-    if (!server) { resultEl.innerHTML = '<div class="search-empty">Server ' + serverNo + ' မရှိပါ</div>'; return; }
+    if (!server) {
+        resultEl.innerHTML = '<div class="search-empty">Server ' + serverNo + ' မရှိပါ</div>'; return;
+    }
 
     if (currentUser && currentUser.userId === userId && currentServerId === server.id) {
         resultEl.innerHTML = '<div class="search-empty">ကိုယ့်ကိုယ်ကို ရှာလို့မရပါ</div>'; return;
@@ -7404,6 +7439,7 @@ function performSearch() {
     resultEl.innerHTML = '<div class="search-empty">ရှာနေသည်...</div>';
 
     fetchUserFullData(server.id, userId).then(function(data) {
+        // သူ ကိုယ့်ကို block ထားလား?
         if (isBlockedByUser(data.blockList, currentUser.userId, currentServerId)) {
             resultEl.innerHTML = '<div class="search-empty">အကောင့် မတွေ့ပါ</div>'; return;
         }
@@ -7412,11 +7448,6 @@ function performSearch() {
     }).catch(function() {
         resultEl.innerHTML = '<div class="search-empty">အကောင့် မတွေ့ပါ</div>';
     });
-}
-
-function isBlockedByUser(blockList, targetUserId, targetServerId) {
-    if (!Array.isArray(blockList)) return false;
-    return blockList.some(function(b) { return b.userId === targetUserId && b.serverId === targetServerId; });
 }
 
 function renderSearchResult() {
@@ -7656,7 +7687,6 @@ function renderChatList() {
 
             var name = cached ? cached.name : 'Loading...';
             var avatar = (cached && cached.avatar) ? cached.avatar : 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'52\' height=\'52\' viewBox=\'0 0 100 100\'%3E%3Ccircle cx=\'50\' cy=\'50\' r=\'45\' fill=\'%2322222e\'/%3E%3C/svg%3E';
-            var play = cached ? (cached.play || '') : '';
             var online = cached ? cached.online === true : false;
 
             var frameHtml = '';
@@ -7746,12 +7776,10 @@ function openChatRoom(target) {
     if (clipBtn) clipBtn.classList.remove('hidden');
     if (sendBtn) sendBtn.classList.add('hidden');
 
-    // IndexedDB ကနေ instant ပြ
     getFriendFromCache(target.serverId, target.userId).then(function(cached) {
         if (cached) applyChatRoomData(cached);
     });
 
-    // Server listener
     if (chatRoomListener) { try { chatRoomListener.off(); } catch(e){} chatRoomListener = null; }
     var friendDb = getDbForServer(target.serverId);
     if (friendDb) {
@@ -7767,7 +7795,6 @@ function openChatRoom(target) {
         });
     }
 
-    // IndexedDB messages
     getMessagesWith(target.serverId, target.userId).then(function(messages) {
         messagesEl.innerHTML = '';
         if (messages.length === 0) {
@@ -7882,7 +7909,6 @@ function displayMessage(msg) {
     msgDiv.className = 'chat-message ' + (isSent ? 'sent' : 'received');
     msgDiv.dataset.messageId = msg.messageId;
 
-    // ✅ Bubble -- 9-slice background
     if (msg.bubbleId && msg.bubbleId !== '') {
         var bubble = BUBBLE_CONFIG.bubbles.find(function(b) { return b.id === msg.bubbleId; });
         if (bubble) {
@@ -8081,11 +8107,8 @@ function stopAppMessageListeners() {
 
     sendBtn.addEventListener('click', function() { sendMessage(); });
 
-    // ✅ Message Icon -- Bubble Picker
     if (msgBtn) {
-        msgBtn.addEventListener('click', function() {
-            toggleBubblePicker();
-        });
+        msgBtn.addEventListener('click', function() { toggleBubblePicker(); });
     }
 
     clipBtn.addEventListener('click', function() {});
@@ -8093,47 +8116,26 @@ function stopAppMessageListeners() {
 })();
 
 // ============================================================
-//  ✅ BUBBLE PICKER PANEL
-//  Message Icon နှိပ်ရင် -- 3-column grid ထွက်
-//  1st slot = Empty (None/Use)
-//  ကျန် 2 slots = Owned bubbles
+//  BUBBLE PICKER PANEL (✓ မပြ)
 // ============================================================
 var bubblePickerOpen = false;
 
 function toggleBubblePicker() {
     var picker = document.getElementById('bubblePicker');
-    if (!picker) {
-        picker = document.createElement('div');
-        picker.id = 'bubblePicker';
-        picker.className = 'bubble-picker';
-        // Chat room input bar ရဲ့ အပေါ် မှာ ထည့်
-        var inputBar = document.querySelector('.chat-room-input-bar');
-        if (inputBar && inputBar.parentNode) {
-            inputBar.parentNode.insertBefore(picker, inputBar);
-        } else {
-            document.body.appendChild(picker);
-        }
-    }
+    if (!picker) return;
 
     if (bubblePickerOpen) {
         picker.classList.remove('open');
         bubblePickerOpen = false;
-        setTimeout(function() {
-            if (!bubblePickerOpen && picker.parentNode) {
-                picker.parentNode.removeChild(picker);
-            }
-        }, 250);
         return;
     }
 
-    // ✅ Bubbles ဆောက်
     var ownedBubbles = Array.isArray(currentUser.bubbleOwned) ? currentUser.bubbleOwned : [];
     var currentBubbleUse = currentUser.bubbleUse || '';
 
-    // 3-slot grid (1st = None, ကျန် = Owned bubbles)
     var slots = [];
 
-    // Slot 1: None (Empty) -- Use နှိပ်ရင် bubble ဖျက်
+    // Slot 1: None
     slots.push({
         id: '',
         name: 'None',
@@ -8157,7 +8159,7 @@ function toggleBubblePicker() {
     });
 
     var html = '<div class="bubble-picker-grid">';
-    slots.forEach(function(slot, idx) {
+    slots.forEach(function(slot) {
         var slotClass = 'bubble-picker-slot';
         if (slot.isUsed) slotClass += ' active';
         if (slot.isNone) slotClass += ' none-slot';
@@ -8175,9 +8177,8 @@ function toggleBubblePicker() {
             html += '<img src="' + slot.image + '" alt="' + escapeHtml(slot.name) + '" class="bubble-slot-image" />';
         }
 
-        if (slot.isUsed) {
-            html += '<div class="bubble-slot-check">✓</div>';
-        }
+        // ❌ Checkmark မထည့်တော့
+        // if (slot.isUsed) { html += '<div class="bubble-slot-check">✓</div>'; }
 
         html += '</div>';
     });
@@ -8185,7 +8186,6 @@ function toggleBubblePicker() {
 
     picker.innerHTML = html;
 
-    // ✅ Slot click -- Use bubble
     picker.querySelectorAll('.bubble-picker-slot').forEach(function(slotEl) {
         slotEl.addEventListener('click', function() {
             var bubbleId = slotEl.dataset.bubbleId;
@@ -8202,19 +8202,15 @@ function toggleBubblePicker() {
         });
     });
 
-    // ✅ Open
     picker.classList.add('open');
     bubblePickerOpen = true;
 }
 
-// ✅ Use Bubble -- Firestore + UI update
 function useBubble(bubble) {
     if (!currentUser || !currentServerId) return;
 
     var newBubbleId = bubble ? bubble.id : '';
-
     if (currentUser.bubbleUse === newBubbleId) {
-        // ပြောင်းလဲမှု မရှိ
         closeBubblePicker();
         return;
     }
@@ -8229,13 +8225,8 @@ function useBubble(bubble) {
         });
     }
 
-    // Chat List ရဲ့ preview update မလို (bubble chat list မှာ မပြ)
-
-    // Picker ကို ပြန် render
     closeBubblePicker();
-    setTimeout(function() {
-        toggleBubblePicker();
-    }, 200);
+    setTimeout(function() { toggleBubblePicker(); }, 200);
 }
 
 function closeBubblePicker() {
@@ -8243,16 +8234,11 @@ function closeBubblePicker() {
     if (picker) {
         picker.classList.remove('open');
         bubblePickerOpen = false;
-        setTimeout(function() {
-            if (!bubblePickerOpen && picker.parentNode) {
-                picker.parentNode.removeChild(picker);
-            }
-        }, 250);
     }
 }
 
 // ============================================================
-//  CHAT ROOM MENU
+//  CHAT ROOM MENU (⋮)
 // ============================================================
 (function initChatRoomMenu() {
     var menuBtn = document.getElementById('chatRoomMenuBtn');
@@ -8272,6 +8258,19 @@ function showChatRoomMenu() {
     var target = currentChatTarget;
     if (!target) return;
 
+    // ✅ Block/Unblock စစ်
+    var isBlocked = isUserInMyBlockList(target.userId, target.serverId);
+
+    var blockBtnHtml = isBlocked
+        ? '<button class="menu-item" data-action="unblock">' +
+            '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
+            '<circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>' +
+            '<span>Unblock</span></button>'
+        : '<button class="menu-item danger" data-action="block">' +
+            '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
+            '<circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>' +
+            '<span>Block</span></button>';
+
     popup.innerHTML =
         '<button class="menu-item" data-action="delete-messages">' +
             '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
@@ -8282,10 +8281,7 @@ function showChatRoomMenu() {
             '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>' +
             '<circle cx="9" cy="7" r="4"/></svg>' +
             '<span>Delete Friend</span></button>' +
-        '<button class="menu-item danger" data-action="block">' +
-            '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
-            '<circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>' +
-            '<span>Block</span></button>';
+        blockBtnHtml;
 
     document.body.appendChild(popup);
     var btnRect = document.getElementById('chatRoomMenuBtn').getBoundingClientRect();
@@ -8301,6 +8297,7 @@ function showChatRoomMenu() {
         if (action === 'delete-messages') deleteAllMessages();
         else if (action === 'delete-friend') { deleteFriendAndSync(target); goBackFullscreen(); }
         else if (action === 'block') blockUser(target);
+        else if (action === 'unblock') unblockUser(target);
     });
 
     setTimeout(function() {
@@ -8328,6 +8325,7 @@ function deleteAllMessages() {
     });
 }
 
+// ✅ Block User
 function blockUser(target) {
     if (!currentUser || !currentServerId) return;
     if (!confirm('ဒီသူကို block မှာ သေချာလား?')) return;
@@ -8348,6 +8346,29 @@ function blockUser(target) {
         goBackFullscreen();
     })
     .catch(function(err) { console.error(err); alert('Block မရပါ'); });
+}
+
+// ✅ Unblock User
+function unblockUser(target) {
+    if (!currentUser || !currentServerId) return;
+    if (!confirm('ဒီသူကို unblock မှာ သေချာလား?')) return;
+
+    var myDb = getDbForServer(currentServerId);
+    if (!myDb) return;
+
+    var blockList = Array.isArray(currentUser.blockList) ? currentUser.blockList.slice() : [];
+    blockList = blockList.filter(function(b) {
+        return !(b.userId === target.userId && b.serverId === target.serverId);
+    });
+
+    myDb.ref('users/' + currentUser.userId + '/blockList').set(blockList)
+    .then(function() {
+        currentUser.blockList = blockList;
+        saveUserToDB(currentUser);
+        alert('Unblock လုပ်ပြီးပါပြီ');
+        goBackFullscreen();
+    })
+    .catch(function(err) { console.error(err); alert('Unblock မရပါ'); });
 }
 
 (function initChatRoomBack() {
@@ -8472,7 +8493,7 @@ goBackFullscreen = function() {
     _origGoBackFullscreen_final();
 };
 
-console.log('✅ STAR ARCADE -- Bubble Picker System Loaded');
+console.log('✅ STAR ARCADE -- Block/Unblock + Clean Bubble Picker Loaded');
 
 // ============================================================
 //  INIT
