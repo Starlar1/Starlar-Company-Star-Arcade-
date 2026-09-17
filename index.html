@@ -4984,6 +4984,54 @@ body {
         padding: 7px 14px;
         font-size: 11px;
     }
+}
+
+/* ============================================================
+   ✅ CHAT LIST PLAY (G1-G5)
+   ============================================================ */
+.chat-list-play {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 3px;
+    max-width: 100%;
+    overflow: hidden;
+}
+
+.chat-list-play-img {
+    width: 16px;
+    height: 16px;
+    border-radius: 4px;
+    object-fit: cover;
+    flex-shrink: 0;
+    background: var(--bg-input);
+    border: 1px solid var(--border-light);
+}
+
+.chat-list-play-name {
+    font-size: 11px;
+    color: var(--accent);
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    animation: playScroll 8s linear infinite;
+    padding-right: 20px;
+}
+
+@keyframes playScroll {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-100%); }
+}
+
+/* ✅ Mobile */
+@media (max-width: 480px) {
+    .chat-list-play-img {
+        width: 14px;
+        height: 14px;
+    }
+    .chat-list-play-name {
+        font-size: 10px;
+    }
 }</style><script>/* ============================================================
    FILE: script.js (FULL VERSION - online inside users only)
    ============================================================ */
@@ -6319,38 +6367,6 @@ var MARK_CONFIG = {
     ]
 };
 
-// ============================================================
-//  PLAY CONFIGURATION (LIKE MARK_CONFIG - FOR FUTURE USE)
-// ============================================================
-var PLAY_CONFIG = {
-    plays: [
-        { id: 200, name: 'Play 1', image: '', description: 'Play 1 description' },
-        { id: 201, name: 'Play 2', image: '', description: 'Play 2 description' },
-        { id: 202, name: 'Play 3', image: '', description: 'Play 3 description' }
-    ]
-};
-
-// ============================================================
-//  BAN CONFIGURATION (LIKE MARK_CONFIG - FOR FUTURE USE)
-// ============================================================
-var BAN_CONFIG = {
-    bans: [
-        { id: 300, name: 'Ban 1', image: '', description: 'Ban 1 description' },
-        { id: 301, name: 'Ban 2', image: '', description: 'Ban 2 description' },
-        { id: 302, name: 'Ban 3', image: '', description: 'Ban 3 description' }
-    ]
-};
-
-// ============================================================
-//  MAIL CONFIGURATION (LIKE MARK_CONFIG - FOR FUTURE USE)
-// ============================================================
-var MAIL_CONFIG = {
-    mails: [
-        { id: 400, name: 'Mail 1', image: '', description: 'Mail 1 description' },
-        { id: 401, name: 'Mail 2', image: '', description: 'Mail 2 description' },
-        { id: 402, name: 'Mail 3', image: '', description: 'Mail 3 description' }
-    ]
-};
 
 // ============================================================
 //  CONFIGURATIONS
@@ -7807,6 +7823,24 @@ function getFirestoreForServer(serverId) {
 }
 
 // ============================================================
+//  ✅ PLAY CONFIGURATION (G1-G5)
+// ============================================================
+var PLAY_CONFIG = {
+    plays: [
+        { id: 'G1', name: 'Game One', image: 'https://i.ibb.co/placeholder/g1.png' },
+        { id: 'G2', name: 'Game Two', image: 'https://i.ibb.co/placeholder/g2.png' },
+        { id: 'G3', name: 'Game Three', image: 'https://i.ibb.co/placeholder/g3.png' },
+        { id: 'G4', name: 'Game Four', image: 'https://i.ibb.co/placeholder/g4.png' },
+        { id: 'G5', name: 'Game Five', image: 'https://i.ibb.co/placeholder/g5.png' }
+    ]
+};
+
+function getPlayById(playId) {
+    if (!playId) return null;
+    return PLAY_CONFIG.plays.find(function(p) { return p.id === playId; }) || null;
+}
+
+// ============================================================
 //  FRIENDS CACHE
 // ============================================================
 var FRIENDS_CACHE_KEY = 'friendsCache';
@@ -8276,7 +8310,7 @@ function stopFriendsListListener() {
 }
 
 // ============================================================
-//  CHAT LIST
+//  ✅ CHAT LIST -- Name + Mark + Online + Play + Last Message
 // ============================================================
 function renderChatList() {
     var listEl = document.getElementById('chatList');
@@ -8300,6 +8334,7 @@ function renderChatList() {
             var name = cached ? cached.name : 'Loading...';
             var avatar = (cached && cached.avatar) ? cached.avatar : 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'52\' height=\'52\' viewBox=\'0 0 100 100\'%3E%3Ccircle cx=\'50\' cy=\'50\' r=\'45\' fill=\'%2322222e\'/%3E%3C/svg%3E';
             var online = cached ? cached.online === true : false;
+            var playId = (cached && cached.play) ? cached.play : '';
 
             var frameHtml = '';
             if (cached && cached.frameUse) {
@@ -8317,6 +8352,19 @@ function renderChatList() {
                 ? '<span class="chat-list-online-text online">Online</span>'
                 : '<span class="chat-list-online-text">Offline</span>';
 
+            // ✅ Play -- PNG + Game Name (Scroll)
+            var playHtml = '';
+            if (playId) {
+                var playData = getPlayById(playId);
+                if (playData) {
+                    playHtml =
+                        '<div class="chat-list-play">' +
+                            '<img class="chat-list-play-img" src="' + playData.image + '" alt="play" />' +
+                            '<div class="chat-list-play-name">' + escapeHtml(playData.name) + '</div>' +
+                        '</div>';
+                }
+            }
+
             row.innerHTML =
                 '<div class="chat-list-avatar-wrap">' +
                     '<img class="chat-list-avatar" src="' + avatar + '" alt="avatar" />' +
@@ -8330,6 +8378,7 @@ function renderChatList() {
                             onlineTextHtml +
                         '</div>' +
                     '</div>' +
+                    playHtml +
                     '<div class="chat-list-bottom">' +
                         '<span class="chat-list-msg" id="' + rowId + '_msg">Tap to open chat</span>' +
                     '</div>' +
@@ -8965,7 +9014,9 @@ function markAsSeenAndDelete(messageId, serverId, friendServer, friendId) {
 }
 
 // ============================================================
-//  APP MESSAGE LISTENERS
+//  ✅ APP MESSAGE LISTENERS
+//  App ဝင်တာနဲ့ Server ၂ ခုလုံး Firestore ကို နားထောင်
+//  Chat Room မဖွင့်ထားလည်း Chat List ကို ချက်ချင်း Update
 // ============================================================
 var appMessageListeners = [];
 
@@ -8977,6 +9028,7 @@ function startAppMessageListeners() {
         var fsdb = getFirestoreForServer(sid);
         if (!fsdb) return;
 
+        // ✅ ① Receiver -- ကိုယ့်ဆီ ရောက်တဲ့စာ
         var unsub1 = fsdb.collection('messages')
             .where('receiverId', '==', currentUser.userId)
             .where('receiverServer', '==', currentServerId)
@@ -8988,27 +9040,32 @@ function startAppMessageListeners() {
                         msg.serverId = sid;
                         msg.type = 'received';
                         msg.seen = false;
-                        saveMessageToLocalDB(msg);
 
-                        if (currentChatTarget &&
-                            currentChatTarget.userId === msg.senderId &&
-                            currentChatTarget.serverId === msg.senderServer) {
-                            displayMessage(msg);
-                            setTimeout(function() {
-                                var messagesEl = document.getElementById('chatRoomMessages');
-                                if (messagesEl) {
-                                    messagesEl.scrollTo({ top: messagesEl.scrollHeight, behavior: 'smooth' });
-                                }
-                            }, 30);
-                            markAsSeenAndDelete(msg.messageId, sid, msg.senderServer, msg.senderId);
-                        } else {
-                            renderChatList();
-                        }
+                        // ✅ IndexedDB သိမ်းပြီးမှ UI update
+                        saveMessageToLocalDB(msg).then(function() {
+                            if (currentChatTarget &&
+                                currentChatTarget.userId === msg.senderId &&
+                                currentChatTarget.serverId === msg.senderServer) {
+                                // Chat Room ဖွင့်ထားရင် → UI ပြ
+                                displayMessage(msg);
+                                setTimeout(function() {
+                                    var messagesEl = document.getElementById('chatRoomMessages');
+                                    if (messagesEl) {
+                                        messagesEl.scrollTo({ top: messagesEl.scrollHeight, behavior: 'smooth' });
+                                    }
+                                }, 30);
+                                markAsSeenAndDelete(msg.messageId, sid, msg.senderServer, msg.senderId);
+                            } else {
+                                // ✅ Chat Room မဖွင့်ထားရင် → Chat List update
+                                renderChatList();
+                            }
+                        });
                     }
                 });
             }, function(err) { console.warn(err); });
         appMessageListeners.push(unsub1);
 
+        // ✅ ② Sender listener -- Firestore ဖျက်ခံရရင် ဘာမှ မလုပ်
         var unsub2 = fsdb.collection('messages')
             .where('senderId', '==', currentUser.userId)
             .where('senderServer', '==', currentServerId)
@@ -9775,7 +9832,7 @@ logoutUser = function() {
     _origLogoutUser_final();
 };
 
-console.log('✅ STAR ARCADE -- Friends List: You Blocked + Profile Cache + Back Fix Loaded');
+console.log('✅ STAR ARCADE -- Chat List Play + App Listener + Cache Only Loaded');
 
 // ============================================================
 //  INIT
