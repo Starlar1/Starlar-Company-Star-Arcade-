@@ -11,7 +11,6 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-    <!-- ✅ Firestore SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
     <link rel="stylesheet" href="style.css" />
@@ -297,7 +296,7 @@
                             </div>
                         </div>
 
-                        <!-- ✅ Bubble Picker Panel (Input Bar အပေါ်မှာ) -->
+                        <!-- ✅ Bubble Picker Panel -->
                         <div class="bubble-picker" id="bubblePicker"></div>
 
                         <div class="chat-room-input-bar">
@@ -367,6 +366,13 @@
                                 </button>
                             </div>
                         </div>
+                    </div>
+                </div>
+
+                <!-- ✅ FRIENDS LIST SCREEN (Other User) -->
+                <div class="fs-screen hidden" id="fs-friends-list">
+                    <div class="friends-list-container" id="friendsListContainer">
+                        <!-- JS က items ထည့်မယ် -->
                     </div>
                 </div>
 
@@ -4834,6 +4840,150 @@ body {
         padding: 12px 14px;
         font-size: 12px;
     }
+}
+
+/* ============================================================
+   ✅ OTHER USER PROFILE -- ID + Edit Profile ဖျောက်
+   ============================================================ */
+#fs-profile.viewing-other .profile-id {
+    display: none !important;
+}
+#fs-profile.viewing-other .profile-edit-btn-wrapper {
+    display: none !important;
+}
+#fs-profile.viewing-other .friends-count {
+    cursor: pointer;
+}
+#fs-profile.viewing-other .friends-count:active {
+    opacity: 0.7;
+}
+
+/* ============================================================
+   ✅ FRIENDS LIST SCREEN (Other User's Friends)
+   ============================================================ */
+.friends-list-container {
+    width: 100%;
+    height: 100%;
+    padding: 16px 14px;
+    background: var(--bg-body);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.friends-list-empty {
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 14px;
+    padding: 40px 20px;
+}
+
+.friend-list-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    animation: msgPop 0.2s ease;
+}
+
+.friend-list-avatar-wrap {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    position: relative;
+    flex-shrink: 0;
+    background: var(--bg-input);
+    overflow: visible;
+    cursor: pointer;
+}
+
+.friend-list-avatar-wrap img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    display: block;
+}
+
+.friend-list-frame {
+    position: absolute;
+    top: -6px;
+    left: -6px;
+    width: calc(100% + 12px);
+    height: calc(100% + 12px);
+    border-radius: 50%;
+    pointer-events: none;
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+.friend-list-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.friend-list-name {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-main);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.friend-list-server {
+    font-size: 11px;
+    color: var(--accent);
+    font-weight: 600;
+    margin-top: 2px;
+}
+
+.friend-list-add-btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 20px;
+    background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    flex-shrink: 0;
+    font-family: inherit;
+    transition: all 0.2s ease;
+}
+
+.friend-list-add-btn:active {
+    transform: scale(0.95);
+}
+
+.friend-list-add-btn:disabled,
+.friend-list-add-btn.already {
+    background: var(--bg-hover);
+    color: var(--text-muted);
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+/* ============================================================
+   ✅ RESPONSIVE -- Friends List (Mobile)
+   ============================================================ */
+@media (max-width: 480px) {
+    .friend-list-avatar-wrap {
+        width: 44px;
+        height: 44px;
+    }
+    .friend-list-name {
+        font-size: 14px;
+    }
+    .friend-list-add-btn {
+        padding: 7px 14px;
+        font-size: 11px;
+    }
 }</style><script>/* ============================================================
    FILE: script.js (FULL VERSION - online inside users only)
    ============================================================ */
@@ -7703,7 +7853,7 @@ function cleanupFriendsCache() {
 }
 
 // ============================================================
-//  MESSAGES CACHE
+//  MESSAGES CACHE -- QUEUE SYSTEM
 // ============================================================
 function getMessagesKey(serverId, userId) { return 'messages_' + serverId + ':' + userId; }
 
@@ -7713,29 +7863,70 @@ function getMessagesWith(serverId, userId) {
     }).catch(function() { return []; });
 }
 
+var messageSaveQueue = Promise.resolve();
+
 function saveMessageToLocalDB(msg) {
+    messageSaveQueue = messageSaveQueue.then(function() {
+        return doSaveMessage(msg);
+    }).catch(function(err) {
+        console.error('saveMessage error:', err);
+    });
+    return messageSaveQueue;
+}
+
+function doSaveMessage(msg) {
     var friendId = msg.type === 'sent' ? msg.receiverId : msg.senderId;
     var friendServer = msg.type === 'sent' ? msg.receiverServer : msg.senderServer;
     var key = getMessagesKey(friendServer, friendId);
+
     return getFromDB(key).then(function(msgs) {
         var messages = Array.isArray(msgs) ? msgs : [];
         var idx = messages.findIndex(function(m) { return m.messageId === msg.messageId; });
-        if (idx >= 0) { messages[idx] = msg; } else { messages.push(msg); }
+        if (idx >= 0) {
+            messages[idx] = Object.assign({}, messages[idx], msg);
+        } else {
+            messages.push(msg);
+        }
         messages.sort(function(a, b) { return a.timestamp - b.timestamp; });
         return setToDB(key, messages);
     });
 }
 
+var seenUpdateQueue = Promise.resolve();
+
 function updateMessageSeen(serverId, userId, messageId) {
+    seenUpdateQueue = seenUpdateQueue.then(function() {
+        return doUpdateSeen(serverId, userId, messageId);
+    }).catch(function(err) {
+        console.error('updateSeen error:', err);
+    });
+    return seenUpdateQueue;
+}
+
+function doUpdateSeen(serverId, userId, messageId) {
     var key = getMessagesKey(serverId, userId);
     return getFromDB(key).then(function(msgs) {
         var messages = Array.isArray(msgs) ? msgs : [];
         var idx = messages.findIndex(function(m) { return m.messageId === messageId; });
-        if (idx >= 0) { messages[idx].seen = true; return setToDB(key, messages); }
+        if (idx >= 0) {
+            messages[idx].seen = true;
+            return setToDB(key, messages);
+        }
     });
 }
 
+var deleteMessageQueue = Promise.resolve();
+
 function deleteMessageFromLocalDB(serverId, userId, messageId) {
+    deleteMessageQueue = deleteMessageQueue.then(function() {
+        return doDeleteMessage(serverId, userId, messageId);
+    }).catch(function(err) {
+        console.error('deleteMessage error:', err);
+    });
+    return deleteMessageQueue;
+}
+
+function doDeleteMessage(serverId, userId, messageId) {
     var key = getMessagesKey(serverId, userId);
     return getFromDB(key).then(function(msgs) {
         var messages = Array.isArray(msgs) ? msgs : [];
@@ -7749,7 +7940,7 @@ function deleteAllMessagesWith(serverId, userId) {
 }
 
 // ============================================================
-//  EXTRACT USE-ONLY
+//  EXTRACT USE-ONLY -- friendsList ပါဝင်
 // ============================================================
 function extractUseOnlyData(data, serverId, serverNo, userId) {
     return {
@@ -7765,7 +7956,8 @@ function extractUseOnlyData(data, serverId, serverNo, userId) {
         backgroundUse: data.backgroundUse || '',
         bubbleUse: data.bubbleUse || '',
         blockList: Array.isArray(data.blockList) ? data.blockList : [],
-        roleUse: Array.isArray(data.roleUse) ? data.roleUse : []
+        roleUse: Array.isArray(data.roleUse) ? data.roleUse : [],
+        friendsList: Array.isArray(data.friendsList) ? data.friendsList : []
     };
 }
 
@@ -7779,6 +7971,22 @@ function fetchUserFullData(serverId, userId) {
             var server = FIREBASE_SERVERS.find(function(s){ return s.id === serverId; });
             var serverNo = server ? server.number : 1;
             resolve(extractUseOnlyData(data, serverId, serverNo, userId));
+        }).catch(reject);
+    });
+}
+
+function fetchUserFullDataWithFriends(serverId, userId) {
+    return new Promise(function(resolve, reject) {
+        var db = getDbForServer(serverId);
+        if (!db) { reject(new Error('DB not available')); return; }
+        db.ref('users/' + userId).once('value').then(function(snap) {
+            var data = snap.val();
+            if (!data) { reject(new Error('User not found')); return; }
+            var server = FIREBASE_SERVERS.find(function(s){ return s.id === serverId; });
+            var serverNo = server ? server.number : 1;
+            var fullData = extractUseOnlyData(data, serverId, serverNo, userId);
+            fullData.friendsList = Array.isArray(data.friendsList) ? data.friendsList : [];
+            resolve(fullData);
         }).catch(reject);
     });
 }
@@ -7866,7 +8074,6 @@ function renderSearchResult() {
         if (mark) markHtml = '<span class="search-user-mark"><img src="' + mark.image + '" /></span>';
     }
 
-    // ✅ Online status -- Search Result မှာ သေးသေး
     var onlineHtml = data.online
         ? '<span class="search-user-online">Online</span>'
         : '<span class="search-user-online offline">Offline</span>';
@@ -8069,7 +8276,7 @@ function stopFriendsListListener() {
 }
 
 // ============================================================
-//  CHAT LIST -- ✅ Online Dot သေးသေး
+//  CHAT LIST -- Online Dot ဖျောက် + Avatar နှိပ် → Profile
 // ============================================================
 function renderChatList() {
     var listEl = document.getElementById('chatList');
@@ -8106,12 +8313,6 @@ function renderChatList() {
                 if (mark) markHtml = '<img src="' + mark.image + '" />';
             }
 
-            // ✅ Online Dot (Avatar ပေါ်မှာ သေးသေး)
-            var onlineDotHtml = online
-                ? '<span class="chat-list-online-dot"></span>'
-                : '';
-
-            // ✅ Online Text သေးသေး
             var onlineTextHtml = online
                 ? '<span class="chat-list-online-text online">Online</span>'
                 : '<span class="chat-list-online-text">Offline</span>';
@@ -8120,7 +8321,6 @@ function renderChatList() {
                 '<div class="chat-list-avatar-wrap">' +
                     '<img class="chat-list-avatar" src="' + avatar + '" alt="avatar" />' +
                     frameHtml +
-                    onlineDotHtml +
                 '</div>' +
                 '<div class="chat-list-info">' +
                     '<div class="chat-list-top">' +
@@ -8138,6 +8338,15 @@ function renderChatList() {
             row.addEventListener('click', function() {
                 openChatRoom({ serverId: friend.serverId, userId: friend.userId, serverNo: friend.serverNo });
             });
+
+            var avatarWrap = row.querySelector('.chat-list-avatar-wrap');
+            if (avatarWrap) {
+                avatarWrap.style.cursor = 'pointer';
+                avatarWrap.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    viewOtherUserProfile(friend.serverId, friend.userId);
+                });
+            }
 
             listEl.appendChild(row);
             updateChatListPreview(friend.serverId, friend.userId, rowId);
@@ -8181,7 +8390,7 @@ function openChatRoom(target) {
     frameEl.style.backgroundImage = 'none';
     nameEl.textContent = 'Loading...';
     markEl.innerHTML = '';
-    statusEl.textContent = 'offline';
+    statusEl.textContent = 'Offline';
     statusEl.classList.remove('online');
     messagesEl.innerHTML = '<div class="chat-empty-state"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#5a5a6a" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>မက်ဆေ့ချ် စတင်ရန် ရေးပါ</span></div>';
 
@@ -8230,7 +8439,6 @@ function openChatRoom(target) {
         });
     }
 
-    // ✅ IndexedDB ကနေ messages ဆွဲ
     getMessagesWith(target.serverId, target.userId).then(function(messages) {
         messagesEl.innerHTML = '';
         if (messages.length === 0) {
@@ -8239,12 +8447,10 @@ function openChatRoom(target) {
         }
         messages.forEach(function(msg) { displayMessage(msg); });
 
-        // ✅ ချောမွေ့စွာ အောက်ဆုံးကို scroll
         setTimeout(function() {
             messagesEl.scrollTo({ top: messagesEl.scrollHeight, behavior: 'smooth' });
         }, 50);
 
-        // ✅ Received message များသာ Seen ပြ
         messages.forEach(function(msg) {
             if (msg.type === 'received' && !msg.seen) {
                 markAsSeenAndDelete(msg.messageId, msg.serverId, target.serverId, target.userId);
@@ -8253,6 +8459,20 @@ function openChatRoom(target) {
     });
 
     startChatRoomMessageListeners(target);
+
+    setTimeout(function() {
+        var chatRoomAvatar = document.querySelector('.chat-room-avatar');
+        if (chatRoomAvatar && !chatRoomAvatar.dataset.profileBound) {
+            chatRoomAvatar.dataset.profileBound = 'true';
+            chatRoomAvatar.style.cursor = 'pointer';
+            chatRoomAvatar.addEventListener('click', function(e) {
+                e.stopPropagation();
+                if (currentChatTarget) {
+                    viewOtherUserProfile(currentChatTarget.serverId, currentChatTarget.userId);
+                }
+            });
+        }
+    }, 100);
 }
 
 function updateChatBlockUI() {
@@ -8361,7 +8581,6 @@ function applyChatRoomData(data) {
         else frameEl.style.backgroundImage = 'none';
     } else frameEl.style.backgroundImage = 'none';
 
-    // ✅ Status -- Online / Offline (dot ပါ)
     if (data.online) {
         statusEl.textContent = 'Online';
         statusEl.classList.add('online');
@@ -8372,7 +8591,7 @@ function applyChatRoomData(data) {
 }
 
 // ============================================================
-//  ✅ DISPLAY MESSAGE -- Reply Quote (အပေါ်) + Bubble (အောက်)
+//  DISPLAY MESSAGE
 // ============================================================
 function displayMessage(msg) {
     var messagesEl = document.getElementById('chatRoomMessages');
@@ -8389,12 +8608,10 @@ function displayMessage(msg) {
 
     var isSent = msg.type === 'sent';
 
-    // ✅ Wrapper -- Reply Quote + Bubble ကို ခွဲထားဖို့
     var wrapper = document.createElement('div');
     wrapper.className = 'chat-message-wrapper ' + (isSent ? 'sent' : 'received');
     wrapper.dataset.messageId = msg.messageId;
 
-    // ✅ ① Reply Quote (အပေါ်မှာ) -- Bubble အပြင်မှာ
     if (msg.replyTo && msg.replyTo.messageId) {
         var replyQuote = document.createElement('div');
         replyQuote.className = 'msg-reply-quote';
@@ -8417,7 +8634,6 @@ function displayMessage(msg) {
         wrapper.appendChild(replyQuote);
     }
 
-    // ✅ ② Message Bubble (အောက်မှာ) -- Reply Quote နဲ့ သီးသန့်
     var msgDiv = document.createElement('div');
     msgDiv.className = 'chat-message ' + (isSent ? 'sent' : 'received');
 
@@ -8581,7 +8797,7 @@ function fallbackCopyText(text) {
 }
 
 // ============================================================
-//  ✅ DELETE ONE MESSAGE
+//  DELETE ONE MESSAGE
 // ============================================================
 function deleteOneMessage(msg) {
     if (!confirm('ဒီ message ကို ဖျက်မှာ သေချာလား?')) return;
@@ -8634,7 +8850,7 @@ function showToast(message) {
 }
 
 // ============================================================
-//  ✅ SEND MESSAGE
+//  SEND MESSAGE
 // ============================================================
 function sendMessage() {
     if (iAmBlockedByThem) {
@@ -8734,7 +8950,7 @@ function generateMessageId() {
 }
 
 // ============================================================
-//  ✅ SEEN + DELETE -- Receiver သာ
+//  SEEN + DELETE -- Receiver သာ
 // ============================================================
 function markAsSeenAndDelete(messageId, serverId, friendServer, friendId) {
     updateMessageSeen(friendServer, friendId, messageId);
@@ -9150,6 +9366,326 @@ window.goOffline = goOffline;
 window.syncFriendsFromFirebase = syncFriendsFromFirebase;
 
 // ============================================================
+//  ✅ OTHER USER PROFILE -- Cache Only (Firebase မဆွဲ)
+// ============================================================
+var viewingUserId = null;
+var viewingUserServerId = null;
+
+function viewOtherUserProfile(serverId, userId) {
+    if (!currentUser || !currentServerId) return;
+
+    // ✅ ကိုယ့်ကိုယ်ကို နှိပ်ရင် ကိုယ့် Profile ပြ
+    if (serverId === currentServerId && userId === currentUser.userId) {
+        loadProfileData();
+        openFullscreen('Profile', 'fs-profile');
+        return;
+    }
+
+    viewingUserId = userId;
+    viewingUserServerId = serverId;
+
+    // ✅ Cache ကနေ သာ ပြ -- Firebase မဆွဲ
+    getFriendFromCache(serverId, userId).then(function(cached) {
+        if (cached) {
+            renderOtherUserProfile(cached);
+        } else {
+            // Cache မရှိရင် error
+            alert('Profile မရပါ');
+        }
+    });
+}
+
+function renderOtherUserProfile(data) {
+    var profileScreen = document.getElementById('fs-profile');
+    if (!profileScreen) return;
+
+    profileScreen.classList.add('viewing-other');
+
+    var avatar = data.avatar || 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"%3E%3Ccircle cx="50" cy="50" r="45" fill="%2322222e"/%3E%3Ccircle cx="50" cy="35" r="18" fill="%235a5a6a"/%3E%3Cpath d="M20 75c0-18 12-30 30-30s30 12 30 30" fill="%235a5a6a"/%3E%3C/svg%3E';
+    document.getElementById('fsProfileAvatar').src = avatar;
+
+    document.getElementById('fsProfileName').textContent = data.name || 'Player';
+
+    var markEl = document.getElementById('fsProfileMark');
+    if (data.markUse) {
+        var mark = MARK_CONFIG.marks.find(function(m){ return String(m.id) === String(data.markUse); });
+        if (mark) {
+            markEl.innerHTML = '<img src="' + mark.image + '" style="width:22px;height:22px;border-radius:50%;" />';
+            markEl.style.display = 'inline-flex';
+            markEl.onclick = function(e) { e.stopPropagation(); showMarkPopup(mark); };
+        } else {
+            markEl.style.display = 'none';
+        }
+    } else {
+        markEl.style.display = 'none';
+    }
+
+    document.getElementById('fsProfileId').textContent = 'ID ' + (data.userId || '');
+
+    var server = FIREBASE_SERVERS.find(function(s){ return s.id === data.serverId; });
+    document.getElementById('fsProfileServer').textContent = server ? server.name : ('Server ' + data.serverNo);
+
+    // ✅ Friends Count
+    var friendsEl = document.getElementById('fsProfileFriends');
+    var friendsList = Array.isArray(data.friendsList) ? data.friendsList : [];
+    friendsEl.textContent = 'Friends ' + friendsList.length;
+    friendsEl.style.cursor = 'pointer';
+    friendsEl.onclick = function(e) {
+        e.stopPropagation();
+        viewUserFriendsList(data.serverId, data.userId, data.name);
+    };
+
+    var bioEl = document.getElementById('fsProfileBio');
+    if (data.bio && data.bio.trim() !== '') {
+        bioEl.innerHTML = escapeHtml(data.bio);
+    } else {
+        bioEl.innerHTML = '<span class="bio-placeholder">No bio yet...</span>';
+    }
+
+    applyOtherUserFrame(data.frameUse);
+    applyOtherUserBanner(data.bannerUse);
+    applyOtherUserBackground(data.backgroundUse);
+
+    loadOtherUserRoles(data.roleUse);
+
+    openFullscreen('Profile', 'fs-profile');
+}
+
+function applyOtherUserFrame(frameId) {
+    var overlay = document.getElementById('profileFrameOverlay');
+    if (!overlay) return;
+    if (!frameId) { overlay.style.backgroundImage = 'none'; return; }
+    var frame = FRAME_CONFIG.frames.find(function(f){ return f.id === frameId; });
+    if (frame) {
+        overlay.style.backgroundImage = 'url("' + frame.image + '")';
+        overlay.style.backgroundSize = 'contain';
+        overlay.style.backgroundPosition = 'center';
+        overlay.style.backgroundRepeat = 'no-repeat';
+    } else {
+        overlay.style.backgroundImage = 'none';
+    }
+}
+
+function applyOtherUserBanner(bannerId) {
+    var bannerEl = document.getElementById('profileBanner');
+    if (!bannerEl) return;
+    if (!bannerId) {
+        bannerEl.style.backgroundImage = 'linear-gradient(135deg, #1a1a2e, #16213e, #0f3460)';
+        return;
+    }
+    var banner = BANNER_CONFIG.banners.find(function(b){ return b.id === bannerId; });
+    if (banner) {
+        bannerEl.style.backgroundImage = 'url("' + banner.image + '")';
+        bannerEl.style.backgroundSize = 'cover';
+        bannerEl.style.backgroundPosition = 'center';
+    } else {
+        bannerEl.style.backgroundImage = 'linear-gradient(135deg, #1a1a2e, #16213e, #0f3460)';
+    }
+}
+
+function applyOtherUserBackground(bgId) {
+    var bgSection = document.getElementById('profileBackgroundSection');
+    if (!bgSection) return;
+    if (!bgId) { bgSection.style.backgroundImage = 'none'; return; }
+    var bg = BACKGROUND_CONFIG.backgrounds.find(function(b){ return b.id === bgId; });
+    if (bg) {
+        bgSection.style.backgroundImage = 'url("' + bg.image + '")';
+        bgSection.style.backgroundSize = 'cover';
+        bgSection.style.backgroundPosition = 'center';
+    } else {
+        bgSection.style.backgroundImage = 'none';
+    }
+}
+
+function loadOtherUserRoles(roleUse) {
+    var grid = document.getElementById('profileRoleGrid');
+    if (!grid) return;
+    var roles = ROLE_CONFIG.roles;
+    var equippedRoles = Array.isArray(roleUse) ? roleUse : [];
+    grid.innerHTML = '';
+    var maxSlots = 6;
+    for (var i = 0; i < maxSlots; i++) {
+        var slot = document.createElement('div');
+        slot.className = 'profile-role-slot';
+        var equippedRoleId = equippedRoles[i] || null;
+        var role = null;
+        if (equippedRoleId) {
+            role = roles.find(function(r) { return r.id === equippedRoleId; });
+        }
+        if (role) {
+            var img = document.createElement('img');
+            img.src = role.image;
+            img.alt = role.name;
+            img.className = 'role-image';
+            slot.appendChild(img);
+            var tag = document.createElement('div');
+            tag.className = 'role-name-tag';
+            tag.textContent = role.name;
+            slot.appendChild(tag);
+        } else {
+            slot.classList.add('empty');
+            var emptyIcon = document.createElement('span');
+            emptyIcon.className = 'empty-slot-icon';
+            emptyIcon.textContent = '+';
+            slot.appendChild(emptyIcon);
+        }
+        grid.appendChild(slot);
+    }
+}
+
+// ============================================================
+//  ✅ VIEW USER'S FRIENDS LIST -- Firebase ဆွဲ
+// ============================================================
+function viewUserFriendsList(serverId, userId, userName) {
+    var container = document.getElementById('friendsListContainer');
+    if (!container) return;
+
+    container.innerHTML = '<div class="friends-list-empty">Loading friends...</div>';
+    openFullscreen(userName + "'s Friends", 'fs-friends-list');
+
+    // ✅ Firebase ကနေ Friends List ဆွဲ
+    var db = getDbForServer(serverId);
+    if (!db) {
+        container.innerHTML = '<div class="friends-list-empty">Database error</div>';
+        return;
+    }
+
+    db.ref('users/' + userId + '/friendsList').once('value').then(function(snap) {
+        var list = snap.val();
+        if (!Array.isArray(list)) {
+            list = list ? Object.keys(list).map(function(k){ return list[k]; }) : [];
+        }
+
+        if (list.length === 0) {
+            container.innerHTML = '<div class="friends-list-empty">No friends yet</div>';
+            return;
+        }
+
+        container.innerHTML = '';
+
+        list.forEach(function(entry) {
+            var friendServerId = entry.serverId;
+            var friendUserId = entry.userId;
+
+            // ✅ Friend Data ကို Cache မှာ ရှိရင် Cache ကနေ၊ မရှိရင် Firebase
+            getFriendFromCache(friendServerId, friendUserId).then(function(fCached) {
+                if (fCached) {
+                    renderFriendListItem(container, fCached, friendServerId, friendUserId);
+                } else {
+                    var friendDb = getDbForServer(friendServerId);
+                    if (!friendDb) return;
+                    friendDb.ref('users/' + friendUserId).once('value').then(function(fSnap) {
+                        var fData = fSnap.val();
+                        if (!fData) return;
+                        var server = FIREBASE_SERVERS.find(function(s){ return s.id === friendServerId; });
+                        var serverNo = server ? server.number : 1;
+                        var fullData = extractUseOnlyData(fData, friendServerId, serverNo, friendUserId);
+                        saveFriendToCache(fullData);
+                        renderFriendListItem(container, fullData, friendServerId, friendUserId);
+                    }).catch(function(err) { console.warn(err); });
+                }
+            });
+        });
+    }).catch(function(err) {
+        console.error('Friends list fetch error:', err);
+        container.innerHTML = '<div class="friends-list-empty">Failed to load</div>';
+    });
+}
+
+// ✅ Friend Row တစ်ခု Render
+function renderFriendListItem(container, fData, friendServerId, friendUserId) {
+    var server = FIREBASE_SERVERS.find(function(s){ return s.id === friendServerId; });
+    var serverNo = fData.serverNo || (server ? server.number : 1);
+
+    var item = document.createElement('div');
+    item.className = 'friend-list-item';
+
+    var frameHtml = '';
+    if (fData.frameUse) {
+        var frame = FRAME_CONFIG.frames.find(function(f){ return f.id === fData.frameUse; });
+        if (frame) frameHtml = '<div class="friend-list-frame" style="background-image:url(\'' + frame.image + '\')"></div>';
+    }
+
+    var avatar = fData.avatar || 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 100 100"%3E%3Ccircle cx="50" cy="50" r="45" fill="%2322222e"/%3E%3C/svg%3E';
+
+    // ✅ ကိုယ်ပါနေလား စစ်
+    var iAmThisFriend = (friendServerId === currentServerId && friendUserId === currentUser.userId);
+    var alreadyFriend = isFriend(friendServerId, friendUserId);
+
+    var addBtnHtml = '';
+
+    if (iAmThisFriend) {
+        addBtnHtml = '<button class="friend-list-add-btn already" disabled>You</button>';
+    } else if (alreadyFriend) {
+        addBtnHtml = '<button class="friend-list-add-btn already" disabled>Already</button>';
+    } else {
+        addBtnHtml = '<button class="friend-list-add-btn" data-server="' + friendServerId + '" data-user="' + friendUserId + '">Add</button>';
+    }
+
+    item.innerHTML =
+        '<div class="friend-list-avatar-wrap">' +
+            '<img src="' + avatar + '" alt="avatar" />' +
+            frameHtml +
+        '</div>' +
+        '<div class="friend-list-info">' +
+            '<div class="friend-list-name">' + escapeHtml(fData.name || 'Player') + '</div>' +
+            '<div class="friend-list-server">Server ' + serverNo + '</div>' +
+        '</div>' +
+        addBtnHtml;
+
+    // ✅ Avatar နှိပ်ရင် Profile ကြည့် (Cache ကနေ)
+    var avatarWrap = item.querySelector('.friend-list-avatar-wrap');
+    avatarWrap.addEventListener('click', function() {
+        viewOtherUserProfile(friendServerId, friendUserId);
+    });
+
+    // ✅ Add နှိပ်ရင် Friend Add
+    var addBtn = item.querySelector('.friend-list-add-btn:not(.already)');
+    if (addBtn) {
+        addBtn.addEventListener('click', function() {
+            addFriendAndSync(fData);
+            addBtn.textContent = 'Already';
+            addBtn.classList.add('already');
+            addBtn.disabled = true;
+        });
+    }
+
+    container.appendChild(item);
+}
+
+// ============================================================
+//  ✅ HOOKS -- Profile Screen ပိတ်ရင် viewing-other class ဖျက်
+// ============================================================
+var _origCloseFullscreen_profile = closeFullscreen;
+closeFullscreen = function() {
+    var profileScreen = document.getElementById('fs-profile');
+    if (profileScreen) profileScreen.classList.remove('viewing-other');
+    viewingUserId = null;
+    viewingUserServerId = null;
+    _origCloseFullscreen_profile();
+};
+
+var _origGoBackFullscreen_profile = goBackFullscreen;
+goBackFullscreen = function() {
+    var currentFs = fullscreenStack[fullscreenStack.length - 1];
+    if (currentFs && currentFs.screenId === 'fs-friends-list') {
+        var prev = fullscreenStack[fullscreenStack.length - 2];
+        if (prev && prev.screenId === 'fs-profile' && viewingUserId) {
+            var profileScreen = document.getElementById('fs-profile');
+            if (profileScreen) profileScreen.classList.add('viewing-other');
+        }
+    } else {
+        var profileScreen = document.getElementById('fs-profile');
+        if (profileScreen && currentFs && currentFs.screenId !== 'fs-profile') {
+            profileScreen.classList.remove('viewing-other');
+            viewingUserId = null;
+            viewingUserServerId = null;
+        }
+    }
+    _origGoBackFullscreen_profile();
+};
+
+// ============================================================
 //  HOOKS
 // ============================================================
 var _origEnterApp_final = enterApp;
@@ -9206,7 +9742,7 @@ goBackFullscreen = function() {
     _origGoBackFullscreen_final();
 };
 
-console.log('✅ STAR ARCADE -- Online Dot + Smooth Scroll + Reply Fix Loaded');
+console.log('✅ STAR ARCADE -- Profile Cache Only + Friends List Firebase Loaded');
 
 // ============================================================
 //  INIT
