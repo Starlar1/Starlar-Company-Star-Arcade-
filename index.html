@@ -3692,6 +3692,41 @@ body {
     border-radius: 8px;
 }
 
+/* ✅ Online သေးသေး (Search Card) */
+.search-user-online {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 10px;
+    color: #44ff88;
+    font-weight: 600;
+}
+
+.search-user-online::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #44ff88;
+    box-shadow: 0 0 5px rgba(68, 255, 136, 0.7);
+    animation: onlinePulse 2s ease-in-out infinite;
+}
+
+.search-user-online.offline {
+    color: var(--text-muted);
+}
+
+.search-user-online.offline::before {
+    background: var(--text-muted);
+    box-shadow: none;
+    animation: none;
+}
+
+@keyframes onlinePulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.6; transform: scale(0.85); }
+}
+
 .search-user-play {
     font-size: 11px;
     color: var(--text-muted);
@@ -3746,6 +3781,7 @@ body {
     overflow-y: auto;
     background: var(--bg-body);
     padding-bottom: 8px;
+    -webkit-overflow-scrolling: touch;
 }
 
 .chat-list-item {
@@ -3792,17 +3828,19 @@ body {
     background-repeat: no-repeat;
 }
 
+/* ✅ Online Dot သေးသေး (Chat List) */
 .chat-list-online-dot {
     position: absolute;
     bottom: 1px;
     right: 1px;
-    width: 13px;
-    height: 13px;
+    width: 10px;
+    height: 10px;
     border-radius: 50%;
     background: #44ff88;
     border: 2px solid var(--bg-body);
-    box-shadow: 0 0 6px rgba(68, 255, 136, 0.7);
+    box-shadow: 0 0 5px rgba(68, 255, 136, 0.7);
     z-index: 5;
+    animation: onlinePulse 2s ease-in-out infinite;
 }
 
 .chat-list-info {
@@ -3849,6 +3887,37 @@ body {
 }
 .chat-list-mark img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
 
+/* ✅ Online Text သေးသေး (Chat List) */
+.chat-list-online-text {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin-left: 6px;
+    flex-shrink: 0;
+}
+
+.chat-list-online-text::before {
+    content: '';
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--text-muted);
+    flex-shrink: 0;
+}
+
+.chat-list-online-text.online {
+    color: #44ff88;
+}
+
+.chat-list-online-text.online::before {
+    background: #44ff88;
+    box-shadow: 0 0 4px rgba(68, 255, 136, 0.7);
+    animation: onlinePulse 2s ease-in-out infinite;
+}
+
 .chat-list-time {
     font-size: 11px;
     color: var(--text-muted);
@@ -3893,6 +3962,7 @@ body {
     width: 100%;
     height: 100%;
     background: var(--bg-body);
+    overflow: hidden;  /* ✅ အရေးကြီး */
 }
 
 .chat-room-topbar {
@@ -3986,8 +4056,34 @@ body {
 }
 .chat-room-mark img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
 
-.chat-room-status { font-size: 11px; color: var(--text-muted); }
-.chat-room-status.online { color: #44ff88; }
+/* ✅ Status -- သေးသေး + Dot ပါ */
+.chat-room-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--text-muted);
+}
+
+.chat-room-status::before {
+    content: '';
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--text-muted);
+    flex-shrink: 0;
+}
+
+.chat-room-status.online {
+    color: #44ff88;
+}
+
+.chat-room-status.online::before {
+    background: #44ff88;
+    box-shadow: 0 0 5px rgba(68, 255, 136, 0.8);
+    animation: onlinePulse 2s ease-in-out infinite;
+}
 
 .chat-room-menu {
     width: 38px;
@@ -4005,14 +4101,35 @@ body {
 }
 .chat-room-menu:active { background: var(--bg-hover); transform: scale(0.92); }
 
+/* ✅ Scroll Area -- ချောမွေ့အောင် */
 .chat-room-messages {
     flex: 1;
+    min-height: 0;                          /* ✅ အရေးကြီး -- flex မှာ scroll ဖြစ်ဖို့ */
     overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;       /* ✅ iOS smooth */
+    overscroll-behavior: contain;            /* ✅ မိခင်ဆီ scroll မကူး */
+    scroll-behavior: smooth;
     padding: 16px 14px;
     display: flex;
     flex-direction: column;
     gap: 8px;
     background: var(--bg-body);
+}
+
+/* ✅ Scrollbar (thin + လှ) */
+.chat-room-messages::-webkit-scrollbar {
+    width: 3px;
+}
+.chat-room-messages::-webkit-scrollbar-track {
+    background: transparent;
+}
+.chat-room-messages::-webkit-scrollbar-thumb {
+    background: var(--border-light);
+    border-radius: 3px;
+}
+.chat-room-messages::-webkit-scrollbar-thumb:hover {
+    background: var(--text-muted);
 }
 
 .chat-empty-state {
@@ -4028,16 +4145,31 @@ body {
     padding: 20px;
 }
 
-.chat-message {
+/* ============================================================
+   ✅ CHAT MESSAGE WRAPPER (Reply + Bubble ခွဲ)
+   ============================================================ */
+.chat-message-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
     max-width: 75%;
-    padding: 9px 13px;
-    border-radius: 16px;
-    font-size: 14px;
-    line-height: 1.45;
-    word-break: break-word;
     animation: msgPop 0.2s ease;
-    cursor: pointer;
-    position: relative;
+}
+
+.chat-message-wrapper.sent {
+    align-self: flex-end;
+    align-items: flex-end;
+}
+
+.chat-message-wrapper.received {
+    align-self: flex-start;
+    align-items: flex-start;
+}
+
+/* Wrapper ထဲက message က wrapper width ကို လိုက် */
+.chat-message-wrapper .chat-message {
+    max-width: 100%;
+    animation: none;
 }
 
 @keyframes msgPop {
@@ -4045,15 +4177,26 @@ body {
     to { opacity: 1; transform: scale(1); }
 }
 
+/* ============================================================
+   CHAT MESSAGE (Bubble ပုံမှန်)
+   ============================================================ */
+.chat-message {
+    padding: 9px 13px;
+    border-radius: 16px;
+    font-size: 14px;
+    line-height: 1.45;
+    word-break: break-word;
+    cursor: pointer;
+    position: relative;
+}
+
 .chat-message.sent {
-    align-self: flex-end;
     background: linear-gradient(135deg, var(--accent), var(--accent-dark));
     color: #fff;
     border-bottom-right-radius: 4px;
 }
 
 .chat-message.received {
-    align-self: flex-start;
     background: var(--bg-card);
     color: var(--text-main);
     border-bottom-left-radius: 4px;
@@ -4069,7 +4212,8 @@ body {
 }
 
 /* ✅ Highlight (Reply နှိပ်ရင် စာကို highlight) */
-.chat-message.highlight {
+.chat-message.highlight,
+.chat-message-wrapper.highlight {
     animation: highlightPulse 1.5s ease;
 }
 
@@ -4096,8 +4240,8 @@ body {
     padding: 14px 18px;
     min-height: 60px;
     min-width: 80px;
-    max-width: 75%;
-    margin: 4px 0;
+    max-width: 100%;
+    margin: 0;
     border-radius: 0;
     position: relative;
 }
@@ -4123,25 +4267,24 @@ body {
 
 .chat-message.has-bubble.sent {
     color: #fff;
-    align-self: flex-end;
 }
 
 .chat-message.has-bubble.received {
     color: var(--text-main);
-    align-self: flex-start;
 }
 
 /* ============================================================
-   ✅ REPLY QUOTE (Message ထဲမှာ ပြတဲ့ အပိုင်း)
+   ✅ REPLY QUOTE (Bubble အပြင်မှာ -- အပေါ်မှာ)
    ============================================================ */
 .msg-reply-quote {
     background: rgba(255, 255, 255, 0.08);
     border-left: 3px solid var(--accent);
-    border-radius: 6px;
+    border-radius: 8px;
     padding: 6px 10px;
-    margin-bottom: 6px;
     cursor: pointer;
     transition: background 0.15s ease;
+    max-width: 100%;
+    min-width: 100px;
 }
 
 .msg-reply-quote:hover {
@@ -4161,25 +4304,21 @@ body {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width: 100%;
+    max-width: 220px;
 }
 
-.chat-message.sent .msg-reply-quote {
-    background: rgba(0, 0, 0, 0.2);
+/* Sent (ကိုယ့်စာ) ရဲ့ Reply Quote -- ပိုလင်း */
+.chat-message-wrapper.sent .msg-reply-quote {
+    background: rgba(255, 109, 31, 0.15);
     border-left-color: rgba(255, 255, 255, 0.6);
 }
 
-.chat-message.sent .msg-reply-name {
-    color: #fff;
+.chat-message-wrapper.sent .msg-reply-name {
+    color: #ffb37a;
 }
 
-.chat-message.sent .msg-reply-text {
+.chat-message-wrapper.sent .msg-reply-text {
     color: rgba(255, 255, 255, 0.85);
-}
-
-.chat-message.has-bubble .msg-reply-quote {
-    position: relative;
-    z-index: 1;
 }
 
 /* ============================================================
@@ -4482,7 +4621,7 @@ body {
 }
 
 /* ============================================================
-   CHAT INPUT BAR -- 3 Elements + Multiline
+   CHAT INPUT BAR
    ============================================================ */
 .chat-room-input-bar {
     display: flex;
@@ -4624,7 +4763,9 @@ body {
 
     .chat-room-avatar { width: 34px; height: 34px; }
     .chat-room-name { font-size: 14px; }
-    .chat-message { font-size: 13px; max-width: 82%; }
+    .chat-message { font-size: 13px; }
+
+    .chat-message-wrapper { max-width: 82%; }
 
     .chat-msg-btn, .chat-clip-btn, .chat-send-btn {
         width: 38px;
@@ -4654,6 +4795,11 @@ body {
     }
     .chat-message.has-bubble .msg-text {
         font-size: 13px;
+    }
+
+    .msg-reply-text {
+        max-width: 180px;
+        font-size: 11px;
     }
 
     .chat-room-menu-popup {
@@ -7720,6 +7866,11 @@ function renderSearchResult() {
         if (mark) markHtml = '<span class="search-user-mark"><img src="' + mark.image + '" /></span>';
     }
 
+    // ✅ Online status -- Search Result မှာ သေးသေး
+    var onlineHtml = data.online
+        ? '<span class="search-user-online">Online</span>'
+        : '<span class="search-user-online offline">Offline</span>';
+
     var avatar = data.avatar || 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 100 100"%3E%3Ccircle cx="50" cy="50" r="45" fill="%2322222e"/%3E%3Ccircle cx="50" cy="35" r="18" fill="%235a5a6a"/%3E%3Cpath d="M20 75c0-18 12-30 30-30s30 12 30 30" fill="%235a5a6a"/%3E%3C/svg%3E';
 
     var alreadyFriend = isFriend(data.serverId, data.userId);
@@ -7738,6 +7889,7 @@ function renderSearchResult() {
                 '</div>' +
                 '<div class="search-user-meta">' +
                     '<span class="search-user-server">Server ' + data.serverNo + '</span>' +
+                    onlineHtml +
                 '</div>' +
                 (data.play ? '<div class="search-user-play">' + escapeHtml(data.play) + '</div>' : '') +
             '</div>' +
@@ -7917,7 +8069,7 @@ function stopFriendsListListener() {
 }
 
 // ============================================================
-//  CHAT LIST
+//  CHAT LIST -- ✅ Online Dot သေးသေး
 // ============================================================
 function renderChatList() {
     var listEl = document.getElementById('chatList');
@@ -7954,7 +8106,13 @@ function renderChatList() {
                 if (mark) markHtml = '<img src="' + mark.image + '" />';
             }
 
-            var onlineHtml = online
+            // ✅ Online Dot (Avatar ပေါ်မှာ သေးသေး)
+            var onlineDotHtml = online
+                ? '<span class="chat-list-online-dot"></span>'
+                : '';
+
+            // ✅ Online Text သေးသေး
+            var onlineTextHtml = online
                 ? '<span class="chat-list-online-text online">Online</span>'
                 : '<span class="chat-list-online-text">Offline</span>';
 
@@ -7962,13 +8120,14 @@ function renderChatList() {
                 '<div class="chat-list-avatar-wrap">' +
                     '<img class="chat-list-avatar" src="' + avatar + '" alt="avatar" />' +
                     frameHtml +
+                    onlineDotHtml +
                 '</div>' +
                 '<div class="chat-list-info">' +
                     '<div class="chat-list-top">' +
                         '<div class="chat-list-name-row">' +
                             '<span class="chat-list-name">' + escapeHtml(name) + '</span>' +
                             '<span class="chat-list-mark">' + markHtml + '</span>' +
-                            onlineHtml +
+                            onlineTextHtml +
                         '</div>' +
                     '</div>' +
                     '<div class="chat-list-bottom">' +
@@ -8079,7 +8238,11 @@ function openChatRoom(target) {
             return;
         }
         messages.forEach(function(msg) { displayMessage(msg); });
-        messagesEl.scrollTop = messagesEl.scrollHeight;
+
+        // ✅ ချောမွေ့စွာ အောက်ဆုံးကို scroll
+        setTimeout(function() {
+            messagesEl.scrollTo({ top: messagesEl.scrollHeight, behavior: 'smooth' });
+        }, 50);
 
         // ✅ Received message များသာ Seen ပြ
         messages.forEach(function(msg) {
@@ -8141,8 +8304,14 @@ function startChatRoomMessageListeners(target) {
                             currentChatTarget.userId === target.userId &&
                             currentChatTarget.serverId === target.serverId) {
                             displayMessage(msg);
-                            var messagesEl = document.getElementById('chatRoomMessages');
-                            messagesEl.scrollTop = messagesEl.scrollHeight;
+
+                            setTimeout(function() {
+                                var messagesEl = document.getElementById('chatRoomMessages');
+                                if (messagesEl) {
+                                    messagesEl.scrollTo({ top: messagesEl.scrollHeight, behavior: 'smooth' });
+                                }
+                            }, 30);
+
                             markAsSeenAndDelete(msg.messageId, sid, target.serverId, target.userId);
                         }
                     }
@@ -8192,17 +8361,18 @@ function applyChatRoomData(data) {
         else frameEl.style.backgroundImage = 'none';
     } else frameEl.style.backgroundImage = 'none';
 
+    // ✅ Status -- Online / Offline (dot ပါ)
     if (data.online) {
-        statusEl.textContent = 'online';
+        statusEl.textContent = 'Online';
         statusEl.classList.add('online');
     } else {
-        statusEl.textContent = 'offline';
+        statusEl.textContent = 'Offline';
         statusEl.classList.remove('online');
     }
 }
 
 // ============================================================
-//  DISPLAY MESSAGE
+//  ✅ DISPLAY MESSAGE -- Reply Quote (အပေါ်) + Bubble (အောက်)
 // ============================================================
 function displayMessage(msg) {
     var messagesEl = document.getElementById('chatRoomMessages');
@@ -8218,39 +8388,21 @@ function displayMessage(msg) {
     var timeStr = hours + ':' + minutes + ' ' + ampm;
 
     var isSent = msg.type === 'sent';
-    var msgDiv = document.createElement('div');
-    msgDiv.className = 'chat-message ' + (isSent ? 'sent' : 'received');
-    msgDiv.dataset.messageId = msg.messageId;
 
-    if (msg.bubbleId && msg.bubbleId !== '') {
-        var bubble = BUBBLE_CONFIG.bubbles.find(function(b) { return b.id === msg.bubbleId; });
-        if (bubble) {
-            msgDiv.classList.add('has-bubble');
-            msgDiv.style.setProperty('--bubble-image', 'url("' + bubble.image + '")');
-        }
-    }
+    // ✅ Wrapper -- Reply Quote + Bubble ကို ခွဲထားဖို့
+    var wrapper = document.createElement('div');
+    wrapper.className = 'chat-message-wrapper ' + (isSent ? 'sent' : 'received');
+    wrapper.dataset.messageId = msg.messageId;
 
-    var replyQuoteHtml = '';
+    // ✅ ① Reply Quote (အပေါ်မှာ) -- Bubble အပြင်မှာ
     if (msg.replyTo && msg.replyTo.messageId) {
-        replyQuoteHtml =
-            '<div class="msg-reply-quote" data-reply-id="' + msg.replyTo.messageId + '">' +
-                '<div class="msg-reply-name">' + escapeHtml(msg.replyTo.name || 'Message') + '</div>' +
-                '<div class="msg-reply-text">' + escapeHtml((msg.replyTo.text || '').substring(0, 80)) + '</div>' +
-            '</div>';
-    }
+        var replyQuote = document.createElement('div');
+        replyQuote.className = 'msg-reply-quote';
+        replyQuote.dataset.replyId = msg.replyTo.messageId;
+        replyQuote.innerHTML =
+            '<div class="msg-reply-name">' + escapeHtml(msg.replyTo.name || 'Message') + '</div>' +
+            '<div class="msg-reply-text">' + escapeHtml((msg.replyTo.text || '').substring(0, 80)) + '</div>';
 
-    msgDiv.innerHTML =
-        replyQuoteHtml +
-        '<span class="msg-text">' + escapeHtml(msg.text).replace(/\n/g, '<br>') + '</span>' +
-        '<span class="chat-message-time">' + timeStr + '</span>';
-
-    msgDiv.addEventListener('click', function(e) {
-        e.stopPropagation();
-        showMessageMenu(msg, msgDiv);
-    });
-
-    var replyQuote = msgDiv.querySelector('.msg-reply-quote');
-    if (replyQuote) {
         replyQuote.addEventListener('click', function(e) {
             e.stopPropagation();
             var replyId = replyQuote.dataset.replyId;
@@ -8261,9 +8413,33 @@ function displayMessage(msg) {
                 setTimeout(function() { targetMsg.classList.remove('highlight'); }, 1500);
             }
         });
+
+        wrapper.appendChild(replyQuote);
     }
 
-    messagesEl.appendChild(msgDiv);
+    // ✅ ② Message Bubble (အောက်မှာ) -- Reply Quote နဲ့ သီးသန့်
+    var msgDiv = document.createElement('div');
+    msgDiv.className = 'chat-message ' + (isSent ? 'sent' : 'received');
+
+    if (msg.bubbleId && msg.bubbleId !== '') {
+        var bubble = BUBBLE_CONFIG.bubbles.find(function(b) { return b.id === msg.bubbleId; });
+        if (bubble) {
+            msgDiv.classList.add('has-bubble');
+            msgDiv.style.setProperty('--bubble-image', 'url("' + bubble.image + '")');
+        }
+    }
+
+    msgDiv.innerHTML =
+        '<span class="msg-text">' + escapeHtml(msg.text).replace(/\n/g, '<br>') + '</span>' +
+        '<span class="chat-message-time">' + timeStr + '</span>';
+
+    msgDiv.addEventListener('click', function(e) {
+        e.stopPropagation();
+        showMessageMenu(msg, wrapper);
+    });
+
+    wrapper.appendChild(msgDiv);
+    messagesEl.appendChild(wrapper);
 }
 
 // ============================================================
@@ -8406,8 +8582,6 @@ function fallbackCopyText(text) {
 
 // ============================================================
 //  ✅ DELETE ONE MESSAGE
-//  -- Sent message (ကိုယ်ပို့) → IndexedDB + Firestore ဖျက်
-//  -- Received message (သူပို့) → IndexedDB သာ ဖျက်
 // ============================================================
 function deleteOneMessage(msg) {
     if (!confirm('ဒီ message ကို ဖျက်မှာ သေချာလား?')) return;
@@ -8415,16 +8589,11 @@ function deleteOneMessage(msg) {
     var target = currentChatTarget;
     if (!target) return;
 
-    // ① ကိုယ့် IndexedDB ကနေ အဲ့စာ တစ်ခုတည်း ဖျက်
     deleteMessageFromLocalDB(target.serverId, target.userId, msg.messageId)
     .then(function() {
-        // ② UI ကနေ အဲ့စာ တစ်ခုတည်း ဖျက်
         var el = document.querySelector('[data-message-id="' + msg.messageId + '"]');
         if (el) el.remove();
 
-        // ③ Sent message ဖြစ်ရင် Firestore ပါ ဖျက်
-        //    → Receiver ဆီက listener "removed" ဖြစ်
-        //    → Receiver IndexedDB မထိ (သူ့စာ သူ့မှာ ကျန်)
         if (msg.type === 'sent' && msg.serverId) {
             var fsdb = getFirestoreForServer(msg.serverId);
             if (fsdb) {
@@ -8466,10 +8635,6 @@ function showToast(message) {
 
 // ============================================================
 //  ✅ SEND MESSAGE
-//  ① Sender IndexedDB သိမ်း
-//  ② UI ချက်ချင်းပြ
-//  ③ Firestore ပို့ (receiver ဆီ)
-//  ⚠️ Sender ကို Seen မပြ -- receiver သာ Seen လုပ်
 // ============================================================
 function sendMessage() {
     if (iAmBlockedByThem) {
@@ -8524,15 +8689,18 @@ function sendMessage() {
         serverId: chosenServerId,
         type: 'sent',
         replyTo: replyTo,
-        seen: false   // ⚠️ Sender က Seen မလုပ် -- receiver သာ
+        seen: false
     };
 
-    // ① Sender IndexedDB သိမ်း
     saveMessageToLocalDB(localMsg).then(function() {
-        // ② UI ချက်ချင်းပြ
         displayMessage(localMsg);
-        var messagesEl = document.getElementById('chatRoomMessages');
-        messagesEl.scrollTop = messagesEl.scrollHeight;
+
+        setTimeout(function() {
+            var messagesEl = document.getElementById('chatRoomMessages');
+            if (messagesEl) {
+                messagesEl.scrollTo({ top: messagesEl.scrollHeight, behavior: 'smooth' });
+            }
+        }, 30);
 
         input.value = '';
         input.style.height = '';
@@ -8544,7 +8712,6 @@ function sendMessage() {
         clearReplyState();
         renderChatList();
 
-        // ③ Firestore ပို့ -- receiver ဆီ
         fsdb.collection('messages').doc(messageId).set(messageData)
         .then(function() {
             console.log('✅ Sent to Firestore:', messageId);
@@ -8568,14 +8735,10 @@ function generateMessageId() {
 
 // ============================================================
 //  ✅ SEEN + DELETE -- Receiver သာ
-//  ⚠️ Receiver က Seen ပြ → Firestore ဖျက်
-//  ⚠️ Sender ရဲ့ IndexedDB မှာ -- စာ ကျန် (သူ့စာ သူ့မှာ)
 // ============================================================
 function markAsSeenAndDelete(messageId, serverId, friendServer, friendId) {
-    // ✅ Receiver IndexedDB -- seen: true
     updateMessageSeen(friendServer, friendId, messageId);
 
-    // ✅ Receiver ကိုယ်တိုင် Firestore ဖျက်
     var fsdb = getFirestoreForServer(serverId);
     if (!fsdb) return;
     fsdb.collection('messages').doc(messageId).delete()
@@ -8587,8 +8750,6 @@ function markAsSeenAndDelete(messageId, serverId, friendServer, friendId) {
 
 // ============================================================
 //  APP MESSAGE LISTENERS
-//  -- Receiver: IndexedDB သိမ်း + Seen + Firestore ဖျက်
-//  -- Sender: Firestore ဖျက်ခံရရင် ဘာမှ မလုပ် (IndexedDB ကျန်)
 // ============================================================
 var appMessageListeners = [];
 
@@ -8600,7 +8761,6 @@ function startAppMessageListeners() {
         var fsdb = getFirestoreForServer(sid);
         if (!fsdb) return;
 
-        // ① Receiver -- ကိုယ့်ဆီ ရောက်တဲ့ စာ
         var unsub1 = fsdb.collection('messages')
             .where('receiverId', '==', currentUser.userId)
             .where('receiverServer', '==', currentServerId)
@@ -8618,8 +8778,12 @@ function startAppMessageListeners() {
                             currentChatTarget.userId === msg.senderId &&
                             currentChatTarget.serverId === msg.senderServer) {
                             displayMessage(msg);
-                            var messagesEl = document.getElementById('chatRoomMessages');
-                            if (messagesEl) messagesEl.scrollTop = messagesEl.scrollHeight;
+                            setTimeout(function() {
+                                var messagesEl = document.getElementById('chatRoomMessages');
+                                if (messagesEl) {
+                                    messagesEl.scrollTo({ top: messagesEl.scrollHeight, behavior: 'smooth' });
+                                }
+                            }, 30);
                             markAsSeenAndDelete(msg.messageId, sid, msg.senderServer, msg.senderId);
                         } else {
                             renderChatList();
@@ -8629,16 +8793,12 @@ function startAppMessageListeners() {
             }, function(err) { console.warn(err); });
         appMessageListeners.push(unsub1);
 
-        // ② Sender listener -- Firestore ဖျက်ခံရလား စစ်
-        //    ⚠️ Sender IndexedDB ကို လုံးဝ မထိ -- စာ Sender မှာ ကျန်
         var unsub2 = fsdb.collection('messages')
             .where('senderId', '==', currentUser.userId)
             .where('senderServer', '==', currentServerId)
             .onSnapshot(function(snapshot) {
                 snapshot.docChanges().forEach(function(change) {
                     if (change.type === 'removed') {
-                        // ✅ Receiver က Seen ပြပြီ → Firestore ဖျက်ခံရ
-                        // ⚠️ Sender IndexedDB ကို မထိ -- Sender စာ Sender မှာ ကျန်
                         console.log('✅ Sender: Firestore ဖျက်ခံရ -- IndexedDB ကျန်:', change.doc.id);
                     }
                 });
@@ -9046,7 +9206,7 @@ goBackFullscreen = function() {
     _origGoBackFullscreen_final();
 };
 
-console.log('✅ STAR ARCADE -- Sender Save + Seen Fix + Delete Fix Loaded');
+console.log('✅ STAR ARCADE -- Online Dot + Smooth Scroll + Reply Fix Loaded');
 
 // ============================================================
 //  INIT
