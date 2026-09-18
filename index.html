@@ -7864,8 +7864,6 @@ function logoutUser() {
     }
 })();
 
-
-
 // ============================================================
 //  FIRESTORE INITIALIZE
 // ============================================================
@@ -8146,7 +8144,7 @@ function isUserInMyBlockList(targetUserId, targetServerId) {
 }
 
 // ============================================================
-//  SEARCH
+//  SEARCH -- ✅ ပြင်ဆင်ပြီး (Realtime Database ထဲ တိုက်ရိုက်ရှာ)
 // ============================================================
 var searchResultUser = null;
 
@@ -8155,35 +8153,76 @@ function performSearch() {
     var userId = document.getElementById('searchUserId').value.trim();
     var resultEl = document.getElementById('searchResult');
 
+    // ✅ Server No. စစ်
     if (!serverNoRaw) {
-        resultEl.innerHTML = '<div class="search-empty">Server No. ရေးပါ</div>'; return;
+        resultEl.innerHTML = '<div class="search-empty">Server No. ရေးပါ</div>';
+        return;
     }
     var serverNo = parseInt(serverNoRaw);
     if (isNaN(serverNo) || serverNo <= 0) {
-        resultEl.innerHTML = '<div class="search-empty">Server No. မှန်ကန်စွာ ရေးပါ</div>'; return;
-    }
-    if (!userId) {
-        resultEl.innerHTML = '<div class="search-empty">ID ရေးပါ</div>'; return;
+        resultEl.innerHTML = '<div class="search-empty">Server No. မှန်ကန်စွာ ရေးပါ</div>';
+        return;
     }
 
+    // ✅ ID စစ်
+    if (!userId) {
+        resultEl.innerHTML = '<div class="search-empty">ID ရေးပါ</div>';
+        return;
+    }
+
+    // ✅ Server ရှား
     var server = FIREBASE_SERVERS.find(function(s) { return s.number === serverNo; });
     if (!server) {
-        resultEl.innerHTML = '<div class="search-empty">Server ' + serverNo + ' မရှိပါ</div>'; return;
+        resultEl.innerHTML = '<div class="search-empty">Server ' + serverNo + ' မရှိပါ</div>';
+        return;
     }
 
+    // ✅ ကိုယ့်ကိုယ်ကို ရှား
     if (currentUser && currentUser.userId === userId && currentServerId === server.id) {
-        resultEl.innerHTML = '<div class="search-empty">ကိုယ့်ကိုယ်ကို ရှာလို့မရပါ</div>'; return;
+        resultEl.innerHTML = '<div class="search-empty">ကိုယ့်ကိုယ်ကို ရှာလို့မရပါ</div>';
+        return;
     }
 
     resultEl.innerHTML = '<div class="search-empty">Server ' + serverNo + ' မှာ ရှာနေသည်...</div>';
 
-    fetchUserFullData(server.id, userId).then(function(data) {
-        if (isBlockedByUser(data.blockList, currentUser.userId, currentServerId)) {
-            resultEl.innerHTML = '<div class="search-empty">အကောင့် မတွေ့ပါ</div>'; return;
+    // ✅ Realtime Database ထဲ တိုက်ရိုက်ရှာ
+    var db = getDbForServer(server.id);
+    if (!db) {
+        resultEl.innerHTML = '<div class="search-empty">Server ' + serverNo + ' ချိတ်ဆက်မရပါ</div>';
+        return;
+    }
+
+    console.log('🔍 Searching Server ' + serverNo + ' (' + server.id + ') for userId:', userId);
+
+    db.ref('users/' + userId).once('value').then(function(snap) {
+        var data = snap.val();
+        
+        console.log('📦 Search result:', data ? 'FOUND' : 'NOT FOUND');
+
+        if (!data) {
+            resultEl.innerHTML = '<div class="search-empty">Server ' + serverNo + ' မှာ အကောင့် မတွေ့ပါ</div>';
+            return;
         }
-        searchResultUser = data;
+
+        // ✅ Block စစ် (သူက ငါ့ကို block ထားလား)
+        var theirBlockList = Array.isArray(data.blockList) ? data.blockList : [];
+        if (theirBlockList.length > 0) {
+            var blockedByThem = theirBlockList.some(function(b) {
+                return b.userId === currentUser.userId && b.serverId === currentServerId;
+            });
+            if (blockedByThem) {
+                resultEl.innerHTML = '<div class="search-empty">အကောင့် မတွေ့ပါ</div>';
+                return;
+            }
+        }
+
+        // ✅ Data extract
+        var fullData = extractUseOnlyData(data, server.id, server.number, userId);
+        searchResultUser = fullData;
         renderSearchResult();
-    }).catch(function() {
+
+    }).catch(function(err) {
+        console.error('❌ Search error:', err);
         resultEl.innerHTML = '<div class="search-empty">Server ' + serverNo + ' မှာ အကောင့် မတွေ့ပါ</div>';
     });
 }
