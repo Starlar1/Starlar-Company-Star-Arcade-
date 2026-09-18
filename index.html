@@ -7715,7 +7715,6 @@ function logoutUser() {
     }
 })();
 
-
 // ============================================================
 //  FIRESTORE INITIALIZE
 // ============================================================
@@ -7779,9 +7778,6 @@ function resetFirestoreStatus() {
 }
 
 function checkExpiredCooldowns() {
-    // ✅ 5h Cooldown မရှိတော့ဘူး -- Server ကုန်ရင် ချက်ချင်း Auto switch လုပ်မယ်
-    // ဒါပေမယ့် အက်ပ် ပြန်ဖွင့်တဲ့အခါ exhausted status ကို ပြန် reset လုပ်ပေးမယ်
-    // ဒါမှ Server တွေ အားလုံး ပြန်အလုပ်လုပ်နိုင်မယ်
     FIREBASE_SERVERS.forEach(function(server) {
         if (firestoreStatus[server.id] && firestoreStatus[server.id].exhausted) {
             firestoreStatus[server.id].exhausted = false;
@@ -8140,15 +8136,19 @@ function addFriendAndSync(targetData) {
     var myDb = getDbForServer(currentServerId);
     var theirDb = getDbForServer(targetData.serverId);
 
-    myDb.ref('users/' + currentUser.userId + '/friendsList').set(myList)
-    .then(function() { return theirDb.ref('users/' + targetData.userId + '/friendsList').once('value'); })
+    // ✅ ကိုယ့် friendsList ကို update သုံးပြီး ရေး
+    myDb.ref('users/' + currentUser.userId).update({ friendsList: myList })
+    .then(function() {
+        return theirDb.ref('users/' + targetData.userId + '/friendsList').once('value');
+    })
     .then(function(snap) {
         var theirList = snap.val();
         if (!Array.isArray(theirList)) theirList = theirList ? Object.keys(theirList).map(function(k){ return theirList[k]; }) : [];
         if (!theirList.some(function(f){ return f.serverId===currentServerId && f.userId===currentUser.userId; })) {
             theirList.push(myEntryForThem);
         }
-        return theirDb.ref('users/' + targetData.userId + '/friendsList').set(theirList);
+        // ✅ သူတစ်ဖက်သားရဲ့ friendsList node ကိုသာ update လုပ်
+        return theirDb.ref('users/' + targetData.userId).update({ friendsList: theirList });
     })
     .then(function() {
         return fetchUserFullData(targetData.serverId, targetData.userId);
@@ -8164,7 +8164,11 @@ function addFriendAndSync(targetData) {
         renderChatList();
         openChatRoom({ serverId: targetData.serverId, userId: targetData.userId, serverNo: targetData.serverNo });
     })
-    .catch(function(err) { console.error(err); hideLoading(); alert('ထည့်မရပါ'); });
+    .catch(function(err) {
+        console.error('addFriend error:', err);
+        hideLoading();
+        alert('ထည့်မရပါ: ' + (err.message || err.code || 'Unknown error'));
+    });
 }
 
 function deleteFriendAndSync(targetData) {
@@ -8181,15 +8185,19 @@ function deleteFriendAndSync(targetData) {
     var myDb = getDbForServer(currentServerId);
     var theirDb = getDbForServer(targetData.serverId);
 
-    myDb.ref('users/' + currentUser.userId + '/friendsList').set(myList)
-    .then(function() { return theirDb.ref('users/' + targetData.userId + '/friendsList').once('value'); })
+    // ✅ ကိုယ့် friendsList ကို update သုံးပြီး ရေး
+    myDb.ref('users/' + currentUser.userId).update({ friendsList: myList })
+    .then(function() {
+        return theirDb.ref('users/' + targetData.userId + '/friendsList').once('value');
+    })
     .then(function(snap) {
         var theirList = snap.val();
         if (!Array.isArray(theirList)) theirList = theirList ? Object.keys(theirList).map(function(k){ return theirList[k]; }) : [];
         theirList = theirList.filter(function(f) {
             return !(f.serverId === currentServerId && f.userId === currentUser.userId);
         });
-        return theirDb.ref('users/' + targetData.userId + '/friendsList').set(theirList);
+        // ✅ သူတစ်ဖက်သားရဲ့ friendsList node ကိုသာ update လုပ်
+        return theirDb.ref('users/' + targetData.userId).update({ friendsList: theirList });
     })
     .then(function() { return removeFriendFromCache(targetData.serverId, targetData.userId); })
     .then(function() {
@@ -8199,7 +8207,11 @@ function deleteFriendAndSync(targetData) {
         renderSearchResult();
         renderChatList();
     })
-    .catch(function(err) { console.error(err); hideLoading(); alert('ဖျက်မရပါ'); });
+    .catch(function(err) {
+        console.error('deleteFriend error:', err);
+        hideLoading();
+        alert('ဖျက်မရပါ: ' + (err.message || err.code || 'Unknown error'));
+    });
 }
 
 // ============================================================
@@ -8899,7 +8911,6 @@ function sendMessage() {
 
     var chosenServerId = pickRandomFirestoreServer();
     if (!chosenServerId) {
-        // ✅ Server အားလုံး ကုန်နေရင် တိတ်တဆိတ် ပြန် reset လုပ်ပြီး ထပ်စမ်း
         resetFirestoreStatus();
         chosenServerId = pickRandomFirestoreServer();
         if (!chosenServerId) {
@@ -8936,7 +8947,6 @@ function sendMessage() {
 
     var fsdb = getFirestoreForServer(chosenServerId);
     if (!fsdb) {
-        // ✅ fsdb မရရင် နောက် server ကို ချက်ချင်း ပြောင်း
         markServerExhausted(chosenServerId, new Error('fsdb not available'));
         var nextId = pickRandomFirestoreServer();
         if (nextId) {
@@ -8984,7 +8994,6 @@ function sendMessage() {
         clearReplyState();
         renderChatList();
 
-        // ✅ Firestore ပို့ -- Error ရရင် တိတ်တဆိတ် နောက် Server ကို Auto ပြောင်း
         fsdb.collection('messages').doc(messageId).set(messageData)
         .then(function() {
             console.log('✅ Sent to Firestore (' + chosenServerId + '):', messageId);
@@ -8992,30 +9001,25 @@ function sendMessage() {
         .catch(function(err) {
             console.error('Firestore send error (' + chosenServerId + '):', err);
 
-            // ✅ Error ဖြစ်ရင် အဲ့ server ကို exhausted လုပ်ပြီး နောက် server ကို ရှာ
             if (err.code === 'resource-exhausted' || err.code === 'permission-denied' || err.code === 'unavailable') {
                 markServerExhausted(chosenServerId, err);
 
-                // ✅ နောက် server ကို ရှာပြီး Auto ပြောင်းပို့
                 var nextServerId = pickRandomFirestoreServer();
                 if (nextServerId) {
                     console.log('🔄 Auto-switching to:', nextServerId);
                     var nextFsdb = getFirestoreForServer(nextServerId);
                     if (nextFsdb) {
-                        // ✅ localMsg ကို update လုပ်ပြီး ပြန်သိမ်း
                         localMsg.serverId = nextServerId;
                         saveMessageToLocalDB(localMsg);
 
                         nextFsdb.collection('messages').doc(messageId).set(messageData)
                         .then(function() {
                             console.log('✅ Auto-switched sent:', nextServerId, messageId);
-                            // ✅ User ကို Error မပြဘူး -- တိတ်တဆိတ် ပြောင်းပို့
                         })
                         .catch(function(err2) {
                             console.error('Auto-switch error:', err2);
                             if (err2.code === 'resource-exhausted' || err2.code === 'permission-denied' || err2.code === 'unavailable') {
                                 markServerExhausted(nextServerId, err2);
-                                // ✅ နောက်ထပ် server ရှိသေးရင် ထပ်စမ်း
                                 var thirdServerId = pickRandomFirestoreServer();
                                 if (thirdServerId) {
                                     var thirdFsdb = getFirestoreForServer(thirdServerId);
@@ -9036,12 +9040,10 @@ function sendMessage() {
                         });
                     }
                 }
-                // ✅ Server အားလုံး ကုန်သွားရင် User ကို အသိပေး
                 if (!pickRandomFirestoreServer()) {
                     showToast('⚠️ Server အားလုံး ကုန်နေပါ -- ခဏစောင့်ပါ');
                 }
             } else {
-                // ✅ အခြား Error တွေအတွက် User ကို မပြဘူး
                 console.warn('Firestore send failed, but silent:', err);
             }
         });
@@ -9271,7 +9273,8 @@ function useBubble(bubble) {
 
     var myDb = getDbForServer(currentServerId);
     if (myDb) {
-        myDb.ref('users/' + currentUser.userId + '/bubbleUse').set(newBubbleId).catch(function(err) {
+        // ✅ update သုံးပြီး bubbleUse field ကိုသာ ရေး
+        myDb.ref('users/' + currentUser.userId).update({ bubbleUse: newBubbleId }).catch(function(err) {
             console.warn(err);
         });
     }
@@ -9382,7 +9385,8 @@ function blockUser(target) {
         blockList.push({ serverId: target.serverId, userId: target.userId });
     }
 
-    myDb.ref('users/' + currentUser.userId + '/blockList').set(blockList)
+    // ✅ update သုံးပြီး blockList field ကိုသာ ရေး
+    myDb.ref('users/' + currentUser.userId).update({ blockList: blockList })
     .then(function() {
         currentUser.blockList = blockList;
         saveUserToDB(currentUser);
@@ -9403,7 +9407,8 @@ function unblockUser(target) {
         return !(b.userId === target.userId && b.serverId === target.serverId);
     });
 
-    myDb.ref('users/' + currentUser.userId + '/blockList').set(blockList)
+    // ✅ update သုံးပြီး blockList field ကိုသာ ရေး
+    myDb.ref('users/' + currentUser.userId).update({ blockList: blockList })
     .then(function() {
         currentUser.blockList = blockList;
         saveUserToDB(currentUser);
@@ -9441,14 +9446,15 @@ function setMyOnlineStatus(isOnline) {
     if (!currentUser || !currentServerId) return Promise.resolve();
     var myDb = getDbForServer(currentServerId);
     if (!myDb) return Promise.resolve();
-    return myDb.ref('users/' + currentUser.userId + '/online').set(isOnline === true).catch(function() {});
+    // ✅ update သုံးပြီး online field ကိုသာ ရေး
+    return myDb.ref('users/' + currentUser.userId).update({ online: isOnline === true }).catch(function() {});
 }
 
 function handleBeforeUnload() {
     if (!currentUser || !currentServerId) return;
     try {
         var myDb = getDbForServer(currentServerId);
-        if (myDb) myDb.ref('users/' + currentUser.userId + '/online').set(false);
+        if (myDb) myDb.ref('users/' + currentUser.userId).update({ online: false });
     } catch(e) {}
 }
 
@@ -9611,7 +9617,7 @@ logoutUser = function() {
     _origLogoutUser_final();
 };
 
-console.log('✅ STAR ARCADE -- Random Pick + Auto Switch (Silent) + No Profile View + Back Fix Loaded');
+console.log('✅ STAR ARCADE -- Random Pick + Auto Switch (Silent) + No Profile View + Back Fix Loaded');            
 
     
 
