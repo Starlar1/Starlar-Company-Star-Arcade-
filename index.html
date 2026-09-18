@@ -4958,32 +4958,11 @@ body {
 }
 
 /* ============================================================
-   PIN BADGE -- "PIN" စာသား (Avatar ရဲ့ ညာဘက်ထောင့်စွန်း)
+   PIN -- နာမည်ကို လိမ္မော်ရောင် ပြောင်း (Badge မပါ)
    ============================================================ */
-.chat-list-pin-badge {
-    position: absolute;
-    top: -8px;
-    right: -8px;
-    background: #ff6d1f;
-    color: #fff;
-    font-size: 8px;
-    font-weight: 800;
-    letter-spacing: 0.5px;
-    padding: 2px 5px;
-    border-radius: 6px;
-    z-index: 10;
-    box-shadow: 0 2px 6px rgba(255, 109, 31, 0.5);
-    line-height: 1;
-    text-transform: uppercase;
-    border: 1.5px solid var(--bg-body);
-}
-
-.chat-list-item.pinned {
-    background: rgba(255, 109, 31, 0.05);
-}
-
 .chat-list-item.pinned .chat-list-name {
-    color: var(--accent);
+    color: #ff6d1f !important;
+    font-weight: 700;
 }
 
 /* ============================================================
@@ -7958,9 +7937,9 @@ FIREBASE_SERVERS.forEach(function(server) {
         var app = firebaseApps[server.id];
         if (app) {
             firestoreDbs[server.id] = firebase.firestore(app);
-            console.log('✅ Firestore:', server.name);
+            console.log('Firestore:', server.name);
         }
-    } catch(e) { console.error('❌ Firestore init:', server.name, e); }
+    } catch(e) { console.error('Firestore init:', server.name, e); }
 });
 
 function getFirestoreForServer(serverId) {
@@ -7977,7 +7956,7 @@ function initFirestoreStatus() {
     FIREBASE_SERVERS.forEach(function(server) {
         firestoreStatus[server.id] = { exhausted: false, error: null };
     });
-    console.log('✅ Firestore status initialized:', Object.keys(firestoreStatus));
+    console.log('Firestore status initialized:', Object.keys(firestoreStatus));
 }
 
 function pickRandomFirestoreServer() {
@@ -7993,7 +7972,7 @@ function markServerExhausted(serverId, error) {
     if (!firestoreStatus[serverId]) return;
     firestoreStatus[serverId].exhausted = true;
     firestoreStatus[serverId].error = error;
-    console.warn('⚠️ Server exhausted:', serverId);
+    console.warn('Server exhausted:', serverId);
 }
 
 function resetFirestoreStatus() { initFirestoreStatus(); }
@@ -8137,8 +8116,7 @@ function getFriendPassword(serverId, userId) {
 }
 
 // ============================================================
-//  ✅ CHAT ROOM UNLOCK FLAG (Session-only)
-//  Password စစ်ပြီးသား User တွေ ဒီ Session မှာ ထပ်မတောင်း
+//  CHAT ROOM UNLOCK FLAG (Session-only)
 // ============================================================
 var chatRoomUnlocked = {};
 
@@ -8292,28 +8270,28 @@ function performSearch() {
     var userId = document.getElementById('searchUserId').value.trim();
     var resultEl = document.getElementById('searchResult');
 
-    if (!serverNoRaw) { resultEl.innerHTML = '<div class="search-empty">Server No. ရေးပါ</div>'; return; }
+    if (!serverNoRaw) { resultEl.innerHTML = '<div class="search-empty">Enter Server No.</div>'; return; }
     var serverNo = parseInt(serverNoRaw);
-    if (isNaN(serverNo) || serverNo <= 0) { resultEl.innerHTML = '<div class="search-empty">Server No. မှန်ကန်စွာ ရေးပါ</div>'; return; }
-    if (!userId) { resultEl.innerHTML = '<div class="search-empty">ID ရေးပါ</div>'; return; }
+    if (isNaN(serverNo) || serverNo <= 0) { resultEl.innerHTML = '<div class="search-empty">Invalid Server No.</div>'; return; }
+    if (!userId) { resultEl.innerHTML = '<div class="search-empty">Enter ID</div>'; return; }
 
     var server = FIREBASE_SERVERS.find(function(s) { return s.number === serverNo; });
-    if (!server) { resultEl.innerHTML = '<div class="search-empty">Server ' + serverNo + ' မရှိပါ</div>'; return; }
+    if (!server) { resultEl.innerHTML = '<div class="search-empty">Server not found</div>'; return; }
 
     if (currentUser && currentUser.userId === userId && currentServerId === server.id) {
-        resultEl.innerHTML = '<div class="search-empty">ကိုယ့်ကိုယ်ကို ရှာလို့မရပါ</div>'; return;
+        resultEl.innerHTML = '<div class="search-empty">Cannot search yourself</div>'; return;
     }
 
-    resultEl.innerHTML = '<div class="search-empty">Server ' + serverNo + ' မှာ ရှာနေသည်...</div>';
+    resultEl.innerHTML = '<div class="search-empty">Searching...</div>';
 
     fetchUserFullData(server.id, userId).then(function(data) {
         if (isBlockedByUser(data.blockList, currentUser.userId, currentServerId)) {
-            resultEl.innerHTML = '<div class="search-empty">အကောင့် မတွေ့ပါ</div>'; return;
+            resultEl.innerHTML = '<div class="search-empty">User not found</div>'; return;
         }
         searchResultUser = data;
         renderSearchResult();
     }).catch(function() {
-        resultEl.innerHTML = '<div class="search-empty">Server ' + serverNo + ' မှာ အကောင့် မတွေ့ပါ</div>';
+        resultEl.innerHTML = '<div class="search-empty">User not found</div>';
     });
 }
 
@@ -8460,7 +8438,6 @@ function deleteFriendAndSync(targetData) {
     .then(function() { return unpinFriend(targetData.serverId, targetData.userId); })
     .then(function() { return unlockFriend(targetData.serverId, targetData.userId); })
     .then(function() {
-        // ✅ Unlock flag ပါ ဖျက်
         delete chatRoomUnlocked[targetData.serverId + ':' + targetData.userId];
         currentUser.friendsList = myList;
         saveUserToDB(currentUser);
@@ -8477,7 +8454,6 @@ function deleteFriendAndSync(targetData) {
 
 // ============================================================
 //  FRIENDS LIST LISTENER (Realtime)
-//  တစ်ဘက်က Delete/Add Friend လုပ်ရင် ကိုယ့်ဆီ ချက်ချင်း သိ
 // ============================================================
 var friendsListListener = null;
 
@@ -8506,7 +8482,6 @@ function startFriendsListListener() {
         currentUser.friendsList = list;
         saveUserToDB(currentUser);
 
-        // ✅ Friend အသစ် -- data ယူ → Cache သိမ်း → Chat List Update
         if (newOnes.length > 0) {
             var addPromises = newOnes.map(function(entry) {
                 return fetchUserFullData(entry.serverId, entry.userId)
@@ -8519,7 +8494,6 @@ function startFriendsListListener() {
             });
         }
 
-        // ✅ Friend ဖျက်ခံရ -- IndexedDB + Pin + Lock + Unlock flag ရှင်း
         if (removedOnes.length > 0) {
             var removePromises = removedOnes.map(function(e) {
                 delete chatRoomUnlocked[e.serverId + ':' + e.userId];
@@ -8546,7 +8520,7 @@ function stopFriendsListListener() {
 }
 
 // ============================================================
-//  CHAT LIST -- Pin + Unread Badge + Last Message Sort
+//  CHAT LIST -- Pin (Name Color) + Unread + Last Message Sort
 // ============================================================
 function renderChatList() {
     var listEl = document.getElementById('chatList');
@@ -8617,6 +8591,7 @@ function renderChatListRow(listEl, item) {
     row.dataset.serverId = friend.serverId;
     row.dataset.userId = friend.userId;
 
+    // ✅ Pin ထိုးထားရင် class ထည့် (CSS က နာမည်ကို လိမ္မော်ရောင် လုပ်မယ်)
     if (item.pinned) row.classList.add('pinned');
 
     var name = cached.name || 'Loading...';
@@ -8654,10 +8629,7 @@ function renderChatListRow(listEl, item) {
         }
     }
 
-    // ✅ Pin Badge -- "PIN" စာသား (Emoji မဟုတ်)
-    var pinBadgeHtml = item.pinned ? '<span class="chat-list-pin-badge">PIN</span>' : '';
-
-    // ✅ Lock Icon -- SVG (Emoji မဟုတ်)
+    // ✅ Lock Icon (SVG -- Emoji မဟုတ်)
     var lockIconHtml = item.locked
         ? '<span class="chat-list-lock-icon">' +
             '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">' +
@@ -8676,11 +8648,11 @@ function renderChatListRow(listEl, item) {
 
     var previewText = item.lastMessageText || 'Tap to open chat';
 
+    // ✅ Pin Badge မပါတော့ဘူး -- နာမည်ရောင်ပဲ ပြောင်း
     row.innerHTML =
         '<div class="chat-list-avatar-wrap">' +
             '<img class="chat-list-avatar" src="' + avatar + '" alt="avatar" />' +
             frameHtml +
-            pinBadgeHtml +
         '</div>' +
         '<div class="chat-list-info">' +
             '<div class="chat-list-top">' +
@@ -8736,7 +8708,7 @@ function attachLongPress(el, callback) {
 }
 
 // ============================================================
-//  CHAT LIST ACTION BAR (Pin / Lock / Delete / Block)
+//  CHAT LIST ACTION BAR
 // ============================================================
 function showChatListActionBar(friend, item) {
     var existing = document.querySelector('.chat-list-action-bar');
@@ -8863,7 +8835,7 @@ function showChatListActionBar(friend, item) {
 }
 
 // ============================================================
-//  PASSWORD PROMPT (စစ်ဆေးရန်)
+//  PASSWORD PROMPT
 // ============================================================
 function showPasswordPrompt(title, callback) {
     var existing = document.querySelector('.password-popup-overlay');
@@ -8910,7 +8882,7 @@ function showPasswordPrompt(title, callback) {
 }
 
 // ============================================================
-//  PASSWORD SETUP (အသစ် သတ်မှတ် -- ၂ ခါ)
+//  PASSWORD SETUP
 // ============================================================
 function showPasswordSetup(title, callback) {
     var existing = document.querySelector('.password-popup-overlay');
@@ -8960,7 +8932,7 @@ function showPasswordSetup(title, callback) {
 }
 
 // ============================================================
-//  APP MESSAGE LISTENERS -- အားလုံး နားထောင်
+//  APP MESSAGE LISTENERS
 // ============================================================
 var appMessageListeners = [];
 
@@ -9045,11 +9017,9 @@ var chatRoomMessageListeners = [];
 var chatRoomBlockListener = null;
 var iAmBlockedByThem = false;
 
-// ✅ Password စစ်ပြီးသား ဖြစ်ရင် ဒါကို ခေါ်
 function openChatRoom(target) {
     var lockKey = target.serverId + ':' + target.userId;
 
-    // ✅ ဒီ Session မှာ ဖွင့်ပြီးသားလား စစ်
     if (chatRoomUnlocked[lockKey]) {
         openChatRoomNow(target);
         return;
@@ -9071,7 +9041,6 @@ function openChatRoom(target) {
     });
 }
 
-// ✅ Chat Room ကို တကယ် ဖွင့်တဲ့ function
 function openChatRoomNow(target) {
     currentChatTarget = target;
     iAmBlockedByThem = false;
@@ -10088,14 +10057,13 @@ closeFullscreen = function() {
 };
 
 // ============================================================
-//  GO BACK FULLSCREEN -- Chat Room ထွက်ရင် Unlock flag ဖျက်
+//  GO BACK FULLSCREEN
 // ============================================================
 var _origGoBackFullscreen_final = goBackFullscreen;
 goBackFullscreen = function() {
     var currentFs = fullscreenStack[fullscreenStack.length - 1];
 
     if (currentFs && currentFs.screenId === 'fs-chat-room') {
-        // ✅ Chat Room ထွက်ရင် Unlock flag ဖျက် (ပြန်ဝင်ရင် Password ပြန်တောင်း)
         if (currentChatTarget) {
             delete chatRoomUnlocked[currentChatTarget.serverId + ':' + currentChatTarget.userId];
         }
@@ -10157,13 +10125,12 @@ logoutUser = function() {
     try { clearReplyState(); } catch(e) {}
     if (chatRoomListener) { try { chatRoomListener.off(); } catch(e) {} chatRoomListener = null; }
 
-    // ✅ Unlock flags ရှင်း
     chatRoomUnlocked = {};
 
     _origLogoutUser_final();
 };
 
-console.log('STAR ARCADE -- Pin Badge + Lock SVG + Unlock Flag + Realtime Friend Sync Loaded');            
+console.log('STAR ARCADE -- Pin (Name Color) + Lock SVG + Unlock Flag + Realtime Friend Sync');            
 
     
 
