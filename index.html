@@ -7864,6 +7864,8 @@ function logoutUser() {
     }
 })();
 
+
+
 // ============================================================
 //  FIRESTORE INITIALIZE
 // ============================================================
@@ -7884,133 +7886,37 @@ function getFirestoreForServer(serverId) {
 }
 
 // ============================================================
-//  ✅ FIRESTORE RANDOM PICK + 5H COOLDOWN (LOCAL TIME ONLY)
-//  ⚠️ Firestore ပေါ် မသိမ်း -- Local Time ပဲ သုံး
+//  ✅ FIRESTORE AUTO-SWITCH STATUS
 // ============================================================
-var COOLDOWN_MS = 5 * 60 * 60 * 1000;  // ✅ 5 နာရီ
+var firestoreStatus = {
+    server1: { exhausted: false, error: null },
+    server2: { exhausted: false, error: null }
+};
 
-var firestoreStatus = {};
-var firestoreCooldownTimers = {};
-
-function initFirestoreStatus() {
-    firestoreStatus = {};
-    firestoreCooldownTimers = {};
-
-    FIREBASE_SERVERS.forEach(function(server) {
-        firestoreStatus[server.id] = {
-            exhausted: false,
-            exhaustedAt: null,
-            cooldownUntil: null,
-            error: null
-        };
-    });
-    console.log('✅ Firestore status initialized (local):', Object.keys(firestoreStatus));
-}
-
-function pickRandomFirestoreServer() {
-    var available = [];
-    Object.keys(firestoreStatus).forEach(function(sid) {
-        if (!firestoreStatus[sid].exhausted) {
-            available.push(sid);
-        }
-    });
-
-    if (available.length === 0) return null;
-
-    var randomIndex = Math.floor(Math.random() * available.length);
-    return available[randomIndex];
+function getWorkingFirestoreServer() {
+    if (!firestoreStatus.server1.exhausted) return 'server1';
+    if (!firestoreStatus.server2.exhausted) return 'server2';
+    return null;
 }
 
 function markServerExhausted(serverId, error) {
-    if (!firestoreStatus[serverId]) return;
-
-    var now = Date.now();
-    firestoreStatus[serverId].exhausted = true;
-    firestoreStatus[serverId].exhaustedAt = now;
-    firestoreStatus[serverId].cooldownUntil = now + COOLDOWN_MS;
-    firestoreStatus[serverId].error = error;
-
-    console.warn('⚠️ Server exhausted:', serverId, '→ Cooldown 5h (local)');
-
-    if (firestoreCooldownTimers[serverId]) {
-        clearTimeout(firestoreCooldownTimers[serverId]);
+    if (firestoreStatus[serverId]) {
+        firestoreStatus[serverId].exhausted = true;
+        firestoreStatus[serverId].error = error;
+        console.warn('⚠️ Server exhausted:', serverId);
     }
-
-    firestoreCooldownTimers[serverId] = setTimeout(function() {
-        console.log('⏰ Cooldown ended (local):', serverId);
-        recheckServerAfterCooldown(serverId);
-    }, COOLDOWN_MS);
-
-    var working = pickRandomFirestoreServer();
+    var working = getWorkingFirestoreServer();
     if (!working) {
         if (typeof showToast === 'function') {
-            showToast('⚠️ Server အားလုံး ကုန်သွားပါ -- ခဏစောင့်ပါ');
+            showToast('⚠️ Firestore Server ၂ ခုလုံး ကုန်သွားပါ');
         }
     }
-}
-
-function recheckServerAfterCooldown(serverId) {
-    if (!firestoreStatus[serverId]) return;
-
-    var fsdb = getFirestoreForServer(serverId);
-    if (!fsdb) {
-        firestoreStatus[serverId].exhausted = false;
-        firestoreStatus[serverId].cooldownUntil = null;
-        firestoreStatus[serverId].error = null;
-        return;
-    }
-
-    var testRef = fsdb.collection('_healthCheck').doc('test_' + Date.now());
-
-    testRef.set({ timestamp: Date.now() })
-    .then(function() {
-        console.log('✅ Server re-checked OK:', serverId);
-        firestoreStatus[serverId].exhausted = false;
-        firestoreStatus[serverId].exhaustedAt = null;
-        firestoreStatus[serverId].cooldownUntil = null;
-        firestoreStatus[serverId].error = null;
-
-        testRef.delete().catch(function() {});
-
-        if (typeof showToast === 'function') {
-            showToast('✅ Server ' + serverId + ' ပြန်အလုပ်လုပ်ပါပြီ');
-        }
-    })
-    .catch(function(err) {
-        console.warn('⚠️ Server still exhausted:', serverId, err.code);
-        markServerExhausted(serverId, err);
-        if (typeof showToast === 'function') {
-            showToast('⚠️ Server ' + serverId + ' ကုန်နေသေးပါ -- နောက် 5h');
-        }
-    });
 }
 
 function resetFirestoreStatus() {
-    initFirestoreStatus();
-    console.log('✅ Firestore status reset (local)');
-}
-
-function checkExpiredCooldowns() {
-    var now = Date.now();
-    Object.keys(firestoreStatus).forEach(function(sid) {
-        var s = firestoreStatus[sid];
-        if (!s.exhausted) return;
-
-        if (s.cooldownUntil && s.cooldownUntil <= now) {
-            console.log('⏰ Expired cooldown (local):', sid);
-            recheckServerAfterCooldown(sid);
-        } else if (s.cooldownUntil) {
-            var remaining = s.cooldownUntil - now;
-            console.log('⏰ Server', sid, 'cooldown remaining:', Math.round(remaining / 60000), 'min');
-
-            if (firestoreCooldownTimers[sid]) {
-                clearTimeout(firestoreCooldownTimers[sid]);
-            }
-            firestoreCooldownTimers[sid] = setTimeout(function() {
-                recheckServerAfterCooldown(sid);
-            }, remaining);
-        }
-    });
+    firestoreStatus.server1 = { exhausted: false, error: null };
+    firestoreStatus.server2 = { exhausted: false, error: null };
+    console.log('✅ Firestore status reset');
 }
 
 // ============================================================
@@ -8726,9 +8632,7 @@ function updateChatBlockUI() {
 function startChatRoomMessageListeners(target) {
     stopChatRoomMessageListeners();
 
-    FIREBASE_SERVERS.forEach(function(server) {
-        var sid = server.id;
-
+    ['server1', 'server2'].forEach(function(sid) {
         if (firestoreStatus[sid] && firestoreStatus[sid].exhausted) {
             console.log('⚠️ Skipping exhausted server (chat room):', sid);
             return;
@@ -8827,6 +8731,7 @@ function applyChatRoomData(data) {
         statusEl.classList.remove('online');
     }
 
+    // ✅ Play -- Online ဘေးမှာ
     if (playEl) {
         if (data.play) {
             var playData = getPlayById(data.play);
@@ -9106,7 +9011,7 @@ function showToast(message) {
 }
 
 // ============================================================
-//  SEND MESSAGE -- Random Pick + Auto-switch
+//  SEND MESSAGE -- Auto-switch
 // ============================================================
 function sendMessage() {
     if (iAmBlockedByThem) {
@@ -9119,9 +9024,10 @@ function sendMessage() {
     if (!text) return;
     if (!currentChatTarget) return;
 
-    var chosenServerId = pickRandomFirestoreServer();
+    // ✅ ကောင်းတဲ့ Firestore Server ရွေး
+    var chosenServerId = getWorkingFirestoreServer();
     if (!chosenServerId) {
-        showToast('⚠️ Server အားလုံး ကုန်နေပါ -- ခဏစောင့်ပါ');
+        showToast('⚠️ Firestore Server ၂ ခုလုံး ကုန်သွားပါ');
         return;
     }
 
@@ -9189,6 +9095,7 @@ function sendMessage() {
         clearReplyState();
         renderChatList();
 
+        // ✅ Firestore ပို့
         fsdb.collection('messages').doc(messageId).set(messageData)
         .then(function() {
             console.log('✅ Sent to Firestore (' + chosenServerId + '):', messageId);
@@ -9196,10 +9103,12 @@ function sendMessage() {
         .catch(function(err) {
             console.error('Firestore send error (' + chosenServerId + '):', err);
 
+            // ✅ Quota ကုန်လား စစ်
             if (err.code === 'resource-exhausted' || err.code === 'permission-denied') {
                 markServerExhausted(chosenServerId, err);
 
-                var nextServerId = pickRandomFirestoreServer();
+                // ✅ ကျန်တဲ့ Server ကို auto-switch
+                var nextServerId = getWorkingFirestoreServer();
                 if (nextServerId) {
                     console.log('🔄 Auto-switching to:', nextServerId);
                     var nextFsdb = getFirestoreForServer(nextServerId);
@@ -9261,9 +9170,7 @@ function startAppMessageListeners() {
     stopAppMessageListeners();
     if (!currentUser || !currentServerId) return;
 
-    FIREBASE_SERVERS.forEach(function(server) {
-        var sid = server.id;
-
+    ['server1', 'server2'].forEach(function(sid) {
         if (firestoreStatus[sid] && firestoreStatus[sid].exhausted) {
             console.log('⚠️ Skipping exhausted server (app):', sid);
             return;
@@ -9997,12 +9904,13 @@ closeFullscreen = function() {
 };
 
 // ============================================================
-//  GO BACK FULLSCREEN -- Back ၂ ခု ပြဿနာ ဖြေရှင်း
+//  ✅ GO BACK FULLSCREEN -- Back ၂ ခု ပြဿနာ ဖြေရှင်း
 // ============================================================
 var _origGoBackFullscreen_final = goBackFullscreen;
 goBackFullscreen = function() {
     var currentFs = fullscreenStack[fullscreenStack.length - 1];
 
+    // Chat Room ကနေ ထွက်ရင်
     if (currentFs && currentFs.screenId === 'fs-chat-room') {
         if (chatRoomListener) { try { chatRoomListener.off(); } catch(e){} chatRoomListener = null; }
         try { stopChatRoomMessageListeners(); } catch(e) {}
@@ -10013,6 +9921,7 @@ goBackFullscreen = function() {
         setTimeout(function() { renderChatList(); }, 100);
     }
 
+    // Profile ကနေ ထွက်ရင်
     if (currentFs && currentFs.screenId === 'fs-profile') {
         var profileScreen = document.getElementById('fs-profile');
         if (profileScreen) profileScreen.classList.remove('viewing-other');
@@ -10020,6 +9929,7 @@ goBackFullscreen = function() {
         viewingUserServerId = null;
     }
 
+    // Friends List ကနေ ထွက်ရင်
     if (currentFs && currentFs.screenId === 'fs-friends-list') {
         var prev = fullscreenStack[fullscreenStack.length - 2];
         if (prev && prev.screenId === 'fs-profile' && viewingUserId) {
@@ -10028,6 +9938,7 @@ goBackFullscreen = function() {
         }
     }
 
+    // ✅ Chat Room ကို ပြန်ရောက်ရင် chat-room-active ပြန်ထည့် (Back ၂ ခု မဖြစ်ဖို့)
     if (fullscreenStack.length > 1) {
         var nextFs = fullscreenStack[fullscreenStack.length - 2];
         if (nextFs && nextFs.screenId === 'fs-chat-room') {
@@ -10043,11 +9954,7 @@ goBackFullscreen = function() {
 // ============================================================
 var _origEnterApp_final = enterApp;
 enterApp = function(user) {
-    if (Object.keys(firestoreStatus).length === 0) {
-        initFirestoreStatus();
-    } else {
-        checkExpiredCooldowns();
-    }
+    resetFirestoreStatus();
 
     _origEnterApp_final(user);
     setTimeout(function() { renderChatList(); }, 100);
@@ -10071,16 +9978,16 @@ logoutUser = function() {
     try { closeBubblePicker(); } catch(e) {}
     try { clearReplyState(); } catch(e) {}
     if (chatRoomListener) { try { chatRoomListener.off(); } catch(e) {} chatRoomListener = null; }
-
-    Object.keys(firestoreCooldownTimers).forEach(function(sid) {
-        try { clearTimeout(firestoreCooldownTimers[sid]); } catch(e) {}
-    });
-    firestoreCooldownTimers = {};
-
     _origLogoutUser_final();
 };
 
-console.log('✅ STAR ARCADE -- Random Pick + 5h Local Cooldown + Chat Room Play + Back Fix Loaded');
+console.log('✅ STAR ARCADE -- Auto-Switch + Chat Room Play + Back Fix Loaded');            
+
+    
+
+
+
+
 
 
 // ============================================================
