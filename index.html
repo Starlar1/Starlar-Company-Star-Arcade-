@@ -8357,6 +8357,9 @@ function isFriend(serverId, userId) {
     });
 }
 
+// ============================================================
+//  ADD FRIEND -- Rules အသစ်နဲ့ ကိုက်ညီအောင်
+// ============================================================
 function addFriendAndSync(targetData) {
     if (!currentUser || !currentServerId) return;
     if (isFriend(targetData.serverId, targetData.userId)) return;
@@ -8375,25 +8378,36 @@ function addFriendAndSync(targetData) {
     var myDb = getDbForServer(currentServerId);
     var theirDb = getDbForServer(targetData.serverId);
 
+    // ၁။ ကိုယ့် friendsList ကို update
     myDb.ref('users/' + currentUser.userId).update({ friendsList: myList })
     .then(function() {
+        // ၂။ သူ့ friendsList ကို ဖတ်
         return theirDb.ref('users/' + targetData.userId + '/friendsList').once('value');
     })
     .then(function(snap) {
         var theirList = snap.val();
-        if (!Array.isArray(theirList)) theirList = theirList ? Object.keys(theirList).map(function(k){ return theirList[k]; }) : [];
+        if (!Array.isArray(theirList)) {
+            theirList = theirList ? Object.keys(theirList).map(function(k){ return theirList[k]; }) : [];
+        }
+
+        // ၃။ ကိုယ့် entry ကို သူ့ friendsList ထဲ ထည့်
         if (!theirList.some(function(f){ return f.serverId===currentServerId && f.userId===currentUser.userId; })) {
             theirList.push(myEntryForThem);
         }
+
+        // ၄။ သူ့ friendsList ကို update (သူ့ node ရဲ့ friendsList field ကိုသာ)
         return theirDb.ref('users/' + targetData.userId).update({ friendsList: theirList });
     })
     .then(function() {
+        // ၅။ သူ့ data အပြည့်အစုံကို ယူ
         return fetchUserFullData(targetData.serverId, targetData.userId);
     })
     .then(function(freshData) {
+        // ၆။ ကိုယ့် IndexedDB ထဲ သိမ်း
         return saveFriendToCache(freshData);
     })
     .then(function() {
+        // ၇။ Local state update
         currentUser.friendsList = myList;
         saveUserToDB(currentUser);
         hideLoading();
@@ -8408,6 +8422,9 @@ function addFriendAndSync(targetData) {
     });
 }
 
+// ============================================================
+//  DELETE FRIEND
+// ============================================================
 function deleteFriendAndSync(targetData) {
     if (!currentUser || !currentServerId) return;
     if (!isFriend(targetData.serverId, targetData.userId)) return;
@@ -8591,7 +8608,6 @@ function renderChatListRow(listEl, item) {
     row.dataset.serverId = friend.serverId;
     row.dataset.userId = friend.userId;
 
-    // ✅ Pin ထိုးထားရင် class ထည့် (CSS က နာမည်ကို လိမ္မော်ရောင် လုပ်မယ်)
     if (item.pinned) row.classList.add('pinned');
 
     var name = cached.name || 'Loading...';
@@ -8629,7 +8645,6 @@ function renderChatListRow(listEl, item) {
         }
     }
 
-    // ✅ Lock Icon (SVG -- Emoji မဟုတ်)
     var lockIconHtml = item.locked
         ? '<span class="chat-list-lock-icon">' +
             '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">' +
@@ -8639,7 +8654,6 @@ function renderChatListRow(listEl, item) {
           '</span>'
         : '';
 
-    // ✅ Unread Badge
     var unreadBadgeHtml = '';
     if (item.unreadCount > 0) {
         var displayCount = item.unreadCount > 99 ? '99+' : String(item.unreadCount);
@@ -8648,7 +8662,6 @@ function renderChatListRow(listEl, item) {
 
     var previewText = item.lastMessageText || 'Tap to open chat';
 
-    // ✅ Pin Badge မပါတော့ဘူး -- နာမည်ရောင်ပဲ ပြောင်း
     row.innerHTML =
         '<div class="chat-list-avatar-wrap">' +
             '<img class="chat-list-avatar" src="' + avatar + '" alt="avatar" />' +
@@ -10130,7 +10143,7 @@ logoutUser = function() {
     _origLogoutUser_final();
 };
 
-console.log('STAR ARCADE -- Pin (Name Color) + Lock SVG + Unlock Flag + Realtime Friend Sync');            
+console.log('STAR ARCADE -- Rules-aligned Add Friend + Pin (Name Color) + Lock + Unlock Flag');            
 
     
 
