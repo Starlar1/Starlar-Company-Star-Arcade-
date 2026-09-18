@@ -303,21 +303,6 @@
                         <!-- Bubble Picker Panel -->
                         <div class="bubble-picker" id="bubblePicker"></div>
 
-                        <!-- ✅ GALLERY PICKER BAR (NEW) -->
-                        <div class="gallery-picker" id="galleryPicker">
-                            <div class="gallery-picker-header">
-                                <span>My Images</span>
-                                <button class="gallery-picker-close" id="galleryPickerClose">
-                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                                        <line x1="18" y1="6" x2="6" y2="18"/>
-                                        <line x1="6" y1="6" x2="18" y2="18"/>
-                                    </svg>
-                                </button>
-                            </div>
-                            <div class="gallery-picker-grid" id="galleryPickerGrid"></div>
-                            <input type="file" id="galleryAddInput" accept="image/*" multiple style="display:none" />
-                        </div>
-
                         <div class="chat-room-input-bar">
                             <button class="chat-msg-btn" id="chatMsgBtn" title="Bubble">
                                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -577,59 +562,6 @@
             </div>
         </div>
 
-    </div>
-
-    <!-- ✅ IMAGE SEND PREVIEW OVERLAY (NEW) -->
-    <div class="img-viewer-overlay hidden" id="imgViewerOverlay">
-        <div class="img-viewer-top">
-            <button class="img-viewer-close" id="imgViewerClose">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                    <line x1="18" y1="6" x2="6" y2="18"/>
-                    <line x1="6" y1="6" x2="18" y2="18"/>
-                </svg>
-            </button>
-        </div>
-        <div class="img-viewer-body">
-            <img id="imgViewerFull" src="" alt="preview" />
-        </div>
-        <div class="img-viewer-bottom" id="imgViewerSliderWrap">
-            <p class="img-viewer-instruction">Slide to send</p>
-            <div class="img-slider-container">
-                <div class="img-slider-track" id="imgSliderTrack">
-                    <div class="img-slider-filled" id="imgSliderFilled"></div>
-                    <div class="img-slider-circle" id="imgSliderCircle">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                            <polyline points="9,18 15,12 9,6"/>
-                        </svg>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ✅ RECEIVED IMAGE FULL VIEW + DOWNLOAD (NEW) -->
-    <div class="img-viewer-overlay hidden" id="recvImgViewer">
-        <div class="img-viewer-top">
-            <button class="img-viewer-close" id="recvImgClose">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                    <line x1="18" y1="6" x2="6" y2="18"/>
-                    <line x1="6" y1="6" x2="18" y2="18"/>
-                </svg>
-            </button>
-        </div>
-        <div class="img-viewer-body">
-            <img id="recvImgFull" src="" alt="received" />
-        </div>
-        <div class="img-viewer-bottom">
-            <button class="img-download-btn" id="recvImgDownload">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                    <polyline points="7 10 12 15 17 10"/>
-                    <line x1="12" y1="15" x2="12" y2="3"/>
-                </svg>
-                <span>Download</span>
-            </button>
-        </div>
     </div>
 
     <script src="script.js"></script>
@@ -5172,43 +5104,7 @@ body {
     display: inline-block;
     animation: playScroll 6s linear infinite;
     padding-right: 30px;
-}
-
-/* style.css အောက်ဆုံးမှာ ထည့်ပါ */
-
-/* GALLERY PICKER */
-.gallery-picker { width: 100%; max-height: 0; overflow: hidden; background: var(--bg-header); border-top: 1px solid var(--border); transition: max-height 0.25s ease, padding 0.25s ease; flex-shrink: 0; }
-.gallery-picker.open { max-height: 320px; overflow-y: auto; padding: 10px 10px 14px; border-top: 1px solid var(--accent); }
-.gallery-picker-header { display: flex; align-items: center; justify-content: space-between; padding: 0 4px 8px; color: var(--text-sub); font-size: 13px; font-weight: 600; }
-.gallery-picker-close { width: 30px; height: 30px; border-radius: 50%; border: none; background: var(--bg-input); color: var(--text-muted); cursor: pointer; display: flex; align-items: center; justify-content: center; }
-.gallery-picker-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; padding: 2px; }
-.gallery-slot { position: relative; aspect-ratio: 1; border-radius: 10px; background: var(--bg-input); border: 2px solid var(--border-light); overflow: hidden; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; }
-.gallery-slot.add-slot { border-style: dashed; border-color: var(--text-muted); background: rgba(255, 109, 31, 0.04); }
-.gallery-slot.add-slot .add-icon { font-size: 26px; color: var(--accent); font-weight: 300; }
-.gallery-slot-img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.gallery-slot-delete { position: absolute; top: 3px; right: 3px; width: 20px; height: 20px; border-radius: 50%; border: none; background: rgba(0, 0, 0, 0.7); color: #fff; font-size: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0; z-index: 2; }
-
-/* IMAGE VIEWER OVERLAY */
-.img-viewer-overlay { position: fixed; inset: 0; z-index: 10050; background: rgba(0, 0, 0, 0.96); display: flex; flex-direction: column; backdrop-filter: blur(6px); }
-.img-viewer-overlay.hidden { display: none !important; }
-.img-viewer-top { display: flex; justify-content: flex-end; padding: 12px 14px; flex-shrink: 0; }
-.img-viewer-close { width: 40px; height: 40px; border-radius: 50%; border: none; background: rgba(255, 255, 255, 0.1); color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-.img-viewer-body { flex: 1; display: flex; align-items: center; justify-content: center; padding: 10px 16px; min-height: 0; overflow: hidden; }
-.img-viewer-body img { max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 12px; box-shadow: 0 8px 48px rgba(0, 0, 0, 0.7); }
-.img-viewer-bottom { padding: 16px 20px 26px; flex-shrink: 0; display: flex; flex-direction: column; align-items: center; gap: 10px; }
-.img-viewer-instruction { color: rgba(255, 255, 255, 0.7); font-size: 13px; text-align: center; margin: 0; }
-.img-slider-container { width: 100%; max-width: 360px; padding: 0 4px; }
-.img-slider-track { width: 100%; height: 50px; background: rgba(255, 255, 255, 0.08); border-radius: 25px; position: relative; overflow: hidden; border: 2px solid rgba(255, 255, 255, 0.15); }
-.img-slider-filled { height: 100%; width: 0%; background: linear-gradient(90deg, #ff6d1f, #ff9a4a, #ff6d1f); border-radius: 25px; transition: width 0.05s linear; }
-.img-slider-circle { position: absolute; top: -4px; left: -4px; width: 54px; height: 54px; border-radius: 50%; background: radial-gradient(circle at 30% 30%, #ff9a4a, #ff6d1f); display: flex; align-items: center; justify-content: center; color: #fff; cursor: grab; box-shadow: 0 0 20px rgba(255, 109, 31, 0.6); user-select: none; touch-action: none; border: 2px solid rgba(255, 255, 255, 0.3); }
-.img-slider-circle.completed { background: radial-gradient(circle at 30% 30%, #66ffaa, #44ff88); }
-.img-download-btn { display: inline-flex; align-items: center; gap: 8px; padding: 12px 32px; border: none; border-radius: 24px; background: linear-gradient(135deg, var(--accent), var(--accent-dark)); color: #fff; font-size: 15px; font-weight: 700; cursor: pointer; font-family: inherit; box-shadow: 0 4px 20px rgba(255, 109, 31, 0.4); }
-
-/* CHAT IMAGE MESSAGE */
-.chat-message.msg-image { padding: 4px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; cursor: pointer; max-width: 220px; }
-.chat-message.msg-image.sent { background: linear-gradient(135deg, var(--accent), var(--accent-dark)); border-color: transparent; }
-.chat-message.msg-image img { width: 100%; display: block; border-radius: 10px; max-height: 280px; object-fit: cover; }
-.chat-message.msg-image .chat-message-time { padding: 4px 8px 2px; }</style><script>/* ============================================================
+}</style><script>/* ============================================================
    FILE: script.js (FULL VERSION - online inside users only)
    ============================================================ */
 
@@ -5596,9 +5492,7 @@ function saveUserToDB(user) {
                 roleUse: user.roleUse || '',
                 roleOwned: user.roleOwned || [],
                 online: user.online || false,
-                isFirstLogin: user.isFirstLogin !== undefined ? user.isFirstLogin : true,
-                mail: user.mail || '',
-                ban: user.ban || ''
+                isFirstLogin: user.isFirstLogin !== undefined ? user.isFirstLogin : true
             };
             return setToDB('users', allUsers);
         }).then(function() {
@@ -5706,9 +5600,7 @@ function saveUserToFirebase(userData, serverId) {
                 roleOwned: userData.roleOwned || [],
                 online: true,
                 avatar: userData.avatar || '',
-                isFirstLogin: userData.isFirstLogin !== undefined ? userData.isFirstLogin : true,
-                mail: userData.mail || '',
-                ban: userData.ban || ''
+                isFirstLogin: userData.isFirstLogin !== undefined ? userData.isFirstLogin : true
             }).then(function() {
                 resolve(true);
             }).catch(function(err) {
@@ -5791,8 +5683,6 @@ function listenUserDataChanges(userId, serverId) {
             currentUser.blockList = data.blockList || currentUser.blockList;
             currentUser.isFirstLogin = data.isFirstLogin !== undefined ? data.isFirstLogin : currentUser.isFirstLogin;
             currentUser.online = data.online !== undefined ? data.online : currentUser.online;
-            currentUser.mail = data.mail !== undefined ? data.mail : currentUser.mail;
-            currentUser.ban = data.ban !== undefined ? data.ban : currentUser.ban;
             saveUserToDB(currentUser);
             updateUIAfterDataChange();
         }
@@ -5991,9 +5881,7 @@ if (newAccountBtn) {
                                 roleOwned: [],
                                 avatar: avatar,
                                 serverId: serverId,
-                                isFirstLogin: true,
-                                mail: '',
-                                ban: ''
+                                isFirstLogin: true
                             };
                             
                             return saveUserToFirebase(userData, serverId).then(function(saved) {
@@ -6314,9 +6202,7 @@ function checkSession() {
                         bubbleOwned: localUserData.bubbleOwned || [],
                         roleUse: localUserData.roleUse || '',
                         roleOwned: localUserData.roleOwned || [],
-                        isFirstLogin: localUserData.isFirstLogin !== undefined ? localUserData.isFirstLogin : true,
-                        mail: localUserData.mail || '',
-                        ban: localUserData.ban || ''
+                        isFirstLogin: localUserData.isFirstLogin !== undefined ? localUserData.isFirstLogin : true
                     };
                     
                     currentUser = userData;
@@ -6362,9 +6248,7 @@ function checkSession() {
                                     bubbleOwned: user.bubbleOwned || [],
                                     roleUse: user.roleUse || '',
                                     roleOwned: user.roleOwned || [],
-                                    isFirstLogin: user.isFirstLogin !== undefined ? user.isFirstLogin : true,
-                                    mail: user.mail || '',
-                                    ban: user.ban || ''
+                                    isFirstLogin: user.isFirstLogin !== undefined ? user.isFirstLogin : true
                                 };
                                 saveUserToDB(userData);
                                 currentUser = userData;
@@ -6589,8 +6473,8 @@ var BACKGROUND_CONFIG = {
 
 var BUBBLE_CONFIG = {
     bubbles: [
-        { id: 4001, name: 'Bubble 1', image: 'https://i.ibb.co/bMDnk6YN/Grid-Art-20260917-141243210.png', price: 100, limited: false },
-        { id: 4002, name: 'Bubble 2', image: 'https://i.ibb.co/ymVxDmw6/Grid-Art-20260917-141317904.png', price: 150, limited: false },
+        { id: 4001, name: 'Bubble 1', image: 'https://via.placeholder.com/60x40/9b4dff/ffffff?text=Bubble+1', price: 100, limited: false },
+        { id: 4002, name: 'Bubble 2', image: 'https://via.placeholder.com/60x40/4a6cf7/ffffff?text=Bubble+2', price: 150, limited: false },
         { id: 4003, name: 'Bubble 3', image: 'https://via.placeholder.com/60x40/ff6b6b/ffffff?text=Bubble+3', price: 200, limited: false },
         { id: 4004, name: 'Bubble 4', image: 'https://via.placeholder.com/60x40/51cf66/ffffff?text=Bubble+4', price: 250, limited: false },
         { id: 4005, name: 'Bubble 5', image: 'https://via.placeholder.com/60x40/ffd93d/000000?text=Bubble+5', price: 300, limited: false },
@@ -6599,6 +6483,7 @@ var BUBBLE_CONFIG = {
         { id: 4008, name: 'Bubble Royal', image: 'https://via.placeholder.com/60x40/ff4444/ffffff?text=Royal', price: 0, limited: true }
     ]
 };
+
 // ============================================================
 //  ROLE CONFIGURATION
 // ============================================================
@@ -8000,8 +7885,9 @@ function getFirestoreForServer(serverId) {
 
 // ============================================================
 //  ✅ FIRESTORE RANDOM PICK + 5H COOLDOWN (LOCAL TIME ONLY)
+//  ⚠️ Firestore ပေါ် မသိမ်း -- Local Time ပဲ သုံး
 // ============================================================
-var COOLDOWN_MS = 5 * 60 * 60 * 1000;
+var COOLDOWN_MS = 5 * 60 * 60 * 1000;  // ✅ 5 နာရီ
 
 var firestoreStatus = {};
 var firestoreCooldownTimers = {};
@@ -8279,378 +8165,6 @@ function deleteAllMessagesWith(serverId, userId) {
 }
 
 // ============================================================
-//  ✅✅✅ GALLERY SYSTEM (NEW -- IndexedDB)
-//  4 columns + "+" slot + unlimited add
-// ============================================================
-var GALLERY_KEY = 'myGalleryImages';
-
-function getGalleryImages() {
-    return getFromDB(GALLERY_KEY).then(function(arr) {
-        return Array.isArray(arr) ? arr : [];
-    }).catch(function() { return []; });
-}
-
-function saveGalleryImages(arr) {
-    return setToDB(GALLERY_KEY, arr);
-}
-
-var galleryPickerOpen = false;
-
-function toggleGalleryPicker() {
-    var picker = document.getElementById('galleryPicker');
-    if (!picker) return;
-    if (galleryPickerOpen) { closeGalleryPicker(); return; }
-
-    try { closeBubblePicker(); } catch(e) {}
-
-    renderGalleryPicker();
-    picker.classList.add('open');
-    galleryPickerOpen = true;
-}
-
-function closeGalleryPicker() {
-    var picker = document.getElementById('galleryPicker');
-    if (picker) picker.classList.remove('open');
-    galleryPickerOpen = false;
-}
-
-function renderGalleryPicker() {
-    var grid = document.getElementById('galleryPickerGrid');
-    if (!grid) return;
-
-    getGalleryImages().then(function(images) {
-        grid.innerHTML = '';
-
-        // + Add Slot
-        var addSlot = document.createElement('div');
-        addSlot.className = 'gallery-slot add-slot';
-        addSlot.innerHTML = '<span class="add-icon">+</span>';
-        addSlot.addEventListener('click', function() {
-            var inp = document.getElementById('galleryAddInput');
-            if (inp) inp.click();
-        });
-        grid.appendChild(addSlot);
-
-        // ကျန်တဲ့ပုံများ
-        images.forEach(function(img) {
-            var slot = document.createElement('div');
-            slot.className = 'gallery-slot';
-
-            var imgEl = document.createElement('img');
-            imgEl.src = img.dataUrl;
-            imgEl.className = 'gallery-slot-img';
-            slot.appendChild(imgEl);
-
-            var delBtn = document.createElement('button');
-            delBtn.className = 'gallery-slot-delete';
-            delBtn.textContent = '×';
-            delBtn.addEventListener('click', function(e) {
-                e.stopPropagation();
-                deleteGalleryImage(img.id);
-            });
-            slot.appendChild(delBtn);
-
-            slot.addEventListener('click', function() {
-                openImageSendPreview(img);
-            });
-
-            grid.appendChild(slot);
-        });
-    });
-}
-
-function deleteGalleryImage(id) {
-    getGalleryImages().then(function(images) {
-        images = images.filter(function(i) { return i.id !== id; });
-        return saveGalleryImages(images);
-    }).then(function() {
-        renderGalleryPicker();
-    });
-}
-
-// Add input handler
-(function initGalleryAddInput() {
-    var input = document.getElementById('galleryAddInput');
-    if (!input) return;
-    input.addEventListener('change', function(e) {
-        var files = Array.from(e.target.files || []);
-        if (files.length === 0) return;
-
-        var promises = files.map(function(file) {
-            return new Promise(function(resolve) {
-                var reader = new FileReader();
-                reader.onload = function(ev) {
-                    compressImage(ev.target.result, 800, 0.75).then(function(compressed) {
-                        resolve({
-                            id: 'img_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8),
-                            dataUrl: compressed,
-                            timestamp: Date.now()
-                        });
-                    }).catch(function() {
-                        resolve({
-                            id: 'img_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8),
-                            dataUrl: ev.target.result,
-                            timestamp: Date.now()
-                        });
-                    });
-                };
-                reader.readAsDataURL(file);
-            });
-        });
-
-        Promise.all(promises).then(function(newImgs) {
-            return getGalleryImages().then(function(existing) {
-                var all = existing.concat(newImgs);
-                return saveGalleryImages(all);
-            });
-        }).then(function() {
-            renderGalleryPicker();
-            input.value = '';
-        });
-    });
-})();
-
-function compressImage(dataUrl, maxSize, quality) {
-    return new Promise(function(resolve, reject) {
-        var img = new Image();
-        img.onload = function() {
-            var w = img.width, h = img.height;
-            if (w > maxSize || h > maxSize) {
-                if (w > h) { h = Math.round(h * maxSize / w); w = maxSize; }
-                else { w = Math.round(w * maxSize / h); h = maxSize; }
-            }
-            var canvas = document.createElement('canvas');
-            canvas.width = w; canvas.height = h;
-            var ctx = canvas.getContext('2d');
-            ctx.drawImage(img, 0, 0, w, h);
-            try { resolve(canvas.toDataURL('image/jpeg', quality)); }
-            catch(e) { reject(e); }
-        };
-        img.onerror = reject;
-        img.src = dataUrl;
-    });
-}
-
-// ============================================================
-//  ✅ IMAGE SEND PREVIEW + SLIDER (Buy Screen style)
-// ============================================================
-var pendingSendImage = null;
-
-function openImageSendPreview(imgObj) {
-    pendingSendImage = imgObj;
-    var overlay = document.getElementById('imgViewerOverlay');
-    var fullImg = document.getElementById('imgViewerFull');
-    var sliderWrap = document.getElementById('imgViewerSliderWrap');
-    if (!overlay || !fullImg) return;
-
-    fullImg.src = imgObj.dataUrl;
-    overlay.classList.remove('hidden');
-    if (sliderWrap) sliderWrap.style.display = 'flex';
-
-    var circle = document.getElementById('imgSliderCircle');
-    var filled = document.getElementById('imgSliderFilled');
-    if (circle) { circle.style.left = '-3px'; circle.classList.remove('completed'); }
-    if (filled) filled.style.width = '0%';
-
-    closeGalleryPicker();
-}
-
-function closeImageSendPreview() {
-    var overlay = document.getElementById('imgViewerOverlay');
-    if (overlay) overlay.classList.add('hidden');
-    pendingSendImage = null;
-    var circle = document.getElementById('imgSliderCircle');
-    var filled = document.getElementById('imgSliderFilled');
-    if (circle) { circle.style.left = '-3px'; circle.classList.remove('completed'); }
-    if (filled) filled.style.width = '0%';
-}
-
-// Slider
-(function initImageSlider() {
-    var isDragging = false;
-    function getCircle() { return document.getElementById('imgSliderCircle'); }
-    function getTrack() { return document.getElementById('imgSliderTrack'); }
-    function getFilled() { return document.getElementById('imgSliderFilled'); }
-    function getMaxX() {
-        var c = getCircle(), t = getTrack();
-        if (!c || !t) return 0;
-        return t.offsetWidth - c.offsetWidth;
-    }
-    function updateSlider(clientX) {
-        var circle = getCircle(), track = getTrack(), filled = getFilled();
-        if (!circle || !track) return false;
-        var rect = track.getBoundingClientRect();
-        var x = clientX - rect.left - circle.offsetWidth / 2;
-        var maxX = getMaxX();
-        x = Math.max(0, Math.min(x, maxX));
-        var percent = maxX > 0 ? (x / maxX) * 100 : 0;
-        circle.style.left = x + 'px';
-        filled.style.width = percent + '%';
-        if (percent >= 95) {
-            circle.classList.add('completed');
-            setTimeout(function() { sendPendingImage(); }, 250);
-            return true;
-        }
-        return false;
-    }
-    function resetSlider() {
-        var circle = getCircle(), filled = getFilled();
-        if (circle) { circle.style.left = '-3px'; circle.classList.remove('completed'); }
-        if (filled) filled.style.width = '0%';
-    }
-    document.addEventListener('mousedown', function(e) {
-        var circle = getCircle();
-        var overlay = document.getElementById('imgViewerOverlay');
-        if (!circle || !overlay || overlay.classList.contains('hidden')) return;
-        if (!circle.contains(e.target)) return;
-        isDragging = true;
-        e.preventDefault();
-    });
-    document.addEventListener('mousemove', function(e) {
-        if (!isDragging) return;
-        updateSlider(e.clientX);
-    });
-    document.addEventListener('mouseup', function() {
-        if (isDragging) {
-            isDragging = false;
-            var circle = getCircle();
-            var left = parseFloat(circle.style.left) || 0;
-            var maxX = getMaxX();
-            if (maxX === 0 || left / maxX < 0.95) resetSlider();
-        }
-    });
-    document.addEventListener('touchstart', function(e) {
-        var circle = getCircle();
-        var overlay = document.getElementById('imgViewerOverlay');
-        if (!circle || !overlay || overlay.classList.contains('hidden')) return;
-        if (!circle.contains(e.target)) return;
-        isDragging = true;
-    }, { passive: true });
-    document.addEventListener('touchmove', function(e) {
-        if (!isDragging) return;
-        var touch = e.touches[0];
-        updateSlider(touch.clientX);
-        e.preventDefault();
-    }, { passive: false });
-    document.addEventListener('touchend', function() {
-        if (isDragging) {
-            isDragging = false;
-            var circle = getCircle();
-            var left = parseFloat(circle.style.left) || 0;
-            var maxX = getMaxX();
-            if (maxX === 0 || left / maxX < 0.95) resetSlider();
-        }
-    });
-})();
-
-// ============================================================
-//  ✅ SEND IMAGE MESSAGE
-// ============================================================
-function sendPendingImage() {
-    if (!pendingSendImage || !currentChatTarget || !currentUser) return;
-    if (iAmBlockedByThem) { showToast('Block ခံထားရပါသည်'); return; }
-
-    var chosenServerId = pickRandomFirestoreServer();
-    if (!chosenServerId) { showToast('⚠️ Server ကုန်နေပါ'); return; }
-
-    var target = currentChatTarget;
-    var messageId = generateMessageId();
-    var timestamp = Date.now();
-
-    var messageData = {
-        senderId: currentUser.userId,
-        senderServer: currentServerId,
-        receiverId: target.userId,
-        receiverServer: target.serverId,
-        msgType: 'image',
-        imageData: pendingSendImage.dataUrl,
-        text: '[Image]',
-        seen: false,
-        timestamp: timestamp
-    };
-
-    var fsdb = getFirestoreForServer(chosenServerId);
-    if (!fsdb) { showToast('Server error'); return; }
-
-    var localMsg = {
-        messageId: messageId,
-        senderId: currentUser.userId,
-        senderServer: currentServerId,
-        receiverId: target.userId,
-        receiverServer: target.serverId,
-        type: 'sent',
-        msgType: 'image',
-        imageData: pendingSendImage.dataUrl,
-        text: '[Image]',
-        timestamp: timestamp,
-        serverId: chosenServerId,
-        seen: false
-    };
-
-    closeImageSendPreview();
-
-    saveMessageToLocalDB(localMsg).then(function() {
-        displayMessage(localMsg);
-        setTimeout(function() {
-            var messagesEl = document.getElementById('chatRoomMessages');
-            if (messagesEl) messagesEl.scrollTo({ top: messagesEl.scrollHeight, behavior: 'smooth' });
-        }, 30);
-        renderChatList();
-
-        fsdb.collection('messages').doc(messageId).set(messageData)
-        .then(function() { console.log('✅ Image sent:', messageId); })
-        .catch(function(err) {
-            console.error('Image send error:', err);
-            if (err.code === 'resource-exhausted' || err.code === 'permission-denied') {
-                markServerExhausted(chosenServerId, err);
-                var nextSid = pickRandomFirestoreServer();
-                if (nextSid) {
-                    var nextFsdb = getFirestoreForServer(nextSid);
-                    if (nextFsdb) {
-                        localMsg.serverId = nextSid;
-                        saveMessageToLocalDB(localMsg);
-                        nextFsdb.collection('messages').doc(messageId).set(messageData)
-                        .then(function() { showToast('Auto-switched'); })
-                        .catch(function(err2) {
-                            if (err2.code === 'resource-exhausted') markServerExhausted(nextSid, err2);
-                        });
-                    }
-                }
-            } else {
-                showToast('ပုံပို့မရပါ');
-            }
-        });
-    });
-}
-
-// ============================================================
-//  ✅ RECEIVED IMAGE VIEWER + DOWNLOAD
-// ============================================================
-var recvImgData = null;
-
-function openReceivedImage(imageData) {
-    recvImgData = imageData;
-    var img = document.getElementById('recvImgFull');
-    if (img) img.src = imageData;
-    var viewer = document.getElementById('recvImgViewer');
-    if (viewer) viewer.classList.remove('hidden');
-}
-function closeReceivedImage() {
-    var viewer = document.getElementById('recvImgViewer');
-    if (viewer) viewer.classList.add('hidden');
-    recvImgData = null;
-}
-function downloadReceivedImage() {
-    if (!recvImgData) return;
-    var a = document.createElement('a');
-    a.href = recvImgData;
-    a.download = 'star_arcade_' + Date.now() + '.jpg';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-}
-
-// ============================================================
 //  EXTRACT USE-ONLY
 // ============================================================
 function extractUseOnlyData(data, serverId, serverNo, userId) {
@@ -8911,7 +8425,7 @@ function deleteFriendAndSync(targetData) {
 }
 
 // ============================================================
-//  SYNC FROM FIREBASE
+//  SYNC FROM FIREBASE (မသုံးတော့ဘူး)
 // ============================================================
 function syncFriendsFromFirebase() {
     return Promise.resolve();
@@ -9070,8 +8584,7 @@ function updateChatListPreview(serverId, userId, rowId) {
         if (messages.length === 0) { msgEl.textContent = 'Tap to open chat'; return; }
         var last = messages[messages.length - 1];
         var prefix = last.type === 'sent' ? 'You: ' : '';
-        var previewText = (last.msgType === 'image' || last.type === 'image') ? '📷 Photo' : last.text;
-        msgEl.textContent = prefix + previewText;
+        msgEl.textContent = prefix + last.text;
     });
 }
 
@@ -9105,9 +8618,6 @@ function openChatRoom(target) {
     statusEl.classList.remove('online');
     if (playEl) { playEl.innerHTML = ''; playEl.style.display = 'none'; }
     messagesEl.innerHTML = '<div class="chat-empty-state"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#5a5a6a" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>မက်ဆေ့ချ် စတင်ရန် ရေးပါ</span></div>';
-
-    // ✅ Chat room မှာ gallery/back stack ကို သန့်ရှင်းစေ
-    try { closeGalleryPicker(); } catch(e) {}
 
     document.getElementById('fullscreenOverlay').classList.add('chat-room-active');
     openFullscreen('', 'fs-chat-room');
@@ -9337,15 +8847,9 @@ function applyChatRoomData(data) {
 }
 
 // ============================================================
-//  DISPLAY MESSAGE -- text + image support
+//  DISPLAY MESSAGE
 // ============================================================
 function displayMessage(msg) {
-    // ✅ Image message ဖြစ်ရင် သီးသန့်ပြ
-    if (msg.msgType === 'image' || msg.type === 'image') {
-        displayImageMessage(msg);
-        return;
-    }
-
     var messagesEl = document.getElementById('chatRoomMessages');
     if (!messagesEl) return;
     var empty = messagesEl.querySelector('.chat-empty-state');
@@ -9411,50 +8915,6 @@ function displayMessage(msg) {
 }
 
 // ============================================================
-//  ✅ DISPLAY IMAGE MESSAGE
-// ============================================================
-function displayImageMessage(msg) {
-    var messagesEl = document.getElementById('chatRoomMessages');
-    if (!messagesEl) return;
-    var empty = messagesEl.querySelector('.chat-empty-state');
-    if (empty) empty.remove();
-
-    var isSent = msg.type === 'sent';
-
-    var wrapper = document.createElement('div');
-    wrapper.className = 'chat-message-wrapper ' + (isSent ? 'sent' : 'received');
-    wrapper.dataset.messageId = msg.messageId;
-
-    var date = new Date(msg.timestamp);
-    var h = date.getHours();
-    var m = date.getMinutes().toString().padStart(2, '0');
-    var ampm = h >= 12 ? 'PM' : 'AM';
-    h = h % 12; h = h ? h : 12;
-    var timeStr = h + ':' + m + ' ' + ampm;
-
-    var msgDiv = document.createElement('div');
-    msgDiv.className = 'chat-message msg-image ' + (isSent ? 'sent' : 'received');
-
-    var img = document.createElement('img');
-    img.src = msg.imageData;
-    img.alt = 'image';
-    msgDiv.appendChild(img);
-
-    var timeEl = document.createElement('span');
-    timeEl.className = 'chat-message-time';
-    timeEl.textContent = timeStr;
-    msgDiv.appendChild(timeEl);
-
-    msgDiv.addEventListener('click', function(e) {
-        e.stopPropagation();
-        openReceivedImage(msg.imageData);
-    });
-
-    wrapper.appendChild(msgDiv);
-    messagesEl.appendChild(wrapper);
-}
-
-// ============================================================
 //  MESSAGE MENU
 // ============================================================
 function showMessageMenu(msg, msgEl) {
@@ -9502,13 +8962,7 @@ function showMessageMenu(msg, msgEl) {
         popup.remove();
 
         if (action === 'reply') startReply(msg);
-        else if (action === 'copy') {
-            if (msg.msgType === 'image' || msg.type === 'image') {
-                copyMessageText('[Image]');
-            } else {
-                copyMessageText(msg.text);
-            }
-        }
+        else if (action === 'copy') copyMessageText(msg.text);
         else if (action === 'delete') deleteOneMessage(msg);
     });
 
@@ -9531,11 +8985,9 @@ function closeMsgMenuOnOutsideClick(e) {
 var currentReplyTo = null;
 
 function startReply(msg) {
-    var replyText = (msg.msgType === 'image' || msg.type === 'image') ? '📷 Photo' : msg.text;
-
     currentReplyTo = {
         messageId: msg.messageId,
-        text: replyText,
+        text: msg.text,
         name: msg.type === 'sent' ? 'You' : (currentChatTarget ? 'Them' : 'Message')
     };
 
@@ -9907,8 +9359,6 @@ function stopAppMessageListeners() {
         if (hasText) {
             clipBtn.classList.add('hidden');
             sendBtn.classList.remove('hidden');
-            // Text ရှိရင် gallery ပိတ်
-            try { closeGalleryPicker(); } catch(e) {}
         } else {
             clipBtn.classList.remove('hidden');
             sendBtn.classList.add('hidden');
@@ -9918,12 +9368,7 @@ function stopAppMessageListeners() {
 
     sendBtn.addEventListener('click', function() { sendMessage(); });
     if (msgBtn) msgBtn.addEventListener('click', function() { toggleBubblePicker(); });
-
-    // ✅ CLIP BUTTON → GALLERY (အသစ်)
-    clipBtn.addEventListener('click', function() {
-        toggleGalleryPicker();
-    });
-
+    clipBtn.addEventListener('click', function() {});
     autoResize();
 })();
 
@@ -9941,9 +9386,6 @@ function toggleBubblePicker() {
         bubblePickerOpen = false;
         return;
     }
-
-    // Gallery ပိတ်
-    try { closeGalleryPicker(); } catch(e) {}
 
     var ownedBubbles = Array.isArray(currentUser.bubbleOwned) ? currentUser.bubbleOwned : [];
     var currentBubbleUse = currentUser.bubbleUse || '';
@@ -10021,37 +9463,6 @@ function closeBubblePicker() {
     var picker = document.getElementById('bubblePicker');
     if (picker) { picker.classList.remove('open'); bubblePickerOpen = false; }
 }
-
-// ============================================================
-//  ✅ IMG VIEWER EVENT BINDINGS (NEW)
-// ============================================================
-(function bindImageViewerEvents() {
-    var closeBtn = document.getElementById('imgViewerClose');
-    if (closeBtn) closeBtn.addEventListener('click', closeImageSendPreview);
-
-    var overlay = document.getElementById('imgViewerOverlay');
-    if (overlay) {
-        overlay.addEventListener('click', function(e) {
-            if (e.target === overlay) closeImageSendPreview();
-        });
-    }
-
-    var galleryClose = document.getElementById('galleryPickerClose');
-    if (galleryClose) galleryClose.addEventListener('click', closeGalleryPicker);
-
-    var recvClose = document.getElementById('recvImgClose');
-    if (recvClose) recvClose.addEventListener('click', closeReceivedImage);
-
-    var recvViewer = document.getElementById('recvImgViewer');
-    if (recvViewer) {
-        recvViewer.addEventListener('click', function(e) {
-            if (e.target === recvViewer) closeReceivedImage();
-        });
-    }
-
-    var dlBtn = document.getElementById('recvImgDownload');
-    if (dlBtn) dlBtn.addEventListener('click', downloadReceivedImage);
-})();
 
 // ============================================================
 //  CHAT ROOM MENU
@@ -10185,7 +9596,6 @@ function unblockUser(target) {
     var backBtn = document.getElementById('chatRoomBackBtn');
     if (backBtn) backBtn.addEventListener('click', function() {
         clearReplyState();
-        try { closeGalleryPicker(); } catch(e) {}
         goBackFullscreen();
     });
 })();
@@ -10555,29 +9965,13 @@ function renderFriendListItem(container, fData, friendServerId, friendUserId) {
 }
 
 // ============================================================
-//  ✅ OPEN FULLSCREEN -- Back 2 ခု ဖြေရှင်းရန် ပြင်ထား
+//  OPEN FULLSCREEN
 // ============================================================
 var _origOpenFullscreen = openFullscreen;
 openFullscreen = function(title, screenId) {
-    // ✅ chat-room မဟုတ်တဲ့ screen ဖွင့်ရင် chat-room-active ဖျက်
     if (screenId !== 'fs-chat-room') {
         document.getElementById('fullscreenOverlay').classList.remove('chat-room-active');
     }
-
-    // ✅ chat-room ဖွင့်ရင် stack ကို chat-room အောက်ကို ဖြတ်
-    if (screenId === 'fs-chat-room') {
-        var chatIdx = -1;
-        for (var i = 0; i < fullscreenStack.length; i++) {
-            if (fullscreenStack[i].screenId === 'fs-chat-room') {
-                chatIdx = i;
-                break;
-            }
-        }
-        if (chatIdx !== -1 && chatIdx < fullscreenStack.length - 1) {
-            fullscreenStack = fullscreenStack.slice(0, chatIdx + 1);
-        }
-    }
-
     _origOpenFullscreen(title, screenId);
 };
 
@@ -10590,9 +9984,6 @@ closeFullscreen = function() {
     try { stopChatRoomMessageListeners(); } catch(e) {}
     try { stopChatRoomBlockListener(); } catch(e) {}
     try { closeBubblePicker(); } catch(e) {}
-    try { closeGalleryPicker(); } catch(e) {}
-    try { closeImageSendPreview(); } catch(e) {}
-    try { closeReceivedImage(); } catch(e) {}
     try { clearReplyState(); } catch(e) {}
 
     var profileScreen = document.getElementById('fs-profile');
@@ -10606,25 +9997,22 @@ closeFullscreen = function() {
 };
 
 // ============================================================
-//  ✅ GO BACK FULLSCREEN -- Back 2 ခု ပြဿနာ ဖြေရှင်း
+//  GO BACK FULLSCREEN -- Back ၂ ခု ပြဿနာ ဖြေရှင်း
 // ============================================================
 var _origGoBackFullscreen_final = goBackFullscreen;
 goBackFullscreen = function() {
     var currentFs = fullscreenStack[fullscreenStack.length - 1];
 
-    // ✅ Chat Room ကနေ ထွက်ရင် listeners အားလုံး ရှင်း
     if (currentFs && currentFs.screenId === 'fs-chat-room') {
         if (chatRoomListener) { try { chatRoomListener.off(); } catch(e){} chatRoomListener = null; }
         try { stopChatRoomMessageListeners(); } catch(e) {}
         try { stopChatRoomBlockListener(); } catch(e) {}
         try { closeBubblePicker(); } catch(e) {}
-        try { closeGalleryPicker(); } catch(e) {}
         try { clearReplyState(); } catch(e) {}
         document.getElementById('fullscreenOverlay').classList.remove('chat-room-active');
         setTimeout(function() { renderChatList(); }, 100);
     }
 
-    // ✅ Profile ကနေ ထွက်ရင် viewing-other ရှင်း
     if (currentFs && currentFs.screenId === 'fs-profile') {
         var profileScreen = document.getElementById('fs-profile');
         if (profileScreen) profileScreen.classList.remove('viewing-other');
@@ -10632,7 +10020,6 @@ goBackFullscreen = function() {
         viewingUserServerId = null;
     }
 
-    // ✅ Friends list ကနေ Profile ပြန်ရောက်ရင် viewing-other ပြန်ထည့်
     if (currentFs && currentFs.screenId === 'fs-friends-list') {
         var prev = fullscreenStack[fullscreenStack.length - 2];
         if (prev && prev.screenId === 'fs-profile' && viewingUserId) {
@@ -10641,7 +10028,6 @@ goBackFullscreen = function() {
         }
     }
 
-    // ✅ နောက်တစ်ဆင့်က chat-room ဖြစ်ရင် chat-room-active ပြန်ထည့်
     if (fullscreenStack.length > 1) {
         var nextFs = fullscreenStack[fullscreenStack.length - 2];
         if (nextFs && nextFs.screenId === 'fs-chat-room') {
@@ -10683,9 +10069,6 @@ logoutUser = function() {
     try { stopChatRoomMessageListeners(); } catch(e) {}
     try { stopChatRoomBlockListener(); } catch(e) {}
     try { closeBubblePicker(); } catch(e) {}
-    try { closeGalleryPicker(); } catch(e) {}
-    try { closeImageSendPreview(); } catch(e) {}
-    try { closeReceivedImage(); } catch(e) {}
     try { clearReplyState(); } catch(e) {}
     if (chatRoomListener) { try { chatRoomListener.off(); } catch(e) {} chatRoomListener = null; }
 
@@ -10697,7 +10080,8 @@ logoutUser = function() {
     _origLogoutUser_final();
 };
 
-console.log('✅ STAR ARCADE -- Gallery + Image Send + Back Fix + All Features Loaded');
+console.log('✅ STAR ARCADE -- Random Pick + 5h Local Cooldown + Chat Room Play + Back Fix Loaded');
+
 
 // ============================================================
 //  INIT
@@ -10722,5 +10106,4 @@ checkSession().then(function(hasSession) {
 });
 
 console.log('All systems loaded: New Account (Google), Login with Server No., Profile, Edit, Shop, Roles, Marks, Play Field, Friends, First Login Popup');
-console.log('Telegram sends to: ' + TELEGRAM_CHAT_USERNAME);
-</script>
+console.log('Telegram sends to: ' + TELEGRAM_CHAT_USERNAME);</script>
