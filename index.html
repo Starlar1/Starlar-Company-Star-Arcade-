@@ -275,7 +275,6 @@
                                         <span class="chat-room-name" id="chatRoomName">Name</span>
                                         <span class="chat-room-mark" id="chatRoomMark"></span>
                                     </div>
-                                    <!-- ✅ Chat Room Status + Play -->
                                     <div class="chat-room-status-row">
                                         <span class="chat-room-status" id="chatRoomStatus">offline</span>
                                         <div class="chat-room-play" id="chatRoomPlay"></div>
@@ -370,13 +369,6 @@
                                 </button>
                             </div>
                         </div>
-                    </div>
-                </div>
-
-                <!-- FRIENDS LIST SCREEN (Other User) -->
-                <div class="fs-screen hidden" id="fs-friends-list">
-                    <div class="friends-list-container" id="friendsListContainer">
-                        <!-- JS က items ထည့်မယ် -->
                     </div>
                 </div>
 
@@ -4846,149 +4838,6 @@ body {
     }
 }
 
-/* ============================================================
-   ✅ OTHER USER PROFILE -- ID + Edit Profile ဖျောက်
-   ============================================================ */
-#fs-profile.viewing-other .profile-id {
-    display: none !important;
-}
-#fs-profile.viewing-other .profile-edit-btn-wrapper {
-    display: none !important;
-}
-#fs-profile.viewing-other .friends-count {
-    cursor: pointer;
-}
-#fs-profile.viewing-other .friends-count:active {
-    opacity: 0.7;
-}
-
-/* ============================================================
-   ✅ FRIENDS LIST SCREEN (Other User's Friends)
-   ============================================================ */
-.friends-list-container {
-    width: 100%;
-    height: 100%;
-    padding: 16px 14px;
-    background: var(--bg-body);
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.friends-list-empty {
-    text-align: center;
-    color: var(--text-muted);
-    font-size: 14px;
-    padding: 40px 20px;
-}
-
-.friend-list-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 10px 12px;
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    animation: msgPop 0.2s ease;
-}
-
-.friend-list-avatar-wrap {
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    position: relative;
-    flex-shrink: 0;
-    background: var(--bg-input);
-    overflow: visible;
-    cursor: pointer;
-}
-
-.friend-list-avatar-wrap img {
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    object-fit: cover;
-    display: block;
-}
-
-.friend-list-frame {
-    position: absolute;
-    top: -6px;
-    left: -6px;
-    width: calc(100% + 12px);
-    height: calc(100% + 12px);
-    border-radius: 50%;
-    pointer-events: none;
-    background-size: contain;
-    background-position: center;
-    background-repeat: no-repeat;
-}
-
-.friend-list-info {
-    flex: 1;
-    min-width: 0;
-}
-
-.friend-list-name {
-    font-size: 15px;
-    font-weight: 700;
-    color: var(--text-main);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.friend-list-server {
-    font-size: 11px;
-    color: var(--accent);
-    font-weight: 600;
-    margin-top: 2px;
-}
-
-.friend-list-add-btn {
-    padding: 8px 16px;
-    border: none;
-    border-radius: 20px;
-    background: linear-gradient(135deg, var(--accent), var(--accent-dark));
-    color: #fff;
-    font-size: 12px;
-    font-weight: 700;
-    cursor: pointer;
-    flex-shrink: 0;
-    font-family: inherit;
-    transition: all 0.2s ease;
-}
-
-.friend-list-add-btn:active {
-    transform: scale(0.95);
-}
-
-.friend-list-add-btn:disabled,
-.friend-list-add-btn.already {
-    background: var(--bg-hover);
-    color: var(--text-muted);
-    cursor: not-allowed;
-    opacity: 0.7;
-}
-
-/* ============================================================
-   ✅ RESPONSIVE -- Friends List (Mobile)
-   ============================================================ */
-@media (max-width: 480px) {
-    .friend-list-avatar-wrap {
-        width: 44px;
-        height: 44px;
-    }
-    .friend-list-name {
-        font-size: 14px;
-    }
-    .friend-list-add-btn {
-        padding: 7px 14px;
-        font-size: 11px;
-    }
-}
 
 /* ============================================================
    ✅ CHAT LIST PLAY (G1-G5)
