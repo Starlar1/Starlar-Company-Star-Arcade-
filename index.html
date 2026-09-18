@@ -4902,7 +4902,7 @@ body {
 }
 
 /* ============================================================
-   ✅ CHAT ROOM STATUS + PLAY (CSS Only Fix)
+   ✅ CHAT ROOM STATUS + PLAY
    ============================================================ */
 .chat-room-status-row {
     display: flex;
@@ -4933,9 +4933,10 @@ body {
     overflow: hidden;
     flex-shrink: 1;
     min-width: 0;
+    position: relative;
 }
 
-/* ✅ Play Image */
+/* ✅ Play Image -- z-index 10 (အပေါ်ဆုံး) */
 .chat-room-play-img {
     width: 14px;
     height: 14px;
@@ -4944,9 +4945,11 @@ body {
     flex-shrink: 0;
     border: 1px solid var(--border-light);
     background: var(--bg-input);
+    position: relative;
+    z-index: 10;
 }
 
-/* ✅ Play Name -- ရှည်ရင် scroll */
+/* ✅ Play Name -- z-index 1 (Image ရဲ့ အောက်) */
 .chat-room-play-name {
     font-size: 10px;
     color: var(--accent);
@@ -4955,6 +4958,13 @@ body {
     display: inline-block;
     animation: playScroll 6s linear infinite;
     padding-right: 30px;
+    position: relative;
+    z-index: 1;
+}
+
+@keyframes playScroll {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-100%); }
 }
 
 /* ============================================================
