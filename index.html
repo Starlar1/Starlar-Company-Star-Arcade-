@@ -7864,6 +7864,7 @@ function logoutUser() {
     }
 })();
 
+
 // ============================================================
 //  FIRESTORE INITIALIZE
 // ============================================================
@@ -8129,6 +8130,7 @@ function isUserInMyBlockList(targetUserId, targetServerId) {
 
 // ============================================================
 //  SEARCH -- Realtime Database ထဲ တိုက်ရိုက်ရှာ
+//  ✅ Online/Offline ဖြတ်ထုတ်ပြီး
 // ============================================================
 var searchResultUser = null;
 
@@ -8220,10 +8222,6 @@ function renderSearchResult() {
         if (mark) markHtml = '<span class="search-user-mark"><img src="' + mark.image + '" /></span>';
     }
 
-    var onlineHtml = data.online
-        ? '<span class="search-user-online">Online</span>'
-        : '<span class="search-user-online offline">Offline</span>';
-
     var avatar = data.avatar || 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 100 100"%3E%3Ccircle cx="50" cy="50" r="45" fill="%2322222e"/%3E%3Ccircle cx="50" cy="35" r="18" fill="%235a5a6a"/%3E%3Cpath d="M20 75c0-18 12-30 30-30s30 12 30 30" fill="%235a5a6a"/%3E%3C/svg%3E';
 
     var alreadyFriend = isFriend(data.serverId, data.userId);
@@ -8231,6 +8229,7 @@ function renderSearchResult() {
         ? '<button class="search-delete-btn" id="searchDeleteBtn">Delete</button>'
         : '<button class="search-chat-btn" id="searchChatBtn">Chat</button>';
 
+    // ✅ Online/Offline ဖြတ်ထုတ်ပြီး -- ရှာတဲ့ရလဒ်မှာ မပြဘူး
     resultEl.innerHTML =
         '<div class="search-user-card">' +
             '<div class="search-user-avatar-wrap">' +
@@ -8242,7 +8241,6 @@ function renderSearchResult() {
                 '</div>' +
                 '<div class="search-user-meta">' +
                     '<span class="search-user-server">Server ' + data.serverNo + '</span>' +
-                    onlineHtml +
                 '</div>' +
                 (data.play ? '<div class="search-user-play">' + escapeHtml(data.play) + '</div>' : '') +
             '</div>' +
@@ -9592,7 +9590,6 @@ var _origGoBackFullscreen_final = goBackFullscreen;
 goBackFullscreen = function() {
     var currentFs = fullscreenStack[fullscreenStack.length - 1];
 
-    // Chat Room ကနေ ထွက်ရင်
     if (currentFs && currentFs.screenId === 'fs-chat-room') {
         if (chatRoomListener) { try { chatRoomListener.off(); } catch(e){} chatRoomListener = null; }
         try { stopChatRoomMessageListeners(); } catch(e) {}
@@ -9603,7 +9600,6 @@ goBackFullscreen = function() {
         setTimeout(function() { renderChatList(); }, 100);
     }
 
-    // Chat Room ကို ပြန်ရောက်ရင် chat-room-active ပြန်ထည့်
     if (fullscreenStack.length > 1) {
         var nextFs = fullscreenStack[fullscreenStack.length - 2];
         if (nextFs && nextFs.screenId === 'fs-chat-room') {
@@ -9646,7 +9642,7 @@ logoutUser = function() {
     _origLogoutUser_final();
 };
 
-console.log('✅ STAR ARCADE -- Auto-Switch + Chat Room Play + Back Fix Loaded');            
+console.log('✅ STAR ARCADE -- Auto-Switch + Chat Room Play + Back Fix Loaded');
 
     
 
