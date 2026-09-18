@@ -7735,18 +7735,14 @@ function getFirestoreForServer(serverId) {
 }
 
 // ============================================================
-//  ✅ FIRESTORE RANDOM PICK + AUTO SWITCH (NO COOLDOWN)
-//  ⚠️ Server ကုန်ရင် ချက်ချင်း နောက် Server ကို Auto ပြောင်း
+//  FIRESTORE STATUS + AUTO SWITCH
 // ============================================================
 var firestoreStatus = {};
 
 function initFirestoreStatus() {
     firestoreStatus = {};
     FIREBASE_SERVERS.forEach(function(server) {
-        firestoreStatus[server.id] = {
-            exhausted: false,
-            error: null
-        };
+        firestoreStatus[server.id] = { exhausted: false, error: null };
     });
     console.log('✅ Firestore status initialized:', Object.keys(firestoreStatus));
 }
@@ -7754,27 +7750,21 @@ function initFirestoreStatus() {
 function pickRandomFirestoreServer() {
     var available = [];
     Object.keys(firestoreStatus).forEach(function(sid) {
-        if (!firestoreStatus[sid].exhausted) {
-            available.push(sid);
-        }
+        if (!firestoreStatus[sid].exhausted) available.push(sid);
     });
-
     if (available.length === 0) return null;
-
-    var randomIndex = Math.floor(Math.random() * available.length);
-    return available[randomIndex];
+    return available[Math.floor(Math.random() * available.length)];
 }
 
 function markServerExhausted(serverId, error) {
     if (!firestoreStatus[serverId]) return;
     firestoreStatus[serverId].exhausted = true;
     firestoreStatus[serverId].error = error;
-    console.warn('⚠️ Server exhausted:', serverId, '→ Auto switch to next server');
+    console.warn('⚠️ Server exhausted:', serverId);
 }
 
 function resetFirestoreStatus() {
     initFirestoreStatus();
-    console.log('✅ Firestore status reset');
 }
 
 function checkExpiredCooldowns() {
@@ -7784,11 +7774,10 @@ function checkExpiredCooldowns() {
             firestoreStatus[server.id].error = null;
         }
     });
-    console.log('✅ All servers reset for new session');
 }
 
 // ============================================================
-//  ✅ PLAY CONFIGURATION (G1-G5)
+//  PLAY CONFIG
 // ============================================================
 var PLAY_CONFIG = {
     plays: [
@@ -7806,7 +7795,7 @@ function getPlayById(playId) {
 }
 
 // ============================================================
-//  FRIENDS CACHE
+//  FRIENDS CACHE (IndexedDB)
 // ============================================================
 var FRIENDS_CACHE_KEY = 'friendsCache';
 
@@ -7852,7 +7841,7 @@ function cleanupFriendsCache() {
 }
 
 // ============================================================
-//  MESSAGES CACHE -- QUEUE SYSTEM
+//  MESSAGES CACHE (IndexedDB)
 // ============================================================
 function getMessagesKey(serverId, userId) { return 'messages_' + serverId + ':' + userId; }
 
@@ -7867,9 +7856,7 @@ var messageSaveQueue = Promise.resolve();
 function saveMessageToLocalDB(msg) {
     messageSaveQueue = messageSaveQueue.then(function() {
         return doSaveMessage(msg);
-    }).catch(function(err) {
-        console.error('saveMessage error:', err);
-    });
+    }).catch(function(err) { console.error('saveMessage error:', err); });
     return messageSaveQueue;
 }
 
@@ -7896,9 +7883,7 @@ var seenUpdateQueue = Promise.resolve();
 function updateMessageSeen(serverId, userId, messageId) {
     seenUpdateQueue = seenUpdateQueue.then(function() {
         return doUpdateSeen(serverId, userId, messageId);
-    }).catch(function(err) {
-        console.error('updateSeen error:', err);
-    });
+    }).catch(function(err) { console.error('updateSeen error:', err); });
     return seenUpdateQueue;
 }
 
@@ -7919,9 +7904,7 @@ var deleteMessageQueue = Promise.resolve();
 function deleteMessageFromLocalDB(serverId, userId, messageId) {
     deleteMessageQueue = deleteMessageQueue.then(function() {
         return doDeleteMessage(serverId, userId, messageId);
-    }).catch(function(err) {
-        console.error('deleteMessage error:', err);
-    });
+    }).catch(function(err) { console.error('deleteMessage error:', err); });
     return deleteMessageQueue;
 }
 
@@ -7974,22 +7957,6 @@ function fetchUserFullData(serverId, userId) {
     });
 }
 
-function fetchUserFullDataWithFriends(serverId, userId) {
-    return new Promise(function(resolve, reject) {
-        var db = getDbForServer(serverId);
-        if (!db) { reject(new Error('DB not available')); return; }
-        db.ref('users/' + userId).once('value').then(function(snap) {
-            var data = snap.val();
-            if (!data) { reject(new Error('User not found')); return; }
-            var server = FIREBASE_SERVERS.find(function(s){ return s.id === serverId; });
-            var serverNo = server ? server.number : 1;
-            var fullData = extractUseOnlyData(data, serverId, serverNo, userId);
-            fullData.friendsList = Array.isArray(data.friendsList) ? data.friendsList : [];
-            resolve(fullData);
-        }).catch(reject);
-    });
-}
-
 function escapeHtml(s) {
     if (!s) return '';
     return String(s).replace(/[&<>"']/g, function(c) {
@@ -8023,21 +7990,13 @@ function performSearch() {
     var userId = document.getElementById('searchUserId').value.trim();
     var resultEl = document.getElementById('searchResult');
 
-    if (!serverNoRaw) {
-        resultEl.innerHTML = '<div class="search-empty">Server No. ရေးပါ</div>'; return;
-    }
+    if (!serverNoRaw) { resultEl.innerHTML = '<div class="search-empty">Server No. ရေးပါ</div>'; return; }
     var serverNo = parseInt(serverNoRaw);
-    if (isNaN(serverNo) || serverNo <= 0) {
-        resultEl.innerHTML = '<div class="search-empty">Server No. မှန်ကန်စွာ ရေးပါ</div>'; return;
-    }
-    if (!userId) {
-        resultEl.innerHTML = '<div class="search-empty">ID ရေးပါ</div>'; return;
-    }
+    if (isNaN(serverNo) || serverNo <= 0) { resultEl.innerHTML = '<div class="search-empty">Server No. မှန်ကန်စွာ ရေးပါ</div>'; return; }
+    if (!userId) { resultEl.innerHTML = '<div class="search-empty">ID ရေးပါ</div>'; return; }
 
     var server = FIREBASE_SERVERS.find(function(s) { return s.number === serverNo; });
-    if (!server) {
-        resultEl.innerHTML = '<div class="search-empty">Server ' + serverNo + ' မရှိပါ</div>'; return;
-    }
+    if (!server) { resultEl.innerHTML = '<div class="search-empty">Server ' + serverNo + ' မရှိပါ</div>'; return; }
 
     if (currentUser && currentUser.userId === userId && currentServerId === server.id) {
         resultEl.innerHTML = '<div class="search-empty">ကိုယ့်ကိုယ်ကို ရှာလို့မရပါ</div>'; return;
@@ -8077,7 +8036,7 @@ function renderSearchResult() {
         ? '<span class="search-user-online">Online</span>'
         : '<span class="search-user-online offline">Offline</span>';
 
-    var avatar = data.avatar || 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 100 100"%3E%3Ccircle cx="50" cy="50" r="45" fill="%2322222e"/%3E%3Ccircle cx="50" cy="35" r="18" fill="%235a5a6a"/%3E%3Cpath d="M20 75c0-18 12-30 30-30s30 12 30 30" fill="%235a5a6a"/%3E%3C/svg%3E';
+    var avatar = data.avatar || 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 100 100"%3E%3Ccircle cx="50" cy="50" r="45" fill="%2322222e"/%3E%3C/svg%3E';
 
     var alreadyFriend = isFriend(data.serverId, data.userId);
     var buttonHtml = alreadyFriend
@@ -8136,7 +8095,6 @@ function addFriendAndSync(targetData) {
     var myDb = getDbForServer(currentServerId);
     var theirDb = getDbForServer(targetData.serverId);
 
-    // ✅ ကိုယ့် friendsList ကို update သုံးပြီး ရေး
     myDb.ref('users/' + currentUser.userId).update({ friendsList: myList })
     .then(function() {
         return theirDb.ref('users/' + targetData.userId + '/friendsList').once('value');
@@ -8147,7 +8105,6 @@ function addFriendAndSync(targetData) {
         if (!theirList.some(function(f){ return f.serverId===currentServerId && f.userId===currentUser.userId; })) {
             theirList.push(myEntryForThem);
         }
-        // ✅ သူတစ်ဖက်သားရဲ့ friendsList node ကိုသာ update လုပ်
         return theirDb.ref('users/' + targetData.userId).update({ friendsList: theirList });
     })
     .then(function() {
@@ -8185,7 +8142,6 @@ function deleteFriendAndSync(targetData) {
     var myDb = getDbForServer(currentServerId);
     var theirDb = getDbForServer(targetData.serverId);
 
-    // ✅ ကိုယ့် friendsList ကို update သုံးပြီး ရေး
     myDb.ref('users/' + currentUser.userId).update({ friendsList: myList })
     .then(function() {
         return theirDb.ref('users/' + targetData.userId + '/friendsList').once('value');
@@ -8196,7 +8152,6 @@ function deleteFriendAndSync(targetData) {
         theirList = theirList.filter(function(f) {
             return !(f.serverId === currentServerId && f.userId === currentUser.userId);
         });
-        // ✅ သူတစ်ဖက်သားရဲ့ friendsList node ကိုသာ update လုပ်
         return theirDb.ref('users/' + targetData.userId).update({ friendsList: theirList });
     })
     .then(function() { return removeFriendFromCache(targetData.serverId, targetData.userId); })
@@ -8215,14 +8170,7 @@ function deleteFriendAndSync(targetData) {
 }
 
 // ============================================================
-//  SYNC FROM FIREBASE (မသုံးတော့ဘူး)
-// ============================================================
-function syncFriendsFromFirebase() {
-    return Promise.resolve();
-}
-
-// ============================================================
-//  FRIENDS LIST LISTENER
+//  FRIENDS LIST LISTENER (Realtime) -- IndexedDB + Chat List Update
 // ============================================================
 var friendsListListener = null;
 
@@ -8249,20 +8197,24 @@ function startFriendsListListener() {
         currentUser.friendsList = list;
         saveUserToDB(currentUser);
 
+        // ✅ Friend အသစ် -- သူ့ Server ကနေ data ယူ → IndexedDB သိမ်း → Chat List update
         if (newOnes.length > 0) {
             newOnes.forEach(function(entry) {
                 fetchUserFullData(entry.serverId, entry.userId)
                     .then(function(d) { return saveFriendToCache(d); })
                     .then(function() { renderChatList(); })
-                    .catch(function() {});
+                    .catch(function() { renderChatList(); });
             });
         }
+
+        // ✅ Friend ဖျက်ခံရ -- IndexedDB ကနေ ဖျက် → Chat List update
         if (removedOnes.length > 0) {
             getFriendsCache().then(function(cache) {
                 removedOnes.forEach(function(e) { delete cache[getFriendCacheKey(e.serverId, e.userId)]; });
                 return saveFriendsCache(cache);
-            }).then(function() { renderChatList(); }).catch(function() {});
+            }).then(function() { renderChatList(); }).catch(function() { renderChatList(); });
         }
+
         cleanupFriendsCache();
         if (newOnes.length === 0 && removedOnes.length === 0) renderChatList();
     });
@@ -8273,8 +8225,10 @@ function stopFriendsListListener() {
 }
 
 // ============================================================
-//  CHAT LIST
+//  CHAT LIST -- IndexedDB ကနေ ပြ + Preview
 // ============================================================
+var chatListPreviewListeners = [];   // ✅ Chat List preview listeners
+
 function renderChatList() {
     var listEl = document.getElementById('chatList');
     if (!listEl) return;
@@ -8352,16 +8306,6 @@ function renderChatList() {
                 openChatRoom({ serverId: friend.serverId, userId: friend.userId, serverNo: friend.serverNo });
             });
 
-            // ✅ Profile Circle နှိပ်ရင် Full Profile ကြည့်တာ ဖြုတ်လိုက်ပြီ
-            var avatarWrap = row.querySelector('.chat-list-avatar-wrap');
-            if (avatarWrap) {
-                avatarWrap.style.cursor = 'pointer';
-                avatarWrap.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    // ✅ ဖြုတ်လိုက်ပြီ -- ဘာမှ မလုပ်တော့ဘူး
-                });
-            }
-
             listEl.appendChild(row);
             updateChatListPreview(friend.serverId, friend.userId, rowId);
         });
@@ -8377,6 +8321,154 @@ function updateChatListPreview(serverId, userId, rowId) {
         var prefix = last.type === 'sent' ? 'You: ' : '';
         msgEl.textContent = prefix + last.text;
     });
+}
+
+// ✅ Chat List Preview ကို ချက်ချင်း Update လုပ်ဖို့ helper
+function updateChatListRow(serverId, userId, friendData) {
+    // Chat List မှာ အဲ့ဒီ friend ရဲ့ row ကို ရှာ
+    var listEl = document.getElementById('chatList');
+    if (!listEl) return;
+
+    // IndexedDB ကနေ ဖတ်ပြီး row update
+    getFriendsCache().then(function(cache) {
+        var cached = cache[getFriendCacheKey(serverId, userId)];
+        if (!cached) return;
+
+        // ရှိပြီးသား row ကို ရှာ
+        var rows = listEl.querySelectorAll('.chat-list-item:not([data-chat="ai"])');
+        rows.forEach(function(row) {
+            var nameEl = row.querySelector('.chat-list-name');
+            if (nameEl && nameEl.textContent === cached.name) {
+                // Avatar update
+                var avatarImg = row.querySelector('.chat-list-avatar');
+                if (avatarImg && cached.avatar) avatarImg.src = cached.avatar;
+
+                // Online status update
+                var onlineEl = row.querySelector('.chat-list-online-text');
+                if (onlineEl) {
+                    if (cached.online) {
+                        onlineEl.classList.add('online');
+                        onlineEl.textContent = 'Online';
+                    } else {
+                        onlineEl.classList.remove('online');
+                        onlineEl.textContent = 'Offline';
+                    }
+                }
+            }
+        });
+    });
+}
+
+// ============================================================
+//  ✅ APP MESSAGE LISTENERS -- အားလုံး နားထောင် (အမြဲ)
+//  Chat List မှာ စာအသစ် ချက်ချင်း ပြ
+// ============================================================
+var appMessageListeners = [];
+
+function startAppMessageListeners() {
+    stopAppMessageListeners();
+    if (!currentUser || !currentServerId) return;
+
+    console.log('🔔 Starting App Message Listeners for ALL Firestore servers...');
+
+    FIREBASE_SERVERS.forEach(function(server) {
+        var sid = server.id;
+
+        if (firestoreStatus[sid] && firestoreStatus[sid].exhausted) {
+            console.log('⚠️ Skipping exhausted server:', sid);
+            return;
+        }
+
+        var fsdb = getFirestoreForServer(sid);
+        if (!fsdb) return;
+
+        // ✅ ကိုယ့်ဆီ လာတဲ့ Message
+        var unsub1 = fsdb.collection('messages')
+            .where('receiverId', '==', currentUser.userId)
+            .where('receiverServer', '==', currentServerId)
+            .onSnapshot(function(snapshot) {
+                snapshot.docChanges().forEach(function(change) {
+                    if (change.type === 'added') {
+                        var msg = change.doc.data();
+                        msg.messageId = change.doc.id;
+                        msg.serverId = sid;
+                        msg.type = 'received';
+                        msg.seen = false;
+
+                        saveMessageToLocalDB(msg).then(function() {
+                            // ✅ Chat Room ဖွင့်ထားရင် Chat Room မှာ ပြ
+                            if (currentChatTarget &&
+                                currentChatTarget.userId === msg.senderId &&
+                                currentChatTarget.serverId === msg.senderServer) {
+                                displayMessage(msg);
+                                setTimeout(function() {
+                                    var messagesEl = document.getElementById('chatRoomMessages');
+                                    if (messagesEl) {
+                                        messagesEl.scrollTo({ top: messagesEl.scrollHeight, behavior: 'smooth' });
+                                    }
+                                }, 30);
+                                markAsSeenAndDelete(msg.messageId, sid, msg.senderServer, msg.senderId);
+                            } else {
+                                // ✅ Chat Room မဖွင့်ရင် Chat List မှာ ပြ
+                                updateChatListPreviewFromMessage(msg);
+                            }
+                        });
+                    }
+                });
+            }, function(err) {
+                console.warn('App listener error on ' + sid + ':', err);
+                if (err.code === 'resource-exhausted' || err.code === 'permission-denied') {
+                    markServerExhausted(sid, err);
+                }
+            });
+        appMessageListeners.push(unsub1);
+
+        // ✅ ကိုယ်ပို့တဲ့ Message
+        var unsub2 = fsdb.collection('messages')
+            .where('senderId', '==', currentUser.userId)
+            .where('senderServer', '==', currentServerId)
+            .onSnapshot(function(snapshot) {
+                snapshot.docChanges().forEach(function(change) {
+                    if (change.type === 'removed') {
+                        console.log('✅ Sender: Firestore removed:', change.doc.id);
+                    }
+                });
+            }, function(err) {
+                console.warn('App sender listener error on ' + sid + ':', err);
+                if (err.code === 'resource-exhausted' || err.code === 'permission-denied') {
+                    markServerExhausted(sid, err);
+                }
+            });
+        appMessageListeners.push(unsub2);
+    });
+}
+
+function stopAppMessageListeners() {
+    appMessageListeners.forEach(function(u) { try { u(); } catch(e) {} });
+    appMessageListeners = [];
+}
+
+// ✅ Chat List မှာ Message အသစ် ချက်ချင်း ပြဖို့
+function updateChatListPreviewFromMessage(msg) {
+    // အဲ့ဒီ friend ရဲ့ row ကို ရှာ
+    var friendServer = msg.senderServer;
+    var friendId = msg.senderId;
+
+    if (!currentUser || !Array.isArray(currentUser.friendsList)) return;
+
+    var friendIndex = -1;
+    currentUser.friendsList.forEach(function(f, idx) {
+        if (f.serverId === friendServer && f.userId === friendId) friendIndex = idx;
+    });
+
+    if (friendIndex === -1) return;   // Friend မဟုတ်ရင် ကျော်
+
+    var rowId = 'chatRow_' + friendIndex;
+    var msgEl = document.getElementById(rowId + '_msg');
+    if (msgEl) {
+        msgEl.textContent = msg.text;   // ✅ ချက်ချင်း ပြ
+        console.log('✅ Chat List preview updated for:', friendId);
+    }
 }
 
 // ============================================================
@@ -8420,10 +8512,12 @@ function openChatRoom(target) {
     if (clipBtn) clipBtn.classList.remove('hidden');
     if (sendBtn) sendBtn.classList.add('hidden');
 
+    // ✅ IndexedDB ကနေ ချက်ချင်း ပြ
     getFriendFromCache(target.serverId, target.userId).then(function(cached) {
         if (cached) applyChatRoomData(cached);
     });
 
+    // ✅ Friend ရဲ့ Server ကို နားထောင် (Chat Room ဝင်မှ)
     if (chatRoomListener) { try { chatRoomListener.off(); } catch(e){} chatRoomListener = null; }
     var friendDb = getDbForServer(target.serverId);
     if (friendDb) {
@@ -8434,7 +8528,14 @@ function openChatRoom(target) {
             var data = snap.val();
             if (!data) return;
             var fullData = extractUseOnlyData(data, target.serverId, serverNo, target.userId);
-            saveFriendToCache(fullData);
+
+            // ✅ IndexedDB သိမ်း
+            saveFriendToCache(fullData).then(function() {
+                // ✅ Chat List Row Update
+                updateChatListRow(target.serverId, target.userId, fullData);
+            });
+
+            // ✅ Chat Room UI Update
             applyChatRoomData(fullData);
         });
     }
@@ -8455,6 +8556,7 @@ function openChatRoom(target) {
         });
     }
 
+    // ✅ IndexedDB ကနေ Message တွေ ဖတ် + ပြ
     getMessagesWith(target.serverId, target.userId).then(function(messages) {
         messagesEl.innerHTML = '';
         if (messages.length === 0) {
@@ -8462,7 +8564,6 @@ function openChatRoom(target) {
             return;
         }
         messages.forEach(function(msg) { displayMessage(msg); });
-
         setTimeout(function() {
             messagesEl.scrollTo({ top: messagesEl.scrollHeight, behavior: 'smooth' });
         }, 50);
@@ -8475,19 +8576,6 @@ function openChatRoom(target) {
     });
 
     startChatRoomMessageListeners(target);
-
-    // ✅ Chat Room Avatar နှိပ်ရင် Full Profile ကြည့်တာ ဖြုတ်လိုက်ပြီ
-    setTimeout(function() {
-        var chatRoomAvatar = document.querySelector('.chat-room-avatar');
-        if (chatRoomAvatar && !chatRoomAvatar.dataset.profileBound) {
-            chatRoomAvatar.dataset.profileBound = 'true';
-            chatRoomAvatar.style.cursor = 'pointer';
-            chatRoomAvatar.addEventListener('click', function(e) {
-                e.stopPropagation();
-                // ✅ ဖြုတ်လိုက်ပြီ -- ဘာမှ မလုပ်တော့ဘူး
-            });
-        }
-    }, 100);
 }
 
 function updateChatBlockUI() {
@@ -8546,14 +8634,12 @@ function startChatRoomMessageListeners(target) {
                             currentChatTarget.userId === target.userId &&
                             currentChatTarget.serverId === target.serverId) {
                             displayMessage(msg);
-
                             setTimeout(function() {
                                 var messagesEl = document.getElementById('chatRoomMessages');
                                 if (messagesEl) {
                                     messagesEl.scrollTo({ top: messagesEl.scrollHeight, behavior: 'smooth' });
                                 }
                             }, 30);
-
                             markAsSeenAndDelete(msg.messageId, sid, target.serverId, target.userId);
                         }
                     }
@@ -8637,11 +8723,19 @@ function applyChatRoomData(data) {
 }
 
 // ============================================================
-//  DISPLAY MESSAGE
+//  DISPLAY MESSAGE -- စာတူ ၂ ခု မဖြစ်အောင် စစ်
 // ============================================================
 function displayMessage(msg) {
     var messagesEl = document.getElementById('chatRoomMessages');
     if (!messagesEl) return;
+
+    // ✅ Message ID တူတာ ရှိပြီးသားလား စစ်
+    var existing = messagesEl.querySelector('[data-message-id="' + msg.messageId + '"]');
+    if (existing) {
+        console.log('⚠️ Duplicate message skipped:', msg.messageId);
+        return;
+    }
+
     var empty = messagesEl.querySelector('.chat-empty-state');
     if (empty) empty.remove();
 
@@ -8860,9 +8954,6 @@ function deleteOneMessage(msg) {
             var fsdb = getFirestoreForServer(msg.serverId);
             if (fsdb) {
                 fsdb.collection('messages').doc(msg.messageId).delete()
-                .then(function() {
-                    console.log('✅ Sender: IndexedDB + Firestore delete:', msg.messageId);
-                })
                 .catch(function(err) { console.warn(err); });
             }
         }
@@ -8896,7 +8987,7 @@ function showToast(message) {
 }
 
 // ============================================================
-//  SEND MESSAGE -- Random Pick + Auto Switch (SILENT)
+//  SEND MESSAGE
 // ============================================================
 function sendMessage() {
     if (iAmBlockedByThem) {
@@ -8953,10 +9044,7 @@ function sendMessage() {
             fsdb = getFirestoreForServer(nextId);
             chosenServerId = nextId;
         }
-        if (!fsdb) {
-            showToast('⚠️ Message server error');
-            return;
-        }
+        if (!fsdb) { showToast('⚠️ Message server error'); return; }
     }
 
     var localMsg = {
@@ -8992,7 +9080,6 @@ function sendMessage() {
         if (sendBtn) sendBtn.classList.add('hidden');
 
         clearReplyState();
-        renderChatList();
 
         fsdb.collection('messages').doc(messageId).set(messageData)
         .then(function() {
@@ -9006,18 +9093,15 @@ function sendMessage() {
 
                 var nextServerId = pickRandomFirestoreServer();
                 if (nextServerId) {
-                    console.log('🔄 Auto-switching to:', nextServerId);
                     var nextFsdb = getFirestoreForServer(nextServerId);
                     if (nextFsdb) {
                         localMsg.serverId = nextServerId;
                         saveMessageToLocalDB(localMsg);
-
                         nextFsdb.collection('messages').doc(messageId).set(messageData)
                         .then(function() {
-                            console.log('✅ Auto-switched sent:', nextServerId, messageId);
+                            console.log('✅ Auto-switched sent:', nextServerId);
                         })
                         .catch(function(err2) {
-                            console.error('Auto-switch error:', err2);
                             if (err2.code === 'resource-exhausted' || err2.code === 'permission-denied' || err2.code === 'unavailable') {
                                 markServerExhausted(nextServerId, err2);
                                 var thirdServerId = pickRandomFirestoreServer();
@@ -9027,13 +9111,7 @@ function sendMessage() {
                                         localMsg.serverId = thirdServerId;
                                         saveMessageToLocalDB(localMsg);
                                         thirdFsdb.collection('messages').doc(messageId).set(messageData)
-                                        .then(function() {
-                                            console.log('✅ Third server sent:', thirdServerId);
-                                        })
-                                        .catch(function(err3) {
-                                            console.error('Third server error:', err3);
-                                            markServerExhausted(thirdServerId, err3);
-                                        });
+                                        .catch(function(err3) { markServerExhausted(thirdServerId, err3); });
                                     }
                                 }
                             }
@@ -9043,8 +9121,6 @@ function sendMessage() {
                 if (!pickRandomFirestoreServer()) {
                     showToast('⚠️ Server အားလုံး ကုန်နေပါ -- ခဏစောင့်ပါ');
                 }
-            } else {
-                console.warn('Firestore send failed, but silent:', err);
             }
         });
     }).catch(function(err) {
@@ -9061,7 +9137,7 @@ function generateMessageId() {
 }
 
 // ============================================================
-//  SEEN + DELETE -- Receiver သာ
+//  SEEN + DELETE -- Receiver
 // ============================================================
 function markAsSeenAndDelete(messageId, serverId, friendServer, friendId) {
     updateMessageSeen(friendServer, friendId, messageId);
@@ -9069,92 +9145,7 @@ function markAsSeenAndDelete(messageId, serverId, friendServer, friendId) {
     var fsdb = getFirestoreForServer(serverId);
     if (!fsdb) return;
     fsdb.collection('messages').doc(messageId).delete()
-    .then(function() {
-        console.log('✅ Receiver: Seen + Firestore delete:', messageId);
-    })
     .catch(function(err) { console.warn(err); });
-}
-
-// ============================================================
-//  APP MESSAGE LISTENERS
-// ============================================================
-var appMessageListeners = [];
-
-function startAppMessageListeners() {
-    stopAppMessageListeners();
-    if (!currentUser || !currentServerId) return;
-
-    FIREBASE_SERVERS.forEach(function(server) {
-        var sid = server.id;
-
-        if (firestoreStatus[sid] && firestoreStatus[sid].exhausted) {
-            console.log('⚠️ Skipping exhausted server (app):', sid);
-            return;
-        }
-
-        var fsdb = getFirestoreForServer(sid);
-        if (!fsdb) return;
-
-        var unsub1 = fsdb.collection('messages')
-            .where('receiverId', '==', currentUser.userId)
-            .where('receiverServer', '==', currentServerId)
-            .onSnapshot(function(snapshot) {
-                snapshot.docChanges().forEach(function(change) {
-                    if (change.type === 'added') {
-                        var msg = change.doc.data();
-                        msg.messageId = change.doc.id;
-                        msg.serverId = sid;
-                        msg.type = 'received';
-                        msg.seen = false;
-
-                        saveMessageToLocalDB(msg).then(function() {
-                            if (currentChatTarget &&
-                                currentChatTarget.userId === msg.senderId &&
-                                currentChatTarget.serverId === msg.senderServer) {
-                                displayMessage(msg);
-                                setTimeout(function() {
-                                    var messagesEl = document.getElementById('chatRoomMessages');
-                                    if (messagesEl) {
-                                        messagesEl.scrollTo({ top: messagesEl.scrollHeight, behavior: 'smooth' });
-                                    }
-                                }, 30);
-                                markAsSeenAndDelete(msg.messageId, sid, msg.senderServer, msg.senderId);
-                            } else {
-                                renderChatList();
-                            }
-                        });
-                    }
-                });
-            }, function(err) {
-                console.warn('App listener error on ' + sid + ':', err);
-                if (err.code === 'resource-exhausted' || err.code === 'permission-denied') {
-                    markServerExhausted(sid, err);
-                }
-            });
-        appMessageListeners.push(unsub1);
-
-        var unsub2 = fsdb.collection('messages')
-            .where('senderId', '==', currentUser.userId)
-            .where('senderServer', '==', currentServerId)
-            .onSnapshot(function(snapshot) {
-                snapshot.docChanges().forEach(function(change) {
-                    if (change.type === 'removed') {
-                        console.log('✅ Sender: Firestore ဖျက်ခံရ -- IndexedDB ကျန်:', change.doc.id);
-                    }
-                });
-            }, function(err) {
-                console.warn('App sender listener error on ' + sid + ':', err);
-                if (err.code === 'resource-exhausted' || err.code === 'permission-denied') {
-                    markServerExhausted(sid, err);
-                }
-            });
-        appMessageListeners.push(unsub2);
-    });
-}
-
-function stopAppMessageListeners() {
-    appMessageListeners.forEach(function(u) { try { u(); } catch(e) {} });
-    appMessageListeners = [];
 }
 
 // ============================================================
@@ -9273,7 +9264,6 @@ function useBubble(bubble) {
 
     var myDb = getDbForServer(currentServerId);
     if (myDb) {
-        // ✅ update သုံးပြီး bubbleUse field ကိုသာ ရေး
         myDb.ref('users/' + currentUser.userId).update({ bubbleUse: newBubbleId }).catch(function(err) {
             console.warn(err);
         });
@@ -9365,7 +9355,7 @@ function closeMenuOnOutsideClick(e) {
 function deleteAllMessages() {
     var target = currentChatTarget;
     if (!target) return;
-    if (!confirm('ဒီသူနဲ့ ဆိုင်တဲ့ message အားလုံး ဖျက်မှာ သေချာလား? (ကိုယ်ပို့တဲ့စာ + သူပို့တဲ့စာ)')) return;
+    if (!confirm('ဒီသူနဲ့ ဆိုင်တဲ့ message အားလုံး ဖျက်မှာ သေချာလား?')) return;
 
     deleteAllMessagesWith(target.serverId, target.userId).then(function() {
         var messagesEl = document.getElementById('chatRoomMessages');
@@ -9385,7 +9375,6 @@ function blockUser(target) {
         blockList.push({ serverId: target.serverId, userId: target.userId });
     }
 
-    // ✅ update သုံးပြီး blockList field ကိုသာ ရေး
     myDb.ref('users/' + currentUser.userId).update({ blockList: blockList })
     .then(function() {
         currentUser.blockList = blockList;
@@ -9407,7 +9396,6 @@ function unblockUser(target) {
         return !(b.userId === target.userId && b.serverId === target.serverId);
     });
 
-    // ✅ update သုံးပြီး blockList field ကိုသာ ရေး
     myDb.ref('users/' + currentUser.userId).update({ blockList: blockList })
     .then(function() {
         currentUser.blockList = blockList;
@@ -9446,7 +9434,6 @@ function setMyOnlineStatus(isOnline) {
     if (!currentUser || !currentServerId) return Promise.resolve();
     var myDb = getDbForServer(currentServerId);
     if (!myDb) return Promise.resolve();
-    // ✅ update သုံးပြီး online field ကိုသာ ရေး
     return myDb.ref('users/' + currentUser.userId).update({ online: isOnline === true }).catch(function() {});
 }
 
@@ -9496,18 +9483,7 @@ function detachOnlineEventListeners() {
 
 window.goOnline = goOnline;
 window.goOffline = goOffline;
-window.syncFriendsFromFirebase = syncFriendsFromFirebase;
-
-// ============================================================
-//  OTHER USER PROFILE -- ✅ ဖြုတ်လိုက်ပြီ
-// ============================================================
-// ✅ viewOtherUserProfile နှင့် ဆက်စပ် function အားလုံး ဖြုတ်လိုက်ပြီ
-// ✅ Profile Circle နှိပ်ရင် ဘာမှ မလုပ်တော့ဘူး
-
-// ============================================================
-//  VIEW USER'S FRIENDS LIST -- ✅ ဖြုတ်လိုက်ပြီ
-// ============================================================
-// ✅ viewUserFriendsList, renderFriendListItem ဖြုတ်လိုက်ပြီ
+window.syncFriendsFromFirebase = function() { return Promise.resolve(); };
 
 // ============================================================
 //  OPEN FULLSCREEN
@@ -9531,18 +9507,13 @@ closeFullscreen = function() {
     try { closeBubblePicker(); } catch(e) {}
     try { clearReplyState(); } catch(e) {}
 
-    var profileScreen = document.getElementById('fs-profile');
-    if (profileScreen) profileScreen.classList.remove('viewing-other');
     document.getElementById('fullscreenOverlay').classList.remove('chat-room-active');
-
-    viewingUserId = null;
-    viewingUserServerId = null;
 
     _origCloseFullscreen_final();
 };
 
 // ============================================================
-//  GO BACK FULLSCREEN -- Back ၂ ခု ပြဿနာ ဖြေရှင်း
+//  GO BACK FULLSCREEN
 // ============================================================
 var _origGoBackFullscreen_final = goBackFullscreen;
 goBackFullscreen = function() {
@@ -9558,13 +9529,6 @@ goBackFullscreen = function() {
         setTimeout(function() { renderChatList(); }, 100);
     }
 
-    if (currentFs && currentFs.screenId === 'fs-profile') {
-        var profileScreen = document.getElementById('fs-profile');
-        if (profileScreen) profileScreen.classList.remove('viewing-other');
-        viewingUserId = null;
-        viewingUserServerId = null;
-    }
-
     if (fullscreenStack.length > 1) {
         var nextFs = fullscreenStack[fullscreenStack.length - 2];
         if (nextFs && nextFs.screenId === 'fs-chat-room') {
@@ -9576,7 +9540,7 @@ goBackFullscreen = function() {
 };
 
 // ============================================================
-//  HOOKS
+//  HOOKS -- enterApp
 // ============================================================
 var _origEnterApp_final = enterApp;
 enterApp = function(user) {
@@ -9587,15 +9551,26 @@ enterApp = function(user) {
     }
 
     _origEnterApp_final(user);
+
+    // ✅ Chat List ကို IndexedDB ကနေ ပြ
     setTimeout(function() { renderChatList(); }, 100);
+
+    // ✅ Friends List ကို Realtime နားထောင် (IndexedDB + Chat List Update)
     setTimeout(function() { startFriendsListListener(); }, 500);
+
+    // ✅ ALL Firestore Server Message ကို အမြဲ နားထောင်
     setTimeout(function() { startAppMessageListeners(); }, 700);
+
+    // ✅ Online
     setTimeout(function() {
         goOnline();
         attachOnlineEventListeners();
     }, 900);
 };
 
+// ============================================================
+//  HOOKS -- logoutUser
+// ============================================================
 var _origLogoutUser_final = logoutUser;
 logoutUser = function() {
     if (currentUser && currentServerId) { try { goOffline(); } catch(e) {} }
@@ -9609,15 +9584,10 @@ logoutUser = function() {
     try { clearReplyState(); } catch(e) {}
     if (chatRoomListener) { try { chatRoomListener.off(); } catch(e) {} chatRoomListener = null; }
 
-    Object.keys(firestoreCooldownTimers).forEach(function(sid) {
-        try { clearTimeout(firestoreCooldownTimers[sid]); } catch(e) {}
-    });
-    firestoreCooldownTimers = {};
-
     _origLogoutUser_final();
 };
 
-console.log('✅ STAR ARCADE -- Random Pick + Auto Switch (Silent) + No Profile View + Back Fix Loaded');            
+console.log('✅ STAR ARCADE -- All Firestore Always Listening + IndexedDB First + Chat List Instant Update');            
 
     
 
