@@ -5275,6 +5275,170 @@ body {
 .msg-menu-item[data-action="report"]:hover,
 .msg-menu-item[data-action="report"]:active {
     background: rgba(255, 170, 68, 0.15);
+}
+
+/* ============================================================
+   REPORT POPUP
+   ============================================================ */
+.report-popup-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 10005;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    backdrop-filter: blur(6px);
+}
+
+.report-popup {
+    background: var(--bg-header);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 0;
+    max-width: 400px;
+    width: 100%;
+    max-height: 90vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 8px 48px rgba(0, 0, 0, 0.7);
+}
+
+.report-popup-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 18px 12px;
+    border-bottom: 1px solid var(--border);
+}
+
+.report-popup-header h3 {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+.report-popup-close {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: none;
+    background: var(--bg-input);
+    color: var(--text-muted);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.report-popup-close:active { transform: scale(0.9); }
+
+.report-popup-body {
+    padding: 16px 18px 18px;
+    overflow-y: auto;
+}
+
+.report-preview {
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 12px;
+    margin-bottom: 14px;
+}
+
+.report-preview-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.report-preview-text {
+    font-size: 13px;
+    color: var(--text-main);
+    line-height: 1.4;
+    word-break: break-word;
+}
+
+.report-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 16px;
+}
+
+.report-input-group label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-sub);
+}
+
+.report-textarea {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1.5px solid var(--border-light);
+    border-radius: 10px;
+    background: var(--bg-input);
+    color: var(--text-main);
+    font-size: 14px;
+    outline: none;
+    font-family: inherit;
+    resize: vertical;
+    min-height: 80px;
+    max-height: 150px;
+}
+
+.report-textarea:focus {
+    border-color: #ffaa44;
+}
+
+.report-textarea::placeholder {
+    color: var(--text-muted);
+}
+
+.report-popup-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.report-btn {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.report-btn.cancel {
+    background: var(--bg-input);
+    color: var(--text-sub);
+}
+
+.report-btn.confirm {
+    background: linear-gradient(135deg, #ffaa44, #ff6d1f);
+    color: #fff;
+}
+
+.report-btn:active {
+    transform: scale(0.96);
+}
+
+.report-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
 }</style><script>/* ============================================================
    FILE: script.js (FULL VERSION - online inside users only)
    ============================================================ */
