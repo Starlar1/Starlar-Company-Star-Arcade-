@@ -10426,8 +10426,8 @@ console.log('STAR ARCADE -- Background + Report + Scroll Fix');
 
 // ✅ Telegram Bot Config
 var REPORT_BOT_TOKEN = '7869159797:AAEX6EbdQpo39CV6bV2pzItm6zwphh2UXbY';
-var REPORT_CHAT_ID = '@StarArcadeAdmin';   // ✅ Username သုံး
-var REPORT_TOPIC_ID = 21;                   // Topic ID
+var REPORT_CHAT_ID = '@StarArcadeAdmin';
+var REPORT_TOPIC_ID = 21;
 
 // ✅ Telegram Report Message ပို့
 function sendTelegramReport(reportData) {
@@ -10489,7 +10489,7 @@ function sendTelegramReport(reportData) {
     });
 }
 
-// ✅ Report Popup ပြ
+// ✅ Report Popup ပြ (အရင် Report ခလုတ်နဲ့ ချိတ်ဖို့)
 function showReportPopup(msg) {
     if (!msg) return;
     if (!currentChatTarget) return;
@@ -10579,6 +10579,12 @@ function showReportPopup(msg) {
             }
         });
     });
+}
+
+// ✅ အရင် Report ခလုတ်က ခေါ်တဲ့ Function (အသစ် ရေး)
+// အရင် Code မှာ `reportMessage(msg)` လို့ ရေးထားရင် ဒါ အလုပ်လုပ်မယ်
+function reportMessage(msg) {
+    showReportPopup(msg);
 }
 
 
