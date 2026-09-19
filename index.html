@@ -5439,6 +5439,145 @@ body {
     opacity: 0.6;
     cursor: not-allowed;
     transform: none;
+}
+
+/* ============================================================
+   LOGOUT OPTIONS POPUP
+   ============================================================ */
+.logout-options-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 10005;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    backdrop-filter: blur(6px);
+}
+
+.logout-options-popup {
+    background: var(--bg-header);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 0;
+    max-width: 380px;
+    width: 100%;
+    box-shadow: 0 8px 48px rgba(0, 0, 0, 0.7);
+    overflow: hidden;
+}
+
+.logout-options-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 20px 14px;
+    border-bottom: 1px solid var(--border);
+}
+
+.logout-options-header h3 {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+.logout-options-close {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: none;
+    background: var(--bg-input);
+    color: var(--text-muted);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.logout-options-close:active {
+    transform: scale(0.9);
+}
+
+.logout-options-body {
+    padding: 16px 16px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.logout-option-btn {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    width: 100%;
+    padding: 14px 16px;
+    background: var(--bg-input);
+    border: 1.5px solid var(--border-light);
+    border-radius: 12px;
+    color: var(--text-main);
+    font-family: inherit;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.2s ease;
+}
+
+.logout-option-btn:hover,
+.logout-option-btn:active {
+    background: var(--bg-hover);
+    border-color: var(--accent);
+}
+
+.logout-option-btn.danger {
+    border-color: rgba(255, 68, 68, 0.3);
+}
+
+.logout-option-btn.danger:hover,
+.logout-option-btn.danger:active {
+    background: rgba(255, 68, 68, 0.1);
+    border-color: rgba(255, 68, 68, 0.6);
+}
+
+.logout-option-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: var(--bg-card);
+    color: var(--accent);
+    flex-shrink: 0;
+}
+
+.logout-option-icon svg {
+    width: 20px;
+    height: 20px;
+}
+
+.logout-option-btn.danger .logout-option-icon {
+    color: #ff4444;
+}
+
+.logout-option-text {
+    flex: 1;
+    min-width: 0;
+}
+
+.logout-option-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-main);
+    margin-bottom: 2px;
+}
+
+.logout-option-btn.danger .logout-option-title {
+    color: #ff4444;
+}
+
+.logout-option-desc {
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.4;
 }</style><script>/* ============================================================
    FILE: script.js (FULL VERSION - online inside users only)
    ============================================================ */
@@ -8022,37 +8161,53 @@ document.getElementById('fsProfileId').addEventListener('click', copyUserId);
 setTimeout(initSlider, 100);
 setTimeout(initRoleSlider, 200);
 
+
+
 // ============================================================
-//  SETTINGS - LOG OUT
+//  SETTINGS - LOG OUT (2 Options)
 // ============================================================
-function logoutUser() {
-    if (isProcessing) return;
-    if (!confirm('Are you sure you want to log out? All data will be cleared from this device.')) {
-        return;
-    }
 
-    isProcessing = true;
-    showLoading('Logging out...');
+// ✅ IndexedDB Database တစ်ခုလုံး ဖျက်
+function deleteEntireDatabase() {
+    return new Promise(function(resolve) {
+        try {
+            var req = indexedDB.deleteDatabase('StarArcadeDB');
+            req.onsuccess = function() {
+                console.log('IndexedDB deleted successfully');
+                resolve();
+            };
+            req.onerror = function(err) {
+                console.warn('IndexedDB delete error:', err);
+                resolve();
+            };
+            req.onblocked = function() {
+                console.warn('IndexedDB delete blocked -- retrying');
+                setTimeout(function() {
+                    try { indexedDB.deleteDatabase('StarArcadeDB'); } catch(e) {}
+                    resolve();
+                }, 500);
+            };
+        } catch(e) {
+            console.warn('IndexedDB delete exception:', e);
+            resolve();
+        }
+    });
+}
 
-    // ၁။ Online status false လုပ်
-    var logoutPromise = Promise.resolve();
-    if (currentUser && currentServerId) {
-        logoutPromise = updateUserOnlineStatus(currentUser.userId, currentServerId, false)
-            .catch(function() { /* ignore */ });
-    }
-
-    logoutPromise.then(function() {
-        // ============================================================
-        //  ၂။ Listener အားလုံး ဖျက်
-        // ============================================================
-
-        // ၂.၁ -- authListeners (diamond + user data)
-        authListeners.forEach(function(ref) {
-            try { ref.off(); } catch(e) {}
-        });
+// ✅ Listener အားလုံး ဖျက်
+function stopAllListeners() {
+    // authListeners
+    try {
+        if (Array.isArray(authListeners)) {
+            authListeners.forEach(function(ref) {
+                try { ref.off(); } catch(e) {}
+            });
+        }
         authListeners = [];
+    } catch(e) {}
 
-        // ၂.၂ -- friendsListListener (ကိုယ့် friendsList real-time)
+    // friendsListListener
+    try {
         if (typeof stopFriendsListListener === 'function') {
             try { stopFriendsListListener(); } catch(e) {}
         }
@@ -8060,142 +8215,377 @@ function logoutUser() {
             try { friendsListListener.off(); } catch(e) {}
             friendsListListener = null;
         }
+    } catch(e) {}
 
-        // ၂.၃ -- chatRoomListener (Full Chat Screen)
+    // chatRoomListener
+    try {
         if (typeof chatRoomListener !== 'undefined' && chatRoomListener) {
             try { chatRoomListener.off(); } catch(e) {}
             chatRoomListener = null;
         }
+    } catch(e) {}
 
-        // ၂.၄ -- chatListFriendListeners (အရင် version ရှိရင်)
+    // chatRoomMessageListeners
+    try {
+        if (typeof chatRoomMessageListeners !== 'undefined' && Array.isArray(chatRoomMessageListeners)) {
+            chatRoomMessageListeners.forEach(function(u) {
+                try { u(); } catch(e) {}
+            });
+            chatRoomMessageListeners = [];
+        }
+    } catch(e) {}
+
+    // chatRoomBlockListener
+    try {
+        if (typeof chatRoomBlockListener !== 'undefined' && chatRoomBlockListener) {
+            try { chatRoomBlockListener.off(); } catch(e) {}
+            chatRoomBlockListener = null;
+        }
+    } catch(e) {}
+
+    // appMessageListeners
+    try {
+        if (typeof appMessageListeners !== 'undefined' && Array.isArray(appMessageListeners)) {
+            appMessageListeners.forEach(function(u) {
+                try { u(); } catch(e) {}
+            });
+            appMessageListeners = [];
+        }
+    } catch(e) {}
+
+    // chatListFriendListeners (အရင် version)
+    try {
         if (typeof chatListFriendListeners !== 'undefined' && Array.isArray(chatListFriendListeners)) {
             chatListFriendListeners.forEach(function(ref) {
                 try { ref.off(); } catch(e) {}
             });
             chatListFriendListeners = [];
         }
+    } catch(e) {}
 
-        // ၂.၅ -- chatRoom listener variable (အရင် version ရှိရင်)
-        if (typeof chatRoomListener !== 'undefined' && chatRoomListener) {
-            try { chatRoomListener.off(); } catch(e) {}
-            chatRoomListener = null;
+    // onDisconnectRef
+    try {
+        if (typeof onDisconnectRef !== 'undefined' && onDisconnectRef) {
+            try { onDisconnectRef.cancel(); } catch(e) {}
+            onDisconnectRef = null;
         }
+    } catch(e) {}
+}
 
-        // ၂.၆ -- currentChatTarget reset
-        if (typeof currentChatTarget !== 'undefined') {
-            currentChatTarget = null;
-        }
+// ✅ Firebase Auth Sign Out
+function firebaseSignOutAll() {
+    try {
+        FIREBASE_SERVERS.forEach(function(server) {
+            var auth = getAuthForServer(server.id);
+            if (auth) {
+                try { auth.signOut(); } catch(e) {}
+            }
+        });
+    } catch(e) {}
+}
 
-        // ၂.၇ -- searchResultUser reset
-        if (typeof searchResultUser !== 'undefined') {
-            searchResultUser = null;
-        }
+// ✅ UI Reset (Log Out / Message All အတွက် တူတူ)
+function resetUIAfterLogout() {
+    // Fullscreen ပိတ်
+    fullscreenOverlay.classList.remove('active');
+    fullscreenOverlay.classList.remove('chat-room-active');
+    document.body.style.overflow = '';
+
+    // Sidebar ပိတ်
+    sidebar.classList.remove('open');
+    sidebarOverlay.classList.remove('active');
+
+    // App wrapper ဖျောက်
+    appWrapper.classList.add('hidden');
+
+    // Auth overlay ပြ
+    authOverlay.style.display = 'flex';
+    authOverlay.classList.remove('hidden');
+
+    // Profile UI reset
+    document.getElementById('profileAvatar').src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 100 100"%3E%3Ccircle cx="50" cy="50" r="45" fill="%2322222e"/%3E%3Ccircle cx="50" cy="35" r="18" fill="%235a5a6a"/%3E%3Cpath d="M20 75c0-18 12-30 30-30s30 12 30 30" fill="%235a5a6a"/%3E%3C/svg%3E';
+    document.getElementById('userName').textContent = 'Player';
+    document.getElementById('userId').textContent = 'ID 0000000000';
+    document.getElementById('userServer').textContent = 'Server 1';
+    document.getElementById('coinDisplay').textContent = '0';
+
+    // Chat List reset (Ai row သာ ကျန်)
+    var chatListEl = document.getElementById('chatList');
+    if (chatListEl) {
+        var friendRows = chatListEl.querySelectorAll('.chat-list-item:not([data-chat="ai"])');
+        friendRows.forEach(function(row) { row.remove(); });
+    }
+
+    // Search result reset
+    var searchResultEl = document.getElementById('searchResult');
+    if (searchResultEl) searchResultEl.innerHTML = '';
+
+    // Search input reset
+    var sServer = document.getElementById('searchServerNo');
+    var sId = document.getElementById('searchUserId');
+    if (sServer) sServer.value = '';
+    if (sId) sId.value = '';
+
+    // Chat room UI reset
+    var chatRoomMessages = document.getElementById('chatRoomMessages');
+    if (chatRoomMessages) {
+        chatRoomMessages.innerHTML = '<div class="chat-empty-state"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#5a5a6a" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>Start a conversation</span></div>';
+    }
+
+    var chatMsgInput = document.getElementById('chatMessageInput');
+    if (chatMsgInput) {
+        chatMsgInput.value = '';
+        chatMsgInput.style.height = '';
+    }
+
+    var chatClip = document.getElementById('chatClipBtn');
+    var chatSend = document.getElementById('chatSendBtn');
+    if (chatClip) chatClip.classList.remove('hidden');
+    if (chatSend) chatSend.classList.add('hidden');
+
+    // Bottom nav reset
+    document.querySelectorAll('.nav-btn').forEach(function(btn) { btn.classList.remove('active'); });
+    var defaultNavBtn = document.querySelector('.nav-btn[data-tab="chat"]');
+    if (defaultNavBtn) defaultNavBtn.classList.add('active');
+    switchTab('chat');
+}
+
+// ============================================================
+//  ✅ LOG OUT ခလုတ် -- Message မဖြတ် (Account Data သာ ဖြတ်)
+// ============================================================
+function logoutUser() {
+    if (isProcessing) return;
+
+    if (!confirm('Log out လုပ်မှာ သေချာလား?\n\nAccount Data ဖျက်ခံရမယ်။\nMessage တွေ ကျန်နေမယ်။')) {
+        return;
+    }
+
+    isProcessing = true;
+    showLoading('Logging out...');
+
+    // ၁။ Online status false
+    var logoutPromise = Promise.resolve();
+    if (currentUser && currentServerId) {
+        logoutPromise = updateUserOnlineStatus(currentUser.userId, currentServerId, false)
+            .catch(function() {});
+    }
+
+    logoutPromise.then(function() {
+        // ၂။ Listener အားလုံး ဖျက်
+        stopAllListeners();
+
+        // ၃။ Firebase Auth Sign Out
+        firebaseSignOutAll();
+
+        // ၄။ State reset
+        currentChatTarget = null;
+        searchResultUser = null;
+        iAmBlockedByThem = false;
+        chatRoomUnlocked = {};
 
     }).then(function() {
         // ============================================================
-        //  ၃။ IndexedDB အားလုံး ရှင်းလင်း
+        //  ၅။ IndexedDB ရှင်းလင်း -- Account Data သာ ဖြတ်
+        //  ⚠️ messages_* ကို မဖြတ်ဘူး
         // ============================================================
-        return deleteFromDB('users');
-    }).then(function() {
-        return deleteFromDB('session');
-    }).then(function() {
-        // ✅ friendsCache ကိုပါ ရှင်းလင်း
-        return deleteFromDB('friendsCache');
-    }).then(function() {
-        // ✅ FRIENDS_CACHE_KEY (အရင် version သုံးခဲ့ရင်)
-        if (typeof FRIENDS_CACHE_KEY !== 'undefined') {
-            return deleteFromDB(FRIENDS_CACHE_KEY);
-        }
-        return Promise.resolve();
+        var keysToClear = ['users', 'session', 'friendsCache', 'pinnedFriends', 'lockedFriends', 'chatBackgrounds'];
+        var clearPromises = keysToClear.map(function(key) {
+            return deleteFromDB(key).catch(function() {});
+        });
+        return Promise.all(clearPromises);
+
     }).then(function() {
         // ============================================================
-        //  ၄။ State reset
+        //  ၆။ State အားလုံး Reset
         // ============================================================
         currentUser = null;
         currentServerId = null;
         currentDb = null;
         currentAuth = null;
+        currentTab = 'chat';
+        activeNavBtn = null;
         fullscreenStack = [];
         isProcessing = false;
         isFirstLoginProcessing = false;
 
-        // ============================================================
-        //  ၅။ UI Reset
-        // ============================================================
-
-        // ၅.၁ -- Fullscreen ပိတ်
-        fullscreenOverlay.classList.remove('active');
-        fullscreenOverlay.classList.remove('chat-room-active');
-        document.body.style.overflow = '';
-
-        // ၅.၂ -- Sidebar ပိတ်
-        sidebar.classList.remove('open');
-        sidebarOverlay.classList.remove('active');
-
-        // ၅.၃ -- App wrapper ဖျောက်
-        appWrapper.classList.add('hidden');
-
-        // ၅.၄ -- Auth overlay ပြ
-        authOverlay.style.display = 'flex';
-        authOverlay.classList.remove('hidden');
-
-        // ၅.၅ -- Profile UI reset
-        document.getElementById('profileAvatar').src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 100 100"%3E%3Ccircle cx="50" cy="50" r="45" fill="%2322222e"/%3E%3Ccircle cx="50" cy="35" r="18" fill="%235a5a6a"/%3E%3Cpath d="M20 75c0-18 12-30 30-30s30 12 30 30" fill="%235a5a6a"/%3E%3C/svg%3E';
-        document.getElementById('userName').textContent = 'Player';
-        document.getElementById('userId').textContent = 'ID 0000000000';
-        document.getElementById('userServer').textContent = 'Server 1';
-        document.getElementById('coinDisplay').textContent = '0';
-
-        // ၅.၆ -- Chat List reset (Ai row သာ ကျန်)
-        var chatListEl = document.getElementById('chatList');
-        if (chatListEl) {
-            var friendRows = chatListEl.querySelectorAll('.chat-list-item:not([data-chat="ai"])');
-            friendRows.forEach(function(row) { row.remove(); });
-        }
-
-        // ၅.၇ -- Search result reset
-        var searchResultEl = document.getElementById('searchResult');
-        if (searchResultEl) searchResultEl.innerHTML = '';
-
-        // ၅.၈ -- Search input reset
-        var sServer = document.getElementById('searchServerNo');
-        var sId = document.getElementById('searchUserId');
-        if (sServer) sServer.value = '';
-        if (sId) sId.value = '';
-
-        // ၅.၉ -- Chat room UI reset
-        var chatRoomMessages = document.getElementById('chatRoomMessages');
-        if (chatRoomMessages) {
-            chatRoomMessages.innerHTML = '<div class="chat-empty-state"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#5a5a6a" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>မက်ဆေ့ချ် စတင်ရန် ရေးပါ</span></div>';
-        }
-
-        var chatMsgInput = document.getElementById('chatMessageInput');
-        if (chatMsgInput) chatMsgInput.value = '';
-
-        var chatAttach = document.getElementById('chatAttachBtn');
-        var chatSend = document.getElementById('chatSendBtn');
-        if (chatAttach) chatAttach.classList.remove('hidden');
-        if (chatSend) chatSend.classList.add('hidden');
+        // ၇။ UI Reset
+        resetUIAfterLogout();
 
         hideLoading();
 
-        // ၆။ အောင်မြင်စွာ logout ဖြစ်ကြောင်း အသိပေး
+        console.log('Logout complete -- Account data cleared, messages kept');
+
         setTimeout(function() {
-            alert('Logged out successfully.');
+            alert('Logged out successfully.\nAccount Data ဖျက်ပြီးပါပြီ။\n(Message တွေ ကျန်နေပါတယ်)');
         }, 300);
+
     }).catch(function(err) {
         console.error('Logout error:', err);
         isProcessing = false;
         hideLoading();
-        alert('Failed to logout. Please try again.');
+        alert('Logout failed. Please try again.');
     });
 }
 
-// Attach logout button event
+// ============================================================
+//  ✅ MESSAGE ALL ခလုတ် -- Message ပါ ဖြတ် (အားလုံး ဖြတ်)
+// ============================================================
+function messageAllUser() {
+    if (isProcessing) return;
+
+    if (!confirm('Message All လုပ်မှာ သေချာလား?\n\nData အားလုံး ဖျက်ခံရမယ် --\nAccount Data + Message တွေပါ အားလုံး။\nပြန်ယူလို့မရဘူး။')) {
+        return;
+    }
+
+    isProcessing = true;
+    showLoading('Clearing all data...');
+
+    // ၁။ Online status false
+    var logoutPromise = Promise.resolve();
+    if (currentUser && currentServerId) {
+        logoutPromise = updateUserOnlineStatus(currentUser.userId, currentServerId, false)
+            .catch(function() {});
+    }
+
+    logoutPromise.then(function() {
+        // ၂။ Listener အားလုံး ဖျက်
+        stopAllListeners();
+
+        // ၃။ Firebase Auth Sign Out
+        firebaseSignOutAll();
+
+        // ၄။ State reset
+        currentChatTarget = null;
+        searchResultUser = null;
+        iAmBlockedByThem = false;
+        chatRoomUnlocked = {};
+
+    }).then(function() {
+        // ============================================================
+        //  ၅။ IndexedDB DB တစ်ခုလုံး ဖျက်
+        //  ✅ messages_* ပါ ဖျက်
+        // ============================================================
+        return deleteEntireDatabase();
+
+    }).then(function() {
+        // ✅ Safety -- key အားလုံး ထပ် ရှင်း
+        var keysToClear = ['users', 'session', 'friendsCache', 'pinnedFriends', 'lockedFriends', 'chatBackgrounds'];
+        var clearPromises = keysToClear.map(function(key) {
+            return deleteFromDB(key).catch(function() {});
+        });
+        return Promise.all(clearPromises);
+
+    }).then(function() {
+        // ============================================================
+        //  ၆။ State အားလုံး Reset
+        // ============================================================
+        currentUser = null;
+        currentServerId = null;
+        currentDb = null;
+        currentAuth = null;
+        currentTab = 'chat';
+        activeNavBtn = null;
+        fullscreenStack = [];
+        isProcessing = false;
+        isFirstLoginProcessing = false;
+
+        // ၇။ UI Reset
+        resetUIAfterLogout();
+
+        hideLoading();
+
+        console.log('Message All complete -- ALL data cleared');
+
+        setTimeout(function() {
+            alert('All data cleared successfully.\nData အားလုံး ဖျက်ပြီးပါပြီ။');
+        }, 300);
+
+    }).catch(function(err) {
+        console.error('Message All error:', err);
+        isProcessing = false;
+        hideLoading();
+        alert('Failed to clear data. Please try again.');
+    });
+}
+
+// ============================================================
+//  ✅ LOG OUT POPUP -- ခလုပ် ၂ ခု ပြ
+// ============================================================
+function showLogoutOptionsPopup() {
+    var existing = document.querySelector('.logout-options-overlay');
+    if (existing) existing.remove();
+
+    var overlay = document.createElement('div');
+    overlay.className = 'logout-options-overlay';
+
+    overlay.innerHTML =
+        '<div class="logout-options-popup">' +
+            '<div class="logout-options-header">' +
+                '<h3>Log Out</h3>' +
+                '<button class="logout-options-close" id="logoutOptionsClose">' +
+                    '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">' +
+                        '<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>' +
+                    '</svg>' +
+                '</button>' +
+            '</div>' +
+            '<div class="logout-options-body">' +
+                '<button class="logout-option-btn" id="logoutOption1">' +
+                    '<div class="logout-option-icon">' +
+                        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
+                            '<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>' +
+                            '<polyline points="16 17 21 12 16 7"/>' +
+                            '<line x1="21" y1="12" x2="9" y2="12"/>' +
+                        '</svg>' +
+                    '</div>' +
+                    '<div class="logout-option-text">' +
+                        '<div class="logout-option-title">Log Out</div>' +
+                        '<div class="logout-option-desc">Account Data ဖျက် -- Message တွေ ကျန်မယ်</div>' +
+                    '</div>' +
+                '</button>' +
+                '<button class="logout-option-btn danger" id="logoutOption2">' +
+                    '<div class="logout-option-icon">' +
+                        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
+                            '<path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/>' +
+                            '<path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>' +
+                        '</svg>' +
+                    '</div>' +
+                    '<div class="logout-option-text">' +
+                        '<div class="logout-option-title">Message All</div>' +
+                        '<div class="logout-option-desc">Data အားလုံး ဖျက် -- Message တွေပါ ဖျက်</div>' +
+                    '</div>' +
+                '</button>' +
+            '</div>' +
+        '</div>';
+
+    document.body.appendChild(overlay);
+
+    function close() { overlay.remove(); }
+
+    document.getElementById('logoutOptionsClose').addEventListener('click', close);
+    overlay.addEventListener('click', function(e) {
+        if (e.target === overlay) close();
+    });
+
+    document.getElementById('logoutOption1').addEventListener('click', function() {
+        close();
+        setTimeout(function() { logoutUser(); }, 200);
+    });
+
+    document.getElementById('logoutOption2').addEventListener('click', function() {
+        close();
+        setTimeout(function() { messageAllUser(); }, 200);
+    });
+}
+
+// ============================================================
+//  ✅ Logout Button Event -- Popup ပြ
+// ============================================================
 (function attachLogoutBtn() {
     var btn = document.getElementById('settingsLogoutBtn');
     if (btn) {
-        btn.addEventListener('click', logoutUser);
+        btn.removeEventListener('click', logoutUser);
+        btn.removeEventListener('click', showLogoutOptionsPopup);
+        btn.addEventListener('click', showLogoutOptionsPopup);
     }
 })();
 
