@@ -5177,6 +5177,119 @@ body {
 
 .password-btn:active {
     transform: scale(0.96);
+}
+
+/* ============================================================
+   CHAT BACKGROUND PICKER
+   ============================================================ */
+.bg-picker-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 10002;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    backdrop-filter: blur(6px);
+}
+
+.bg-picker {
+    background: var(--bg-header);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px;
+    max-width: 340px;
+    width: 100%;
+    box-shadow: 0 8px 48px rgba(0, 0, 0, 0.7);
+}
+
+.bg-picker-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+}
+
+.bg-picker-header h3 {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+.bg-picker-close {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: none;
+    background: var(--bg-input);
+    color: var(--text-muted);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.bg-picker-close:active { transform: scale(0.9); }
+
+.bg-picker-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.bg-picker-btn {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 14px 16px;
+    border: none;
+    border-radius: 12px;
+    background: var(--bg-input);
+    color: var(--text-main);
+    font-size: 15px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.bg-picker-btn:hover,
+.bg-picker-btn:active {
+    background: var(--bg-hover);
+}
+
+.bg-picker-btn.danger {
+    color: #ff4444;
+    background: rgba(255, 68, 68, 0.1);
+}
+
+.bg-picker-btn.danger:hover,
+.bg-picker-btn.danger:active {
+    background: rgba(255, 68, 68, 0.2);
+}
+
+/* ============================================================
+   CHAT ROOM MESSAGES -- Background Support
+   ============================================================ */
+.chat-room-messages {
+    /* background-image ကို JS က set လုပ်မယ် */
+    background-color: var(--bg-body);
+}
+
+/* ============================================================
+   REPORT MENU ITEM -- warning color
+   ============================================================ */
+.msg-menu-item[data-action="report"] {
+    color: #ffaa44;
+}
+
+.msg-menu-item[data-action="report"]:hover,
+.msg-menu-item[data-action="report"]:active {
+    background: rgba(255, 170, 68, 0.15);
 }</style><script>/* ============================================================
    FILE: script.js (FULL VERSION - online inside users only)
    ============================================================ */
@@ -6546,7 +6659,7 @@ var BACKGROUND_CONFIG = {
 
 var BUBBLE_CONFIG = {
     bubbles: [
-        { id: 4001, name: 'Bubble 1', image: 'https://i.ibb.co/RTkNjf9R/Grid-Art-20260918-223805016.png', price: 100, limited: false },
+        { id: 4001, name: 'Bubble 1', image: 'https://via.placeholder.com/60x40/9b4dff/ffffff?text=Bubble+1', price: 100, limited: false },
         { id: 4002, name: 'Bubble 2', image: 'https://via.placeholder.com/60x40/4a6cf7/ffffff?text=Bubble+2', price: 150, limited: false },
         { id: 4003, name: 'Bubble 3', image: 'https://via.placeholder.com/60x40/ff6b6b/ffffff?text=Bubble+3', price: 200, limited: false },
         { id: 4004, name: 'Bubble 4', image: 'https://via.placeholder.com/60x40/51cf66/ffffff?text=Bubble+4', price: 250, limited: false },
@@ -7947,7 +8060,6 @@ FIREBASE_SERVERS.forEach(function(server) {
         var app = firebaseApps[server.id];
         if (app) {
             firestoreDbs[server.id] = firebase.firestore(app);
-            console.log('Firestore:', server.name);
         }
     } catch(e) { console.error('Firestore init:', server.name, e); }
 });
@@ -7966,7 +8078,6 @@ function initFirestoreStatus() {
     FIREBASE_SERVERS.forEach(function(server) {
         firestoreStatus[server.id] = { exhausted: false, error: null };
     });
-    console.log('Firestore status initialized:', Object.keys(firestoreStatus));
 }
 
 function pickRandomFirestoreServer() {
@@ -7982,7 +8093,6 @@ function markServerExhausted(serverId, error) {
     if (!firestoreStatus[serverId]) return;
     firestoreStatus[serverId].exhausted = true;
     firestoreStatus[serverId].error = error;
-    console.warn('Server exhausted:', serverId);
 }
 
 function resetFirestoreStatus() { initFirestoreStatus(); }
@@ -8000,7 +8110,7 @@ function checkExpiredCooldowns() {
 // ============================================================
 var PLAY_CONFIG = {
     plays: [
-        { id: 'G1', name: 'Mobile Legends Bag Bag Play', image: 'https://i.ibb.co/TMBNbtSW/3ab4cf4415e4aaf7627b3d02055218b3.jpg' },
+        { id: 'G1', name: 'Game One', image: 'https://i.ibb.co/placeholder/g1.png' },
         { id: 'G2', name: 'Game Two', image: 'https://i.ibb.co/placeholder/g2.png' },
         { id: 'G3', name: 'Game Three', image: 'https://i.ibb.co/placeholder/g3.png' },
         { id: 'G4', name: 'Game Four', image: 'https://i.ibb.co/placeholder/g4.png' },
@@ -8014,7 +8124,7 @@ function getPlayById(playId) {
 }
 
 // ============================================================
-//  FRIENDS CACHE (IndexedDB)
+//  FRIENDS CACHE
 // ============================================================
 var FRIENDS_CACHE_KEY = 'friendsCache';
 
@@ -8060,7 +8170,7 @@ function cleanupFriendsCache() {
 }
 
 // ============================================================
-//  PINNED FRIENDS (IndexedDB)
+//  PINNED FRIENDS
 // ============================================================
 var PINNED_FRIENDS_KEY = 'pinnedFriends';
 
@@ -8093,7 +8203,40 @@ function unpinFriend(serverId, userId) {
 }
 
 // ============================================================
-//  LOCKED FRIENDS (IndexedDB)
+//  ✅ CHAT BACKGROUND (IndexedDB) -- အသစ်
+// ============================================================
+var CHAT_BACKGROUNDS_KEY = 'chatBackgrounds';
+
+function getChatBackgrounds() {
+    return new Promise(function(resolve) {
+        getFromDB(CHAT_BACKGROUNDS_KEY).then(function(b) { resolve(b || {}); })
+        .catch(function() { resolve({}); });
+    });
+}
+function saveChatBackgrounds(bg) { return setToDB(CHAT_BACKGROUNDS_KEY, bg); }
+
+function setChatBackground(serverId, userId, imageData) {
+    return getChatBackgrounds().then(function(bgs) {
+        bgs[serverId + ':' + userId] = imageData;
+        return saveChatBackgrounds(bgs);
+    });
+}
+
+function getChatBackground(serverId, userId) {
+    return getChatBackgrounds().then(function(bgs) {
+        return bgs[serverId + ':' + userId] || null;
+    });
+}
+
+function removeChatBackground(serverId, userId) {
+    return getChatBackgrounds().then(function(bgs) {
+        delete bgs[serverId + ':' + userId];
+        return saveChatBackgrounds(bgs);
+    });
+}
+
+// ============================================================
+//  LOCKED FRIENDS
 // ============================================================
 var LOCKED_FRIENDS_KEY = 'lockedFriends';
 
@@ -8367,9 +8510,6 @@ function isFriend(serverId, userId) {
     });
 }
 
-// ============================================================
-//  ✅ ADD FRIEND -- friendsList မရှိသေးရင် ဖန်တီးပြီး ထည့်
-// ============================================================
 function addFriendAndSync(targetData) {
     if (!currentUser || !currentServerId) return;
     if (isFriend(targetData.serverId, targetData.userId)) return;
@@ -8381,7 +8521,6 @@ function addFriendAndSync(targetData) {
     var theirEntry = { serverId: targetData.serverId, serverNo: targetData.serverNo, userId: targetData.userId };
     var myEntryForThem = { serverId: currentServerId, serverNo: myServerNo, userId: currentUser.userId };
 
-    // ကိုယ့် friendsList
     var myList = Array.isArray(currentUser.friendsList) ? currentUser.friendsList.slice() : [];
     if (!myList.some(function(f){ return f.serverId===targetData.serverId && f.userId===targetData.userId; })) {
         myList.push(theirEntry);
@@ -8390,43 +8529,30 @@ function addFriendAndSync(targetData) {
     var myDb = getDbForServer(currentServerId);
     var theirDb = getDbForServer(targetData.serverId);
 
-    // ၁။ ကိုယ့် friendsList ကို update (ကိုယ့် data ဖြစ်လို့ ရေးလို့ရ)
     myDb.ref('users/' + currentUser.userId).update({ friendsList: myList })
     .then(function() {
-        // ၂။ သူ့ friendsList ကို ဖတ်
         return theirDb.ref('users/' + targetData.userId + '/friendsList').once('value');
     })
     .then(function(snap) {
         var theirList = snap.val();
+        if (!theirList) theirList = [];
+        else if (!Array.isArray(theirList)) theirList = Object.keys(theirList).map(function(k){ return theirList[k]; });
 
-        // ✅ friendsList မရှိသေးရင် (null ဖြစ်ရင်) Array အသစ် ဖန်တီး
-        if (!theirList) {
-            theirList = [];
-        } else if (!Array.isArray(theirList)) {
-            theirList = Object.keys(theirList).map(function(k){ return theirList[k]; });
-        }
-
-        // ကိုယ့် entry ကို ထည့်
         if (!theirList.some(function(f){
             return f.serverId === currentServerId && f.userId === currentUser.userId;
         })) {
             theirList.push(myEntryForThem);
         }
 
-        // ✅ သူ့ friendsList ကို update
-        // (ဒါက သူ့ node မှာ friendsList field ကို ဖန်တီးပေးမယ် -- Rules က auth != null ဆိုတော့ ရေးလို့ရ)
         return theirDb.ref('users/' + targetData.userId).update({ friendsList: theirList });
     })
     .then(function() {
-        // ၃။ သူ့ data အပြည့်အစုံကို ယူ
         return fetchUserFullData(targetData.serverId, targetData.userId);
     })
     .then(function(freshData) {
-        // ၄။ IndexedDB ထဲ သိမ်း
         return saveFriendToCache(freshData);
     })
     .then(function() {
-        // ၅။ Local state update
         currentUser.friendsList = myList;
         saveUserToDB(currentUser);
         hideLoading();
@@ -8441,9 +8567,6 @@ function addFriendAndSync(targetData) {
     });
 }
 
-// ============================================================
-//  DELETE FRIEND
-// ============================================================
 function deleteFriendAndSync(targetData) {
     if (!currentUser || !currentServerId) return;
     if (!isFriend(targetData.serverId, targetData.userId)) return;
@@ -8475,6 +8598,7 @@ function deleteFriendAndSync(targetData) {
     .then(function() { return removeFriendFromCache(targetData.serverId, targetData.userId); })
     .then(function() { return unpinFriend(targetData.serverId, targetData.userId); })
     .then(function() { return unlockFriend(targetData.serverId, targetData.userId); })
+    .then(function() { return removeChatBackground(targetData.serverId, targetData.userId); })
     .then(function() {
         delete chatRoomUnlocked[targetData.serverId + ':' + targetData.userId];
         currentUser.friendsList = myList;
@@ -8491,7 +8615,7 @@ function deleteFriendAndSync(targetData) {
 }
 
 // ============================================================
-//  FRIENDS LIST LISTENER (Realtime)
+//  FRIENDS LIST LISTENER
 // ============================================================
 var friendsListListener = null;
 
@@ -8517,8 +8641,6 @@ function startFriendsListListener() {
             return !list.some(function(nf) { return nf.serverId === of.serverId && nf.userId === of.userId; });
         });
 
-        console.log('FriendsList changed. New:', newOnes.length, 'Removed:', removedOnes.length);
-
         currentUser.friendsList = list;
         saveUserToDB(currentUser);
 
@@ -8538,6 +8660,7 @@ function startFriendsListListener() {
                     removeFriendFromCache(e.serverId, e.userId),
                     unpinFriend(e.serverId, e.userId),
                     unlockFriend(e.serverId, e.userId),
+                    removeChatBackground(e.serverId, e.userId),
                     deleteAllMessagesWith(e.serverId, e.userId)
                 ]);
             });
@@ -8965,6 +9088,109 @@ function showPasswordSetup(title, callback) {
 }
 
 // ============================================================
+//  ✅ CHAT BACKGROUND PICKER -- အသစ်
+// ============================================================
+function showChatBackgroundPicker() {
+    if (!currentChatTarget) return;
+
+    var target = currentChatTarget;
+    var lockKey = target.serverId + ':' + target.userId;
+
+    var existing = document.querySelector('.bg-picker-overlay');
+    if (existing) existing.remove();
+
+    var overlay = document.createElement('div');
+    overlay.className = 'bg-picker-overlay';
+
+    overlay.innerHTML =
+        '<div class="bg-picker">' +
+            '<div class="bg-picker-header">' +
+                '<h3>Chat Background</h3>' +
+                '<button class="bg-picker-close" id="bgPickerClose">' +
+                    '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">' +
+                        '<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>' +
+                    '</svg>' +
+                '</button>' +
+            '</div>' +
+            '<div class="bg-picker-body">' +
+                '<div class="bg-picker-buttons">' +
+                    '<button class="bg-picker-btn" id="bgPickImage">' +
+                        '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
+                            '<rect x="3" y="3" width="18" height="18" rx="2"/>' +
+                            '<circle cx="8.5" cy="8.5" r="1.5"/>' +
+                            '<polyline points="21 15 16 10 5 21"/>' +
+                        '</svg>' +
+                        '<span>Choose Image</span>' +
+                    '</button>' +
+                    '<button class="bg-picker-btn danger" id="bgRemoveImage">' +
+                        '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
+                            '<path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/>' +
+                            '<path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>' +
+                        '</svg>' +
+                        '<span>Remove Background</span>' +
+                    '</button>' +
+                '</div>' +
+                '<input type="file" id="bgPickerInput" accept="image/*" style="display:none" />' +
+            '</div>' +
+        '</div>';
+
+    document.body.appendChild(overlay);
+
+    function close() { overlay.remove(); }
+
+    document.getElementById('bgPickerClose').addEventListener('click', close);
+    overlay.addEventListener('click', function(e) {
+        if (e.target === overlay) close();
+    });
+
+    // ✅ Image ရွေး
+    document.getElementById('bgPickImage').addEventListener('click', function() {
+        document.getElementById('bgPickerInput').click();
+    });
+
+    document.getElementById('bgPickerInput').addEventListener('change', function(e) {
+        var file = e.target.files[0];
+        if (!file) return;
+        var reader = new FileReader();
+        reader.onload = function(ev) {
+            var imageData = ev.target.result;
+            setChatBackground(target.serverId, target.userId, imageData).then(function() {
+                applyChatBackground(imageData);
+                showToast('Background changed');
+                close();
+            });
+        };
+        reader.readAsDataURL(file);
+    });
+
+    // ✅ Background ဖျက်
+    document.getElementById('bgRemoveImage').addEventListener('click', function() {
+        removeChatBackground(target.serverId, target.userId).then(function() {
+            applyChatBackground(null);
+            showToast('Background removed');
+            close();
+        });
+    });
+}
+
+// ✅ Chat Room မှာ Background ပြ
+function applyChatBackground(imageData) {
+    var messagesEl = document.getElementById('chatRoomMessages');
+    if (!messagesEl) return;
+    if (imageData) {
+        messagesEl.style.backgroundImage = 'url("' + imageData + '")';
+        messagesEl.style.backgroundSize = 'cover';
+        messagesEl.style.backgroundPosition = 'center';
+        messagesEl.style.backgroundRepeat = 'no-repeat';
+    } else {
+        messagesEl.style.backgroundImage = '';
+        messagesEl.style.backgroundSize = '';
+        messagesEl.style.backgroundPosition = '';
+        messagesEl.style.backgroundRepeat = '';
+    }
+}
+
+// ============================================================
 //  APP MESSAGE LISTENERS
 // ============================================================
 var appMessageListeners = [];
@@ -9094,6 +9320,11 @@ function openChatRoomNow(target) {
     if (playEl) { playEl.innerHTML = ''; playEl.style.display = 'none'; }
     messagesEl.innerHTML = '<div class="chat-empty-state"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#5a5a6a" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>Start a conversation</span></div>';
 
+    // ✅ Background ပြ
+    getChatBackground(target.serverId, target.userId).then(function(bg) {
+        applyChatBackground(bg);
+    });
+
     document.getElementById('fullscreenOverlay').classList.add('chat-room-active');
     openFullscreen('', 'fs-chat-room');
 
@@ -9141,6 +9372,7 @@ function openChatRoomNow(target) {
         });
     }
 
+    // ✅ Message တွေ ဖတ် + ပြ + Scroll
     getMessagesWith(target.serverId, target.userId).then(function(messages) {
         messagesEl.innerHTML = '';
         if (messages.length === 0) {
@@ -9148,9 +9380,11 @@ function openChatRoomNow(target) {
             return;
         }
         messages.forEach(function(msg) { displayMessage(msg); });
-        setTimeout(function() {
-            messagesEl.scrollTo({ top: messagesEl.scrollHeight, behavior: 'smooth' });
-        }, 50);
+
+        // ✅ Instant scroll -- ဆွဲသွားသလို မဖြစ်အောင်
+        requestAnimationFrame(function() {
+            messagesEl.scrollTop = messagesEl.scrollHeight;
+        });
 
         messages.forEach(function(msg) {
             if (msg.type === 'received' && !msg.seen) {
@@ -9373,7 +9607,7 @@ function displayMessage(msg) {
 }
 
 // ============================================================
-//  MESSAGE MENU
+//  MESSAGE MENU -- Report ထည့်
 // ============================================================
 function showMessageMenu(msg, msgEl) {
     var existing = document.querySelector('.msg-menu-popup');
@@ -9391,6 +9625,11 @@ function showMessageMenu(msg, msgEl) {
             '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
             '<rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>' +
             '<span>Copy</span></button>' +
+        '<button class="msg-menu-item" data-action="report">' +
+            '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
+            '<path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>' +
+            '<line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>' +
+            '<span>Report</span></button>' +
         '<button class="msg-menu-item danger" data-action="delete">' +
             '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
             '<path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>' +
@@ -9421,12 +9660,19 @@ function showMessageMenu(msg, msgEl) {
 
         if (action === 'reply') startReply(msg);
         else if (action === 'copy') copyMessageText(msg.text);
+        else if (action === 'report') reportMessage(msg);
         else if (action === 'delete') deleteOneMessage(msg);
     });
 
     setTimeout(function() {
         document.addEventListener('click', closeMsgMenuOnOutsideClick);
     }, 10);
+}
+
+// ✅ Report Function -- ယာယီ
+function reportMessage(msg) {
+    showToast('Report feature coming soon');
+    console.log('Report message:', msg);
 }
 
 function closeMsgMenuOnOutsideClick(e) {
@@ -9755,6 +10001,16 @@ function markAsSeenAndDelete(messageId, serverId, friendServer, friendId) {
         autoResize();
     });
 
+    // ✅ Input နှိပ်တဲ့အခါ နောက်ဆုံးစာ အပေါ်တက်
+    input.addEventListener('focus', function() {
+        setTimeout(function() {
+            var messagesEl = document.getElementById('chatRoomMessages');
+            if (messagesEl) {
+                messagesEl.scrollTop = messagesEl.scrollHeight;
+            }
+        }, 300);
+    });
+
     sendBtn.addEventListener('click', function() { sendMessage(); });
     if (msgBtn) msgBtn.addEventListener('click', function() { toggleBubblePicker(); });
     clipBtn.addEventListener('click', function() {});
@@ -9854,7 +10110,7 @@ function closeBubblePicker() {
 }
 
 // ============================================================
-//  CHAT ROOM MENU
+//  CHAT ROOM MENU -- Background ထည့်
 // ============================================================
 (function initChatRoomMenu() {
     var menuBtn = document.getElementById('chatRoomMenuBtn');
@@ -9886,6 +10142,13 @@ function showChatRoomMenu() {
             '<span>Block</span></button>';
 
     popup.innerHTML =
+        '<button class="menu-item" data-action="background">' +
+            '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
+                '<rect x="3" y="3" width="18" height="18" rx="2"/>' +
+                '<circle cx="8.5" cy="8.5" r="1.5"/>' +
+                '<polyline points="21 15 16 10 5 21"/>' +
+            '</svg>' +
+            '<span>Background</span></button>' +
         '<button class="menu-item" data-action="delete-messages">' +
             '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
             '<path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg>' +
@@ -9908,7 +10171,8 @@ function showChatRoomMenu() {
         var action = btn.dataset.action;
         popup.remove();
 
-        if (action === 'delete-messages') deleteAllMessages();
+        if (action === 'background') showChatBackgroundPicker();
+        else if (action === 'delete-messages') deleteAllMessages();
         else if (action === 'delete-friend') { deleteFriendAndSync(target); goBackFullscreen(); }
         else if (action === 'block') blockUser(target);
         else if (action === 'unblock') unblockUser(target);
@@ -10161,11 +10425,8 @@ logoutUser = function() {
     _origLogoutUser_final();
 };
 
-console.log('STAR ARCADE -- Add Friend (Auto-create friendsList) + All Features');            
-
-    
-
-
+console.log('STAR ARCADE -- Background + Report + Scroll Fix');
+                        
 
 
 
