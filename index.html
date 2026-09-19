@@ -454,35 +454,35 @@
 
                 <!-- Total -->
                 <div class="storage-total">
-                    <div class="storage-total-label">Total IndexedDB Usage</div>
+                    <div class="storage-total-label">Total Used</div>
                     <div class="storage-total-value" id="storageTotalValue">0 KB</div>
                 </div>
 
-                <!-- Circles -->
+                <!-- 3 Circles -->
                 <div class="storage-circles">
 
-                    <!-- ACC Data (Blue) -->
+                    <!-- 1. Friends Data (Blue) -->
                     <div class="storage-circle-wrapper">
-                        <div class="storage-circle" id="storageCircleAcc">
+                        <div class="storage-circle">
                             <svg viewBox="0 0 100 100">
                                 <circle cx="50" cy="50" r="42" class="storage-circle-bg"></circle>
-                                <circle cx="50" cy="50" r="42" class="storage-circle-fill" id="storageAccFill"></circle>
+                                <circle cx="50" cy="50" r="42" class="storage-circle-fill storage-fill-blue" id="storageFriendsFill"></circle>
                             </svg>
                             <div class="storage-circle-center">
-                                <div class="storage-circle-count" id="storageAccCount">0</div>
+                                <div class="storage-circle-count" id="storageFriendsCount">0</div>
                                 <div class="storage-circle-unit">items</div>
                             </div>
                         </div>
                         <div class="storage-circle-label">
                             <span class="storage-dot storage-dot-blue"></span>
-                            <span>ACC Data</span>
+                            <span>Friends Data</span>
                         </div>
-                        <div class="storage-circle-size" id="storageAccSize">0 KB</div>
+                        <div class="storage-circle-size" id="storageFriendsSize">0 KB</div>
                     </div>
 
-                    <!-- Message Data (Red) -->
+                    <!-- 2. Message Data (Red) -->
                     <div class="storage-circle-wrapper">
-                        <div class="storage-circle" id="storageCircleMsg">
+                        <div class="storage-circle">
                             <svg viewBox="0 0 100 100">
                                 <circle cx="50" cy="50" r="42" class="storage-circle-bg"></circle>
                                 <circle cx="50" cy="50" r="42" class="storage-circle-fill storage-fill-red" id="storageMsgFill"></circle>
@@ -499,11 +499,25 @@
                         <div class="storage-circle-size" id="storageMsgSize">0 KB</div>
                     </div>
 
-                </div>
+                    <!-- 3. Available Space (Green) -->
+                    <div class="storage-circle-wrapper">
+                        <div class="storage-circle">
+                            <svg viewBox="0 0 100 100">
+                                <circle cx="50" cy="50" r="42" class="storage-circle-bg"></circle>
+                                <circle cx="50" cy="50" r="42" class="storage-circle-fill storage-fill-green" id="storageAvailableFill"></circle>
+                            </svg>
+                            <div class="storage-circle-center">
+                                <div class="storage-circle-count" id="storageAvailablePercent">100</div>
+                                <div class="storage-circle-unit">% free</div>
+                            </div>
+                        </div>
+                        <div class="storage-circle-label">
+                            <span class="storage-dot storage-dot-green"></span>
+                            <span>Available</span>
+                        </div>
+                        <div class="storage-circle-size" id="storageAvailableSize">--</div>
+                    </div>
 
-                <!-- Breakdown -->
-                <div class="storage-breakdown" id="storageBreakdown">
-                    <!-- JS ထည့်မယ် -->
                 </div>
 
             </div>
@@ -514,7 +528,6 @@
             <h3 class="settings-section-title">Clear Data</h3>
             <div class="settings-card">
 
-                <!-- Option 1: Friends -->
                 <button class="storage-clear-btn" id="clearFriendsBtn">
                     <div class="storage-clear-icon">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -530,7 +543,6 @@
                     </div>
                 </button>
 
-                <!-- Option 2: Messages -->
                 <button class="storage-clear-btn danger" id="clearMessagesBtn">
                     <div class="storage-clear-icon">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -5679,10 +5691,10 @@ body {
     background: var(--bg-card);
     border: 1px solid var(--border);
     border-radius: 14px;
-    padding: 20px 18px;
+    padding: 20px 14px;
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 18px;
 }
 
 .storage-total {
@@ -5706,24 +5718,25 @@ body {
     font-family: monospace;
 }
 
-/* Circles */
+/* 3 Circles */
 .storage-circles {
     display: flex;
     justify-content: space-around;
-    gap: 16px;
+    gap: 8px;
 }
 
 .storage-circle-wrapper {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
     flex: 1;
+    min-width: 0;
 }
 
 .storage-circle {
-    width: 110px;
-    height: 110px;
+    width: 90px;
+    height: 90px;
     position: relative;
 }
 
@@ -5741,7 +5754,6 @@ body {
 
 .storage-circle-fill {
     fill: none;
-    stroke: #4a6cf7;
     stroke-width: 8;
     stroke-linecap: round;
     stroke-dasharray: 263.89;
@@ -5749,8 +5761,16 @@ body {
     transition: stroke-dashoffset 0.8s ease;
 }
 
+.storage-fill-blue {
+    stroke: #4a6cf7;
+}
+
 .storage-fill-red {
     stroke: #ff4444;
+}
+
+.storage-fill-green {
+    stroke: #44ff88;
 }
 
 .storage-circle-center {
@@ -5763,82 +5783,58 @@ body {
 }
 
 .storage-circle-count {
-    font-size: 22px;
+    font-size: 18px;
     font-weight: 800;
     color: var(--text-main);
     line-height: 1;
 }
 
 .storage-circle-unit {
-    font-size: 10px;
+    font-size: 9px;
     color: var(--text-muted);
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.3px;
     margin-top: 2px;
 }
 
 .storage-circle-label {
     display: flex;
     align-items: center;
-    gap: 6px;
-    font-size: 12px;
+    gap: 4px;
+    font-size: 10px;
     font-weight: 600;
     color: var(--text-sub);
+    text-align: center;
+    justify-content: center;
+    white-space: nowrap;
 }
 
 .storage-dot {
-    width: 8px;
-    height: 8px;
+    width: 6px;
+    height: 6px;
     border-radius: 50%;
     flex-shrink: 0;
 }
 
 .storage-dot-blue {
     background: #4a6cf7;
-    box-shadow: 0 0 6px rgba(74, 108, 247, 0.6);
+    box-shadow: 0 0 5px rgba(74, 108, 247, 0.6);
 }
 
 .storage-dot-red {
     background: #ff4444;
-    box-shadow: 0 0 6px rgba(255, 68, 68, 0.6);
+    box-shadow: 0 0 5px rgba(255, 68, 68, 0.6);
+}
+
+.storage-dot-green {
+    background: #44ff88;
+    box-shadow: 0 0 5px rgba(68, 255, 136, 0.6);
 }
 
 .storage-circle-size {
-    font-size: 11px;
+    font-size: 10px;
     color: var(--text-muted);
     font-family: monospace;
-}
-
-/* Breakdown */
-.storage-breakdown {
-    background: var(--bg-input);
-    border-radius: 10px;
-    padding: 12px 14px;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-
-.storage-breakdown-row {
-    display: flex;
-    justify-content: space-between;
-    font-size: 12px;
-    color: var(--text-sub);
-    padding: 2px 0;
-}
-
-.storage-breakdown-row span:last-child {
-    font-family: monospace;
-    color: var(--text-main);
-}
-
-.storage-breakdown-header {
-    font-size: 11px;
-    font-weight: 700;
-    color: var(--text-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin-bottom: 4px;
 }
 
 /* Clear Buttons */
@@ -5920,6 +5916,29 @@ body {
     font-size: 12px;
     color: var(--text-muted);
     line-height: 1.4;
+}
+
+/* Mobile */
+@media (max-width: 480px) {
+    .storage-circle {
+        width: 80px;
+        height: 80px;
+    }
+    .storage-circle-count {
+        font-size: 16px;
+    }
+    .storage-circle-unit {
+        font-size: 8px;
+    }
+    .storage-circle-label {
+        font-size: 9px;
+    }
+    .storage-circle-size {
+        font-size: 9px;
+    }
+    .storage-circles {
+        gap: 4px;
+    }
 }</style><script>/* ============================================================
    FILE: script.js (FULL VERSION - online inside users only)
    ============================================================ */
@@ -11497,60 +11516,51 @@ function calculateIndexedDBStorage() {
             var transaction = db.transaction(STORE_NAME, 'readonly');
             var store = transaction.objectStore(STORE_NAME);
 
-            var accKeys = ['users', 'session', 'friendsCache', 'pinnedFriends', 'lockedFriends', 'chatBackgrounds'];
-            var msgKeys = [];
+            // Friends-related keys
+            var friendsKeys = ['friendsCache', 'pinnedFriends', 'lockedFriends', 'chatBackgrounds'];
 
-            var accCount = 0;
-            var msgCount = 0;
-            var accSize = 0;
-            var msgSize = 0;
+            // Messages keys (messages_*)
+            var allKeysReq = store.getAllKeys();
 
-            var breakdown = {};
+            allKeysReq.onsuccess = function() {
+                var allKeys = allKeysReq.result || [];
 
-            // Get all keys
-            var getAllKeys = store.getAllKeys();
-            getAllKeys.onsuccess = function() {
-                var keys = getAllKeys.result || [];
-
-                // Messages keys ကို ရှာ
-                keys.forEach(function(key) {
-                    if (typeof key === 'string' && key.indexOf('messages_') === 0) {
-                        msgKeys.push(key);
-                    }
+                var msgKeys = allKeys.filter(function(key) {
+                    return typeof key === 'string' && key.indexOf('messages_') === 0;
                 });
 
-                // ACC items စစ်
-                var accItems = accKeys.concat(['messages_']); // placeholder
-                var totalToProcess = accKeys.length + msgKeys.length;
+                var friendsCount = 0;
+                var friendsSize = 0;
+                var msgCount = 0;
+                var msgSize = 0;
+
+                var totalToProcess = friendsKeys.length + msgKeys.length;
 
                 if (totalToProcess === 0) {
                     resolve({
-                        accCount: 0, msgCount: 0,
-                        accSize: 0, msgSize: 0,
-                        totalSize: 0,
-                        breakdown: {}
+                        friendsCount: 0, friendsSize: 0,
+                        msgCount: 0, msgSize: 0,
+                        totalSize: 0
                     });
                     return;
                 }
 
                 var processed = 0;
-
                 function done() {
                     processed++;
                     if (processed >= totalToProcess) {
                         resolve({
-                            accCount: accCount,
+                            friendsCount: friendsCount,
+                            friendsSize: friendsSize,
                             msgCount: msgCount,
-                            accSize: accSize,
                             msgSize: msgSize,
-                            totalSize: accSize + msgSize,
-                            breakdown: breakdown
+                            totalSize: friendsSize + msgSize
                         });
                     }
                 }
 
-                // ACC keys ဖတ်
-                accKeys.forEach(function(key) {
+                // Friends keys
+                friendsKeys.forEach(function(key) {
                     var req = store.get(key);
                     req.onsuccess = function() {
                         if (req.result && req.result.value !== undefined) {
@@ -11562,17 +11572,15 @@ function calculateIndexedDBStorage() {
                             else if (typeof val === 'object') count = Object.keys(val).length;
                             else count = 1;
 
-                            accSize += size;
-                            accCount += count;
-
-                            breakdown[key] = { size: size, count: count };
+                            friendsSize += size;
+                            friendsCount += count;
                         }
                         done();
                     };
                     req.onerror = function() { done(); };
                 });
 
-                // Messages keys ဖတ်
+                // Messages keys
                 msgKeys.forEach(function(key) {
                     var req = store.get(key);
                     req.onsuccess = function() {
@@ -11583,90 +11591,133 @@ function calculateIndexedDBStorage() {
 
                             msgSize += size;
                             msgCount += count;
-
-                            breakdown[key] = { size: size, count: count };
                         }
                         done();
                     };
                     req.onerror = function() { done(); };
                 });
             };
-            getAllKeys.onerror = function() {
-                resolve({ accCount: 0, msgCount: 0, accSize: 0, msgSize: 0, totalSize: 0, breakdown: {} });
+
+            allKeysReq.onerror = function() {
+                resolve({
+                    friendsCount: 0, friendsSize: 0,
+                    msgCount: 0, msgSize: 0,
+                    totalSize: 0
+                });
             };
 
         }).catch(function() {
-            resolve({ accCount: 0, msgCount: 0, accSize: 0, msgSize: 0, totalSize: 0, breakdown: {} });
+            resolve({
+                friendsCount: 0, friendsSize: 0,
+                msgCount: 0, msgSize: 0,
+                totalSize: 0
+            });
         });
     });
 }
 
-// ✅ Size ကို ဖော်ပြ
+// ✅ Size Format
 function formatSize(bytes) {
     if (bytes < 1024) return bytes + ' B';
     if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + ' KB';
     return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
 }
 
+// ✅ Browser Storage Quota (Available Space)
+function getStorageQuota() {
+    return new Promise(function(resolve) {
+        if (navigator.storage && navigator.storage.estimate) {
+            navigator.storage.estimate().then(function(estimate) {
+                resolve({
+                    usage: estimate.usage || 0,
+                    quota: estimate.quota || 0,
+                    available: (estimate.quota || 0) - (estimate.usage || 0)
+                });
+            }).catch(function() {
+                resolve({ usage: 0, quota: 0, available: 0 });
+            });
+        } else {
+            // Fallback -- 50MB estimate
+            resolve({ usage: 0, quota: 50 * 1024 * 1024, available: 50 * 1024 * 1024 });
+        }
+    });
+}
+
 // ✅ Storage Monitor ပြ
 function loadStorageMonitor() {
     var totalEl = document.getElementById('storageTotalValue');
-    var accCountEl = document.getElementById('storageAccCount');
+    var friendsCountEl = document.getElementById('storageFriendsCount');
+    var friendsSizeEl = document.getElementById('storageFriendsSize');
     var msgCountEl = document.getElementById('storageMsgCount');
-    var accSizeEl = document.getElementById('storageAccSize');
     var msgSizeEl = document.getElementById('storageMsgSize');
-    var accFill = document.getElementById('storageAccFill');
+    var availablePercentEl = document.getElementById('storageAvailablePercent');
+    var availableSizeEl = document.getElementById('storageAvailableSize');
+
+    var friendsFill = document.getElementById('storageFriendsFill');
     var msgFill = document.getElementById('storageMsgFill');
-    var breakdownEl = document.getElementById('storageBreakdown');
+    var availableFill = document.getElementById('storageAvailableFill');
 
     if (!totalEl) return;
 
+    // IndexedDB Data
     calculateIndexedDBStorage().then(function(data) {
-        // Total
-        totalEl.textContent = formatSize(data.totalSize);
 
-        // ACC
-        accCountEl.textContent = data.accCount;
-        accSizeEl.textContent = formatSize(data.accSize);
+        // Browser Quota
+        getStorageQuota().then(function(quota) {
 
-        // Msg
-        msgCountEl.textContent = data.msgCount;
-        msgSizeEl.textContent = formatSize(data.msgSize);
+            // Total
+            totalEl.textContent = formatSize(data.totalSize);
 
-        // Circle animation
-        var circleLength = 2 * Math.PI * 42;  // r=42
-        var total = data.accSize + data.msgSize;
+            // Friends
+            friendsCountEl.textContent = data.friendsCount;
+            friendsSizeEl.textContent = formatSize(data.friendsSize);
 
-        if (total > 0) {
-            var accPercent = data.accSize / total;
-            var msgPercent = data.msgSize / total;
+            // Messages
+            msgCountEl.textContent = data.msgCount;
+            msgSizeEl.textContent = formatSize(data.msgSize);
 
-            if (accFill) {
-                accFill.style.strokeDashoffset = circleLength * (1 - accPercent);
-            }
-            if (msgFill) {
-                msgFill.style.strokeDashoffset = circleLength * (1 - msgPercent);
-            }
-        } else {
-            if (accFill) accFill.style.strokeDashoffset = circleLength;
-            if (msgFill) msgFill.style.strokeDashoffset = circleLength;
-        }
+            // Available (Browser Quota)
+            var availableBytes = quota.available;
+            var quotaBytes = quota.quota;
 
-        // Breakdown
-        if (breakdownEl) {
-            var html = '<div class="storage-breakdown-header">Breakdown</div>';
-            var keys = Object.keys(data.breakdown);
-            if (keys.length === 0) {
-                html += '<div class="storage-breakdown-row"><span>No data</span><span>-</span></div>';
+            var percentFree = 0;
+            if (quotaBytes > 0) {
+                percentFree = Math.round((availableBytes / quotaBytes) * 100);
             } else {
-                keys.forEach(function(key) {
-                    var item = data.breakdown[key];
-                    var displayKey = key.replace(/_/g, ' ');
-                    html += '<div class="storage-breakdown-row"><span>' + displayKey + '</span><span>' + formatSize(item.size) + '</span></div>';
-                });
+                percentFree = 100;
             }
-            breakdownEl.innerHTML = html;
-        }
+
+            if (availablePercentEl) {
+                availablePercentEl.textContent = percentFree;
+            }
+            if (availableSizeEl) {
+                availableSizeEl.textContent = formatSize(availableBytes);
+            }
+
+            // Circles -- Total ကို base ထား
+            var circleLength = 2 * Math.PI * 42;
+            var total = data.friendsSize + data.msgSize;
+
+            if (total > 0) {
+                var friendsPercent = data.friendsSize / total;
+                var msgPercent = data.msgSize / total;
+
+                if (friendsFill) {
+                    friendsFill.style.strokeDashoffset = circleLength * (1 - friendsPercent);
+                }
+                if (msgFill) {
+                    msgFill.style.strokeDashoffset = circleLength * (1 - msgPercent);
+                }
+            } else {
+                if (friendsFill) friendsFill.style.strokeDashoffset = circleLength;
+                if (msgFill) msgFill.style.strokeDashoffset = circleLength;
+            }
+
+            // Available Circle -- PercentFree
+            if (availableFill) {
+                availableFill.style.strokeDashoffset = circleLength * (1 - (percentFree / 100));
+            }
+        });
     });
 }
 
@@ -11769,7 +11820,7 @@ openFullscreen = function(title, screenId) {
     if (screenId === 'fs-settings') {
         setTimeout(function() {
             loadStorageMonitor();
-        }, 100);
+        }, 150);
     }
 };
 
@@ -11786,7 +11837,7 @@ openFullscreen = function(title, screenId) {
     }
 })();
 
-console.log('Storage Monitor loaded');
+console.log('Storage Monitor loaded -- 3 Circles');
 
 
 // ============================================================
