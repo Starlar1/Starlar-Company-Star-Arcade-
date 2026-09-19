@@ -444,40 +444,133 @@
                 <div class="fs-screen hidden" id="fs-mail"><div class="screen-center"><p>No new messages</p></div></div>
                 <div class="fs-screen hidden" id="fs-tasks"><div class="screen-center"><p>Complete tasks to earn rewards</p></div></div>
 
-                <div class="fs-screen hidden" id="fs-settings">
-                    <div class="settings-container">
-                        <div class="settings-section">
-                            <h3 class="settings-section-title">App အကြောင်း</h3>
-                            <div class="settings-card">
-                                <p class="settings-text">STAR ARCADE သည် ဂိမ်းကစားသူများအတွက် ဖန်တီးထားသော ဆိုရှယ်မီဒီယာ ပလက်ဖောင်းတစ်ခုဖြစ်ပါသည်။</p>
-                                <p class="settings-text">ကျွန်ုပ်တို့သည် သင့်ကိုယ်ရေးကိုယ်တာ အချက်အလက်များကို လုံခြုံစွာ ထိန်းသိမ်းထားပါသည်။</p>
-                                <p class="settings-text">အကယ်၍ သင့်တွင် ပြဿနာများ သို့မဟုတ် အကြံပြုချက်များ ရှိပါက ကျွန်ုပ်တို့၏ Telegram Group မှတစ်ဆင့် ဆက်သွယ်နိုင်ပါသည်။</p>
-                            </div>
-                        </div>
-                        <div class="settings-section">
-                            <h3 class="settings-section-title">မူဝါဒများ</h3>
-                            <div class="settings-card">
-                                <p class="settings-text">ဤအက်ပ်ကို အသုံးပြုခြင်းဖြင့် သင်သည် ကျွန်ုပ်တို့၏ စည်းကမ်းချက်များနှင့် ကိုယ်ရေးကိုယ်တာ မူဝါဒများကို လက်ခံသည်ဟု မှတ်ယူပါသည်။</p>
-                                <p class="settings-text">မည်သည့် မသင့်လျော်သော အပြုအမူများ ပြုလုပ်ပါက သင့်အကောင့်ကို ရပ်ဆိုင်းခြင်း သို့မဟုတ် ဖျက်သိမ်းခြင်းများ ပြုလုပ်နိုင်ပါသည်။</p>
-                            </div>
-                        </div>
-                        <div class="settings-section">
-                            <h3 class="settings-section-title">အကောင့်</h3>
-                            <div class="settings-card">
-                                <button class="settings-logout-btn" id="settingsLogoutBtn">
-                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-                                        <polyline points="16 17 21 12 16 7"/>
-                                        <line x1="21" y1="12" x2="9" y2="12"/>
-                                    </svg>
-                                    <span>Log Out</span>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
+      <div class="fs-screen hidden" id="fs-settings">
+    <div class="settings-container">
+
+        <!-- ✅ STORAGE MONITOR -->
+        <div class="settings-section">
+            <h3 class="settings-section-title">Storage Monitor</h3>
+            <div class="storage-monitor-card">
+
+                <!-- Total -->
+                <div class="storage-total">
+                    <div class="storage-total-label">Total IndexedDB Usage</div>
+                    <div class="storage-total-value" id="storageTotalValue">0 KB</div>
                 </div>
+
+                <!-- Circles -->
+                <div class="storage-circles">
+
+                    <!-- ACC Data (Blue) -->
+                    <div class="storage-circle-wrapper">
+                        <div class="storage-circle" id="storageCircleAcc">
+                            <svg viewBox="0 0 100 100">
+                                <circle cx="50" cy="50" r="42" class="storage-circle-bg"></circle>
+                                <circle cx="50" cy="50" r="42" class="storage-circle-fill" id="storageAccFill"></circle>
+                            </svg>
+                            <div class="storage-circle-center">
+                                <div class="storage-circle-count" id="storageAccCount">0</div>
+                                <div class="storage-circle-unit">items</div>
+                            </div>
+                        </div>
+                        <div class="storage-circle-label">
+                            <span class="storage-dot storage-dot-blue"></span>
+                            <span>ACC Data</span>
+                        </div>
+                        <div class="storage-circle-size" id="storageAccSize">0 KB</div>
+                    </div>
+
+                    <!-- Message Data (Red) -->
+                    <div class="storage-circle-wrapper">
+                        <div class="storage-circle" id="storageCircleMsg">
+                            <svg viewBox="0 0 100 100">
+                                <circle cx="50" cy="50" r="42" class="storage-circle-bg"></circle>
+                                <circle cx="50" cy="50" r="42" class="storage-circle-fill storage-fill-red" id="storageMsgFill"></circle>
+                            </svg>
+                            <div class="storage-circle-center">
+                                <div class="storage-circle-count" id="storageMsgCount">0</div>
+                                <div class="storage-circle-unit">msgs</div>
+                            </div>
+                        </div>
+                        <div class="storage-circle-label">
+                            <span class="storage-dot storage-dot-red"></span>
+                            <span>Message Data</span>
+                        </div>
+                        <div class="storage-circle-size" id="storageMsgSize">0 KB</div>
+                    </div>
+
+                </div>
+
+                <!-- Breakdown -->
+                <div class="storage-breakdown" id="storageBreakdown">
+                    <!-- JS ထည့်မယ် -->
+                </div>
+
             </div>
         </div>
+
+        <!-- ✅ CLEAR DATA -->
+        <div class="settings-section">
+            <h3 class="settings-section-title">Clear Data</h3>
+            <div class="settings-card">
+
+                <!-- Option 1: Friends -->
+                <button class="storage-clear-btn" id="clearFriendsBtn">
+                    <div class="storage-clear-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                            <circle cx="9" cy="7" r="4"/>
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                        </svg>
+                    </div>
+                    <div class="storage-clear-text">
+                        <div class="storage-clear-title">All Friends Data</div>
+                        <div class="storage-clear-desc">Friends Cache, Pin, Lock, Background ဖျက်</div>
+                    </div>
+                </button>
+
+                <!-- Option 2: Messages -->
+                <button class="storage-clear-btn danger" id="clearMessagesBtn">
+                    <div class="storage-clear-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                        </svg>
+                    </div>
+                    <div class="storage-clear-text">
+                        <div class="storage-clear-title">All Messages Data</div>
+                        <div class="storage-clear-desc">Message အားလုံး ဖျက်</div>
+                    </div>
+                </button>
+
+            </div>
+        </div>
+
+        <!-- App အကြောင်း -->
+        <div class="settings-section">
+            <h3 class="settings-section-title">App အကြောင်း</h3>
+            <div class="settings-card">
+                <p class="settings-text">STAR ARCADE သည် ဂိမ်းကစားသူများအတွက် ဖန်တီးထားသော ဆိုရှယ်မီဒီယာ ပလက်ဖောင်းတစ်ခုဖြစ်ပါသည်။</p>
+            </div>
+        </div>
+
+        <!-- အကောင့် -->
+        <div class="settings-section">
+            <h3 class="settings-section-title">အကောင့်</h3>
+            <div class="settings-card">
+                <button class="settings-logout-btn" id="settingsLogoutBtn">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                        <polyline points="16 17 21 12 16 7"/>
+                        <line x1="21" y1="12" x2="9" y2="12"/>
+                    </svg>
+                    <span>Log Out</span>
+                </button>
+            </div>
+        </div>
+
+    </div>
+</div>
 
         <!-- Buy Popup -->
         <div class="buy-popup-overlay hidden" id="buyPopup">
@@ -5574,6 +5667,256 @@ body {
 }
 
 .logout-option-desc {
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.4;
+}
+
+/* ============================================================
+   STORAGE MONITOR
+   ============================================================ */
+.storage-monitor-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.storage-total {
+    text-align: center;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border);
+}
+
+.storage-total-label {
+    font-size: 12px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+}
+
+.storage-total-value {
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--accent);
+    font-family: monospace;
+}
+
+/* Circles */
+.storage-circles {
+    display: flex;
+    justify-content: space-around;
+    gap: 16px;
+}
+
+.storage-circle-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+}
+
+.storage-circle {
+    width: 110px;
+    height: 110px;
+    position: relative;
+}
+
+.storage-circle svg {
+    width: 100%;
+    height: 100%;
+    transform: rotate(-90deg);
+}
+
+.storage-circle-bg {
+    fill: none;
+    stroke: var(--bg-input);
+    stroke-width: 8;
+}
+
+.storage-circle-fill {
+    fill: none;
+    stroke: #4a6cf7;
+    stroke-width: 8;
+    stroke-linecap: round;
+    stroke-dasharray: 263.89;
+    stroke-dashoffset: 263.89;
+    transition: stroke-dashoffset 0.8s ease;
+}
+
+.storage-fill-red {
+    stroke: #ff4444;
+}
+
+.storage-circle-center {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    pointer-events: none;
+}
+
+.storage-circle-count {
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--text-main);
+    line-height: 1;
+}
+
+.storage-circle-unit {
+    font-size: 10px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 2px;
+}
+
+.storage-circle-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-sub);
+}
+
+.storage-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.storage-dot-blue {
+    background: #4a6cf7;
+    box-shadow: 0 0 6px rgba(74, 108, 247, 0.6);
+}
+
+.storage-dot-red {
+    background: #ff4444;
+    box-shadow: 0 0 6px rgba(255, 68, 68, 0.6);
+}
+
+.storage-circle-size {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-family: monospace;
+}
+
+/* Breakdown */
+.storage-breakdown {
+    background: var(--bg-input);
+    border-radius: 10px;
+    padding: 12px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.storage-breakdown-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--text-sub);
+    padding: 2px 0;
+}
+
+.storage-breakdown-row span:last-child {
+    font-family: monospace;
+    color: var(--text-main);
+}
+
+.storage-breakdown-header {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+}
+
+/* Clear Buttons */
+.storage-clear-btn {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    width: 100%;
+    padding: 14px 16px;
+    background: var(--bg-input);
+    border: 1.5px solid var(--border-light);
+    border-radius: 12px;
+    color: var(--text-main);
+    font-family: inherit;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.2s ease;
+    margin-bottom: 10px;
+}
+
+.storage-clear-btn:last-child {
+    margin-bottom: 0;
+}
+
+.storage-clear-btn:hover,
+.storage-clear-btn:active {
+    background: var(--bg-hover);
+    border-color: var(--accent);
+}
+
+.storage-clear-btn.danger {
+    border-color: rgba(255, 68, 68, 0.3);
+}
+
+.storage-clear-btn.danger:hover,
+.storage-clear-btn.danger:active {
+    background: rgba(255, 68, 68, 0.1);
+    border-color: rgba(255, 68, 68, 0.6);
+}
+
+.storage-clear-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: var(--bg-card);
+    color: #4a6cf7;
+    flex-shrink: 0;
+}
+
+.storage-clear-btn.danger .storage-clear-icon {
+    color: #ff4444;
+}
+
+.storage-clear-icon svg {
+    width: 20px;
+    height: 20px;
+}
+
+.storage-clear-text {
+    flex: 1;
+    min-width: 0;
+}
+
+.storage-clear-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-main);
+    margin-bottom: 2px;
+}
+
+.storage-clear-btn.danger .storage-clear-title {
+    color: #ff4444;
+}
+
+.storage-clear-desc {
     font-size: 12px;
     color: var(--text-muted);
     line-height: 1.4;
@@ -11142,6 +11485,308 @@ function showReportPopup(msg) {
 function reportMessage(msg) {
     showReportPopup(msg);
 }
+
+// ============================================================
+//  ✅ STORAGE MONITOR + CLEAR DATA
+// ============================================================
+
+// ✅ IndexedDB Storage စစ်ဆေး
+function calculateIndexedDBStorage() {
+    return new Promise(function(resolve) {
+        openDB().then(function(db) {
+            var transaction = db.transaction(STORE_NAME, 'readonly');
+            var store = transaction.objectStore(STORE_NAME);
+
+            var accKeys = ['users', 'session', 'friendsCache', 'pinnedFriends', 'lockedFriends', 'chatBackgrounds'];
+            var msgKeys = [];
+
+            var accCount = 0;
+            var msgCount = 0;
+            var accSize = 0;
+            var msgSize = 0;
+
+            var breakdown = {};
+
+            // Get all keys
+            var getAllKeys = store.getAllKeys();
+            getAllKeys.onsuccess = function() {
+                var keys = getAllKeys.result || [];
+
+                // Messages keys ကို ရှာ
+                keys.forEach(function(key) {
+                    if (typeof key === 'string' && key.indexOf('messages_') === 0) {
+                        msgKeys.push(key);
+                    }
+                });
+
+                // ACC items စစ်
+                var accItems = accKeys.concat(['messages_']); // placeholder
+                var totalToProcess = accKeys.length + msgKeys.length;
+
+                if (totalToProcess === 0) {
+                    resolve({
+                        accCount: 0, msgCount: 0,
+                        accSize: 0, msgSize: 0,
+                        totalSize: 0,
+                        breakdown: {}
+                    });
+                    return;
+                }
+
+                var processed = 0;
+
+                function done() {
+                    processed++;
+                    if (processed >= totalToProcess) {
+                        resolve({
+                            accCount: accCount,
+                            msgCount: msgCount,
+                            accSize: accSize,
+                            msgSize: msgSize,
+                            totalSize: accSize + msgSize,
+                            breakdown: breakdown
+                        });
+                    }
+                }
+
+                // ACC keys ဖတ်
+                accKeys.forEach(function(key) {
+                    var req = store.get(key);
+                    req.onsuccess = function() {
+                        if (req.result && req.result.value !== undefined) {
+                            var val = req.result.value;
+                            var size = JSON.stringify(val).length;
+                            var count = 0;
+
+                            if (Array.isArray(val)) count = val.length;
+                            else if (typeof val === 'object') count = Object.keys(val).length;
+                            else count = 1;
+
+                            accSize += size;
+                            accCount += count;
+
+                            breakdown[key] = { size: size, count: count };
+                        }
+                        done();
+                    };
+                    req.onerror = function() { done(); };
+                });
+
+                // Messages keys ဖတ်
+                msgKeys.forEach(function(key) {
+                    var req = store.get(key);
+                    req.onsuccess = function() {
+                        if (req.result && req.result.value !== undefined) {
+                            var val = req.result.value;
+                            var size = JSON.stringify(val).length;
+                            var count = Array.isArray(val) ? val.length : 0;
+
+                            msgSize += size;
+                            msgCount += count;
+
+                            breakdown[key] = { size: size, count: count };
+                        }
+                        done();
+                    };
+                    req.onerror = function() { done(); };
+                });
+            };
+            getAllKeys.onerror = function() {
+                resolve({ accCount: 0, msgCount: 0, accSize: 0, msgSize: 0, totalSize: 0, breakdown: {} });
+            };
+
+        }).catch(function() {
+            resolve({ accCount: 0, msgCount: 0, accSize: 0, msgSize: 0, totalSize: 0, breakdown: {} });
+        });
+    });
+}
+
+// ✅ Size ကို ဖော်ပြ
+function formatSize(bytes) {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+}
+
+// ✅ Storage Monitor ပြ
+function loadStorageMonitor() {
+    var totalEl = document.getElementById('storageTotalValue');
+    var accCountEl = document.getElementById('storageAccCount');
+    var msgCountEl = document.getElementById('storageMsgCount');
+    var accSizeEl = document.getElementById('storageAccSize');
+    var msgSizeEl = document.getElementById('storageMsgSize');
+    var accFill = document.getElementById('storageAccFill');
+    var msgFill = document.getElementById('storageMsgFill');
+    var breakdownEl = document.getElementById('storageBreakdown');
+
+    if (!totalEl) return;
+
+    calculateIndexedDBStorage().then(function(data) {
+        // Total
+        totalEl.textContent = formatSize(data.totalSize);
+
+        // ACC
+        accCountEl.textContent = data.accCount;
+        accSizeEl.textContent = formatSize(data.accSize);
+
+        // Msg
+        msgCountEl.textContent = data.msgCount;
+        msgSizeEl.textContent = formatSize(data.msgSize);
+
+        // Circle animation
+        var circleLength = 2 * Math.PI * 42;  // r=42
+        var total = data.accSize + data.msgSize;
+
+        if (total > 0) {
+            var accPercent = data.accSize / total;
+            var msgPercent = data.msgSize / total;
+
+            if (accFill) {
+                accFill.style.strokeDashoffset = circleLength * (1 - accPercent);
+            }
+            if (msgFill) {
+                msgFill.style.strokeDashoffset = circleLength * (1 - msgPercent);
+            }
+        } else {
+            if (accFill) accFill.style.strokeDashoffset = circleLength;
+            if (msgFill) msgFill.style.strokeDashoffset = circleLength;
+        }
+
+        // Breakdown
+        if (breakdownEl) {
+            var html = '<div class="storage-breakdown-header">Breakdown</div>';
+            var keys = Object.keys(data.breakdown);
+            if (keys.length === 0) {
+                html += '<div class="storage-breakdown-row"><span>No data</span><span>-</span></div>';
+            } else {
+                keys.forEach(function(key) {
+                    var item = data.breakdown[key];
+                    var displayKey = key.replace(/_/g, ' ');
+                    html += '<div class="storage-breakdown-row"><span>' + displayKey + '</span><span>' + formatSize(item.size) + '</span></div>';
+                });
+            }
+            breakdownEl.innerHTML = html;
+        }
+    });
+}
+
+// ✅ Friends Data ရှင်း
+function clearAllFriendsData() {
+    if (isProcessing) return;
+    if (!confirm('Friends Data အားလုံး ဖျက်မှာ သေချာလား?\n\n(Friends Cache, Pin, Lock, Background အားလုံး ဖျက်ခံရမယ်)')) {
+        return;
+    }
+
+    isProcessing = true;
+    showLoading('Clearing friends data...');
+
+    var keysToClear = ['friendsCache', 'pinnedFriends', 'lockedFriends', 'chatBackgrounds'];
+    var clearPromises = keysToClear.map(function(key) {
+        return deleteFromDB(key).catch(function() {});
+    });
+
+    Promise.all(clearPromises).then(function() {
+        hideLoading();
+        isProcessing = false;
+        showToast('Friends data cleared');
+        loadStorageMonitor();
+        setTimeout(function() {
+            if (typeof renderChatList === 'function') renderChatList();
+        }, 300);
+    }).catch(function(err) {
+        console.error('Clear friends error:', err);
+        hideLoading();
+        isProcessing = false;
+        showToast('Failed to clear');
+    });
+}
+
+// ✅ Messages Data ရှင်း
+function clearAllMessagesData() {
+    if (isProcessing) return;
+    if (!confirm('Messages Data အားလုံး ဖျက်မှာ သေချာလား?\n\nMessage အားလုံး ဖျက်ခံရမယ်။')) {
+        return;
+    }
+
+    isProcessing = true;
+    showLoading('Clearing messages...');
+
+    openDB().then(function(db) {
+        var transaction = db.transaction(STORE_NAME, 'readwrite');
+        var store = transaction.objectStore(STORE_NAME);
+
+        var getAllKeys = store.getAllKeys();
+        getAllKeys.onsuccess = function() {
+            var keys = getAllKeys.result || [];
+            var msgKeys = keys.filter(function(key) {
+                return typeof key === 'string' && key.indexOf('messages_') === 0;
+            });
+
+            if (msgKeys.length === 0) {
+                hideLoading();
+                isProcessing = false;
+                showToast('No messages to clear');
+                loadStorageMonitor();
+                return;
+            }
+
+            var deletePromises = msgKeys.map(function(key) {
+                return deleteFromDB(key).catch(function() {});
+            });
+
+            Promise.all(deletePromises).then(function() {
+                hideLoading();
+                isProcessing = false;
+                showToast('Messages cleared (' + msgKeys.length + ')');
+                loadStorageMonitor();
+                setTimeout(function() {
+                    if (typeof renderChatList === 'function') renderChatList();
+                }, 300);
+            }).catch(function(err) {
+                console.error('Clear messages error:', err);
+                hideLoading();
+                isProcessing = false;
+                showToast('Failed to clear');
+            });
+        };
+        getAllKeys.onerror = function() {
+            hideLoading();
+            isProcessing = false;
+            showToast('Failed to clear');
+        };
+    }).catch(function(err) {
+        console.error('Clear messages error:', err);
+        hideLoading();
+        isProcessing = false;
+        showToast('Failed to clear');
+    });
+}
+
+// ✅ Settings ဖွင့်တိုင်း Storage Monitor ခေါ်
+var _origOpenFullscreen_sm = openFullscreen;
+openFullscreen = function(title, screenId) {
+    _origOpenFullscreen_sm(title, screenId);
+    if (screenId === 'fs-settings') {
+        setTimeout(function() {
+            loadStorageMonitor();
+        }, 100);
+    }
+};
+
+// ✅ Button Events
+(function initStorageMonitorEvents() {
+    var clearFriendsBtn = document.getElementById('clearFriendsBtn');
+    if (clearFriendsBtn) {
+        clearFriendsBtn.addEventListener('click', clearAllFriendsData);
+    }
+
+    var clearMessagesBtn = document.getElementById('clearMessagesBtn');
+    if (clearMessagesBtn) {
+        clearMessagesBtn.addEventListener('click', clearAllMessagesData);
+    }
+})();
+
+console.log('Storage Monitor loaded');
 
 
 // ============================================================
