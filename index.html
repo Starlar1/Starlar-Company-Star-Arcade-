@@ -6440,6 +6440,20 @@ body {
     .friend-list-avatar-wrap { width: 44px; height: 44px; }
     .friend-list-name { font-size: 14px; }
     .friend-list-add-btn { padding: 7px 14px; font-size: 11px; }
+}
+
+/* ============================================================
+   ✅ CHAT ROOM -- Fullscreen Header ဖျောက်
+   ============================================================ */
+
+/* Chat Room Active ဖြစ်နေရင် -- Fullscreen Header ဖျောက် */
+.fullscreen-overlay.chat-room-active .fullscreen-header {
+    display: none !important;
+}
+
+/* Chat Room Active ဖြစ်နေရင် -- Fullscreen Body အမြင့် 100% */
+.fullscreen-overlay.chat-room-active .fullscreen-body {
+    height: 100% !important;
 }</style><script>/* ============================================================
    FILE: script.js (FULL VERSION - online inside users only)
    ============================================================ */
@@ -12715,11 +12729,105 @@ openFullscreen = function(title, screenId) {
 console.log('Tasks System loaded -- Join / ရယူမည်');
 
 // ============================================================
-//  ✅ OTHER USER PROFILE + FRIENDS LIST VIEW
+//  ✅ FULLSCREEN STACK MANAGEMENT (Fixed Back)
 // ============================================================
 
 // ============================================================
-//  PART 1 -- OTHER USER PROFILE VIEW
+//  OPEN FULLSCREEN -- chat-room-active Auto Manage
+// ============================================================
+var _origOpenFullscreen_final = openFullscreen;
+openFullscreen = function(title, screenId) {
+    // Stack ထဲ ထည့်/မထည့် ဆုံးဖြတ် (အရင် function က လုပ်ပေးတယ်)
+    _origOpenFullscreen_final(title, screenId);
+
+    // ✅ Stack ကို ကြည့်ပြီး chat-room-active class ကို စီမံ
+    updateChatRoomActiveClass();
+};
+
+// ============================================================
+//  GO BACK FULLSCREEN -- chat-room-active Auto Manage
+// ============================================================
+var _origGoBackFullscreen_final = goBackFullscreen;
+goBackFullscreen = function() {
+    var currentFs = fullscreenStack[fullscreenStack.length - 1];
+
+    // Chat Room ကနေ ထွက်ရင် -- Listeners ဖျက်
+    if (currentFs && currentFs.screenId === 'fs-chat-room') {
+        if (chatRoomListener) { try { chatRoomListener.off(); } catch(e){} chatRoomListener = null; }
+        try { stopChatRoomMessageListeners(); } catch(e) {}
+        try { stopChatRoomBlockListener(); } catch(e) {}
+        try { closeBubblePicker(); } catch(e) {}
+        try { clearReplyState(); } catch(e) {}
+        setTimeout(function() { renderChatList(); }, 100);
+    }
+
+    // Profile ကနေ ထွက်ရင် -- viewing-other ဖျက်
+    if (currentFs && currentFs.screenId === 'fs-profile') {
+        var profileScreen = document.getElementById('fs-profile');
+        if (profileScreen) profileScreen.classList.remove('viewing-other');
+    }
+
+    // Friends List ကနေ ထွက်ရင် -- Container ရှင်း
+    if (currentFs && currentFs.screenId === 'fs-friends-list') {
+        var container = document.getElementById('friendsListContainer');
+        if (container) container.innerHTML = '';
+    }
+
+    // အရင် function ကို ခေါ် (Stack ကနေ pop လုပ်ပြီး နောက် Screen ပြ)
+    _origGoBackFullscreen_final();
+
+    // ✅ Stack ကို ကြည့်ပြီး chat-room-active class ကို ပြန်စီမံ
+    updateChatRoomActiveClass();
+};
+
+// ============================================================
+//  CLOSE FULLSCREEN -- chat-room-active Auto Manage
+// ============================================================
+var _origCloseFullscreen_final = closeFullscreen;
+closeFullscreen = function() {
+    // Listeners ဖျက်
+    if (chatRoomListener) { try { chatRoomListener.off(); } catch(e){} chatRoomListener = null; }
+    try { stopChatRoomMessageListeners(); } catch(e) {}
+    try { stopChatRoomBlockListener(); } catch(e) {}
+    try { closeBubblePicker(); } catch(e) {}
+    try { clearReplyState(); } catch(e) {}
+
+    // Profile viewing-other ဖျက်
+    var profileScreen = document.getElementById('fs-profile');
+    if (profileScreen) profileScreen.classList.remove('viewing-other');
+
+    // Friends List Container ရှင်း
+    var container = document.getElementById('friendsListContainer');
+    if (container) container.innerHTML = '';
+
+    // chat-room-active ဖျက်
+    document.getElementById('fullscreenOverlay').classList.remove('chat-room-active');
+
+    // အရင် function ကို ခေါ်
+    _origCloseFullscreen_final();
+};
+
+// ============================================================
+//  ✅ UPDATE CHAT-ROOM-ACTIVE CLASS (Stack ကို ကြည့်ပြီး)
+// ============================================================
+function updateChatRoomActiveClass() {
+    var overlay = document.getElementById('fullscreenOverlay');
+    if (!overlay) return;
+
+    // Stack ထဲမှာ Chat Room ရှိလား စစ်
+    var hasChatRoom = fullscreenStack.some(function(item) {
+        return item.screenId === 'fs-chat-room';
+    });
+
+    if (hasChatRoom) {
+        overlay.classList.add('chat-room-active');
+    } else {
+        overlay.classList.remove('chat-room-active');
+    }
+}
+
+// ============================================================
+//  ✅ OTHER USER PROFILE VIEW (v4)
 // ============================================================
 
 function showOtherUserProfile(serverId, userId) {
@@ -12734,10 +12842,7 @@ function showOtherUserProfile(serverId, userId) {
     }
 
     getFriendFromCache(serverId, userId).then(function(cached) {
-        if (!cached) {
-            showToast('Profile not found in cache');
-            return;
-        }
+        if (!cached) { showToast('Profile not found in cache'); return; }
         renderOtherUserProfile(cached);
     });
 }
@@ -12793,11 +12898,8 @@ function renderOtherUserProfile(data) {
 
     var fsBio = document.getElementById('fsProfileBio');
     if (fsBio) {
-        if (data.bio && data.bio.trim() !== '') {
-            fsBio.innerHTML = escapeHtml(data.bio);
-        } else {
-            fsBio.innerHTML = '<span class="bio-placeholder">No bio yet...</span>';
-        }
+        if (data.bio && data.bio.trim() !== '') fsBio.innerHTML = escapeHtml(data.bio);
+        else fsBio.innerHTML = '<span class="bio-placeholder">No bio yet...</span>';
     }
 
     var frameOverlay = document.getElementById('profileFrameOverlay');
@@ -12886,10 +12988,12 @@ function loadOtherUserRoles(roleUse) {
     }
 }
 
-// ✅ Chat List Row Override
-var _origRenderChatListRow_03 = renderChatListRow;
+// ============================================================
+//  Chat List Avatar Click
+// ============================================================
+var _origRenderChatListRow_final = renderChatListRow;
 renderChatListRow = function(listEl, item) {
-    _origRenderChatListRow_03(listEl, item);
+    _origRenderChatListRow_final(listEl, item);
 
     var rowId = 'chatRow_' + item.friend.serverId + '_' + item.friend.userId;
     var row = document.getElementById(rowId);
@@ -12908,17 +13012,17 @@ renderChatListRow = function(listEl, item) {
     });
 };
 
-// ✅ Chat Room Avatar Override -- Full Chat Screen အတွက်
-var _origOpenChatRoomNow_03 = openChatRoomNow;
+// ============================================================
+//  Chat Room Avatar Click
+// ============================================================
+var _origOpenChatRoomNow_final = openChatRoomNow;
 openChatRoomNow = function(target) {
-    _origOpenChatRoomNow_03(target);
+    _origOpenChatRoomNow_final(target);
 
-    // Chat Room Avatar Event ချိတ်
     setTimeout(function() {
         var chatRoomAvatar = document.querySelector('.chat-room-avatar');
         if (!chatRoomAvatar) return;
 
-        // အရင် Event ဖျက်
         var newAvatar = chatRoomAvatar.cloneNode(true);
         chatRoomAvatar.parentNode.replaceChild(newAvatar, chatRoomAvatar);
 
@@ -12933,35 +13037,8 @@ openChatRoomNow = function(target) {
     }, 200);
 };
 
-// ✅ Fullscreen ပြန်ပိတ်ရင် class ဖျက်
-var _origGoBackFullscreen_03 = goBackFullscreen;
-goBackFullscreen = function() {
-    var currentFs = fullscreenStack[fullscreenStack.length - 1];
-
-    if (currentFs && currentFs.screenId === 'fs-profile') {
-        var profileScreen = document.getElementById('fs-profile');
-        if (profileScreen) profileScreen.classList.remove('viewing-other');
-    }
-
-    if (currentFs && currentFs.screenId === 'fs-friends-list') {
-        var container = document.getElementById('friendsListContainer');
-        if (container) container.innerHTML = '';
-    }
-
-    _origGoBackFullscreen_03();
-};
-
-var _origCloseFullscreen_03 = closeFullscreen;
-closeFullscreen = function() {
-    var profileScreen = document.getElementById('fs-profile');
-    if (profileScreen) profileScreen.classList.remove('viewing-other');
-    var container = document.getElementById('friendsListContainer');
-    if (container) container.innerHTML = '';
-    _origCloseFullscreen_03();
-};
-
 // ============================================================
-//  PART 2 -- FRIENDS LIST VIEW
+//  FRIENDS LIST VIEW
 // ============================================================
 
 function viewUserFriendsList(serverId, userId, userName) {
@@ -13033,13 +13110,9 @@ function renderFriendListItem(container, fData, friendServerId, friendUserId) {
 
     var avatar = fData.avatar || 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 100 100"%3E%3Ccircle cx="50" cy="50" r="45" fill="%2322222e"/%3E%3C/svg%3E';
 
-    // ✅ ကိုယ်ဟုတ်လား စစ်
     var isMe = (friendServerId === currentServerId && friendUserId === currentUser.userId);
-
-    // ✅ Friend ဖြစ်ပြီးလား စစ်
     var alreadyFriend = isFriend(friendServerId, friendUserId);
 
-    // Button
     var btnHtml = '';
     if (isMe) {
         btnHtml = '<button class="friend-list-add-btn already" disabled>You</button>';
@@ -13060,14 +13133,12 @@ function renderFriendListItem(container, fData, friendServerId, friendUserId) {
         '</div>' +
         btnHtml;
 
-    // Avatar Wrap -- နှိပ်မရ
     var avatarWrap = item.querySelector('.friend-list-avatar-wrap');
     if (avatarWrap) {
         avatarWrap.style.cursor = 'default';
         avatarWrap.style.pointerEvents = 'none';
     }
 
-    // ✅ Add Button Event -- ကိုယ် မဟုတ်ရင်၊ ဖြစ်ပြီးသား မဟုတ်ရင်
     var addBtn = item.querySelector('.friend-list-add-btn:not(.already)');
     if (addBtn && !isMe && !alreadyFriend) {
         addBtn.addEventListener('click', function() {
@@ -13088,7 +13159,7 @@ function renderFriendListItem(container, fData, friendServerId, friendUserId) {
     container.appendChild(item);
 }
 
-console.log('✅ Other User Profile + Friends List View loaded (v3)');
+console.log('✅ Fullscreen Stack Management + Profile + Friends List loaded (v4)');
 
 
 // ============================================================
