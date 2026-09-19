@@ -3965,7 +3965,7 @@ body {
     width: 100%;
     height: 100%;
     background: var(--bg-body);
-    overflow: hidden;  /* ✅ အရေးကြီး */
+    overflow: hidden;
 }
 
 .chat-room-topbar {
@@ -4059,7 +4059,6 @@ body {
 }
 .chat-room-mark img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
 
-/* ✅ Status -- သေးသေး + Dot ပါ */
 .chat-room-status {
     display: inline-flex;
     align-items: center;
@@ -4104,15 +4103,17 @@ body {
 }
 .chat-room-menu:active { background: var(--bg-hover); transform: scale(0.92); }
 
-/* ✅ Scroll Area -- ချောမွေ့အောင် */
+/* ============================================================
+   ✅ Scroll Area -- Instant (smooth မဟုတ်)
+   ============================================================ */
 .chat-room-messages {
     flex: 1;
-    min-height: 0;                          /* ✅ အရေးကြီး -- flex မှာ scroll ဖြစ်ဖို့ */
+    min-height: 0;
     overflow-y: auto;
     overflow-x: hidden;
-    -webkit-overflow-scrolling: touch;       /* ✅ iOS smooth */
-    overscroll-behavior: contain;            /* ✅ မိခင်ဆီ scroll မကူး */
-    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    scroll-behavior: auto;   /* ✅ Instant -- smooth မဟုတ် */
     padding: 16px 14px;
     display: flex;
     flex-direction: column;
@@ -4120,7 +4121,6 @@ body {
     background: var(--bg-body);
 }
 
-/* ✅ Scrollbar (thin + လှ) */
 .chat-room-messages::-webkit-scrollbar {
     width: 3px;
 }
@@ -4149,7 +4149,7 @@ body {
 }
 
 /* ============================================================
-   ✅ CHAT MESSAGE WRAPPER (Reply + Bubble ခွဲ)
+   ✅ CHAT MESSAGE WRAPPER
    ============================================================ */
 .chat-message-wrapper {
     display: flex;
@@ -4169,7 +4169,6 @@ body {
     align-items: flex-start;
 }
 
-/* Wrapper ထဲက message က wrapper width ကို လိုက် */
 .chat-message-wrapper .chat-message {
     max-width: 100%;
     animation: none;
@@ -4181,7 +4180,7 @@ body {
 }
 
 /* ============================================================
-   CHAT MESSAGE (Bubble ပုံမှန်)
+   CHAT MESSAGE
    ============================================================ */
 .chat-message {
     padding: 9px 13px;
@@ -4214,7 +4213,6 @@ body {
     text-align: right;
 }
 
-/* ✅ Highlight (Reply နှိပ်ရင် စာကို highlight) */
 .chat-message.highlight,
 .chat-message-wrapper.highlight {
     animation: highlightPulse 1.5s ease;
@@ -4227,7 +4225,7 @@ body {
 }
 
 /* ============================================================
-   ✅ MESSAGE BUBBLE -- 9-slice PNG background
+   ✅ MESSAGE BUBBLE
    ============================================================ */
 .chat-message.has-bubble {
     border-image-source: var(--bubble-image);
@@ -4268,16 +4266,11 @@ body {
     text-align: right;
 }
 
-.chat-message.has-bubble.sent {
-    color: #fff;
-}
-
-.chat-message.has-bubble.received {
-    color: var(--text-main);
-}
+.chat-message.has-bubble.sent { color: #fff; }
+.chat-message.has-bubble.received { color: var(--text-main); }
 
 /* ============================================================
-   ✅ REPLY QUOTE (Bubble အပြင်မှာ -- အပေါ်မှာ)
+   ✅ REPLY QUOTE
    ============================================================ */
 .msg-reply-quote {
     background: rgba(255, 255, 255, 0.08);
@@ -4310,7 +4303,6 @@ body {
     max-width: 220px;
 }
 
-/* Sent (ကိုယ့်စာ) ရဲ့ Reply Quote -- ပိုလင်း */
 .chat-message-wrapper.sent .msg-reply-quote {
     background: rgba(255, 109, 31, 0.15);
     border-left-color: rgba(255, 255, 255, 0.6);
@@ -4325,7 +4317,7 @@ body {
 }
 
 /* ============================================================
-   ✅ MESSAGE MENU POPUP (Reply / Copy / Delete)
+   ✅ MESSAGE MENU POPUP
    ============================================================ */
 .msg-menu-popup {
     position: fixed;
@@ -4386,7 +4378,7 @@ body {
 }
 
 /* ============================================================
-   ✅ REPLY PREVIEW BAR (Input အပေါ်မှာ)
+   ✅ REPLY PREVIEW BAR
    ============================================================ */
 .reply-preview-bar {
     display: flex;
@@ -4562,7 +4554,7 @@ body {
 }
 
 /* ============================================================
-   ✅ CHAT ROOM MENU POPUP (⋮ Menu -- Block/Unblock)
+   ✅ CHAT ROOM MENU POPUP
    ============================================================ */
 .chat-room-menu-popup {
     position: fixed;
@@ -4839,8 +4831,6 @@ body {
     }
 }
 
-
-
 /* ============================================================
    ✅ CHAT LIST PLAY (G1-G5)
    ============================================================ */
@@ -4863,10 +4853,9 @@ body {
     background: var(--bg-input);
     border: 1px solid var(--border-light);
     position: relative;
-    z-index: 2;  /* ✅ ပုံကို အပေါ်ဆုံး */
+    z-index: 2;
 }
 
-/* ✅ စာ scroll လုပ်တဲ့ wrapper -- ပုံအောက်မှာ */
 .chat-list-play-name-wrapper {
     flex: 1;
     min-width: 0;
@@ -4890,7 +4879,6 @@ body {
     100% { transform: translateX(-100%); }
 }
 
-/* ✅ Mobile */
 @media (max-width: 480px) {
     .chat-list-play-img {
         width: 14px;
@@ -4924,7 +4912,6 @@ body {
     color: #44ff88;
 }
 
-/* ✅ Play Container */
 .chat-room-play {
     display: inline-flex;
     align-items: center;
@@ -4936,7 +4923,6 @@ body {
     position: relative;
 }
 
-/* ✅ Play Image -- z-index 10 (အပေါ်ဆုံး) */
 .chat-room-play-img {
     width: 14px;
     height: 14px;
@@ -4949,7 +4935,6 @@ body {
     z-index: 10;
 }
 
-/* ✅ Play Name -- z-index 1 (Image ရဲ့ အောက်) */
 .chat-room-play-name {
     font-size: 10px;
     color: var(--accent);
@@ -4968,7 +4953,7 @@ body {
 }
 
 /* ============================================================
-   PIN -- နာမည်ကို လိမ္မော်ရောင် ပြောင်း (Badge မပါ)
+   PIN
    ============================================================ */
 .chat-list-item.pinned .chat-list-name {
     color: #ff6d1f !important;
@@ -4976,7 +4961,7 @@ body {
 }
 
 /* ============================================================
-   LOCK ICON (SVG)
+   LOCK ICON
    ============================================================ */
 .chat-list-lock-icon {
     display: inline-flex;
@@ -5015,7 +5000,7 @@ body {
 }
 
 /* ============================================================
-   ACTION BAR (Long-press)
+   ACTION BAR
    ============================================================ */
 .chat-list-action-overlay {
     position: fixed;
@@ -8050,6 +8035,7 @@ function logoutUser() {
     }
 })();
 
+
 // ============================================================
 //  FIRESTORE INITIALIZE
 // ============================================================
@@ -8203,7 +8189,7 @@ function unpinFriend(serverId, userId) {
 }
 
 // ============================================================
-//  ✅ CHAT BACKGROUND (IndexedDB) -- အသစ်
+//  CHAT BACKGROUND (IndexedDB)
 // ============================================================
 var CHAT_BACKGROUNDS_KEY = 'chatBackgrounds';
 
@@ -9088,7 +9074,7 @@ function showPasswordSetup(title, callback) {
 }
 
 // ============================================================
-//  ✅ CHAT BACKGROUND PICKER -- အသစ်
+//  CHAT BACKGROUND PICKER
 // ============================================================
 function showChatBackgroundPicker() {
     if (!currentChatTarget) return;
@@ -9143,7 +9129,6 @@ function showChatBackgroundPicker() {
         if (e.target === overlay) close();
     });
 
-    // ✅ Image ရွေး
     document.getElementById('bgPickImage').addEventListener('click', function() {
         document.getElementById('bgPickerInput').click();
     });
@@ -9163,7 +9148,6 @@ function showChatBackgroundPicker() {
         reader.readAsDataURL(file);
     });
 
-    // ✅ Background ဖျက်
     document.getElementById('bgRemoveImage').addEventListener('click', function() {
         removeChatBackground(target.serverId, target.userId).then(function() {
             applyChatBackground(null);
@@ -9173,7 +9157,6 @@ function showChatBackgroundPicker() {
     });
 }
 
-// ✅ Chat Room မှာ Background ပြ
 function applyChatBackground(imageData) {
     var messagesEl = document.getElementById('chatRoomMessages');
     if (!messagesEl) return;
@@ -9320,7 +9303,6 @@ function openChatRoomNow(target) {
     if (playEl) { playEl.innerHTML = ''; playEl.style.display = 'none'; }
     messagesEl.innerHTML = '<div class="chat-empty-state"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#5a5a6a" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>Start a conversation</span></div>';
 
-    // ✅ Background ပြ
     getChatBackground(target.serverId, target.userId).then(function(bg) {
         applyChatBackground(bg);
     });
@@ -9372,7 +9354,7 @@ function openChatRoomNow(target) {
         });
     }
 
-    // ✅ Message တွေ ဖတ် + ပြ + Scroll
+    // ✅ Message တွေ ဖတ် + ပြ + Instant Scroll
     getMessagesWith(target.serverId, target.userId).then(function(messages) {
         messagesEl.innerHTML = '';
         if (messages.length === 0) {
@@ -9381,10 +9363,19 @@ function openChatRoomNow(target) {
         }
         messages.forEach(function(msg) { displayMessage(msg); });
 
-        // ✅ Instant scroll -- ဆွဲသွားသလို မဖြစ်အောင်
+        // ✅ scroll-behavior ကို ခဏ override (instant)
+        messagesEl.style.scrollBehavior = 'auto';
+        messagesEl.scrollTop = messagesEl.scrollHeight;
+
+        // ✅ Layout ပြီးသေချာအောင် နောက်တစ်ခါ
         requestAnimationFrame(function() {
             messagesEl.scrollTop = messagesEl.scrollHeight;
         });
+
+        // ✅ ပြီးရင် smooth ပြန် (user scroll အတွက်)
+        setTimeout(function() {
+            messagesEl.style.scrollBehavior = 'smooth';
+        }, 200);
 
         messages.forEach(function(msg) {
             if (msg.type === 'received' && !msg.seen) {
@@ -9607,7 +9598,7 @@ function displayMessage(msg) {
 }
 
 // ============================================================
-//  MESSAGE MENU -- Report ထည့်
+//  MESSAGE MENU
 // ============================================================
 function showMessageMenu(msg, msgEl) {
     var existing = document.querySelector('.msg-menu-popup');
@@ -9669,7 +9660,6 @@ function showMessageMenu(msg, msgEl) {
     }, 10);
 }
 
-// ✅ Report Function -- ယာယီ
 function reportMessage(msg) {
     showToast('Report feature coming soon');
     console.log('Report message:', msg);
@@ -9970,7 +9960,7 @@ function markAsSeenAndDelete(messageId, serverId, friendServer, friendId) {
 }
 
 // ============================================================
-//  CHAT INPUT
+//  CHAT INPUT -- Input နှိပ်ရင် နောက်ဆုံးစာ အပေါ်တက်
 // ============================================================
 (function initChatInput() {
     var input = document.getElementById('chatMessageInput');
@@ -10001,13 +9991,16 @@ function markAsSeenAndDelete(messageId, serverId, friendServer, friendId) {
         autoResize();
     });
 
-    // ✅ Input နှိပ်တဲ့အခါ နောက်ဆုံးစာ အပေါ်တက်
+    // ✅ Input နှိပ်တဲ့အခါ နောက်ဆုံးစာ အပေါ်တက် (instant)
     input.addEventListener('focus', function() {
+        var messagesEl = document.getElementById('chatRoomMessages');
+        if (!messagesEl) return;
+        messagesEl.style.scrollBehavior = 'auto';
         setTimeout(function() {
-            var messagesEl = document.getElementById('chatRoomMessages');
-            if (messagesEl) {
-                messagesEl.scrollTop = messagesEl.scrollHeight;
-            }
+            messagesEl.scrollTop = messagesEl.scrollHeight;
+            setTimeout(function() {
+                messagesEl.style.scrollBehavior = 'smooth';
+            }, 200);
         }, 300);
     });
 
@@ -10110,7 +10103,7 @@ function closeBubblePicker() {
 }
 
 // ============================================================
-//  CHAT ROOM MENU -- Background ထည့်
+//  CHAT ROOM MENU
 // ============================================================
 (function initChatRoomMenu() {
     var menuBtn = document.getElementById('chatRoomMenuBtn');
@@ -10425,8 +10418,7 @@ logoutUser = function() {
     _origLogoutUser_final();
 };
 
-console.log('STAR ARCADE -- Background + Report + Scroll Fix');
-                        
+console.log('STAR ARCADE -- Background + Report + Scroll Fix');                        
 
 
 
