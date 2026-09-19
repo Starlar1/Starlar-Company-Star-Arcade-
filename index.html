@@ -10420,7 +10420,166 @@ logoutUser = function() {
 
 console.log('STAR ARCADE -- Background + Report + Scroll Fix');                        
 
+// ============================================================
+//  ✅ REPORT SYSTEM -- Telegram (Username)
+// ============================================================
 
+// ✅ Telegram Bot Config
+var REPORT_BOT_TOKEN = '7869159797:AAEX6EbdQpo39CV6bV2pzItm6zwphh2UXbY';
+var REPORT_CHAT_ID = '@StarArcadeAdmin';   // ✅ Username သုံး
+var REPORT_TOPIC_ID = 21;                   // Topic ID
+
+// ✅ Telegram Report Message ပို့
+function sendTelegramReport(reportData) {
+    return new Promise(function(resolve) {
+        try {
+            var msg = '';
+            msg += '<b>🚨 NEW REPORT</b>\n\n';
+
+            msg += '<b>👤 Reporter Info</b>\n';
+            msg += '📛 Name: ' + (reportData.reporterName || 'Unknown') + '\n';
+            msg += '🖥 Server: ' + (reportData.reporterServer || 'Unknown') + '\n';
+            msg += '🆔 ID: ' + (reportData.reporterId || 'Unknown') + '\n\n';
+
+            msg += '<b>🎯 Reported User</b>\n';
+            msg += '📛 Name: ' + (reportData.reportedName || 'Unknown') + '\n';
+            msg += '🖥 Server: ' + (reportData.reportedServer || 'Unknown') + '\n';
+            msg += '🆔 ID: ' + (reportData.reportedId || 'Unknown') + '\n\n';
+
+            msg += '<b>💬 Reported Message</b>\n';
+            msg += (reportData.reportedMessage || 'No message') + '\n\n';
+
+            msg += '<b>📝 Reason</b>\n';
+            msg += (reportData.reason || 'No reason provided') + '\n\n';
+
+            msg += '📅 ' + new Date().toLocaleString('en-US', { timeZone: 'Asia/Yangon' });
+
+            var url = 'https://api.telegram.org/bot' + REPORT_BOT_TOKEN + '/sendMessage';
+
+            fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    chat_id: REPORT_CHAT_ID,
+                    message_thread_id: REPORT_TOPIC_ID,
+                    text: msg,
+                    parse_mode: 'HTML',
+                    disable_web_page_preview: true
+                })
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (data.ok) {
+                    console.log('Report sent to Telegram');
+                    resolve({ ok: true });
+                } else {
+                    console.warn('Telegram API error:', data.description);
+                    resolve({ ok: false, error: data.description });
+                }
+            })
+            .catch(function(err) {
+                console.error('Telegram send error:', err);
+                resolve({ ok: false, error: err.message });
+            });
+
+        } catch(e) {
+            console.error('Report error:', e);
+            resolve({ ok: false, error: e.message });
+        }
+    });
+}
+
+// ✅ Report Popup ပြ
+function showReportPopup(msg) {
+    if (!msg) return;
+    if (!currentChatTarget) return;
+
+    var existing = document.querySelector('.report-popup-overlay');
+    if (existing) existing.remove();
+
+    var overlay = document.createElement('div');
+    overlay.className = 'report-popup-overlay';
+
+    overlay.innerHTML =
+        '<div class="report-popup">' +
+            '<div class="report-popup-header">' +
+                '<h3>Report Message</h3>' +
+                '<button class="report-popup-close" id="reportPopupClose">' +
+                    '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">' +
+                        '<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>' +
+                    '</svg>' +
+                '</button>' +
+            '</div>' +
+            '<div class="report-popup-body">' +
+                '<div class="report-preview">' +
+                    '<div class="report-preview-label">Reported Message:</div>' +
+                    '<div class="report-preview-text">' + escapeHtml((msg.text || '').substring(0, 150)) + '</div>' +
+                '</div>' +
+                '<div class="report-input-group">' +
+                    '<label>Reason for Report</label>' +
+                    '<textarea class="report-textarea" id="reportReasonInput" placeholder="Describe why you are reporting this message..." rows="4"></textarea>' +
+                '</div>' +
+                '<div class="report-popup-actions">' +
+                    '<button class="report-btn cancel" id="reportPopupCancel">Cancel</button>' +
+                    '<button class="report-btn confirm" id="reportPopupSubmit">' +
+                        '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">' +
+                            '<line x1="22" y1="2" x2="11" y2="13"/>' +
+                            '<polygon points="22 2 15 22 11 13 2 9 22 2"/>' +
+                        '</svg>' +
+                        '<span>Submit Report</span>' +
+                    '</button>' +
+                '</div>' +
+            '</div>' +
+        '</div>';
+
+    document.body.appendChild(overlay);
+
+    function close() { overlay.remove(); }
+
+    document.getElementById('reportPopupClose').addEventListener('click', close);
+    document.getElementById('reportPopupCancel').addEventListener('click', close);
+    overlay.addEventListener('click', function(e) {
+        if (e.target === overlay) close();
+    });
+
+    document.getElementById('reportPopupSubmit').addEventListener('click', function() {
+        var reason = document.getElementById('reportReasonInput').value.trim();
+        if (!reason) {
+            showToast('Please enter a reason');
+            return;
+        }
+
+        var btn = document.getElementById('reportPopupSubmit');
+        btn.disabled = true;
+        btn.innerHTML = '<span>Sending...</span>';
+
+        var myServer = FIREBASE_SERVERS.find(function(s){ return s.id === currentServerId; });
+        var myServerNo = myServer ? myServer.number : 1;
+
+        var reportedServer = FIREBASE_SERVERS.find(function(s){ return s.id === currentChatTarget.serverId; });
+        var reportedServerNo = reportedServer ? reportedServer.number : 1;
+
+        var reportData = {
+            reporterName: currentUser.name || 'Unknown',
+            reporterServer: 'Server ' + myServerNo,
+            reporterId: currentUser.userId || 'Unknown',
+            reportedName: currentChatTarget.name || 'Unknown',
+            reportedServer: 'Server ' + reportedServerNo,
+            reportedId: currentChatTarget.userId || 'Unknown',
+            reportedMessage: msg.text || 'No message',
+            reason: reason
+        };
+
+        sendTelegramReport(reportData).then(function(result) {
+            close();
+            if (result.ok) {
+                showToast('Report submitted successfully');
+            } else {
+                showToast('Failed to submit report');
+            }
+        });
+    });
+}
 
 
 // ============================================================
