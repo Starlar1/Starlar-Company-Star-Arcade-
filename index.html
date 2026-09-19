@@ -12916,6 +12916,7 @@ console.log('Tasks System loaded -- Join / ရယူမည်');
 
 // ============================================================
 //  PART 1 -- CHAT LIST AVATAR → FULL PROFILE (New Screen)
+//  ✅ cloneNode မသုံးဘဲ event တိုက်ရိုက်ထည့် (row မပွား)
 // ============================================================
 var _origRenderChatListRow_combine = renderChatListRow;
 renderChatListRow = function(listEl, item) {
@@ -12928,9 +12929,10 @@ renderChatListRow = function(listEl, item) {
     var avatarWrap = row.querySelector('.chat-list-avatar-wrap');
     if (!avatarWrap) return;
 
-    var newWrap = avatarWrap.cloneNode(true);
-    avatarWrap.parentNode.replaceChild(newWrap, avatarWrap);
-    avatarWrap = newWrap;
+    // ✅ Event ထပ်မထည့်အောင် flag နဲ့ ကာကွယ်
+    if (avatarWrap.dataset.profileBound === '1') return;
+    avatarWrap.dataset.profileBound = '1';
+
     avatarWrap.style.cursor = 'pointer';
     avatarWrap.addEventListener('click', function(e) {
         e.stopPropagation();
@@ -12950,12 +12952,13 @@ openChatRoomNow = function(target) {
         var chatRoomAvatar = document.querySelector('.chat-room-avatar');
         if (!chatRoomAvatar) return;
 
-        var newAvatar = chatRoomAvatar.cloneNode(true);
-        chatRoomAvatar.parentNode.replaceChild(newAvatar, chatRoomAvatar);
+        // ✅ Event ထပ်မထည့်အောင် flag
+        if (chatRoomAvatar.dataset.cardBound === '1') return;
+        chatRoomAvatar.dataset.cardBound = '1';
 
-        newAvatar.style.cursor = 'pointer';
-        newAvatar.style.pointerEvents = 'auto';
-        newAvatar.addEventListener('click', function(e) {
+        chatRoomAvatar.style.cursor = 'pointer';
+        chatRoomAvatar.style.pointerEvents = 'auto';
+        chatRoomAvatar.addEventListener('click', function(e) {
             e.stopPropagation();
             if (currentChatTarget) {
                 // ✅ Chat Room ကနေ -- Popup Card ပြ
@@ -13079,15 +13082,22 @@ function renderOtherUserProfile(data) {
 
     loadOtherUserRoles(data.roleUse || []);
 
+    // ✅ Friends count click (cloneNode မသုံးဘဲ flag နဲ့)
     if (fsFriends) {
-        var newFriends = fsFriends.cloneNode(true);
-        fsFriends.parentNode.replaceChild(newFriends, fsFriends);
-        fsFriends = newFriends;
-        fsFriends.style.cursor = 'pointer';
-        fsFriends.addEventListener('click', function(e) {
-            e.stopPropagation();
-            viewUserFriendsList(data.serverId, data.userId, data.name);
-        });
+        if (fsFriends.dataset.friendsBound !== '1') {
+            fsFriends.dataset.friendsBound = '1';
+            fsFriends.style.cursor = 'pointer';
+            fsFriends.addEventListener('click', function(e) {
+                e.stopPropagation();
+                var sid = fsFriends.dataset.serverId;
+                var uid = fsFriends.dataset.userId;
+                var uname = fsFriends.dataset.userName;
+                if (sid && uid) viewUserFriendsList(sid, uid, uname);
+            });
+        }
+        fsFriends.dataset.serverId = data.serverId;
+        fsFriends.dataset.userId = data.userId;
+        fsFriends.dataset.userName = data.name || 'User';
     }
 
     openFullscreen('Profile', 'fs-profile');
