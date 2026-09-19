@@ -5163,7 +5163,6 @@ body {
 .password-btn:active {
     transform: scale(0.96);
 }
-
 /* ============================================================
    CHAT BACKGROUND PICKER
    ============================================================ */
@@ -5619,101 +5618,71 @@ var FIREBASE_SERVERS = [
     }
 ];
 
-// ===================================================
-// TELEGRAM CONFIGURATION (USERNAME ONLY)
-// ===================================================
-var TELEGRAM_BOT_TOKEN = '7869159797:AAEX6EbdQpo39CV6bV2pzItm6zwphh2UXbY';
-var TELEGRAM_CHAT_USERNAME = '@StarArcadeAdmin';
+// ============================================================
+//  ✅ SHOP PURCHASE → Telegram Topic Group
+// ============================================================
 
-// ========== INITIALIZE FIREBASE ==========
-var firebaseApps = {};
-var firebaseDbs = {};
-var firebaseAuths = {};
+// ✅ Telegram Bot Config
+var PURCHASE_BOT_TOKEN = '7869159797:AAEX6EbdQpo39CV6bV2pzItm6zwphh2UXbY';
+var PURCHASE_CHAT_ID = '@StarArcadeAdmin';
+var PURCHASE_TOPIC_ID = 20;   // Topic 20
 
-FIREBASE_SERVERS.forEach(function(server) {
-    try {
-        var app = firebase.initializeApp(server.config, server.id);
-        firebaseApps[server.id] = app;
-        firebaseDbs[server.id] = firebase.database(app);
-        firebaseAuths[server.id] = firebase.auth(app);
-        console.log('Initialized:', server.name);
-    } catch(e) {
-        console.error('Error initializing', server.name, e);
-    }
-});
+// ✅ Shop Purchase → Telegram
+function sendTelegramPurchaseMessage(purchaseInfo) {
+    return new Promise(function(resolve) {
+        try {
+            var msg = '';
+            msg += '<b>🛒 NEW PURCHASE</b>\n\n';
 
-// ========== INDEXEDDB HELPER ==========
-var DB_NAME = 'StarArcadeDB';
-var DB_VERSION = 1;
-var STORE_NAME = 'userData';
+            msg += '<b>👤 Buyer Info</b>\n';
+            msg += '📛 Name: ' + (purchaseInfo.name || 'Unknown') + '\n';
+            msg += '🖥 Server: ' + (purchaseInfo.serverNo || 'Unknown') + '\n';
+            msg += '🆔 ID: ' + (purchaseInfo.userId || 'Unknown') + '\n';
+            msg += '💎 Diamond (current): ' + (purchaseInfo.diamondBefore || 0) + '\n\n';
 
-function openDB() {
-    return new Promise(function(resolve, reject) {
-        var request = indexedDB.open(DB_NAME, DB_VERSION);
-        request.onupgradeneeded = function(e) {
-            var db = e.target.result;
-            if (!db.objectStoreNames.contains(STORE_NAME)) {
-                var store = db.createObjectStore(STORE_NAME, { keyPath: 'key' });
-                store.createIndex('email', 'email', { unique: true });
-                store.createIndex('userId', 'userId', { unique: true });
-            }
-        };
-        request.onsuccess = function(e) {
-            resolve(e.target.result);
-        };
-        request.onerror = function(e) {
-            reject(e.target.error);
-        };
+            msg += '<b>📦 Item Info</b>\n';
+            msg += '🏷 Item Name: ' + (purchaseInfo.itemName || 'Unknown') + '\n';
+            msg += '🔢 Item ID: ' + (purchaseInfo.itemId || 'Unknown') + '\n';
+            msg += '💰 Price: ' + (purchaseInfo.price || 0) + ' 💎\n';
+            msg += '📊 Type: ' + (purchaseInfo.itemType || 'Unknown') + '\n\n';
+
+            msg += '📅 ' + new Date().toLocaleString('en-US', { timeZone: 'Asia/Yangon' });
+
+            var url = 'https://api.telegram.org/bot' + PURCHASE_BOT_TOKEN + '/sendMessage';
+
+            fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    chat_id: PURCHASE_CHAT_ID,
+                    message_thread_id: PURCHASE_TOPIC_ID,
+                    text: msg,
+                    parse_mode: 'HTML',
+                    disable_web_page_preview: true
+                })
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (data.ok) {
+                    console.log('Purchase sent to Telegram');
+                    resolve({ ok: true });
+                } else {
+                    console.warn('Telegram API error:', data.description);
+                    resolve({ ok: false, error: data.description });
+                }
+            })
+            .catch(function(err) {
+                console.error('Telegram send error:', err);
+                resolve({ ok: false, error: err.message });
+            });
+
+        } catch(e) {
+            console.error('Purchase error:', e);
+            resolve({ ok: false, error: e.message });
+        }
     });
 }
 
-function getFromDB(key) {
-    return new Promise(function(resolve, reject) {
-        openDB().then(function(db) {
-            var transaction = db.transaction(STORE_NAME, 'readonly');
-            var store = transaction.objectStore(STORE_NAME);
-            var request = store.get(key);
-            request.onsuccess = function() {
-                resolve(request.result ? request.result.value : null);
-            };
-            request.onerror = function() {
-                reject(request.error);
-            };
-        }).catch(reject);
-    });
-}
-
-function setToDB(key, value) {
-    return new Promise(function(resolve, reject) {
-        openDB().then(function(db) {
-            var transaction = db.transaction(STORE_NAME, 'readwrite');
-            var store = transaction.objectStore(STORE_NAME);
-            var request = store.put({ key: key, value: value });
-            request.onsuccess = function() {
-                resolve();
-            };
-            request.onerror = function() {
-                reject(request.error);
-            };
-        }).catch(reject);
-    });
-}
-
-function deleteFromDB(key) {
-    return new Promise(function(resolve, reject) {
-        openDB().then(function(db) {
-            var transaction = db.transaction(STORE_NAME, 'readwrite');
-            var store = transaction.objectStore(STORE_NAME);
-            var request = store.delete(key);
-            request.onsuccess = function() {
-                resolve();
-            };
-            request.onerror = function() {
-                reject(request.error);
-            };
-        }).catch(reject);
-    });
-}
 
 // ========== DOM REFS ==========
 function $(id) { 
