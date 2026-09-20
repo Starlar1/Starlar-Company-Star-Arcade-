@@ -9608,11 +9608,80 @@ setTimeout(initRoleSlider, 200);
 
 // ============================================================
 //  SETTINGS - LOG OUT (2 Options) -- FULL FINAL
-//  Log Out: Account Data + Tasks + Listeners (Message ကျန်)
-//  Message All: အားလုံး ဖြတ် + Auth Screen ပြန် (အစကနေ)
+//  IndexedDB ရှိသမျှ အကုန်ဖြတ် (Universal Clear)
 // ============================================================
 
-// ✅ IndexedDB Database တစ်ခုလုံး ဖျက်
+// ============================================================
+//  ✅ IndexedDB Object Store ထဲက key အားလုံး ဖျက်
+//  - ဘယ် key ပဲ ဖြစ်ဖြစ် အကုန် (users, session, tasksState...)
+//  ============================================================
+function clearAllFromStore(excludeKeys) {
+    excludeKeys = excludeKeys || [];
+
+    return new Promise(function(resolve) {
+        openDB().then(function(db) {
+            var transaction = db.transaction(STORE_NAME, 'readwrite');
+            var store = transaction.objectStore(STORE_NAME);
+
+            var getAllKeys = store.getAllKeys();
+
+            getAllKeys.onsuccess = function() {
+                var keys = getAllKeys.result || [];
+
+                if (keys.length === 0) {
+                    resolve(0);
+                    return;
+                }
+
+                // exclude လုပ်ထားတာတွေ ဖယ်
+                var keysToDelete = keys.filter(function(key) {
+                    return excludeKeys.indexOf(key) === -1;
+                });
+
+                if (keysToDelete.length === 0) {
+                    resolve(0);
+                    return;
+                }
+
+                // တစ်ခါပဲ delete လုပ် (transaction single)
+                var deletedCount = 0;
+                keysToDelete.forEach(function(key) {
+                    var req = store.delete(key);
+                    req.onsuccess = function() {
+                        deletedCount++;
+                        if (deletedCount >= keysToDelete.length) {
+                            // Transaction complete ဖြစ်တာနဲ့ resolve
+                        }
+                    };
+                });
+
+                transaction.oncomplete = function() {
+                    console.log('Deleted ' + keysToDelete.length + ' keys from IndexedDB');
+                    resolve(keysToDelete.length);
+                };
+
+                transaction.onerror = function(err) {
+                    console.warn('Clear store error:', err);
+                    resolve(deletedCount);
+                };
+            };
+
+            getAllKeys.onerror = function(err) {
+                console.warn('getAllKeys error:', err);
+                resolve(0);
+            };
+
+        }).catch(function(err) {
+            console.warn('clearAllFromStore error:', err);
+            resolve(0);
+        });
+    });
+}
+
+// ============================================================
+//  ✅ IndexedDB Database တစ်ခုလုံး ဖျက် (DB level)
+//  - Store အားလုံး ပါ ဖျက်
+// ============================================================
 function deleteEntireDatabase() {
     return new Promise(function(resolve) {
         try {
@@ -9671,47 +9740,9 @@ function firebaseSignOutAll() {
 }
 
 // ============================================================
-//  ✅ Task Timers အားလုံး ဖျက် (New -- Task Reset)
-// ============================================================
-function clearAllTaskTimers() {
-    try {
-        // TASK_STATE_MAP reset
-        if (typeof TASK_STATE_MAP !== 'undefined') {
-            Object.keys(TASK_STATE_MAP).forEach(function(key) {
-                delete TASK_STATE_MAP[key];
-            });
-            console.log('TASK_STATE_MAP reset');
-        }
-    } catch(e) {}
-
-    // Cooldown timers (task-card.cooldown) ရှိရင် ဖျက်
-    try {
-        document.querySelectorAll('.task-card.cooldown').forEach(function(card) {
-            card.classList.remove('cooldown');
-        });
-    } catch(e) {}
-
-    // Task action buttons reset
-    try {
-        document.querySelectorAll('.task-card').forEach(function(card) {
-            card.classList.remove('completed');
-            var btn = card.querySelector('[data-task-action]');
-            if (btn) {
-                btn.classList.remove('claim', 'completed');
-                btn.disabled = true;
-                btn.textContent = 'ရယူမည်';
-            }
-        });
-    } catch(e) {}
-
-    console.log('Task timers + state cleared');
-}
-
-// ============================================================
-//  ✅ Listener အားလုံး ဖျက် (Comprehensive)
+//  ✅ Listener အားလုံး ဖျက်
 // ============================================================
 function stopAllListeners() {
-    // authListeners
     try {
         if (Array.isArray(authListeners)) {
             authListeners.forEach(function(ref) {
@@ -9721,7 +9752,6 @@ function stopAllListeners() {
         authListeners = [];
     } catch(e) {}
 
-    // friendsListListener
     try {
         if (typeof stopFriendsListListener === 'function') {
             try { stopFriendsListListener(); } catch(e) {}
@@ -9732,7 +9762,6 @@ function stopAllListeners() {
         }
     } catch(e) {}
 
-    // chatRoomListener
     try {
         if (typeof chatRoomListener !== 'undefined' && chatRoomListener) {
             try { chatRoomListener.off(); } catch(e) {}
@@ -9740,7 +9769,6 @@ function stopAllListeners() {
         }
     } catch(e) {}
 
-    // chatRoomMessageListeners
     try {
         if (typeof chatRoomMessageListeners !== 'undefined' && Array.isArray(chatRoomMessageListeners)) {
             chatRoomMessageListeners.forEach(function(u) {
@@ -9750,7 +9778,6 @@ function stopAllListeners() {
         }
     } catch(e) {}
 
-    // chatRoomBlockListener
     try {
         if (typeof chatRoomBlockListener !== 'undefined' && chatRoomBlockListener) {
             try { chatRoomBlockListener.off(); } catch(e) {}
@@ -9758,7 +9785,6 @@ function stopAllListeners() {
         }
     } catch(e) {}
 
-    // appMessageListeners
     try {
         if (typeof appMessageListeners !== 'undefined' && Array.isArray(appMessageListeners)) {
             appMessageListeners.forEach(function(u) {
@@ -9768,7 +9794,6 @@ function stopAllListeners() {
         }
     } catch(e) {}
 
-    // chatListFriendListeners
     try {
         if (typeof chatListFriendListeners !== 'undefined' && Array.isArray(chatListFriendListeners)) {
             chatListFriendListeners.forEach(function(ref) {
@@ -9778,7 +9803,6 @@ function stopAllListeners() {
         }
     } catch(e) {}
 
-    // onDisconnectRef
     try {
         if (typeof onDisconnectRef !== 'undefined' && onDisconnectRef) {
             try { onDisconnectRef.cancel(); } catch(e) {}
@@ -9788,31 +9812,86 @@ function stopAllListeners() {
 }
 
 // ============================================================
+//  ✅ In-Memory State အားလုံး Reset
+//  - Task state, chat state, search state, profile state
+//  ============================================================
+function resetAllInMemoryState() {
+    // Task State
+    try {
+        if (typeof TASK_STATE_MAP !== 'undefined' && TASK_STATE_MAP) {
+            Object.keys(TASK_STATE_MAP).forEach(function(key) {
+                delete TASK_STATE_MAP[key];
+            });
+        }
+    } catch(e) {}
+
+    // Global Variables
+    currentUser = null;
+    currentServerId = null;
+    currentDb = null;
+    currentAuth = null;
+    currentTab = 'chat';
+    activeNavBtn = null;
+    fullscreenStack = [];
+    isProcessing = false;
+    isFirstLoginProcessing = false;
+
+    // Profile state
+    currentViewingProfile = 'self';
+    currentFriendProfileData = null;
+    openedProfileFromChatList = false;
+
+    // Chat state
+    currentChatTarget = null;
+    searchResultUser = null;
+    iAmBlockedByThem = false;
+    chatRoomUnlocked = {};
+    bubblePickerOpen = false;
+
+    // Reply state
+    try {
+        currentReplyTo = null;
+        var replyBar = document.getElementById('replyPreviewBar');
+        if (replyBar) replyBar.remove();
+    } catch(e) {}
+
+    // Message save/seen/delete queues reset
+    try { messageSaveQueue = Promise.resolve(); } catch(e) {}
+    try { seenUpdateQueue = Promise.resolve(); } catch(e) {}
+    try { deleteMessageQueue = Promise.resolve(); } catch(e) {}
+
+    console.log('In-memory state reset');
+}
+
+// ============================================================
 //  ✅ UI Reset -- Auth Screen ပြန်
 // ============================================================
 function resetUIAfterLogout() {
+    // Fullscreen
     try {
         fullscreenOverlay.classList.remove('active');
         fullscreenOverlay.classList.remove('chat-room-active');
     } catch(e) {}
     document.body.style.overflow = '';
 
+    // Sidebar
     try {
         sidebar.classList.remove('open');
         sidebarOverlay.classList.remove('active');
     } catch(e) {}
 
+    // App wrapper
     try {
         appWrapper.classList.add('hidden');
     } catch(e) {}
 
-    // Auth overlay ပြ
+    // Auth overlay
     try {
         authOverlay.style.display = 'flex';
         authOverlay.classList.remove('hidden');
     } catch(e) {}
 
-    // Profile UI reset
+    // Profile UI
     try {
         document.getElementById('profileAvatar').src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 100 100"%3E%3Ccircle cx="50" cy="50" r="45" fill="%2322222e"/%3E%3Ccircle cx="50" cy="35" r="18" fill="%235a5a6a"/%3E%3Cpath d="M20 75c0-18 12-30 30-30s30 12 30 30" fill="%235a5a6a"/%3E%3C/svg%3E';
         document.getElementById('userName').textContent = 'Player';
@@ -9821,7 +9900,7 @@ function resetUIAfterLogout() {
         document.getElementById('coinDisplay').textContent = '0';
     } catch(e) {}
 
-    // Chat List reset (Ai row သာ ကျန်)
+    // Chat List
     try {
         var chatListEl = document.getElementById('chatList');
         if (chatListEl) {
@@ -9871,19 +9950,29 @@ function resetUIAfterLogout() {
         if (friendsListContainer) friendsListContainer.innerHTML = '';
     } catch(e) {}
 
-    // Profile Card popup
+    // Popups remove
     try {
         var profileCardOverlay = document.querySelector('.profile-card-overlay');
         if (profileCardOverlay) profileCardOverlay.remove();
     } catch(e) {}
-
-    // Logout popup
     try {
         var logoutOverlay = document.querySelector('.logout-options-overlay');
         if (logoutOverlay) logoutOverlay.remove();
     } catch(e) {}
+    try {
+        var msgMenu = document.querySelector('.msg-menu-popup');
+        if (msgMenu) msgMenu.remove();
+    } catch(e) {}
+    try {
+        var chatRoomMenu = document.querySelector('.chat-room-menu-popup');
+        if (chatRoomMenu) chatRoomMenu.remove();
+    } catch(e) {}
+    try {
+        var markPopup = document.querySelector('.mark-popup-overlay');
+        if (markPopup) markPopup.remove();
+    } catch(e) {}
 
-    // ✅ Task UI reset
+    // Task UI
     try {
         var tasksListEl = document.getElementById('tasksList');
         if (tasksListEl) {
@@ -9904,7 +9993,7 @@ function resetUIAfterLogout() {
         }
     } catch(e) {}
 
-    // ✅ Storage Monitor reset
+    // Storage Monitor
     try {
         var totalEl = document.getElementById('storageTotalValue');
         var friendsCountEl = document.getElementById('storageFriendsCount');
@@ -9921,37 +10010,19 @@ function resetUIAfterLogout() {
         if (availablePercentEl) availablePercentEl.textContent = '100';
         if (availableSizeEl) availableSizeEl.textContent = '--';
     } catch(e) {}
+
+    // Sidebar profile frame overlay remove
+    try {
+        var sidebarFrame = document.querySelector('.sidebar-frame-overlay');
+        if (sidebarFrame) sidebarFrame.remove();
+    } catch(e) {}
+
+    console.log('UI reset complete');
 }
 
 // ============================================================
-//  ✅ State Reset (Shared by both)
-// ============================================================
-function resetAllState() {
-    currentUser = null;
-    currentServerId = null;
-    currentDb = null;
-    currentAuth = null;
-    currentTab = 'chat';
-    activeNavBtn = null;
-    fullscreenStack = [];
-    isProcessing = false;
-    isFirstLoginProcessing = false;
-    currentViewingProfile = 'self';
-    currentFriendProfileData = null;
-    openedProfileFromChatList = false;
-    currentChatTarget = null;
-    searchResultUser = null;
-    iAmBlockedByThem = false;
-    chatRoomUnlocked = {};
-    bubblePickerOpen = false;
-    currentReplyTo = null;
-
-    // ✅ Task reset
-    clearAllTaskTimers();
-}
-
-// ============================================================
-//  ✅ LOG OUT -- Account Data + Tasks (Message ကျန်)
+//  ✅ LOG OUT -- Account Data အကုန်ဖြတ် (Message မပါ)
+//  IndexedDB က messages_* ကလွဲပြီး အကုန်ဖျက်
 // ============================================================
 function logoutUser() {
     if (isProcessing) return;
@@ -9970,24 +10041,24 @@ function logoutUser() {
             .catch(function() {});
     }
 
-    // ၂။ onDisconnect cancel (sync)
+    // ၂။ onDisconnect cancel
     try {
         if (typeof cancelOnDisconnect === 'function') {
             cancelOnDisconnect();
         }
     } catch(e) {}
 
-    // ၃။ Online events detach (sync)
+    // ၃။ Online events detach
     try {
         if (typeof detachOnlineEventListeners === 'function') {
             detachOnlineEventListeners();
         }
     } catch(e) {}
 
-    // ၄။ Listener အားလုံး ဖျက် (sync)
+    // ၄။ Listener အားလုံး ဖျက်
     stopAllListeners();
 
-    // ၅။ Chat Room ပိတ် (sync)
+    // ၅။ Chat Room ပိတ်
     try {
         if (typeof chatRoomListener !== 'undefined' && chatRoomListener) {
             try { chatRoomListener.off(); } catch(e) {}
@@ -9999,46 +10070,33 @@ function logoutUser() {
         clearReplyState();
     } catch(e) {}
 
-    // ၆။ Firestore listeners ရပ် (sync)
+    // ၆။ Firestore listeners ရပ်
     try { stopAppMessageListeners(); } catch(e) {}
     try { stopFriendsListListener(); } catch(e) {}
 
     onlinePromise.then(function() {
-        // ============================================================
-        //  ၇။ Firebase Auth Sign Out -- စောင့်
-        //  ============================================================
+        // ၇။ Firebase Auth Sign Out -- စောင့်
         return firebaseSignOutAll();
 
     }).then(function() {
         // ============================================================
-        //  ၈။ IndexedDB ရှင်းလင်း -- Account + Tasks (Message မပါ)
+        //  ၈။ ✅ IndexedDB ရှိသမျှ အကုန်ဖျက်
+        //  messages_* ကလွဲပြီး (Message ကျန်ရမယ်)
         //  ============================================================
-        var keysToClear = [
-            'users',
-            'session',
-            'friendsCache',
-            'pinnedFriends',
-            'lockedFriends',
-            'chatBackgrounds',
-            'tasksState'  // ✅ Tasks State ဖျက်
-        ];
-        var clearPromises = keysToClear.map(function(key) {
-            return deleteFromDB(key).catch(function() {});
+        return getAllKeysWithPrefix('messages_').then(function(msgKeys) {
+            return clearAllFromStore(msgKeys);  // messages_* exclude
         });
-        return Promise.all(clearPromises);
 
-    }).then(function() {
-        // ============================================================
-        //  ၉။ State Reset (Task state + timers ပါ)
-        //  ============================================================
-        resetAllState();
+    }).then(function(deletedCount) {
+        console.log('Logout: Deleted ' + deletedCount + ' keys (messages kept)');
 
-        // ၁၀။ UI Reset -- Auth Screen ပြန်
+        // ၉။ In-Memory state reset (Task state ပါ)
+        resetAllInMemoryState();
+
+        // ၁၀။ UI Reset
         resetUIAfterLogout();
 
         hideLoading();
-
-        console.log('Logout complete -- Account + Tasks cleared, messages kept');
 
         setTimeout(function() {
             alert('Logged out successfully.\n\nAccount Data + Tasks ဖျက်ပြီးပါပြီ။\n(Message တွေ ကျန်နေပါတယ်)');
@@ -10053,8 +10111,8 @@ function logoutUser() {
 }
 
 // ============================================================
-//  ✅ MESSAGE ALL -- အကုန်ဖြတ် + Auth Screen ပြန်
-// ============================================================
+//  ✅ MESSAGE ALL -- IndexedDB အကုန်ဖြတ် (DB level)
+//  ============================================================
 function messageAllUser() {
     if (isProcessing) return;
 
@@ -10106,46 +10164,30 @@ function messageAllUser() {
     try { stopFriendsListListener(); } catch(e) {}
 
     onlinePromise.then(function() {
-        // ============================================================
-        //  ၇။ Firebase Auth Sign Out -- စောင့်
-        //  ============================================================
+        // ၇။ Firebase Auth Sign Out -- စောင့်
         return firebaseSignOutAll();
 
     }).then(function() {
         // ============================================================
-        //  ၈။ IndexedDB DB တစ်ခုလုံး ဖျက် (Messages ပါ)
+        //  ၈။ ✅ IndexedDB DB တစ်ခုလုံး ဖျက်
+        //  Store အားလုံး၊ Key အားလုံး -- messages_* ပါ
         //  ============================================================
         return deleteEntireDatabase();
 
     }).then(function() {
-        // ✅ Safety -- key အားလုံး ထပ် ရှင်း
-        var keysToClear = [
-            'users',
-            'session',
-            'friendsCache',
-            'pinnedFriends',
-            'lockedFriends',
-            'chatBackgrounds',
-            'tasksState',
-            'deviceStorageQuota'
-        ];
-        var clearPromises = keysToClear.map(function(key) {
-            return deleteFromDB(key).catch(function() {});
-        });
-        return Promise.all(clearPromises);
+        // ၉။ Safety -- DB delete မအောင်မြင်ရင် key အားလုံး ထပ်ရှင်း
+        return clearAllFromStore([]);  // exclude မရှိ → အကုန်ဖျက်
 
-    }).then(function() {
-        // ============================================================
-        //  ၉။ State Reset (Task state + timers ပါ)
-        //  ============================================================
-        resetAllState();
+    }).then(function(deletedCount) {
+        console.log('Message All: All IndexedDB cleared (safety: ' + deletedCount + ' keys)');
 
-        // ၁၀။ UI Reset -- Auth Screen ပြန်
+        // ၁၀။ In-Memory state reset
+        resetAllInMemoryState();
+
+        // ၁၁။ UI Reset -- Auth Screen ပြန်
         resetUIAfterLogout();
 
         hideLoading();
-
-        console.log('Message All complete -- ALL data + tasks cleared');
 
         setTimeout(function() {
             alert('All data cleared successfully.\n\nData + Tasks အားလုံး ဖျက်ပြီးပါပြီ။\nအစကနေ ပြန်စပါ။');
@@ -10156,6 +10198,33 @@ function messageAllUser() {
         isProcessing = false;
         hideLoading();
         alert('Failed to clear data. Please try again.');
+    });
+}
+
+// ============================================================
+//  ✅ Helper -- Key prefix နဲ့ စတဲ့ keys တွေ ရှာ
+// ============================================================
+function getAllKeysWithPrefix(prefix) {
+    return new Promise(function(resolve) {
+        openDB().then(function(db) {
+            var transaction = db.transaction(STORE_NAME, 'readonly');
+            var store = transaction.objectStore(STORE_NAME);
+            var req = store.getAllKeys();
+
+            req.onsuccess = function() {
+                var allKeys = req.result || [];
+                var matched = allKeys.filter(function(key) {
+                    return typeof key === 'string' && key.indexOf(prefix) === 0;
+                });
+                resolve(matched);
+            };
+
+            req.onerror = function() {
+                resolve([]);
+            };
+        }).catch(function() {
+            resolve([]);
+        });
     });
 }
 
@@ -10240,7 +10309,7 @@ function showLogoutOptionsPopup() {
     }
 })();
 
-console.log('Log Out System FINAL -- Account + Tasks cleared, Firebase awaited');
+console.log('Log Out System FINAL -- Universal IndexedDB Clear');
 
     
 
