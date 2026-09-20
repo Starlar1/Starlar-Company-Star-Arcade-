@@ -424,14 +424,6 @@
                     </div>
                 </div>
 
-<!-- ============================================================
-     ✅ FRIENDS LIST SCREEN
-     index.html ရဲ့ fullscreen-body ထဲ၊ fs-settings အပေါ်မှာ ထည့်ပါ
-     ============================================================ -->
-<div class="fs-screen hidden" id="fs-friends-list">
-    <div class="friends-list-container" id="friendsListContainer"></div>
-</div>
-
                 <div class="fs-screen hidden" id="fs-shop">
                     <div class="shop-container">
                         <div class="shop-tabs">
@@ -450,224 +442,237 @@
                 </div>
 
                 <div class="fs-screen hidden" id="fs-mail"><div class="screen-center"><p>No new messages</p></div></div>
-         
-         
-      <div class="fs-screen hidden" id="fs-settings">
-    <div class="settings-container">
 
-        <!-- ✅ STORAGE MONITOR -->
-        <div class="settings-section">
-            <h3 class="settings-section-title">Storage Monitor</h3>
-            <div class="storage-monitor-card">
-
-                <!-- Total -->
-                <div class="storage-total">
-                    <div class="storage-total-label">Total Used</div>
-                    <div class="storage-total-value" id="storageTotalValue">0 KB</div>
+                <!-- ✅ TASKS SCREEN (EMPTY) -->
+                <div class="fs-screen hidden" id="fs-tasks">
+                    <div class="tasks-container">
+                        <div class="tasks-list" id="tasksList"></div>
+                    </div>
                 </div>
 
-                <!-- 3 Circles -->
-                <div class="storage-circles">
-
-                    <!-- 1. Friends Data (Blue) -->
-                    <div class="storage-circle-wrapper">
-                        <div class="storage-circle">
-                            <svg viewBox="0 0 100 100">
-                                <circle cx="50" cy="50" r="42" class="storage-circle-bg"></circle>
-                                <circle cx="50" cy="50" r="42" class="storage-circle-fill storage-fill-blue" id="storageFriendsFill"></circle>
-                            </svg>
-                            <div class="storage-circle-center">
-                                <div class="storage-circle-count" id="storageFriendsCount">0</div>
-                                <div class="storage-circle-unit">items</div>
-                            </div>
-                        </div>
-                        <div class="storage-circle-label">
-                            <span class="storage-dot storage-dot-blue"></span>
-                            <span>Friends Data</span>
-                        </div>
-                        <div class="storage-circle-size" id="storageFriendsSize">0 KB</div>
-                    </div>
-
-                    <!-- 2. Message Data (Red) -->
-                    <div class="storage-circle-wrapper">
-                        <div class="storage-circle">
-                            <svg viewBox="0 0 100 100">
-                                <circle cx="50" cy="50" r="42" class="storage-circle-bg"></circle>
-                                <circle cx="50" cy="50" r="42" class="storage-circle-fill storage-fill-red" id="storageMsgFill"></circle>
-                            </svg>
-                            <div class="storage-circle-center">
-                                <div class="storage-circle-count" id="storageMsgCount">0</div>
-                                <div class="storage-circle-unit">msgs</div>
-                            </div>
-                        </div>
-                        <div class="storage-circle-label">
-                            <span class="storage-dot storage-dot-red"></span>
-                            <span>Message Data</span>
-                        </div>
-                        <div class="storage-circle-size" id="storageMsgSize">0 KB</div>
-                    </div>
-
-                    <!-- 3. Available Space (Green) -->
-                    <div class="storage-circle-wrapper">
-                        <div class="storage-circle">
-                            <svg viewBox="0 0 100 100">
-                                <circle cx="50" cy="50" r="42" class="storage-circle-bg"></circle>
-                                <circle cx="50" cy="50" r="42" class="storage-circle-fill storage-fill-green" id="storageAvailableFill"></circle>
-                            </svg>
-                            <div class="storage-circle-center">
-                                <div class="storage-circle-count" id="storageAvailablePercent">100</div>
-                                <div class="storage-circle-unit">% free</div>
-                            </div>
-                        </div>
-                        <div class="storage-circle-label">
-                            <span class="storage-dot storage-dot-green"></span>
-                            <span>Available</span>
-                        </div>
-                        <div class="storage-circle-size" id="storageAvailableSize">--</div>
-                    </div>
-
+                <!-- ✅ FRIENDS LIST SCREEN -->
+                <div class="fs-screen hidden" id="fs-friends-list">
+                    <div class="friends-list-container" id="friendsListContainer"></div>
                 </div>
 
-            </div>
-        </div>
+                <div class="fs-screen hidden" id="fs-settings">
+                    <div class="settings-container">
 
-        <!-- ✅ CLEAR DATA -->
-        <div class="settings-section">
-            <h3 class="settings-section-title">Clear Data</h3>
-            <div class="settings-card">
+                        <!-- ✅ STORAGE MONITOR -->
+                        <div class="settings-section">
+                            <h3 class="settings-section-title">Storage Monitor</h3>
+                            <div class="storage-monitor-card">
 
-                <button class="storage-clear-btn" id="clearFriendsBtn">
-                    <div class="storage-clear-icon">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                            <circle cx="9" cy="7" r="4"/>
-                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-                            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-                        </svg>
-                    </div>
-                    <div class="storage-clear-text">
-                        <div class="storage-clear-title">All Friends Data</div>
-                        <div class="storage-clear-desc">Friends Cache, Pin, Lock, Background ဖျက်</div>
-                    </div>
-                </button>
+                                <!-- Total -->
+                                <div class="storage-total">
+                                    <div class="storage-total-label">Total Used</div>
+                                    <div class="storage-total-value" id="storageTotalValue">0 KB</div>
+                                </div>
 
-                <button class="storage-clear-btn danger" id="clearMessagesBtn">
-                    <div class="storage-clear-icon">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-                        </svg>
-                    </div>
-                    <div class="storage-clear-text">
-                        <div class="storage-clear-title">All Messages Data</div>
-                        <div class="storage-clear-desc">Message အားလုံး ဖျက်</div>
-                    </div>
-                </button>
+                                <!-- 3 Circles -->
+                                <div class="storage-circles">
 
-            </div>
-        </div>
+                                    <!-- 1. Friends Data (Blue) -->
+                                    <div class="storage-circle-wrapper">
+                                        <div class="storage-circle">
+                                            <svg viewBox="0 0 100 100">
+                                                <circle cx="50" cy="50" r="42" class="storage-circle-bg"></circle>
+                                                <circle cx="50" cy="50" r="42" class="storage-circle-fill storage-fill-blue" id="storageFriendsFill"></circle>
+                                            </svg>
+                                            <div class="storage-circle-center">
+                                                <div class="storage-circle-count" id="storageFriendsCount">0</div>
+                                                <div class="storage-circle-unit">items</div>
+                                            </div>
+                                        </div>
+                                        <div class="storage-circle-label">
+                                            <span class="storage-dot storage-dot-blue"></span>
+                                            <span>Friends Data</span>
+                                        </div>
+                                        <div class="storage-circle-size" id="storageFriendsSize">0 KB</div>
+                                    </div>
 
-        <!-- App အကြောင်း -->
-        <div class="settings-section">
-            <h3 class="settings-section-title">App အကြောင်း</h3>
-            <div class="settings-card">
-                <p class="settings-text">STAR ARCADE သည် ဂိမ်းကစားသူများအတွက် ဖန်တီးထားသော ဆိုရှယ်မီဒီယာ ပလက်ဖောင်းတစ်ခုဖြစ်ပါသည်။</p>
-            </div>
-        </div>
+                                    <!-- 2. Message Data (Red) -->
+                                    <div class="storage-circle-wrapper">
+                                        <div class="storage-circle">
+                                            <svg viewBox="0 0 100 100">
+                                                <circle cx="50" cy="50" r="42" class="storage-circle-bg"></circle>
+                                                <circle cx="50" cy="50" r="42" class="storage-circle-fill storage-fill-red" id="storageMsgFill"></circle>
+                                            </svg>
+                                            <div class="storage-circle-center">
+                                                <div class="storage-circle-count" id="storageMsgCount">0</div>
+                                                <div class="storage-circle-unit">msgs</div>
+                                            </div>
+                                        </div>
+                                        <div class="storage-circle-label">
+                                            <span class="storage-dot storage-dot-red"></span>
+                                            <span>Message Data</span>
+                                        </div>
+                                        <div class="storage-circle-size" id="storageMsgSize">0 KB</div>
+                                    </div>
 
-        <!-- အကောင့် -->
-        <div class="settings-section">
-            <h3 class="settings-section-title">အကောင့်</h3>
-            <div class="settings-card">
-                <button class="settings-logout-btn" id="settingsLogoutBtn">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-                        <polyline points="16 17 21 12 16 7"/>
-                        <line x1="21" y1="12" x2="9" y2="12"/>
-                    </svg>
-                    <span>Log Out</span>
-                </button>
-            </div>
-        </div>
+                                    <!-- 3. Available Space (Green) -->
+                                    <div class="storage-circle-wrapper">
+                                        <div class="storage-circle">
+                                            <svg viewBox="0 0 100 100">
+                                                <circle cx="50" cy="50" r="42" class="storage-circle-bg"></circle>
+                                                <circle cx="50" cy="50" r="42" class="storage-circle-fill storage-fill-green" id="storageAvailableFill"></circle>
+                                            </svg>
+                                            <div class="storage-circle-center">
+                                                <div class="storage-circle-count" id="storageAvailablePercent">100</div>
+                                                <div class="storage-circle-unit">% free</div>
+                                            </div>
+                                        </div>
+                                        <div class="storage-circle-label">
+                                            <span class="storage-dot storage-dot-green"></span>
+                                            <span>Available</span>
+                                        </div>
+                                        <div class="storage-circle-size" id="storageAvailableSize">--</div>
+                                    </div>
 
-    </div>
-</div>
+                                </div>
 
-        <!-- Buy Popup -->
-        <div class="buy-popup-overlay hidden" id="buyPopup">
-            <div class="buy-popup">
-                <div class="buy-popup-header">
-                    <h3>Confirm Purchase</h3>
-                    <button class="buy-popup-close" id="buyPopupClose">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                            <line x1="18" y1="6" x2="6" y2="18"/>
-                            <line x1="6" y1="6" x2="18" y2="18"/>
-                        </svg>
-                    </button>
-                </div>
-                <div class="buy-popup-body">
-                    <div class="buy-popup-item">
-                        <img id="buyPopupImage" src="" alt="item" />
-                        <div>
-                            <p id="buyPopupName">Item Name</p>
-                            <div class="buy-popup-price">
-                                <img src="https://i.ibb.co/39SYGr6M/Grid-Art-20260805-102408042.png" alt="diamond" class="buy-diamond-icon" />
-                                <span id="buyPopupPrice">0</span>
                             </div>
                         </div>
+
+                        <!-- ✅ CLEAR DATA -->
+                        <div class="settings-section">
+                            <h3 class="settings-section-title">Clear Data</h3>
+                            <div class="settings-card">
+
+                                <button class="storage-clear-btn" id="clearFriendsBtn">
+                                    <div class="storage-clear-icon">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                                            <circle cx="9" cy="7" r="4"/>
+                                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                                            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                                        </svg>
+                                    </div>
+                                    <div class="storage-clear-text">
+                                        <div class="storage-clear-title">All Friends Data</div>
+                                        <div class="storage-clear-desc">Friends Cache, Pin, Lock, Background ဖျက်</div>
+                                    </div>
+                                </button>
+
+                                <button class="storage-clear-btn danger" id="clearMessagesBtn">
+                                    <div class="storage-clear-icon">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                                        </svg>
+                                    </div>
+                                    <div class="storage-clear-text">
+                                        <div class="storage-clear-title">All Messages Data</div>
+                                        <div class="storage-clear-desc">Message အားလုံး ဖျက်</div>
+                                    </div>
+                                </button>
+
+                            </div>
+                        </div>
+
+                        <!-- App အကြောင်း -->
+                        <div class="settings-section">
+                            <h3 class="settings-section-title">App အကြောင်း</h3>
+                            <div class="settings-card">
+                                <p class="settings-text">STAR ARCADE သည် ဂိမ်းကစားသူများအတွက် ဖန်တီးထားသော ဆိုရှယ်မီဒီယာ ပလက်ဖောင်းတစ်ခုဖြစ်ပါသည်။</p>
+                            </div>
+                        </div>
+
+                        <!-- အကောင့် -->
+                        <div class="settings-section">
+                            <h3 class="settings-section-title">အကောင့်</h3>
+                            <div class="settings-card">
+                                <button class="settings-logout-btn" id="settingsLogoutBtn">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                                        <polyline points="16 17 21 12 16 7"/>
+                                        <line x1="21" y1="12" x2="9" y2="12"/>
+                                    </svg>
+                                    <span>Log Out</span>
+                                </button>
+                            </div>
+                        </div>
+
                     </div>
-                    <p class="buy-popup-instruction">Slide the circle to confirm purchase</p>
-                    <div class="slider-container">
-                        <div class="slider-track" id="sliderTrack">
-                            <div class="slider-filled" id="sliderFilled"></div>
-                            <div class="slider-circle" id="sliderCircle">
+                </div>
+
+                <!-- Buy Popup -->
+                <div class="buy-popup-overlay hidden" id="buyPopup">
+                    <div class="buy-popup">
+                        <div class="buy-popup-header">
+                            <h3>Confirm Purchase</h3>
+                            <button class="buy-popup-close" id="buyPopupClose">
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                                    <polyline points="9,18 15,12 9,6"/>
+                                    <line x1="18" y1="6" x2="6" y2="18"/>
+                                    <line x1="6" y1="6" x2="18" y2="18"/>
                                 </svg>
+                            </button>
+                        </div>
+                        <div class="buy-popup-body">
+                            <div class="buy-popup-item">
+                                <img id="buyPopupImage" src="" alt="item" />
+                                <div>
+                                    <p id="buyPopupName">Item Name</p>
+                                    <div class="buy-popup-price">
+                                        <img src="https://i.ibb.co/39SYGr6M/Grid-Art-20260805-102408042.png" alt="diamond" class="buy-diamond-icon" />
+                                        <span id="buyPopupPrice">0</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <p class="buy-popup-instruction">Slide the circle to confirm purchase</p>
+                            <div class="slider-container">
+                                <div class="slider-track" id="sliderTrack">
+                                    <div class="slider-filled" id="sliderFilled"></div>
+                                    <div class="slider-circle" id="sliderCircle">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                            <polyline points="9,18 15,12 9,6"/>
+                                        </svg>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
 
-        <!-- Role Buy Popup -->
-        <div class="role-buy-popup-overlay hidden" id="roleBuyPopup">
-            <div class="role-buy-popup">
-                <div class="role-buy-popup-header">
-                    <h3>Confirm Purchase</h3>
-                    <button class="role-buy-popup-close" id="roleBuyPopupClose">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                            <line x1="18" y1="6" x2="6" y2="18"/>
-                            <line x1="6" y1="6" x2="18" y2="18"/>
-                        </svg>
-                    </button>
-                </div>
-                <div class="role-buy-popup-body">
-                    <div class="role-buy-popup-item">
-                        <img id="roleBuyPopupImage" src="" alt="role" />
-                        <div>
-                            <p id="roleBuyPopupName">Role Name</p>
-                            <div class="role-buy-popup-price">
-                                <img src="https://i.ibb.co/39SYGr6M/Grid-Art-20260805-102408042.png" alt="diamond" class="role-buy-diamond-icon" />
-                                <span id="roleBuyPopupPrice">0</span>
-                            </div>
-                        </div>
-                    </div>
-                    <p class="role-buy-popup-instruction">Slide the circle to confirm purchase</p>
-                    <div class="role-slider-container">
-                        <div class="role-slider-track" id="roleSliderTrack">
-                            <div class="role-slider-filled" id="roleSliderFilled"></div>
-                            <div class="role-slider-circle" id="roleSliderCircle">
+                <!-- Role Buy Popup -->
+                <div class="role-buy-popup-overlay hidden" id="roleBuyPopup">
+                    <div class="role-buy-popup">
+                        <div class="role-buy-popup-header">
+                            <h3>Confirm Purchase</h3>
+                            <button class="role-buy-popup-close" id="roleBuyPopupClose">
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                                    <polyline points="9,18 15,12 9,6"/>
+                                    <line x1="18" y1="6" x2="6" y2="18"/>
+                                    <line x1="6" y1="6" x2="18" y2="18"/>
                                 </svg>
+                            </button>
+                        </div>
+                        <div class="role-buy-popup-body">
+                            <div class="role-buy-popup-item">
+                                <img id="roleBuyPopupImage" src="" alt="role" />
+                                <div>
+                                    <p id="roleBuyPopupName">Role Name</p>
+                                    <div class="role-buy-popup-price">
+                                        <img src="https://i.ibb.co/39SYGr6M/Grid-Art-20260805-102408042.png" alt="diamond" class="role-buy-diamond-icon" />
+                                        <span id="roleBuyPopupPrice">0</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <p class="role-buy-popup-instruction">Slide the circle to confirm purchase</p>
+                            <div class="role-slider-container">
+                                <div class="role-slider-track" id="roleSliderTrack">
+                                    <div class="role-slider-filled" id="roleSliderFilled"></div>
+                                    <div class="role-slider-circle" id="roleSliderCircle">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                            <polyline points="9,18 15,12 9,6"/>
+                                        </svg>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
+
             </div>
         </div>
-
     </div>
 
     <script src="script.js"></script>
