@@ -6384,8 +6384,8 @@ body {
 }
 
 /* ============================================================
-   PROFILE CARD POPUP (Chat Room)
-   Banner/BG ပါ | Chat/View မပါ
+   PROFILE CARD POPUP
+   Banner/BG ပါ + View Full Profile ခလုတ်
    ============================================================ */
 .profile-card-overlay {
     position: fixed; inset: 0; z-index: 10003;
@@ -6402,11 +6402,19 @@ body {
     overflow: hidden;
     box-shadow: 0 16px 64px rgba(0,0,0,0.8);
     animation: popIn 0.25s ease; position: relative;
+    display: flex; flex-direction: column;
 }
 .profile-card-banner {
-    width: 100%; aspect-ratio: 16/9; position: relative;
-    background-size: cover; background-position: center;
-    min-height: 120px; max-height: 180px;
+    width: 100%;
+    aspect-ratio: 16/9;
+    position: relative;
+    background-color: #1a1a2e;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    min-height: 120px;
+    max-height: 180px;
+    flex-shrink: 0;
 }
 .profile-card-banner-overlay {
     position: absolute; inset: 0;
@@ -6422,21 +6430,36 @@ body {
 }
 .profile-card-close:active { transform: scale(0.9); }
 .profile-card-body {
-    position: relative; padding: 0 20px 22px;
+    position: relative;
+    padding: 0 20px 20px;
     margin-top: -45px;
-    background-size: cover; background-position: center;
+    background-color: #12121c;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
     border-radius: 0 0 20px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
 }
 .profile-card-bg-overlay {
     position: absolute; inset: 0;
-    background: rgba(13,13,20,0.85);
-    pointer-events: none; border-radius: 0 0 20px 20px;
+    background: rgba(13,13,20,0.75);
+    pointer-events: none;
+    border-radius: 0 0 20px 20px;
+    z-index: 0;
+}
+.profile-card-body > * {
+    position: relative;
+    z-index: 1;
 }
 .profile-card-avatar-wrap {
     position: relative; width: 90px; height: 90px;
     margin: 0 auto 12px; border-radius: 50%;
     border: 4px solid var(--bg-header); background: var(--bg-card);
-    box-shadow: 0 4px 24px rgba(0,0,0,0.6); overflow: visible; z-index: 2;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.6);
+    overflow: visible;
+    z-index: 2;
 }
 .profile-card-avatar-wrap img {
     width: 100%; height: 100%; border-radius: 50%;
@@ -6451,7 +6474,7 @@ body {
 }
 .profile-card-name-row {
     display: flex; align-items: center; justify-content: center;
-    gap: 8px; margin-bottom: 6px; position: relative; z-index: 2;
+    gap: 8px; margin-bottom: 6px;
 }
 .profile-card-name {
     font-size: 20px; font-weight: 700; color: var(--text-main);
@@ -6468,7 +6491,7 @@ body {
 .profile-card-info {
     display: flex; align-items: center; justify-content: center;
     gap: 10px; margin-bottom: 12px;
-    position: relative; z-index: 2; flex-wrap: wrap;
+    flex-wrap: wrap;
 }
 .profile-card-server {
     font-size: 12px; font-weight: 600; color: var(--accent);
@@ -6492,21 +6515,50 @@ body {
     font-size: 13px; color: rgba(255,255,255,0.85);
     line-height: 1.6; text-align: center;
     padding: 12px 14px;
-    background: rgba(255,255,255,0.04);
+    background: rgba(255,255,255,0.06);
     border-radius: 12px;
-    border: 1px solid rgba(255,255,255,0.06);
-    position: relative; z-index: 2;
+    border: 1px solid rgba(255,255,255,0.08);
     max-height: 100px; overflow-y: auto;
     word-break: break-word;
+    margin-bottom: 14px;
 }
 .profile-card-bio .bio-placeholder {
     color: rgba(255,255,255,0.4); font-style: italic;
+}
+
+/* ✅ View Full Profile ခလုတ် */
+.profile-card-view-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 12px 16px;
+    border: 1.5px solid rgba(255, 109, 31, 0.3);
+    border-radius: 12px;
+    background: rgba(255, 109, 31, 0.12);
+    color: var(--accent);
+    font-size: 14px;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-top: 4px;
+}
+.profile-card-view-btn:active {
+    transform: scale(0.97);
+    background: rgba(255, 109, 31, 0.2);
+    border-color: rgba(255, 109, 31, 0.5);
+}
+.profile-card-view-btn svg {
+    flex-shrink: 0;
 }
 
 @media (max-width: 480px) {
     .profile-card { max-width: 300px; }
     .profile-card-avatar-wrap { width: 78px; height: 78px; }
     .profile-card-name { font-size: 18px; }
+    .profile-card-view-btn { font-size: 13px; padding: 10px 14px; }
     .friend-list-avatar-wrap { width: 46px; height: 46px; }
     .friend-list-name { font-size: 14px; }
     .friend-list-add-btn { padding: 7px 14px; font-size: 12px; }
@@ -12785,19 +12837,20 @@ openFullscreen = function(title, screenId) {
 console.log('Tasks System loaded -- Join / ရယူမည်');
 
 // ============================================================
-//  ✅ FRIEND PROFILE SYSTEM (FULL RE-WRITE)
-//  - Chat List avatar → fs-profile (Back ရင် Chat List ပဲ)
-//  - Friend profile: Edit မပါ | Friends ခလုတ် မပါ
+//  ✅ FRIEND PROFILE SYSTEM (FULL RE-WRITE - FINAL)
+//  - Chat List avatar → fs-profile (Back → Chat List ပဲ)
+//  - Friend profile: ID မပြ | Server ပဲပြ | Edit မပါ | Friends ခလုတ် မပါ
 //  - Friends စာလေး နှိပ် → Friends List
-//  - Chat Room avatar → Popup (Banner/BG ပါ)
+//  - Chat Room avatar → Popup (Banner/BG ပါ + View Full Profile ခလုတ်)
+//  - View Full Profile → Chat List ကနေ နှိပ်သလို → Back → Chat List
 // ============================================================
 
 var currentViewingProfile = 'self';
 var currentFriendProfileData = null;
+var openedProfileFromChatList = false;
 
 // ============================================================
 //  ✅ Profile screen ကို Friend Data နဲ့ ဖြည့်
-//  (fs-profile ကို reuse)
 // ============================================================
 function loadFriendProfileIntoFsProfile(d) {
     currentViewingProfile = 'friend';
@@ -12838,16 +12891,21 @@ function loadFriendProfileIntoFsProfile(d) {
         }
     }
 
-    // ID
-    if (fsId) fsId.textContent = 'ID ' + (d.userId || '0000000000');
+    // ✅ ID မပြ -- ဖျောက်
+    if (fsId) {
+        fsId.style.display = 'none';
+        fsId.textContent = '';
+        fsId.onclick = null;
+    }
 
-    // Server
+    // ✅ Server ပဲ ပြ
     if (fsServer) {
         var server = FIREBASE_SERVERS.find(function(s) { return s.id === d.serverId; });
         fsServer.textContent = server ? server.name : 'Server ' + (d.serverNo || 1);
+        fsServer.style.display = 'inline-block';
     }
 
-    // ✅ Friends စာလေး -- နှိပ်လို့ရ
+    // Friends စာလေး -- နှိပ်လို့ရ
     if (fsFriends) {
         var list = Array.isArray(d.friendsList) ? d.friendsList : [];
         fsFriends.textContent = 'Friends ' + list.length;
@@ -12867,23 +12925,23 @@ function loadFriendProfileIntoFsProfile(d) {
         }
     }
 
-    // Frame / Banner / Background
+    // Frame / Banner / Background / Roles
     applyFrameFor(d);
     applyBannerFor(d);
     applyBackgroundFor(d);
     loadProfileRolesFor(d);
 
-    // ✅ Edit Profile ဖျောက်
+    // Edit Profile ဖျောက်
     var editWrap = document.querySelector('.profile-edit-btn-wrapper');
     if (editWrap) editWrap.style.display = 'none';
 
-    // ✅ Friends ခလုတ် ရှိရင် ဖျက် (မထည့်ရ)
+    // Friends ခလုတ် ရှိရင် ဖျက်
     var oldFBtn = document.getElementById('friendProfileFriendsBtn');
     if (oldFBtn) oldFBtn.remove();
 }
 
 // ============================================================
-//  ✅ Apply Functions (parameter)
+//  ✅ Apply Functions
 // ============================================================
 function applyFrameFor(d) {
     var overlay = document.getElementById('profileFrameOverlay');
@@ -12967,7 +13025,7 @@ function loadProfileRolesFor(d) {
 }
 
 // ============================================================
-//  ✅ Self Profile ပြန်ဖွင့် (original loadProfileData)
+//  ✅ Self Profile ပြန်ဖွင့်
 // ============================================================
 var _origLoadProfileData_final = loadProfileData;
 loadProfileData = function() {
@@ -12989,18 +13047,19 @@ loadProfileData = function() {
         fsFriends.onclick = null;
     }
 
+    // ✅ ID ပြန်ပြ (ကိုယ့် profile)
+    var fsId = document.getElementById('fsProfileId');
+    if (fsId) {
+        fsId.style.display = '';
+        fsId.onclick = copyUserId;
+    }
+
     _origLoadProfileData_final();
 };
 
 // ============================================================
-//  ✅ Chat List Avatar Click → fs-profile
-//  ✅ Back ရင် Chat List ပဲ ပြန်
+//  ✅ Chat List Avatar Click → fs-profile (Back → Chat List)
 // ============================================================
-
-// Chat List က profile ကို ဖွင့်တဲ့ flag
-// ဒီ flag ပါရင် goBackFullscreen က chat-room ကို မသွားစေရ
-var openedProfileFromChatList = false;
-
 function attachChatListAvatarClick() {
     var chatList = document.getElementById('chatList');
     if (!chatList) return;
@@ -13023,20 +13082,13 @@ function attachChatListAvatarClick() {
         e.stopPropagation();
         e.preventDefault();
 
-        // IndexedDB ကနေ ယူ
         getFriendFromCache(serverId, userId).then(function(cached) {
             if (!cached) {
                 showToast('Profile not found');
                 return;
             }
-
-            // fs-profile ကို friend data နဲ့ ဖြည့်
             loadFriendProfileIntoFsProfile(cached);
-
-            // ✅ Chat List ကနေ ဖွင့်တယ် ဆိုတာ မှတ်
             openedProfileFromChatList = true;
-
-            // fullscreen stack ကို reset (chat-room မပါအောင်)
             fullscreenStack = [];
             openFullscreen('Profile', 'fs-profile');
         });
@@ -13047,31 +13099,29 @@ function attachChatListAvatarClick() {
 
 // ============================================================
 //  ✅ goBackFullscreen Override
-//  openedProfileFromChatList ဆိုရင် → Chat List ပဲ ပြန်
 // ============================================================
 var _origGoBackFullscreen_friend = goBackFullscreen;
 goBackFullscreen = function() {
-    // Chat List ကနေ Profile ဖွင့်ထားတယ်
     if (openedProfileFromChatList) {
-        // Profile ပိတ်၊ Chat List ပြန်
         openedProfileFromChatList = false;
-
-        // self mode ပြန်
         currentViewingProfile = 'self';
         currentFriendProfileData = null;
 
-        // Edit button ပြန်
         var editWrap = document.querySelector('.profile-edit-btn-wrapper');
         if (editWrap) editWrap.style.display = '';
 
-        // fsFriends click ဖျက်
         var fsFriends = document.getElementById('fsProfileFriends');
         if (fsFriends) {
             fsFriends.style.cursor = '';
             fsFriends.onclick = null;
         }
 
-        // fullscreen ပိတ်
+        var fsId = document.getElementById('fsProfileId');
+        if (fsId) {
+            fsId.style.display = '';
+            fsId.onclick = copyUserId;
+        }
+
         fullscreenOverlay.classList.remove('active');
         document.getElementById('fullscreenOverlay').classList.remove('chat-room-active');
         document.body.style.overflow = '';
@@ -13079,12 +13129,12 @@ goBackFullscreen = function() {
         return;
     }
 
-    // ကျန် case -- မူလအတိုင်း
     _origGoBackFullscreen_friend();
 };
 
 // ============================================================
-//  ✅ Chat Room Avatar Click → Popup (Banner/BG ပါ)
+//  ✅ Chat Room Avatar Click → Popup
+//  ✅ Banner/BG ပါ + View Full Profile ခလုတ်
 // ============================================================
 function showProfileCardPopup(serverId, userId) {
     if (!currentUser) return;
@@ -13114,18 +13164,18 @@ function showProfileCardPopup(serverId, userId) {
             if (mark) markHtml = '<span class="profile-card-mark"><img src="' + mark.image + '" alt="' + mark.name + '" /></span>';
         }
 
-        // Banner
+        // ✅ Banner -- သေချာ style နဲ့ ထည့်
         var bannerStyle = 'linear-gradient(135deg, #1a1a2e, #16213e, #0f3460)';
         if (cached.bannerUse) {
             var b = BANNER_CONFIG.banners.find(function(x){ return x.id === cached.bannerUse; });
             if (b) bannerStyle = 'url("' + b.image + '")';
         }
 
-        // Background
+        // ✅ Background -- သေချာ style နဲ့ ထည့်
         var bgStyle = '';
         if (cached.backgroundUse) {
             var bg = BACKGROUND_CONFIG.backgrounds.find(function(x){ return x.id === cached.backgroundUse; });
-            if (bg) bgStyle = 'background-image:url("' + bg.image + '");background-size:cover;background-position:center;';
+            if (bg) bgStyle = 'background-image:url("' + bg.image + '"); background-size:cover; background-position:center; background-repeat:no-repeat;';
         }
 
         // Bio
@@ -13144,7 +13194,7 @@ function showProfileCardPopup(serverId, userId) {
         overlay.innerHTML =
             '<div class="profile-card">' +
                 // ✅ Banner
-                '<div class="profile-card-banner" style="background-image:' + bannerStyle + ';background-size:cover;background-position:center;">' +
+                '<div class="profile-card-banner" style="background-image: ' + bannerStyle + '; background-size: cover; background-position: center; background-repeat: no-repeat;">' +
                     '<div class="profile-card-banner-overlay"></div>' +
                     '<button class="profile-card-close" id="profileCardClose">' +
                         '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">' +
@@ -13152,7 +13202,7 @@ function showProfileCardPopup(serverId, userId) {
                         '</svg>' +
                     '</button>' +
                 '</div>' +
-                // ✅ Background ပါ
+                // ✅ Background
                 '<div class="profile-card-body" style="' + bgStyle + '">' +
                     '<div class="profile-card-bg-overlay"></div>' +
                     '<div class="profile-card-avatar-wrap">' +
@@ -13167,13 +13217,59 @@ function showProfileCardPopup(serverId, userId) {
                         '<span class="profile-card-online ' + onlineClass + '">' + onlineText + '</span>' +
                     '</div>' +
                     '<div class="profile-card-bio">' + bioHtml + '</div>' +
+                    // ✅ View Full Profile ခလုတ်
+                    '<button class="profile-card-view-btn" id="profileCardViewBtn">' +
+                        '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
+                            '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>' +
+                            '<circle cx="12" cy="12" r="3"/>' +
+                        '</svg>' +
+                        '<span>View Full Profile</span>' +
+                    '</button>' +
                 '</div>' +
             '</div>';
 
         document.body.appendChild(overlay);
 
-        document.getElementById('profileCardClose').addEventListener('click', function(){ overlay.remove(); });
-        overlay.addEventListener('click', function(e){ if (e.target === overlay) overlay.remove(); });
+        // Close
+        function closePopup() { overlay.remove(); }
+        document.getElementById('profileCardClose').addEventListener('click', closePopup);
+        overlay.addEventListener('click', function(e){ if (e.target === overlay) closePopup(); });
+
+        // ✅ View Full Profile → Chat List ကနေ နှိပ်သလို
+        document.getElementById('profileCardViewBtn').addEventListener('click', function() {
+            closePopup();
+
+            // Chat Room ပိတ်
+            var fsOverlay = document.getElementById('fullscreenOverlay');
+            fsOverlay.classList.remove('chat-room-active');
+            fsOverlay.classList.remove('active');
+            document.body.style.overflow = '';
+
+            // currentChatTarget ရှိရင် ရှင်းလင်း
+            if (currentChatTarget) {
+                delete chatRoomUnlocked[currentChatTarget.serverId + ':' + currentChatTarget.userId];
+            }
+            currentChatTarget = null;
+
+            // Listeners ရပ်
+            if (chatRoomListener) { try { chatRoomListener.off(); } catch(e){} chatRoomListener = null; }
+            try { stopChatRoomMessageListeners(); } catch(e) {}
+            try { stopChatRoomBlockListener(); } catch(e) {}
+            try { closeBubblePicker(); } catch(e) {}
+            try { clearReplyState(); } catch(e) {}
+
+            // ✅ Chat List ပြန်ပြ
+            setTimeout(function() {
+                renderChatList();
+
+                // fs-profile ကို friend data နဲ့ ဖွင့်
+                loadFriendProfileIntoFsProfile(cached);
+
+                openedProfileFromChatList = true;
+                fullscreenStack = [];
+                openFullscreen('Profile', 'fs-profile');
+            }, 150);
+        });
     });
 }
 
@@ -13337,7 +13433,6 @@ openChatRoomNow = function(t) {
     setTimeout(attachChatRoomAvatarClick, 100);
 };
 
-// closeFullscreen ရဲ့အခါ flag reset
 var _origCloseFullscreen_final2 = closeFullscreen;
 closeFullscreen = function() {
     openedProfileFromChatList = false;
@@ -13353,6 +13448,12 @@ closeFullscreen = function() {
         fsFriends.onclick = null;
     }
 
+    var fsId = document.getElementById('fsProfileId');
+    if (fsId) {
+        fsId.style.display = '';
+        fsId.onclick = copyUserId;
+    }
+
     _origCloseFullscreen_final2();
 };
 
@@ -13361,7 +13462,7 @@ setTimeout(function(){
     attachChatRoomAvatarClick();
 }, 1000);
 
-console.log('Friend Profile System (Chat List → Profile → Back to Chat List)');
+console.log('Friend Profile System FINAL');
 
 
 // ============================================================
