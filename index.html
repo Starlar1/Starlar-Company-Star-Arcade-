@@ -423,6 +423,7 @@
                         <div class="role-edit-grid" id="roleEditGrid"></div>
                     </div>
                 </div>
+
 <!-- ============================================================
      ✅ FRIENDS LIST SCREEN
      index.html ရဲ့ fullscreen-body ထဲ၊ fs-settings အပေါ်မှာ ထည့်ပါ
@@ -430,7 +431,6 @@
 <div class="fs-screen hidden" id="fs-friends-list">
     <div class="friends-list-container" id="friendsListContainer"></div>
 </div>
-
 
                 <div class="fs-screen hidden" id="fs-shop">
                     <div class="shop-container">
@@ -9606,10 +9606,10 @@ document.getElementById('fsProfileId').addEventListener('click', copyUserId);
 setTimeout(initSlider, 100);
 setTimeout(initRoleSlider, 200);
 
-
-
 // ============================================================
-//  SETTINGS - LOG OUT (2 Options)
+//  SETTINGS - LOG OUT (2 Options) -- FULL FIXED
+//  1. Log Out -- Account Data ဖြတ် (Message ကျန်)
+//  2. Message All -- အားလုံး ဖြတ် + Auth Screen ပြန်
 // ============================================================
 
 // ✅ IndexedDB Database တစ်ခုလုံး ဖျက်
@@ -9639,9 +9639,11 @@ function deleteEntireDatabase() {
     });
 }
 
-// ✅ Listener အားလုံး ဖျက်
+// ============================================================
+//  ✅ Listener အားလုံး ဖျက် (Comprehensive)
+// ============================================================
 function stopAllListeners() {
-    // authListeners
+    // authListeners (diamond, user data changes)
     try {
         if (Array.isArray(authListeners)) {
             authListeners.forEach(function(ref) {
@@ -9688,7 +9690,7 @@ function stopAllListeners() {
         }
     } catch(e) {}
 
-    // appMessageListeners
+    // appMessageListeners (Firestore global listeners)
     try {
         if (typeof appMessageListeners !== 'undefined' && Array.isArray(appMessageListeners)) {
             appMessageListeners.forEach(function(u) {
@@ -9729,79 +9731,127 @@ function firebaseSignOutAll() {
     } catch(e) {}
 }
 
-// ✅ UI Reset (Log Out / Message All အတွက် တူတူ)
+// ============================================================
+//  ✅ UI Reset -- Auth Screen ပြန်
+// ============================================================
 function resetUIAfterLogout() {
     // Fullscreen ပိတ်
-    fullscreenOverlay.classList.remove('active');
-    fullscreenOverlay.classList.remove('chat-room-active');
+    try {
+        fullscreenOverlay.classList.remove('active');
+        fullscreenOverlay.classList.remove('chat-room-active');
+    } catch(e) {}
     document.body.style.overflow = '';
 
     // Sidebar ပိတ်
-    sidebar.classList.remove('open');
-    sidebarOverlay.classList.remove('active');
+    try {
+        sidebar.classList.remove('open');
+        sidebarOverlay.classList.remove('active');
+    } catch(e) {}
 
     // App wrapper ဖျောက်
-    appWrapper.classList.add('hidden');
+    try {
+        appWrapper.classList.add('hidden');
+    } catch(e) {}
 
-    // Auth overlay ပြ
-    authOverlay.style.display = 'flex';
-    authOverlay.classList.remove('hidden');
+    // ✅ Auth overlay ပြ -- အစကနေ ပြန်
+    try {
+        authOverlay.style.display = 'flex';
+        authOverlay.classList.remove('hidden');
+    } catch(e) {}
 
     // Profile UI reset
-    document.getElementById('profileAvatar').src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 100 100"%3E%3Ccircle cx="50" cy="50" r="45" fill="%2322222e"/%3E%3Ccircle cx="50" cy="35" r="18" fill="%235a5a6a"/%3E%3Cpath d="M20 75c0-18 12-30 30-30s30 12 30 30" fill="%235a5a6a"/%3E%3C/svg%3E';
-    document.getElementById('userName').textContent = 'Player';
-    document.getElementById('userId').textContent = 'ID 0000000000';
-    document.getElementById('userServer').textContent = 'Server 1';
-    document.getElementById('coinDisplay').textContent = '0';
+    try {
+        document.getElementById('profileAvatar').src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 100 100"%3E%3Ccircle cx="50" cy="50" r="45" fill="%2322222e"/%3E%3Ccircle cx="50" cy="35" r="18" fill="%235a5a6a"/%3E%3Cpath d="M20 75c0-18 12-30 30-30s30 12 30 30" fill="%235a5a6a"/%3E%3C/svg%3E';
+        document.getElementById('userName').textContent = 'Player';
+        document.getElementById('userId').textContent = 'ID 0000000000';
+        document.getElementById('userServer').textContent = 'Server 1';
+        document.getElementById('coinDisplay').textContent = '0';
+    } catch(e) {}
 
     // Chat List reset (Ai row သာ ကျန်)
-    var chatListEl = document.getElementById('chatList');
-    if (chatListEl) {
-        var friendRows = chatListEl.querySelectorAll('.chat-list-item:not([data-chat="ai"])');
-        friendRows.forEach(function(row) { row.remove(); });
-    }
+    try {
+        var chatListEl = document.getElementById('chatList');
+        if (chatListEl) {
+            var friendRows = chatListEl.querySelectorAll('.chat-list-item:not([data-chat="ai"])');
+            friendRows.forEach(function(row) { row.remove(); });
+        }
+    } catch(e) {}
 
     // Search result reset
-    var searchResultEl = document.getElementById('searchResult');
-    if (searchResultEl) searchResultEl.innerHTML = '';
+    try {
+        var searchResultEl = document.getElementById('searchResult');
+        if (searchResultEl) searchResultEl.innerHTML = '';
+    } catch(e) {}
 
     // Search input reset
-    var sServer = document.getElementById('searchServerNo');
-    var sId = document.getElementById('searchUserId');
-    if (sServer) sServer.value = '';
-    if (sId) sId.value = '';
+    try {
+        var sServer = document.getElementById('searchServerNo');
+        var sId = document.getElementById('searchUserId');
+        if (sServer) sServer.value = '';
+        if (sId) sId.value = '';
+    } catch(e) {}
 
     // Chat room UI reset
-    var chatRoomMessages = document.getElementById('chatRoomMessages');
-    if (chatRoomMessages) {
-        chatRoomMessages.innerHTML = '<div class="chat-empty-state"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#5a5a6a" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>Start a conversation</span></div>';
-    }
+    try {
+        var chatRoomMessages = document.getElementById('chatRoomMessages');
+        if (chatRoomMessages) {
+            chatRoomMessages.innerHTML = '<div class="chat-empty-state"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#5a5a6a" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>Start a conversation</span></div>';
+        }
+    } catch(e) {}
 
-    var chatMsgInput = document.getElementById('chatMessageInput');
-    if (chatMsgInput) {
-        chatMsgInput.value = '';
-        chatMsgInput.style.height = '';
-    }
+    // Chat input reset
+    try {
+        var chatMsgInput = document.getElementById('chatMessageInput');
+        if (chatMsgInput) {
+            chatMsgInput.value = '';
+            chatMsgInput.style.height = '';
+        }
+    } catch(e) {}
 
-    var chatClip = document.getElementById('chatClipBtn');
-    var chatSend = document.getElementById('chatSendBtn');
-    if (chatClip) chatClip.classList.remove('hidden');
-    if (chatSend) chatSend.classList.add('hidden');
+    // Chat buttons reset
+    try {
+        var chatClip = document.getElementById('chatClipBtn');
+        var chatSend = document.getElementById('chatSendBtn');
+        if (chatClip) chatClip.classList.remove('hidden');
+        if (chatSend) chatSend.classList.add('hidden');
+    } catch(e) {}
 
     // Bottom nav reset
-    document.querySelectorAll('.nav-btn').forEach(function(btn) { btn.classList.remove('active'); });
-    var defaultNavBtn = document.querySelector('.nav-btn[data-tab="chat"]');
-    if (defaultNavBtn) defaultNavBtn.classList.add('active');
-    switchTab('chat');
+    try {
+        document.querySelectorAll('.nav-btn').forEach(function(btn) { btn.classList.remove('active'); });
+        var defaultNavBtn = document.querySelector('.nav-btn[data-tab="chat"]');
+        if (defaultNavBtn) defaultNavBtn.classList.add('active');
+        if (typeof switchTab === 'function') switchTab('chat');
+    } catch(e) {}
+
+    // Friends List container reset
+    try {
+        var friendsListContainer = document.getElementById('friendsListContainer');
+        if (friendsListContainer) friendsListContainer.innerHTML = '';
+    } catch(e) {}
+
+    // Profile popup reset
+    try {
+        var profileCardOverlay = document.querySelector('.profile-card-overlay');
+        if (profileCardOverlay) profileCardOverlay.remove();
+    } catch(e) {}
+
+    // Logout popup reset
+    try {
+        var logoutOverlay = document.querySelector('.logout-options-overlay');
+        if (logoutOverlay) logoutOverlay.remove();
+    } catch(e) {}
 }
 
 // ============================================================
-//  ✅ LOG OUT ခလုတ် -- Message မဖြတ် (Account Data သာ ဖြတ်)
+//  ✅ LOG OUT -- Account Data ဖြတ် (Message ကျန်)
+//  လုပ်ဆောင်ချက်တွေ၊ နားထောင်တာတွေ အကုန်ဖြတ်
+//  Message သာ မဖြတ်
 // ============================================================
 function logoutUser() {
     if (isProcessing) return;
 
-    if (!confirm('Log out လုပ်မှာ သေချာလား?\n\nAccount Data ဖျက်ခံရမယ်။\nMessage တွေ ကျန်နေမယ်။')) {
+    if (!confirm('Log out လုပ်မှာ သေချာလား?\n\nAccount Data + လုပ်ဆောင်ချက်အားလုံး ဖျက်ခံရမယ်။\n\n(Message တွေ ကျန်နေမယ်)')) {
         return;
     }
 
@@ -9816,24 +9866,61 @@ function logoutUser() {
     }
 
     logoutPromise.then(function() {
-        // ၂။ Listener အားလုံး ဖျက်
+        // ၂။ ✅ Listener အားလုံး ဖျက်
         stopAllListeners();
 
-        // ၃။ Firebase Auth Sign Out
+        // ၃။ ✅ Firebase Auth Sign Out (အကောင့်ဖြုတ်)
         firebaseSignOutAll();
 
-        // ၄။ State reset
+        // ၄။ ✅ onDisconnect cancel
+        try {
+            if (typeof cancelOnDisconnect === 'function') {
+                cancelOnDisconnect();
+            }
+        } catch(e) {}
+
+        // ၅။ ✅ Online events detach
+        try {
+            if (typeof detachOnlineEventListeners === 'function') {
+                detachOnlineEventListeners();
+            }
+        } catch(e) {}
+
+        // ၆။ ✅ Chat Room ပိတ်
+        if (typeof chatRoomListener !== 'undefined' && chatRoomListener) {
+            try { chatRoomListener.off(); } catch(e) {}
+            chatRoomListener = null;
+        }
+        try { stopChatRoomMessageListeners(); } catch(e) {}
+        try { stopChatRoomBlockListener(); } catch(e) {}
+        try { closeBubblePicker(); } catch(e) {}
+        try { clearReplyState(); } catch(e) {}
+
+        // ၇။ ✅ State reset
         currentChatTarget = null;
         searchResultUser = null;
         iAmBlockedByThem = false;
         chatRoomUnlocked = {};
 
+        // ၈။ ✅ Firestore listeners ရပ်
+        try { stopAppMessageListeners(); } catch(e) {}
+        try { stopFriendsListListener(); } catch(e) {}
+
     }).then(function() {
         // ============================================================
-        //  ၅။ IndexedDB ရှင်းလင်း -- Account Data သာ ဖြတ်
+        //  ၉။ IndexedDB ရှင်းလင်း -- Account Data သာ ဖြတ်
         //  ⚠️ messages_* ကို မဖြတ်ဘူး
+        //  ⚠️ deviceStorageQuota ကို မဖြတ်ဘူး
         // ============================================================
-        var keysToClear = ['users', 'session', 'friendsCache', 'pinnedFriends', 'lockedFriends', 'chatBackgrounds'];
+        var keysToClear = [
+            'users',
+            'session',
+            'friendsCache',
+            'pinnedFriends',
+            'lockedFriends',
+            'chatBackgrounds',
+            'tasksState'
+        ];
         var clearPromises = keysToClear.map(function(key) {
             return deleteFromDB(key).catch(function() {});
         });
@@ -9841,7 +9928,7 @@ function logoutUser() {
 
     }).then(function() {
         // ============================================================
-        //  ၆။ State အားလုံး Reset
+        //  ၁၀။ State အားလုံး Reset
         // ============================================================
         currentUser = null;
         currentServerId = null;
@@ -9852,8 +9939,11 @@ function logoutUser() {
         fullscreenStack = [];
         isProcessing = false;
         isFirstLoginProcessing = false;
+        currentViewingProfile = 'self';
+        currentFriendProfileData = null;
+        openedProfileFromChatList = false;
 
-        // ၇။ UI Reset
+        // ၁၁။ UI Reset -- Auth Screen ပြန်
         resetUIAfterLogout();
 
         hideLoading();
@@ -9861,7 +9951,7 @@ function logoutUser() {
         console.log('Logout complete -- Account data cleared, messages kept');
 
         setTimeout(function() {
-            alert('Logged out successfully.\nAccount Data ဖျက်ပြီးပါပြီ။\n(Message တွေ ကျန်နေပါတယ်)');
+            alert('Logged out successfully.\n\nAccount Data + လုပ်ဆောင်ချက်အားလုံး ဖျက်ပြီးပါပြီ။\n(Message တွေ ကျန်နေပါတယ်)');
         }, 300);
 
     }).catch(function(err) {
@@ -9873,12 +9963,13 @@ function logoutUser() {
 }
 
 // ============================================================
-//  ✅ MESSAGE ALL ခလုတ် -- Message ပါ ဖြတ် (အားလုံး ဖြတ်)
+//  ✅ MESSAGE ALL -- အကုန်ဖြတ် + Auth Screen ပြန်
+//  Message ပါ အပါအဝင် အားလုံးဖြတ်
 // ============================================================
 function messageAllUser() {
     if (isProcessing) return;
 
-    if (!confirm('Message All လုပ်မှာ သေချာလား?\n\nData အားလုံး ဖျက်ခံရမယ် --\nAccount Data + Message တွေပါ အားလုံး။\nပြန်ယူလို့မရဘူး။')) {
+    if (!confirm('Message All လုပ်မှာ သေချာလား?\n\nData အားလုံး ဖျက်ခံရမယ် --\nAccount Data + လုပ်ဆောင်ချက်များ + Message တွေပါ အားလုံး။\n\nပြန်ယူလို့မရဘူး။')) {
         return;
     }
 
@@ -9893,28 +9984,66 @@ function messageAllUser() {
     }
 
     logoutPromise.then(function() {
-        // ၂။ Listener အားလုံး ဖျက်
+        // ၂။ ✅ Listener အားလုံး ဖျက်
         stopAllListeners();
 
-        // ၃။ Firebase Auth Sign Out
+        // ၃။ ✅ Firebase Auth Sign Out
         firebaseSignOutAll();
 
-        // ၄။ State reset
+        // ၄။ ✅ onDisconnect cancel
+        try {
+            if (typeof cancelOnDisconnect === 'function') {
+                cancelOnDisconnect();
+            }
+        } catch(e) {}
+
+        // ၅။ ✅ Online events detach
+        try {
+            if (typeof detachOnlineEventListeners === 'function') {
+                detachOnlineEventListeners();
+            }
+        } catch(e) {}
+
+        // ၆။ ✅ Chat Room ပိတ်
+        if (typeof chatRoomListener !== 'undefined' && chatRoomListener) {
+            try { chatRoomListener.off(); } catch(e) {}
+            chatRoomListener = null;
+        }
+        try { stopChatRoomMessageListeners(); } catch(e) {}
+        try { stopChatRoomBlockListener(); } catch(e) {}
+        try { closeBubblePicker(); } catch(e) {}
+        try { clearReplyState(); } catch(e) {}
+
+        // ၇။ ✅ State reset
         currentChatTarget = null;
         searchResultUser = null;
         iAmBlockedByThem = false;
         chatRoomUnlocked = {};
 
+        // ၈။ ✅ Firestore listeners ရပ်
+        try { stopAppMessageListeners(); } catch(e) {}
+        try { stopFriendsListListener(); } catch(e) {}
+
     }).then(function() {
         // ============================================================
-        //  ၅။ IndexedDB DB တစ်ခုလုံး ဖျက်
+        //  ၉။ IndexedDB DB တစ်ခုလုံး ဖျက်
         //  ✅ messages_* ပါ ဖျက်
-        // ============================================================
+        //  ✅ deviceStorageQuota ပါ ဖျက် (fresh start)
+        //  ============================================================
         return deleteEntireDatabase();
 
     }).then(function() {
         // ✅ Safety -- key အားလုံး ထပ် ရှင်း
-        var keysToClear = ['users', 'session', 'friendsCache', 'pinnedFriends', 'lockedFriends', 'chatBackgrounds'];
+        var keysToClear = [
+            'users',
+            'session',
+            'friendsCache',
+            'pinnedFriends',
+            'lockedFriends',
+            'chatBackgrounds',
+            'tasksState',
+            'deviceStorageQuota'
+        ];
         var clearPromises = keysToClear.map(function(key) {
             return deleteFromDB(key).catch(function() {});
         });
@@ -9922,7 +10051,7 @@ function messageAllUser() {
 
     }).then(function() {
         // ============================================================
-        //  ၆။ State အားလုံး Reset
+        //  ၁၀။ State အားလုံး Reset
         // ============================================================
         currentUser = null;
         currentServerId = null;
@@ -9933,16 +10062,19 @@ function messageAllUser() {
         fullscreenStack = [];
         isProcessing = false;
         isFirstLoginProcessing = false;
+        currentViewingProfile = 'self';
+        currentFriendProfileData = null;
+        openedProfileFromChatList = false;
 
-        // ၇။ UI Reset
+        // ၁၁။ UI Reset -- Auth Screen ပြန်
         resetUIAfterLogout();
 
         hideLoading();
 
-        console.log('Message All complete -- ALL data cleared');
+        console.log('Message All complete -- ALL data cleared, back to auth screen');
 
         setTimeout(function() {
-            alert('All data cleared successfully.\nData အားလုံး ဖျက်ပြီးပါပြီ။');
+            alert('All data cleared successfully.\n\nData အားလုံး ဖျက်ပြီးပါပြီ။\nအစကနေ ပြန်စပါ။');
         }, 300);
 
     }).catch(function(err) {
@@ -9984,7 +10116,7 @@ function showLogoutOptionsPopup() {
                     '</div>' +
                     '<div class="logout-option-text">' +
                         '<div class="logout-option-title">Log Out</div>' +
-                        '<div class="logout-option-desc">Account Data ဖျက် -- Message တွေ ကျန်မယ်</div>' +
+                        '<div class="logout-option-desc">Account Data + လုပ်ဆောင်ချက်များ ဖျက် -- Message ကျန်</div>' +
                     '</div>' +
                 '</button>' +
                 '<button class="logout-option-btn danger" id="logoutOption2">' +
@@ -9996,7 +10128,7 @@ function showLogoutOptionsPopup() {
                     '</div>' +
                     '<div class="logout-option-text">' +
                         '<div class="logout-option-title">Message All</div>' +
-                        '<div class="logout-option-desc">Data အားလုံး ဖျက် -- Message တွေပါ ဖျက်</div>' +
+                        '<div class="logout-option-desc">Data အားလုံး ဖျက် -- Message အပါအဝင် အကုန်</div>' +
                     '</div>' +
                 '</button>' +
             '</div>' +
@@ -10034,6 +10166,10 @@ function showLogoutOptionsPopup() {
     }
 })();
 
+console.log('Log Out System -- 2 Options (Log Out keeps messages, Message All clears all)');
+
+
+    
 
 // ============================================================
 //  FIRESTORE INITIALIZE
