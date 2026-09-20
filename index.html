@@ -12584,11 +12584,12 @@ function reportMessage(msg) {
 }
 
 // ============================================================
-//  ✅ STORAGE MONITOR + CLEAR DATA
+//  ✅ STORAGE MONITOR + CLEAR DATA -- FIXED
+//  Available = ဖုန်း Quota - App Used (သုံးရင် သုံးသလောက် ကုန်)
 // ============================================================
 
-// ✅ IndexedDB Storage စစ်ဆေး
-function calculateIndexedDBStorage() {
+// ✅ App Storage အားလုံး တွက် (Friends + Messages + Others)
+function calculateAppStorage() {
     return new Promise(function(resolve) {
         openDB().then(function(db) {
             var transaction = db.transaction(STORE_NAME, 'readonly');
@@ -12597,27 +12598,35 @@ function calculateIndexedDBStorage() {
             // Friends-related keys
             var friendsKeys = ['friendsCache', 'pinnedFriends', 'lockedFriends', 'chatBackgrounds'];
 
-            // Messages keys (messages_*)
             var allKeysReq = store.getAllKeys();
 
             allKeysReq.onsuccess = function() {
                 var allKeys = allKeysReq.result || [];
 
+                // Messages keys
                 var msgKeys = allKeys.filter(function(key) {
                     return typeof key === 'string' && key.indexOf('messages_') === 0;
+                });
+
+                // Others keys (users, session, tasksState စသည်)
+                var otherKeys = allKeys.filter(function(key) {
+                    return friendsKeys.indexOf(key) === -1 &&
+                           !(typeof key === 'string' && key.indexOf('messages_') === 0);
                 });
 
                 var friendsCount = 0;
                 var friendsSize = 0;
                 var msgCount = 0;
                 var msgSize = 0;
+                var othersSize = 0;
 
-                var totalToProcess = friendsKeys.length + msgKeys.length;
+                var totalToProcess = friendsKeys.length + msgKeys.length + otherKeys.length;
 
                 if (totalToProcess === 0) {
                     resolve({
                         friendsCount: 0, friendsSize: 0,
                         msgCount: 0, msgSize: 0,
+                        othersSize: 0,
                         totalSize: 0
                     });
                     return;
@@ -12632,7 +12641,8 @@ function calculateIndexedDBStorage() {
                             friendsSize: friendsSize,
                             msgCount: msgCount,
                             msgSize: msgSize,
-                            totalSize: friendsSize + msgSize
+                            othersSize: othersSize,
+                            totalSize: friendsSize + msgSize + othersSize
                         });
                     }
                 }
@@ -12674,12 +12684,26 @@ function calculateIndexedDBStorage() {
                     };
                     req.onerror = function() { done(); };
                 });
+
+                // Other keys
+                otherKeys.forEach(function(key) {
+                    var req = store.get(key);
+                    req.onsuccess = function() {
+                        if (req.result && req.result.value !== undefined) {
+                            var size = JSON.stringify(req.result.value).length;
+                            othersSize += size;
+                        }
+                        done();
+                    };
+                    req.onerror = function() { done(); };
+                });
             };
 
             allKeysReq.onerror = function() {
                 resolve({
                     friendsCount: 0, friendsSize: 0,
                     msgCount: 0, msgSize: 0,
+                    othersSize: 0,
                     totalSize: 0
                 });
             };
@@ -12688,6 +12712,7 @@ function calculateIndexedDBStorage() {
             resolve({
                 friendsCount: 0, friendsSize: 0,
                 msgCount: 0, msgSize: 0,
+                othersSize: 0,
                 totalSize: 0
             });
         });
@@ -12701,22 +12726,21 @@ function formatSize(bytes) {
     return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
 }
 
-// ✅ Browser Storage Quota (Available Space)
+// ✅ Browser Storage Quota (ဖုန်း ရနိုင်တဲ့ စုစုပေါင်း)
 function getStorageQuota() {
     return new Promise(function(resolve) {
         if (navigator.storage && navigator.storage.estimate) {
             navigator.storage.estimate().then(function(estimate) {
                 resolve({
                     usage: estimate.usage || 0,
-                    quota: estimate.quota || 0,
-                    available: (estimate.quota || 0) - (estimate.usage || 0)
+                    quota: estimate.quota || 0
                 });
             }).catch(function() {
-                resolve({ usage: 0, quota: 0, available: 0 });
+                resolve({ usage: 0, quota: 50 * 1024 * 1024 });
             });
         } else {
             // Fallback -- 50MB estimate
-            resolve({ usage: 0, quota: 50 * 1024 * 1024, available: 50 * 1024 * 1024 });
+            resolve({ usage: 0, quota: 50 * 1024 * 1024 });
         }
     });
 }
@@ -12737,13 +12761,13 @@ function loadStorageMonitor() {
 
     if (!totalEl) return;
 
-    // IndexedDB Data
-    calculateIndexedDBStorage().then(function(data) {
+    // App Data အားလုံး
+    calculateAppStorage().then(function(data) {
 
         // Browser Quota
         getStorageQuota().then(function(quota) {
 
-            // Total
+            // ✅ Total Used (App Data တစ်ခုလုံး)
             totalEl.textContent = formatSize(data.totalSize);
 
             // Friends
@@ -12754,15 +12778,18 @@ function loadStorageMonitor() {
             msgCountEl.textContent = data.msgCount;
             msgSizeEl.textContent = formatSize(data.msgSize);
 
-            // Available (Browser Quota)
-            var availableBytes = quota.available;
-            var quotaBytes = quota.quota;
+            // ============================================================
+            //  ✅ Available = ဖုန်း Quota - App သုံးထားတာ
+            //  ============================================================
+            var totalQuota = quota.quota;
+            var appUsed = data.totalSize;
+            var availableBytes = Math.max(0, totalQuota - appUsed);
 
             var percentFree = 0;
-            if (quotaBytes > 0) {
-                percentFree = Math.round((availableBytes / quotaBytes) * 100);
-            } else {
-                percentFree = 100;
+            if (totalQuota > 0) {
+                percentFree = Math.round((availableBytes / totalQuota) * 100);
+                if (percentFree > 100) percentFree = 100;
+                if (percentFree < 0) percentFree = 0;
             }
 
             if (availablePercentEl) {
@@ -12772,8 +12799,12 @@ function loadStorageMonitor() {
                 availableSizeEl.textContent = formatSize(availableBytes);
             }
 
-            // Circles -- Total ကို base ထား
+            // ============================================================
+            //  Circles
+            //  ============================================================
             var circleLength = 2 * Math.PI * 42;
+
+            // Friends + Messages Circles (App Data အချိုး)
             var total = data.friendsSize + data.msgSize;
 
             if (total > 0) {
@@ -12791,7 +12822,7 @@ function loadStorageMonitor() {
                 if (msgFill) msgFill.style.strokeDashoffset = circleLength;
             }
 
-            // Available Circle -- PercentFree
+            // ✅ Available Circle
             if (availableFill) {
                 availableFill.style.strokeDashoffset = circleLength * (1 - (percentFree / 100));
             }
@@ -12818,6 +12849,7 @@ function clearAllFriendsData() {
         hideLoading();
         isProcessing = false;
         showToast('Friends data cleared');
+        // ✅ Refresh -- Available တက်လာ
         loadStorageMonitor();
         setTimeout(function() {
             if (typeof renderChatList === 'function') renderChatList();
@@ -12867,6 +12899,7 @@ function clearAllMessagesData() {
                 hideLoading();
                 isProcessing = false;
                 showToast('Messages cleared (' + msgKeys.length + ')');
+                // ✅ Refresh -- Available တက်လာ
                 loadStorageMonitor();
                 setTimeout(function() {
                     if (typeof renderChatList === 'function') renderChatList();
@@ -12902,6 +12935,30 @@ openFullscreen = function(title, screenId) {
     }
 };
 
+// ✅ Message ပို့ပြီးတိုင်း Available update (Settings ဖွင့်ထားရင်)
+var _origSaveMessage_sm = saveMessageToLocalDB;
+saveMessageToLocalDB = function(msg) {
+    return _origSaveMessage_sm(msg).then(function(r) {
+        var settingsScreen = document.getElementById('fs-settings');
+        if (settingsScreen && !settingsScreen.classList.contains('hidden')) {
+            setTimeout(loadStorageMonitor, 200);
+        }
+        return r;
+    });
+};
+
+// ✅ Message ဖျက်ပြီးတိုင်း Available update (Settings ဖွင့်ထားရင်)
+var _origDeleteMessage_sm = deleteMessageFromLocalDB;
+deleteMessageFromLocalDB = function(serverId, userId, messageId) {
+    return _origDeleteMessage_sm(serverId, userId, messageId).then(function(r) {
+        var settingsScreen = document.getElementById('fs-settings');
+        if (settingsScreen && !settingsScreen.classList.contains('hidden')) {
+            setTimeout(loadStorageMonitor, 200);
+        }
+        return r;
+    });
+};
+
 // ✅ Button Events
 (function initStorageMonitorEvents() {
     var clearFriendsBtn = document.getElementById('clearFriendsBtn');
@@ -12915,7 +12972,7 @@ openFullscreen = function(title, screenId) {
     }
 })();
 
-console.log('Storage Monitor loaded -- 3 Circles');
+console.log('Storage Monitor FIXED -- Available = Quota - App Used');
 
 // ============================================================
 //  ✅ TASKS SYSTEM -- Join / ရယူမည်
