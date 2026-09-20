@@ -13292,8 +13292,8 @@ openFullscreen = function(title, screenId) {
 console.log('Tasks System loaded -- Join / ရယူမည်');
 
 // ============================================================
-//  ✅ FRIEND PROFILE SYSTEM -- FULL FINAL (Banner/BG Fix)
-//  IndexedDB ကနေ ယူ | Banner/BG သေချာပြ | View Full Profile ပါ
+//  ✅ FRIEND PROFILE SYSTEM -- FULL JAVA (FINAL)
+//  IndexedDB + Banner/BG + Popup + Friends List + Self Skip
 // ============================================================
 
 var currentViewingProfile = 'self';
@@ -13301,7 +13301,7 @@ var currentFriendProfileData = null;
 var openedProfileFromChatList = false;
 
 // ============================================================
-//  ✅ LOOKUP HELPERS (String match -- number/string မတူလည်းရ)
+//  ✅ LOOKUP HELPERS (String match)
 // ============================================================
 function findBannerImage(bannerUse) {
     if (!bannerUse) return '';
@@ -13331,7 +13331,7 @@ function findMarkObject(markUse) {
 }
 
 // ============================================================
-//  ✅ CACHE UPDATE (bannerUse/backgroundUse သေချာပါအောင်)
+//  ✅ CACHE -- bannerUse/backgroundUse သေချာပါအောင်
 // ============================================================
 function fetchFullFriendData(serverId, userId) {
     return new Promise(function(resolve) {
@@ -13377,7 +13377,6 @@ function fetchFullFriendData(serverId, userId) {
 
 // ============================================================
 //  ✅ Chat List Avatar Click → fs-profile
-//  IndexedDB ကနေ ယူ | bannerUse/backgroundUse မပါ → ဖြည့်
 // ============================================================
 function attachChatListAvatarClick() {
     var chatList = document.getElementById('chatList');
@@ -13401,11 +13400,9 @@ function attachChatListAvatarClick() {
         e.stopPropagation();
         e.preventDefault();
 
-        // ✅ IndexedDB ကနေ ယူ
         getFriendFromCache(serverId, userId).then(function(cached) {
             if (!cached) { showToast('Profile not found'); return; }
 
-            // bannerUse/backgroundUse မပါရင် → Firebase ကနေ ဖြည့်
             if (!('bannerUse' in cached) || !('backgroundUse' in cached)) {
                 fetchFullFriendData(serverId, userId).then(function(updated) {
                     loadFriendProfileIntoFsProfile(updated || cached);
@@ -13427,7 +13424,7 @@ function attachChatListAvatarClick() {
 }
 
 // ============================================================
-//  ✅ loadFriendProfileIntoFsProfile -- fs-profile ကို friend data နဲ့ ဖြည့်
+//  ✅ loadFriendProfileIntoFsProfile
 // ============================================================
 function loadFriendProfileIntoFsProfile(d) {
     currentViewingProfile = 'friend';
@@ -13441,15 +13438,12 @@ function loadFriendProfileIntoFsProfile(d) {
     var fsBio = document.getElementById('fsProfileBio');
     var fsFriends = document.getElementById('fsProfileFriends');
 
-    // Avatar
     if (fsAvatar) {
         fsAvatar.src = d.avatar || 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"%3E%3Ccircle cx="50" cy="50" r="45" fill="%2322222e"/%3E%3Ccircle cx="50" cy="35" r="18" fill="%235a5a6a"/%3E%3Cpath d="M20 75c0-18 12-30 30-30s30 12 30 30" fill="%235a5a6a"/%3E%3C/svg%3E';
     }
 
-    // Name
     if (fsName) fsName.textContent = d.name || 'Player';
 
-    // Mark
     if (fsMark) {
         fsMark.onclick = null;
         var markObj = findMarkObject(d.markUse);
@@ -13463,21 +13457,18 @@ function loadFriendProfileIntoFsProfile(d) {
         }
     }
 
-    // ✅ ID ဖျောက်
     if (fsId) {
         fsId.style.display = 'none';
         fsId.textContent = '';
         fsId.onclick = null;
     }
 
-    // ✅ Server ပြ
     if (fsServer) {
         var server = FIREBASE_SERVERS.find(function(s){ return s.id === d.serverId; });
         fsServer.textContent = server ? server.name : 'Server ' + (d.serverNo || 1);
         fsServer.style.display = 'inline-block';
     }
 
-    // Friends စာလေး → နှိပ်ရင် Friends List
     if (fsFriends) {
         var list = Array.isArray(d.friendsList) ? d.friendsList : [];
         fsFriends.textContent = 'Friends ' + list.length;
@@ -13488,7 +13479,6 @@ function loadFriendProfileIntoFsProfile(d) {
         };
     }
 
-    // Bio
     if (fsBio) {
         if (d.bio && d.bio.trim() !== '') {
             fsBio.innerHTML = escapeHtml(d.bio).replace(/\n/g, '<br>');
@@ -13497,17 +13487,14 @@ function loadFriendProfileIntoFsProfile(d) {
         }
     }
 
-    // Frame / Banner / Background / Roles
     applyFrameFor(d);
     applyBannerFor(d);
     applyBackgroundFor(d);
     loadProfileRolesFor(d);
 
-    // Edit Profile ဖျောက်
     var editWrap = document.querySelector('.profile-edit-btn-wrapper');
     if (editWrap) editWrap.style.display = 'none';
 
-    // Friends ခလုတ် ဖျက်
     var oldFBtn = document.getElementById('friendProfileFriendsBtn');
     if (oldFBtn) oldFBtn.remove();
 }
@@ -13591,7 +13578,6 @@ function loadProfileRolesFor(d) {
 
 // ============================================================
 //  ✅ Chat Room Avatar Click → Popup
-//  IndexedDB ကနေ ယူ | Banner/BG သေချာပြ
 // ============================================================
 function attachChatRoomAvatarClick() {
     var av = document.querySelector('.chat-room-avatar');
@@ -13609,11 +13595,9 @@ function attachChatRoomAvatarClick() {
 function showProfileCardPopup(serverId, userId) {
     if (!currentUser) return;
 
-    // ✅ IndexedDB ကနေ ယူ
     getFriendFromCache(serverId, userId).then(function(cached) {
         if (!cached) { showToast('Profile not found'); return; }
 
-        // bannerUse/backgroundUse မပါရင် → Firebase ဖြည့်
         if (!('bannerUse' in cached) || !('backgroundUse' in cached)) {
             fetchFullFriendData(serverId, userId).then(function(updated) {
                 renderProfileCardPopup(updated || cached);
@@ -13632,24 +13616,20 @@ function renderProfileCardPopup(cached) {
     var overlay = document.createElement('div');
     overlay.className = 'profile-card-overlay';
 
-    // Avatar
     var avatar = cached.avatar || 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"%3E%3Ccircle cx="50" cy="50" r="45" fill="%2322222e"/%3E%3Ccircle cx="50" cy="35" r="18" fill="%235a5a6a"/%3E%3Cpath d="M20 75c0-18 12-30 30-30s30 12 30 30" fill="%235a5a6a"/%3E%3C/svg%3E';
 
-    // Frame
     var frameHtml = '';
     var frameImg = findFrameImage(cached.frameUse);
     if (frameImg) {
         frameHtml = '<div class="profile-card-frame" style="background-image:url(\'' + frameImg + '\')"></div>';
     }
 
-    // Mark
     var markHtml = '';
     var markObj = findMarkObject(cached.markUse);
     if (markObj) {
         markHtml = '<span class="profile-card-mark"><img src="' + markObj.image + '" alt="' + markObj.name + '" /></span>';
     }
 
-    // ✅ Banner
     var bannerImg = findBannerImage(cached.bannerUse);
     var bannerHtml = '';
     if (bannerImg) {
@@ -13675,23 +13655,19 @@ function renderProfileCardPopup(cached) {
             '</div>';
     }
 
-    // ✅ Background
     var bgImg = findBackgroundImage(cached.backgroundUse);
     var bgHtml = '';
     if (bgImg) {
         bgHtml = '<img src="' + bgImg + '" alt="bg" class="profile-card-bg-img" />';
     }
 
-    // Bio
     var bioHtml = cached.bio && cached.bio.trim() !== ''
         ? escapeHtml(cached.bio).replace(/\n/g, '<br>')
         : '<span class="bio-placeholder">No bio yet...</span>';
 
-    // Server
     var server = FIREBASE_SERVERS.find(function(s){ return s.id === cached.serverId; });
     var serverName = server ? server.name : 'Server ' + (cached.serverNo || 1);
 
-    // Online
     var onlineText = cached.online === true ? 'Online' : 'Offline';
     var onlineClass = cached.online === true ? 'online' : '';
 
@@ -13725,12 +13701,10 @@ function renderProfileCardPopup(cached) {
 
     document.body.appendChild(overlay);
 
-    // Close
     function closePopup() { overlay.remove(); }
     document.getElementById('profileCardClose').addEventListener('click', closePopup);
     overlay.addEventListener('click', function(e){ if (e.target === overlay) closePopup(); });
 
-    // View Full Profile -- Chat List ကနေ နှိပ်သလို
     document.getElementById('profileCardViewBtn').addEventListener('click', function() {
         closePopup();
 
@@ -13761,7 +13735,7 @@ function renderProfileCardPopup(cached) {
 }
 
 // ============================================================
-//  ✅ Self Profile ပြန် (loadProfileData)
+//  ✅ Self Profile ပြန်
 // ============================================================
 var _origLoadProfileData_final = loadProfileData;
 loadProfileData = function() {
@@ -13790,7 +13764,7 @@ loadProfileData = function() {
 };
 
 // ============================================================
-//  ✅ Back Button -- Chat List ကနေ ဖွင့်ထားရင် Chat List ပဲပြန်
+//  ✅ Back Button
 // ============================================================
 var _origGoBackFullscreen_friend = goBackFullscreen;
 goBackFullscreen = function() {
@@ -13834,9 +13808,15 @@ function openFriendsListScreen(serverId, userId, ownerName) {
     openFullscreen('Friends', 'fs-friends-list');
 
     var server = FIREBASE_SERVERS.find(function(s){ return s.id === serverId; });
-    if (!server) { container.innerHTML = '<div class="friends-list-empty">Server not found</div>'; return; }
+    if (!server) { 
+        container.innerHTML = '<div class="friends-list-empty">Server not found</div>'; 
+        return; 
+    }
     var db = getDbForServer(serverId);
-    if (!db) { container.innerHTML = '<div class="friends-list-empty">Database error</div>'; return; }
+    if (!db) { 
+        container.innerHTML = '<div class="friends-list-empty">Database error</div>'; 
+        return; 
+    }
 
     db.ref('users/' + userId + '/friendsList').once('value').then(function(snap) {
         var list = snap.val();
@@ -13859,23 +13839,35 @@ function openFriendsListScreen(serverId, userId, ownerName) {
     });
 }
 
+// ============================================================
+//  ✅ Friends List -- Self Skip (ကိုယ့်ကိုကိုယ် လုံးဝ မပြ)
+// ============================================================
 function renderFriendsList(friends) {
     var container = document.getElementById('friendsListContainer');
     if (!container) return;
-    if (friends.length === 0) {
+
+    // ✅ ကိုယ့်ကိုကိုယ် ဖယ်
+    var filtered = friends.filter(function(f) {
+        var isMe = (String(f.userId) === String(currentUser.userId) && 
+                    String(f.serverId) === String(currentServerId));
+        return !isMe;
+    });
+
+    if (filtered.length === 0) {
         container.innerHTML = '<div class="friends-list-empty">No friends yet</div>';
         return;
     }
 
     var html = '<div class="friends-list-items">';
-    friends.forEach(function(f) {
-        var isMe = (f.userId === currentUser.userId && f.serverId === currentServerId);
+    filtered.forEach(function(f) {
         var already = isFriend(f.serverId, f.userId);
 
         var action = '';
-        if (isMe) action = '<span class="friend-list-you">You</span>';
-        else if (already) action = '<span class="friend-list-already">Already</span>';
-        else action = '<button class="friend-list-add-btn" data-server-id="' + f.serverId + '" data-user-id="' + f.userId + '">Add</button>';
+        if (already) {
+            action = '<span class="friend-list-already">Already</span>';
+        } else {
+            action = '<button class="friend-list-add-btn" data-server-id="' + f.serverId + '" data-user-id="' + f.userId + '">Add</button>';
+        }
 
         var frameHtml = '';
         var frImg = findFrameImage(f.frameUse);
@@ -13909,9 +13901,19 @@ function renderFriendsList(friends) {
 
     container.querySelectorAll('.friend-list-add-btn').forEach(function(btn){
         btn.addEventListener('click', function(){
-            var sId = btn.dataset.serverId, uId = btn.dataset.userId;
+            var sId = btn.dataset.serverId;
+            var uId = btn.dataset.userId;
+
+            // ✅ Double check -- self add မရ
+            if (String(uId) === String(currentUser.userId) && 
+                String(sId) === String(currentServerId)) {
+                showToast('You cannot add yourself');
+                return;
+            }
+
             fetchUserFullData(sId, uId).then(function(data){
-                btn.disabled = true; btn.textContent = 'Adding...';
+                btn.disabled = true;
+                btn.textContent = 'Adding...';
                 addFriendFromList(data, function(ok){
                     if (ok) {
                         btn.textContent = 'Already';
@@ -13922,22 +13924,52 @@ function renderFriendsList(friends) {
                         btn.disabled = false;
                     }
                 });
-            }).catch(function(){ showToast('Failed'); });
+            }).catch(function(){
+                showToast('Failed');
+                btn.disabled = false;
+                btn.textContent = 'Add';
+            });
         });
     });
 }
 
+// ============================================================
+//  ✅ Add Friend From List
+// ============================================================
 function addFriendFromList(targetData, cb) {
     if (!currentUser || !currentServerId) return;
-    if (isFriend(targetData.serverId, targetData.userId)) { if (cb) cb(false); return; }
+
+    // ✅ Self check
+    if (String(targetData.userId) === String(currentUser.userId) && 
+        String(targetData.serverId) === String(currentServerId)) {
+        showToast('You cannot add yourself');
+        if (cb) cb(false);
+        return;
+    }
+
+    if (isFriend(targetData.serverId, targetData.userId)) { 
+        if (cb) cb(false); 
+        return; 
+    }
 
     var myServer = FIREBASE_SERVERS.find(function(s){ return s.id === currentServerId; });
     var myServerNo = myServer ? myServer.number : 1;
-    var theirEntry = { serverId: targetData.serverId, serverNo: targetData.serverNo, userId: targetData.userId };
-    var myEntry = { serverId: currentServerId, serverNo: myServerNo, userId: currentUser.userId };
+    var theirEntry = { 
+        serverId: targetData.serverId, 
+        serverNo: targetData.serverNo, 
+        userId: targetData.userId 
+    };
+    var myEntry = { 
+        serverId: currentServerId, 
+        serverNo: myServerNo, 
+        userId: currentUser.userId 
+    };
 
     var myList = Array.isArray(currentUser.friendsList) ? currentUser.friendsList.slice() : [];
-    if (!myList.some(function(f){ return f.serverId === targetData.serverId && f.userId === targetData.userId; })) {
+    if (!myList.some(function(f){ 
+        return String(f.serverId) === String(targetData.serverId) && 
+               String(f.userId) === String(targetData.userId); 
+    })) {
         myList.push(theirEntry);
     }
 
@@ -13945,14 +13977,23 @@ function addFriendFromList(targetData, cb) {
     var theirDb = getDbForServer(targetData.serverId);
 
     myDb.ref('users/' + currentUser.userId).update({ friendsList: myList })
-    .then(function(){ return theirDb.ref('users/' + targetData.userId + '/friendsList').once('value'); })
+    .then(function(){ 
+        return theirDb.ref('users/' + targetData.userId + '/friendsList').once('value'); 
+    })
     .then(function(snap){
         var tl = snap.val() || [];
         if (!Array.isArray(tl)) tl = Object.keys(tl).map(function(k){ return tl[k]; });
-        if (!tl.some(function(f){ return f.serverId === currentServerId && f.userId === currentUser.userId; })) tl.push(myEntry);
+        if (!tl.some(function(f){ 
+            return String(f.serverId) === String(currentServerId) && 
+                   String(f.userId) === String(currentUser.userId); 
+        })) {
+            tl.push(myEntry);
+        }
         return theirDb.ref('users/' + targetData.userId).update({ friendsList: tl });
     })
-    .then(function(){ return saveFriendToCache(targetData); })
+    .then(function(){ 
+        return saveFriendToCache(targetData); 
+    })
     .then(function(){
         currentUser.friendsList = myList;
         saveUserToDB(currentUser);
@@ -13960,7 +14001,11 @@ function addFriendFromList(targetData, cb) {
         showToast('Friend added');
         if (cb) cb(true);
     })
-    .catch(function(err){ console.error(err); showToast('Failed'); if (cb) cb(false); });
+    .catch(function(err){ 
+        console.error(err); 
+        showToast('Failed'); 
+        if (cb) cb(false); 
+    });
 }
 
 // ============================================================
@@ -14007,7 +14052,7 @@ setTimeout(function(){
     attachChatRoomAvatarClick();
 }, 1000);
 
-console.log('Friend Profile FINAL -- IndexedDB Banner/BG');
+console.log('Friend Profile FULL FINAL -- Self Skip + Banner/BG Fix');
 
 
 // ============================================================
