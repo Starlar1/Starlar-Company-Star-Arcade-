@@ -6303,230 +6303,492 @@ body {
 }
 
 /* ============================================================
+   ✅ FRIEND PROFILE + POPUP + FRIENDS LIST -- FULL CSS
+   style.css ရဲ့ အောက်ဆုံးမှာ ထည့်ပါ
+   ============================================================ */
+
+/* ============================================================
    FRIENDS LIST SCREEN
-   (style.css အောက်ဆုံးမှာ ထည့်ပါ)
    ============================================================ */
 #fs-friends-list .friends-list-container {
-    width: 100%; height: 100%;
+    width: 100%;
+    height: 100%;
     overflow-y: auto;
     background: var(--bg-body);
     padding: 12px 0;
-}
-.friends-list-loading, .friends-list-empty {
-    text-align: center; color: var(--text-muted);
-    font-size: 14px; padding: 60px 20px;
-}
-.friends-list-items { display: flex; flex-direction: column; }
-.friend-list-item {
-    display: flex; align-items: center; gap: 12px;
-    padding: 10px 16px;
-    border-bottom: 1px solid rgba(255,255,255,0.03);
-}
-.friend-list-item:active { background: var(--bg-hover); }
-.friend-list-avatar-wrap {
-    width: 52px; height: 52px; border-radius: 50%;
-    flex-shrink: 0; position: relative;
-    background: var(--bg-card); overflow: visible;
-}
-.friend-list-avatar-wrap img {
-    width: 100%; height: 100%; border-radius: 50%;
-    object-fit: cover; display: block;
-}
-.friend-list-frame {
-    position: absolute; top: -7px; left: -7px;
-    width: calc(100% + 14px); height: calc(100% + 14px);
-    border-radius: 50%; pointer-events: none;
-    background-size: contain; background-position: center;
-    background-repeat: no-repeat;
-}
-.friend-list-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
-.friend-list-name-row { display: flex; align-items: center; gap: 5px; min-width: 0; }
-.friend-list-name {
-    font-size: 15px; font-weight: 700; color: var(--text-main);
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-.friend-list-mark { display: inline-flex; width: 16px; height: 16px; border-radius: 50%; flex-shrink: 0; }
-.friend-list-mark img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
-.friend-list-meta { display: flex; align-items: center; gap: 8px; font-size: 12px; }
-.friend-list-server {
-    color: var(--accent); font-weight: 600;
-    background: var(--accent-bg); padding: 1px 8px; border-radius: 8px;
-}
-.friend-list-action { flex-shrink: 0; }
-.friend-list-add-btn {
-    padding: 8px 18px; border: none; border-radius: 20px;
-    background: linear-gradient(135deg, var(--accent), var(--accent-dark));
-    color: #fff; font-size: 13px; font-weight: 700;
-    font-family: inherit; cursor: pointer; transition: all 0.2s ease;
-}
-.friend-list-add-btn:active { transform: scale(0.95); opacity: 0.9; }
-.friend-list-add-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-.friend-list-add-btn.added { background: var(--bg-hover); color: var(--text-muted); }
-.friend-list-you {
-    font-size: 13px; font-weight: 700; color: #44ff88;
-    background: rgba(68,255,136,0.1);
-    padding: 6px 16px; border-radius: 20px;
-    border: 1px solid rgba(68,255,136,0.3);
-}
-.friend-list-already {
-    font-size: 13px; font-weight: 700; color: var(--text-muted);
-    background: var(--bg-input); padding: 6px 16px; border-radius: 20px;
+    -webkit-overflow-scrolling: touch;
 }
 
-/* Friends စာလေး နှိပ်လို့ရ */
+.friends-list-loading,
+.friends-list-empty {
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 14px;
+    padding: 60px 20px;
+}
+
+.friends-list-items {
+    display: flex;
+    flex-direction: column;
+}
+
+.friend-list-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 16px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+    transition: background 0.15s ease;
+}
+
+.friend-list-item:active {
+    background: var(--bg-hover);
+}
+
+.friend-list-avatar-wrap {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    position: relative;
+    background: var(--bg-card);
+    overflow: visible;
+}
+
+.friend-list-avatar-wrap img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    display: block;
+}
+
+.friend-list-frame {
+    position: absolute;
+    top: -7px;
+    left: -7px;
+    width: calc(100% + 14px);
+    height: calc(100% + 14px);
+    border-radius: 50%;
+    pointer-events: none;
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+.friend-list-info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.friend-list-name-row {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    min-width: 0;
+}
+
+.friend-list-name {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-main);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.friend-list-mark {
+    display: inline-flex;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+}
+
+.friend-list-mark img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.friend-list-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+}
+
+.friend-list-server {
+    color: var(--accent);
+    font-weight: 600;
+    background: var(--accent-bg);
+    padding: 1px 8px;
+    border-radius: 8px;
+}
+
+.friend-list-action {
+    flex-shrink: 0;
+}
+
+.friend-list-add-btn {
+    padding: 8px 18px;
+    border: none;
+    border-radius: 20px;
+    background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+    color: #fff;
+    font-size: 13px;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.friend-list-add-btn:active {
+    transform: scale(0.95);
+    opacity: 0.9;
+}
+
+.friend-list-add-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.friend-list-add-btn.added {
+    background: var(--bg-hover);
+    color: var(--text-muted);
+}
+
+.friend-list-you {
+    font-size: 13px;
+    font-weight: 700;
+    color: #44ff88;
+    background: rgba(68, 255, 136, 0.1);
+    padding: 6px 16px;
+    border-radius: 20px;
+    border: 1px solid rgba(68, 255, 136, 0.3);
+}
+
+.friend-list-already {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-muted);
+    background: var(--bg-input);
+    padding: 6px 16px;
+    border-radius: 20px;
+}
+
+/* ============================================================
+   FRIEND PROFILE -- Friends စာလေး click
+   ============================================================ */
 #fsProfileFriends .friends-count {
     cursor: pointer;
     transition: all 0.2s ease;
 }
+
 #fsProfileFriends .friends-count:active {
     transform: scale(0.95);
     opacity: 0.8;
 }
 
 /* ============================================================
-   PROFILE CARD POPUP
-   Banner/BG ပါ + View Full Profile ခလုတ်
+   PROFILE CARD POPUP -- Chat Room Avatar Click
+   Banner/BG (Image Tag) | View Full Profile ခလုတ်
    ============================================================ */
 .profile-card-overlay {
-    position: fixed; inset: 0; z-index: 10003;
-    background: rgba(0,0,0,0.75);
-    display: flex; align-items: center; justify-content: center;
+    position: fixed;
+    inset: 0;
+    z-index: 10003;
+    background: rgba(0, 0, 0, 0.75);
+    display: flex;
+    align-items: center;
+    justify-content: center;
     padding: 24px;
-    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     animation: fadeIn 0.2s ease;
 }
+
 .profile-card {
-    width: 100%; max-width: 340px;
-    background: var(--bg-header);
-    border: 1px solid var(--border); border-radius: 20px;
-    overflow: hidden;
-    box-shadow: 0 16px 64px rgba(0,0,0,0.8);
-    animation: popIn 0.25s ease; position: relative;
-    display: flex; flex-direction: column;
-}
-.profile-card-banner {
     width: 100%;
-    aspect-ratio: 16/9;
+    max-width: 340px;
+    background: var(--bg-header);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 16px 64px rgba(0, 0, 0, 0.8);
+    animation: popIn 0.25s ease;
     position: relative;
-    background-color: #1a1a2e;
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ============================================================
+   BANNER
+   ============================================================ */
+.profile-card-banner {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 9;
     min-height: 120px;
     max-height: 180px;
+    overflow: hidden;
     flex-shrink: 0;
+    background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
 }
+
+.profile-card-banner-img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    display: block;
+    z-index: 0;
+}
+
 .profile-card-banner-overlay {
-    position: absolute; inset: 0;
-    background: linear-gradient(to bottom, transparent 30%, rgba(10,10,15,0.8) 100%);
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, transparent 30%, rgba(10, 10, 15, 0.85) 100%);
     pointer-events: none;
+    z-index: 1;
 }
+
 .profile-card-close {
-    position: absolute; top: 10px; right: 10px;
-    width: 32px; height: 32px; border-radius: 50%; border: none;
-    background: rgba(0,0,0,0.5); color: #fff; cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    z-index: 10; backdrop-filter: blur(6px);
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(0, 0, 0, 0.55);
+    color: #fff;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 5;
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    transition: all 0.2s ease;
 }
-.profile-card-close:active { transform: scale(0.9); }
+
+.profile-card-close:active {
+    transform: scale(0.9);
+    background: rgba(0, 0, 0, 0.8);
+}
+
+/* ============================================================
+   BODY + BACKGROUND
+   ============================================================ */
 .profile-card-body {
     position: relative;
     padding: 0 20px 20px;
     margin-top: -45px;
     background-color: #12121c;
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
     border-radius: 0 0 20px 20px;
+    overflow: hidden;
     display: flex;
     flex-direction: column;
-    gap: 0;
 }
-.profile-card-bg-overlay {
-    position: absolute; inset: 0;
-    background: rgba(13,13,20,0.75);
-    pointer-events: none;
-    border-radius: 0 0 20px 20px;
+
+.profile-card-bg-img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    display: block;
     z-index: 0;
 }
-.profile-card-body > * {
-    position: relative;
+
+.profile-card-bg-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(13, 13, 20, 0.8);
+    pointer-events: none;
     z-index: 1;
+    border-radius: 0 0 20px 20px;
 }
+
+.profile-card-body > *:not(.profile-card-bg-img):not(.profile-card-bg-overlay) {
+    position: relative;
+    z-index: 2;
+}
+
+/* ============================================================
+   AVATAR
+   ============================================================ */
 .profile-card-avatar-wrap {
-    position: relative; width: 90px; height: 90px;
-    margin: 0 auto 12px; border-radius: 50%;
-    border: 4px solid var(--bg-header); background: var(--bg-card);
-    box-shadow: 0 4px 24px rgba(0,0,0,0.6);
+    position: relative;
+    width: 90px;
+    height: 90px;
+    margin: 0 auto 12px;
+    border-radius: 50%;
+    border: 4px solid var(--bg-header);
+    background: var(--bg-card);
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.6);
     overflow: visible;
     z-index: 2;
 }
+
 .profile-card-avatar-wrap img {
-    width: 100%; height: 100%; border-radius: 50%;
-    object-fit: cover; display: block;
-}
-.profile-card-frame {
-    position: absolute; top: -10px; left: -10px;
-    width: calc(100% + 20px); height: calc(100% + 20px);
-    border-radius: 50%; pointer-events: none;
-    background-size: contain; background-position: center;
-    background-repeat: no-repeat; z-index: 3;
-}
-.profile-card-name-row {
-    display: flex; align-items: center; justify-content: center;
-    gap: 8px; margin-bottom: 6px;
-}
-.profile-card-name {
-    font-size: 20px; font-weight: 700; color: var(--text-main);
-    text-align: center; margin: 0;
-}
-.profile-card-mark {
-    display: inline-flex; align-items: center; justify-content: center;
-    width: 26px; height: 26px; border-radius: 50%;
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.08);
-    padding: 2px; flex-shrink: 0;
-}
-.profile-card-mark img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
-.profile-card-info {
-    display: flex; align-items: center; justify-content: center;
-    gap: 10px; margin-bottom: 12px;
-    flex-wrap: wrap;
-}
-.profile-card-server {
-    font-size: 12px; font-weight: 600; color: var(--accent);
-    background: var(--accent-bg); padding: 2px 12px; border-radius: 12px;
-}
-.profile-card-online {
-    display: inline-flex; align-items: center; gap: 4px;
-    font-size: 11px; font-weight: 600; color: var(--text-muted);
-}
-.profile-card-online::before {
-    content: ''; width: 6px; height: 6px; border-radius: 50%;
-    background: var(--text-muted);
-}
-.profile-card-online.online { color: #44ff88; }
-.profile-card-online.online::before {
-    background: #44ff88;
-    box-shadow: 0 0 5px rgba(68,255,136,0.7);
-    animation: onlinePulse 2s ease-in-out infinite;
-}
-.profile-card-bio {
-    font-size: 13px; color: rgba(255,255,255,0.85);
-    line-height: 1.6; text-align: center;
-    padding: 12px 14px;
-    background: rgba(255,255,255,0.06);
-    border-radius: 12px;
-    border: 1px solid rgba(255,255,255,0.08);
-    max-height: 100px; overflow-y: auto;
-    word-break: break-word;
-    margin-bottom: 14px;
-}
-.profile-card-bio .bio-placeholder {
-    color: rgba(255,255,255,0.4); font-style: italic;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    display: block;
 }
 
-/* ✅ View Full Profile ခလုတ် */
+.profile-card-frame {
+    position: absolute;
+    top: -10px;
+    left: -10px;
+    width: calc(100% + 20px);
+    height: calc(100% + 20px);
+    border-radius: 50%;
+    pointer-events: none;
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+    z-index: 3;
+}
+
+/* ============================================================
+   NAME + MARK
+   ============================================================ */
+.profile-card-name-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 6px;
+}
+
+.profile-card-name {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text-main);
+    text-align: center;
+    margin: 0;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+}
+
+.profile-card-mark {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    padding: 2px;
+    flex-shrink: 0;
+}
+
+.profile-card-mark img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+/* ============================================================
+   INFO
+   ============================================================ */
+.profile-card-info {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+}
+
+.profile-card-server {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--accent);
+    background: var(--accent-bg);
+    padding: 2px 12px;
+    border-radius: 12px;
+}
+
+.profile-card-online {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+}
+
+.profile-card-online::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--text-muted);
+}
+
+.profile-card-online.online {
+    color: #44ff88;
+}
+
+.profile-card-online.online::before {
+    background: #44ff88;
+    box-shadow: 0 0 5px rgba(68, 255, 136, 0.7);
+    animation: onlinePulse 2s ease-in-out infinite;
+}
+
+/* ============================================================
+   BIO
+   ============================================================ */
+.profile-card-bio {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.9);
+    line-height: 1.6;
+    text-align: center;
+    padding: 12px 14px;
+    background: rgba(0, 0, 0, 0.35);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    max-height: 100px;
+    overflow-y: auto;
+    word-break: break-word;
+    margin-bottom: 14px;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+}
+
+.profile-card-bio::-webkit-scrollbar {
+    width: 3px;
+}
+
+.profile-card-bio::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+}
+
+.profile-card-bio .bio-placeholder {
+    color: rgba(255, 255, 255, 0.4);
+    font-style: italic;
+}
+
+/* ============================================================
+   VIEW FULL PROFILE BUTTON
+   ============================================================ */
 .profile-card-view-btn {
     display: flex;
     align-items: center;
@@ -6534,34 +6796,173 @@ body {
     gap: 8px;
     width: 100%;
     padding: 12px 16px;
-    border: 1.5px solid rgba(255, 109, 31, 0.3);
+    border: 1.5px solid rgba(255, 109, 31, 0.4);
     border-radius: 12px;
-    background: rgba(255, 109, 31, 0.12);
+    background: rgba(255, 109, 31, 0.15);
     color: var(--accent);
     font-size: 14px;
     font-weight: 700;
     font-family: inherit;
     cursor: pointer;
     transition: all 0.2s ease;
-    margin-top: 4px;
-}
-.profile-card-view-btn:active {
-    transform: scale(0.97);
-    background: rgba(255, 109, 31, 0.2);
-    border-color: rgba(255, 109, 31, 0.5);
-}
-.profile-card-view-btn svg {
-    flex-shrink: 0;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
 }
 
+.profile-card-view-btn:active {
+    transform: scale(0.97);
+    background: rgba(255, 109, 31, 0.25);
+    border-color: rgba(255, 109, 31, 0.6);
+}
+
+.profile-card-view-btn svg {
+    flex-shrink: 0;
+    width: 16px;
+    height: 16px;
+}
+
+/* ============================================================
+   ANIMATIONS
+   ============================================================ */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes popIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9) translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+@keyframes onlinePulse {
+    0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.6;
+        transform: scale(0.85);
+    }
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
 @media (max-width: 480px) {
-    .profile-card { max-width: 300px; }
-    .profile-card-avatar-wrap { width: 78px; height: 78px; }
-    .profile-card-name { font-size: 18px; }
-    .profile-card-view-btn { font-size: 13px; padding: 10px 14px; }
-    .friend-list-avatar-wrap { width: 46px; height: 46px; }
-    .friend-list-name { font-size: 14px; }
-    .friend-list-add-btn { padding: 7px 14px; font-size: 12px; }
+    .profile-card-overlay {
+        padding: 16px;
+    }
+    
+    .profile-card {
+        max-width: 300px;
+    }
+    
+    .profile-card-banner {
+        min-height: 100px;
+        max-height: 150px;
+    }
+    
+    .profile-card-avatar-wrap {
+        width: 78px;
+        height: 78px;
+        border-width: 3px;
+    }
+    
+    .profile-card-frame {
+        top: -8px;
+        left: -8px;
+        width: calc(100% + 16px);
+        height: calc(100% + 16px);
+    }
+    
+    .profile-card-name {
+        font-size: 18px;
+    }
+    
+    .profile-card-mark {
+        width: 22px;
+        height: 22px;
+    }
+    
+    .profile-card-bio {
+        font-size: 12px;
+        padding: 10px 12px;
+        max-height: 80px;
+    }
+    
+    .profile-card-view-btn {
+        font-size: 13px;
+        padding: 10px 14px;
+    }
+    
+    /* Friends List */
+    .friend-list-avatar-wrap {
+        width: 46px;
+        height: 46px;
+    }
+    
+    .friend-list-frame {
+        top: -6px;
+        left: -6px;
+        width: calc(100% + 12px);
+        height: calc(100% + 12px);
+    }
+    
+    .friend-list-name {
+        font-size: 14px;
+    }
+    
+    .friend-list-add-btn {
+        padding: 7px 14px;
+        font-size: 12px;
+    }
+    
+    .friend-list-you,
+    .friend-list-already {
+        font-size: 12px;
+        padding: 5px 12px;
+    }
+    
+    .friend-list-item {
+        padding: 9px 12px;
+        gap: 10px;
+    }
+}
+
+/* ============================================================
+   LANDSCAPE MODE
+   ============================================================ */
+@media (max-height: 600px) and (orientation: landscape) {
+    .profile-card-overlay {
+        padding: 12px;
+        align-items: flex-start;
+        padding-top: 20px;
+    }
+    
+    .profile-card {
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+    
+    .profile-card-banner {
+        min-height: 80px;
+        max-height: 110px;
+    }
+    
+    .profile-card-avatar-wrap {
+        width: 70px;
+        height: 70px;
+    }
+    
+    .profile-card-bio {
+        max-height: 60px;
+    }
 }</style><script>/* ============================================================
    FILE: script.js (FULL VERSION - online inside users only)
    ============================================================ */
