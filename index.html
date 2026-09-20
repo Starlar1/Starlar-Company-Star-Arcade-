@@ -6304,6 +6304,7 @@ body {
 
 /* ============================================================
    FRIENDS LIST SCREEN
+   (style.css အောက်ဆုံးမှာ ထည့်ပါ)
    ============================================================ */
 #fs-friends-list .friends-list-container {
     width: 100%; height: 100%;
@@ -6372,8 +6373,19 @@ body {
     background: var(--bg-input); padding: 6px 16px; border-radius: 20px;
 }
 
+/* Friends စာလေး နှိပ်လို့ရ */
+#fsProfileFriends .friends-count {
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+#fsProfileFriends .friends-count:active {
+    transform: scale(0.95);
+    opacity: 0.8;
+}
+
 /* ============================================================
-   PROFILE CARD POPUP (Chat Room) -- Chat/View မပါ
+   PROFILE CARD POPUP (Chat Room)
+   Banner/BG ပါ | Chat/View မပါ
    ============================================================ */
 .profile-card-overlay {
     position: fixed; inset: 0; z-index: 10003;
@@ -12773,34 +12785,23 @@ openFullscreen = function(title, screenId) {
 console.log('Tasks System loaded -- Join / ရယူမည်');
 
 // ============================================================
-//  ✅ FRIEND PROFILE -- fs-profile ကို reuse
-//  IndexedDB data နဲ့ ဖြည့် | Edit Profile ဖျောက်
+//  ✅ FRIEND PROFILE SYSTEM (FULL RE-WRITE)
+//  - Chat List avatar → fs-profile (Back ရင် Chat List ပဲ)
+//  - Friend profile: Edit မပါ | Friends ခလုတ် မပါ
+//  - Friends စာလေး နှိပ် → Friends List
+//  - Chat Room avatar → Popup (Banner/BG ပါ)
 // ============================================================
 
-var currentViewingProfile = null; // 'self' | 'friend'
+var currentViewingProfile = 'self';
 var currentFriendProfileData = null;
 
-// ✅ loadProfileData ကို parameterize
-// (မူလ loadProfileData ကို မဖျက်၊ wrapper ပဲ လုပ်)
-var _origLoadProfileData = loadProfileData;
-
-loadProfileData = function(userDataOverride) {
-    // userDataOverride မပါရင် ကိုယ့် profile (မူလအတိုင်း)
-    if (!userDataOverride) {
-        currentViewingProfile = 'self';
-        currentFriendProfileData = null;
-        _origLoadProfileData();
-        // Edit button ပြန်ပြ
-        var editWrap = document.querySelector('.profile-edit-btn-wrapper');
-        if (editWrap) editWrap.style.display = '';
-        return;
-    }
-
-    // Friend profile
+// ============================================================
+//  ✅ Profile screen ကို Friend Data နဲ့ ဖြည့်
+//  (fs-profile ကို reuse)
+// ============================================================
+function loadFriendProfileIntoFsProfile(d) {
     currentViewingProfile = 'friend';
-    currentFriendProfileData = userDataOverride;
-
-    var d = userDataOverride;
+    currentFriendProfileData = d;
 
     var fsAvatar = document.getElementById('fsProfileAvatar');
     var fsName = document.getElementById('fsProfileName');
@@ -12816,40 +12817,29 @@ loadProfileData = function(userDataOverride) {
     }
 
     // Name
-    if (fsName) {
-        fsName.textContent = d.name || 'Player';
-    }
+    if (fsName) fsName.textContent = d.name || 'Player';
 
     // Mark
     if (fsMark) {
-        var markId = d.markUse;
-        if (markId && markId !== '') {
-            var mark = MARK_CONFIG.marks.find(function(m) { return String(m.id) === String(markId); });
+        fsMark.onclick = null;
+        if (d.markUse) {
+            var mark = MARK_CONFIG.marks.find(function(m) { return String(m.id) === String(d.markUse); });
             if (mark) {
-                fsMark.innerHTML = '<img src="' + mark.image + '" alt="' + mark.name + '" style="width:22px;height:22px;border-radius:50%;vertical-align:middle;" title="' + mark.name + '" />';
+                fsMark.innerHTML = '<img src="' + mark.image + '" alt="' + mark.name + '" title="' + mark.name + '" />';
                 fsMark.style.display = 'inline-flex';
-                fsMark.style.alignItems = 'center';
-                fsMark.style.justifyContent = 'center';
-                fsMark.style.background = 'rgba(255,255,255,0.05)';
-                fsMark.style.borderRadius = '50%';
-                fsMark.style.padding = '2px';
-                fsMark.style.border = '1px solid rgba(255,255,255,0.08)';
-                fsMark.style.width = '28px';
-                fsMark.style.height = '28px';
-                fsMark.style.marginLeft = '6px';
                 fsMark.onclick = function(e) { e.stopPropagation(); showMarkPopup(mark); };
             } else {
                 fsMark.style.display = 'none';
+                fsMark.innerHTML = '';
             }
         } else {
             fsMark.style.display = 'none';
+            fsMark.innerHTML = '';
         }
     }
 
     // ID
-    if (fsId) {
-        fsId.textContent = 'ID ' + (d.userId || '0000000000');
-    }
+    if (fsId) fsId.textContent = 'ID ' + (d.userId || '0000000000');
 
     // Server
     if (fsServer) {
@@ -12857,10 +12847,15 @@ loadProfileData = function(userDataOverride) {
         fsServer.textContent = server ? server.name : 'Server ' + (d.serverNo || 1);
     }
 
-    // Friends count
+    // ✅ Friends စာလေး -- နှိပ်လို့ရ
     if (fsFriends) {
         var list = Array.isArray(d.friendsList) ? d.friendsList : [];
         fsFriends.textContent = 'Friends ' + list.length;
+        fsFriends.style.cursor = 'pointer';
+        fsFriends.onclick = function(e) {
+            e.stopPropagation();
+            openFriendsListScreen(d.serverId, d.userId, d.name);
+        };
     }
 
     // Bio
@@ -12882,11 +12877,14 @@ loadProfileData = function(userDataOverride) {
     var editWrap = document.querySelector('.profile-edit-btn-wrapper');
     if (editWrap) editWrap.style.display = 'none';
 
-    // ✅ Friends button ပြ (friend profile မှာ)
-    ensureFriendProfileFriendsBtn(d);
-};
+    // ✅ Friends ခလုတ် ရှိရင် ဖျက် (မထည့်ရ)
+    var oldFBtn = document.getElementById('friendProfileFriendsBtn');
+    if (oldFBtn) oldFBtn.remove();
+}
 
-// ✅ Frame (parameter)
+// ============================================================
+//  ✅ Apply Functions (parameter)
+// ============================================================
 function applyFrameFor(d) {
     var overlay = document.getElementById('profileFrameOverlay');
     if (!overlay) return;
@@ -12903,7 +12901,6 @@ function applyFrameFor(d) {
     }
 }
 
-// ✅ Banner (parameter)
 function applyBannerFor(d) {
     var bannerEl = document.getElementById('profileBanner');
     if (!bannerEl) return;
@@ -12922,7 +12919,6 @@ function applyBannerFor(d) {
     }
 }
 
-// ✅ Background (parameter)
 function applyBackgroundFor(d) {
     var bgSection = document.getElementById('profileBackgroundSection');
     if (!bgSection) return;
@@ -12938,7 +12934,6 @@ function applyBackgroundFor(d) {
     }
 }
 
-// ✅ Roles (parameter)
 function loadProfileRolesFor(d) {
     var grid = document.getElementById('profileRoleGrid');
     if (!grid) return;
@@ -12971,37 +12966,41 @@ function loadProfileRolesFor(d) {
     }
 }
 
-// ✅ Friend profile မှာ Friends ခလုတ် ပြ
-function ensureFriendProfileFriendsBtn(d) {
+// ============================================================
+//  ✅ Self Profile ပြန်ဖွင့် (original loadProfileData)
+// ============================================================
+var _origLoadProfileData_final = loadProfileData;
+loadProfileData = function() {
+    currentViewingProfile = 'self';
+    currentFriendProfileData = null;
+
+    // Edit button ပြ
     var editWrap = document.querySelector('.profile-edit-btn-wrapper');
-    if (!editWrap) return;
+    if (editWrap) editWrap.style.display = '';
 
-    // အရင် friends btn ရှိရင် ဖျက်
-    var old = document.getElementById('friendProfileFriendsBtn');
-    if (old) old.remove();
+    // Friend friends btn ရှိရင် ဖျက်
+    var oldFBtn = document.getElementById('friendProfileFriendsBtn');
+    if (oldFBtn) oldFBtn.remove();
 
-    var btn = document.createElement('button');
-    btn.className = 'profile-edit-btn';
-    btn.id = 'friendProfileFriendsBtn';
-    btn.innerHTML =
-        '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
-            '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>' +
-            '<circle cx="9" cy="7" r="4"/>' +
-            '<path d="M23 21v-2a4 4 0 0 0-3-3.87"/>' +
-            '<path d="M16 3.13a4 4 0 0 1 0 7.75"/>' +
-        '</svg> Friends';
+    // fsFriends click ဖျက်
+    var fsFriends = document.getElementById('fsProfileFriends');
+    if (fsFriends) {
+        fsFriends.style.cursor = '';
+        fsFriends.onclick = null;
+    }
 
-    btn.addEventListener('click', function() {
-        openFriendsListScreen(d.serverId, d.userId, d.name);
-    });
-
-    editWrap.appendChild(btn);
-    editWrap.style.display = 'flex';
-}
+    _origLoadProfileData_final();
+};
 
 // ============================================================
-//  ✅ Chat List Avatar Click → fs-profile (reuse)
+//  ✅ Chat List Avatar Click → fs-profile
+//  ✅ Back ရင် Chat List ပဲ ပြန်
 // ============================================================
+
+// Chat List က profile ကို ဖွင့်တဲ့ flag
+// ဒီ flag ပါရင် goBackFullscreen က chat-room ကို မသွားစေရ
+var openedProfileFromChatList = false;
+
 function attachChatListAvatarClick() {
     var chatList = document.getElementById('chatList');
     if (!chatList) return;
@@ -13024,13 +13023,21 @@ function attachChatListAvatarClick() {
         e.stopPropagation();
         e.preventDefault();
 
-        // ✅ IndexedDB ကနေ ယူ
+        // IndexedDB ကနေ ယူ
         getFriendFromCache(serverId, userId).then(function(cached) {
             if (!cached) {
                 showToast('Profile not found');
                 return;
             }
-            loadProfileData(cached);          // friend data ဖြည့်
+
+            // fs-profile ကို friend data နဲ့ ဖြည့်
+            loadFriendProfileIntoFsProfile(cached);
+
+            // ✅ Chat List ကနေ ဖွင့်တယ် ဆိုတာ မှတ်
+            openedProfileFromChatList = true;
+
+            // fullscreen stack ကို reset (chat-room မပါအောင်)
+            fullscreenStack = [];
             openFullscreen('Profile', 'fs-profile');
         });
     };
@@ -13039,7 +13046,45 @@ function attachChatListAvatarClick() {
 }
 
 // ============================================================
-//  ✅ Chat Room Avatar Click → Popup (Chat/View မပါ)
+//  ✅ goBackFullscreen Override
+//  openedProfileFromChatList ဆိုရင် → Chat List ပဲ ပြန်
+// ============================================================
+var _origGoBackFullscreen_friend = goBackFullscreen;
+goBackFullscreen = function() {
+    // Chat List ကနေ Profile ဖွင့်ထားတယ်
+    if (openedProfileFromChatList) {
+        // Profile ပိတ်၊ Chat List ပြန်
+        openedProfileFromChatList = false;
+
+        // self mode ပြန်
+        currentViewingProfile = 'self';
+        currentFriendProfileData = null;
+
+        // Edit button ပြန်
+        var editWrap = document.querySelector('.profile-edit-btn-wrapper');
+        if (editWrap) editWrap.style.display = '';
+
+        // fsFriends click ဖျက်
+        var fsFriends = document.getElementById('fsProfileFriends');
+        if (fsFriends) {
+            fsFriends.style.cursor = '';
+            fsFriends.onclick = null;
+        }
+
+        // fullscreen ပိတ်
+        fullscreenOverlay.classList.remove('active');
+        document.getElementById('fullscreenOverlay').classList.remove('chat-room-active');
+        document.body.style.overflow = '';
+        fullscreenStack = [];
+        return;
+    }
+
+    // ကျန် case -- မူလအတိုင်း
+    _origGoBackFullscreen_friend();
+};
+
+// ============================================================
+//  ✅ Chat Room Avatar Click → Popup (Banner/BG ပါ)
 // ============================================================
 function showProfileCardPopup(serverId, userId) {
     if (!currentUser) return;
@@ -13055,41 +13100,50 @@ function showProfileCardPopup(serverId, userId) {
 
         var avatar = cached.avatar || 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"%3E%3Ccircle cx="50" cy="50" r="45" fill="%2322222e"/%3E%3Ccircle cx="50" cy="35" r="18" fill="%235a5a6a"/%3E%3Cpath d="M20 75c0-18 12-30 30-30s30 12 30 30" fill="%235a5a6a"/%3E%3C/svg%3E';
 
+        // Frame
         var frameHtml = '';
         if (cached.frameUse) {
             var frame = FRAME_CONFIG.frames.find(function(f){ return f.id === cached.frameUse; });
             if (frame) frameHtml = '<div class="profile-card-frame" style="background-image:url(\'' + frame.image + '\')"></div>';
         }
 
+        // Mark
         var markHtml = '';
         if (cached.markUse) {
             var mark = MARK_CONFIG.marks.find(function(m){ return String(m.id) === String(cached.markUse); });
-            if (mark) markHtml = '<span class="profile-card-mark"><img src="' + mark.image + '" /></span>';
+            if (mark) markHtml = '<span class="profile-card-mark"><img src="' + mark.image + '" alt="' + mark.name + '" /></span>';
         }
 
+        // Banner
         var bannerStyle = 'linear-gradient(135deg, #1a1a2e, #16213e, #0f3460)';
         if (cached.bannerUse) {
             var b = BANNER_CONFIG.banners.find(function(x){ return x.id === cached.bannerUse; });
             if (b) bannerStyle = 'url("' + b.image + '")';
         }
 
+        // Background
         var bgStyle = '';
         if (cached.backgroundUse) {
             var bg = BACKGROUND_CONFIG.backgrounds.find(function(x){ return x.id === cached.backgroundUse; });
             if (bg) bgStyle = 'background-image:url("' + bg.image + '");background-size:cover;background-position:center;';
         }
 
+        // Bio
         var bioHtml = cached.bio && cached.bio.trim() !== ''
             ? escapeHtml(cached.bio).replace(/\n/g, '<br>')
             : '<span class="bio-placeholder">No bio yet...</span>';
 
+        // Server
         var server = FIREBASE_SERVERS.find(function(s){ return s.id === cached.serverId; });
         var serverName = server ? server.name : 'Server ' + (cached.serverNo || 1);
+
+        // Online
         var onlineText = cached.online === true ? 'Online' : 'Offline';
         var onlineClass = cached.online === true ? 'online' : '';
 
         overlay.innerHTML =
             '<div class="profile-card">' +
+                // ✅ Banner
                 '<div class="profile-card-banner" style="background-image:' + bannerStyle + ';background-size:cover;background-position:center;">' +
                     '<div class="profile-card-banner-overlay"></div>' +
                     '<button class="profile-card-close" id="profileCardClose">' +
@@ -13098,6 +13152,7 @@ function showProfileCardPopup(serverId, userId) {
                         '</svg>' +
                     '</button>' +
                 '</div>' +
+                // ✅ Background ပါ
                 '<div class="profile-card-body" style="' + bgStyle + '">' +
                     '<div class="profile-card-bg-overlay"></div>' +
                     '<div class="profile-card-avatar-wrap">' +
@@ -13136,7 +13191,7 @@ function attachChatRoomAvatarClick() {
 }
 
 // ============================================================
-//  ✅ Friends List Screen (Add/You/Already)
+//  ✅ Friends List Screen
 // ============================================================
 function openFriendsListScreen(serverId, userId, ownerName) {
     var container = document.getElementById('friendsListContainer');
@@ -13270,28 +13325,35 @@ function addFriendFromList(targetData, cb) {
 // ============================================================
 //  ✅ HOOKS
 // ============================================================
-var _origRenderChatList2 = renderChatList;
+var _origRenderChatList_final = renderChatList;
 renderChatList = function() {
-    _origRenderChatList2();
+    _origRenderChatList_final();
     setTimeout(attachChatListAvatarClick, 50);
 };
 
-var _origOpenChatRoomNow2 = openChatRoomNow;
+var _origOpenChatRoomNow_final = openChatRoomNow;
 openChatRoomNow = function(t) {
-    _origOpenChatRoomNow2(t);
+    _origOpenChatRoomNow_final(t);
     setTimeout(attachChatRoomAvatarClick, 100);
 };
 
-// profile ပိတ်တဲ့အခါ self mode ပြန်
-var _origCloseFullscreenP = closeFullscreen;
+// closeFullscreen ရဲ့အခါ flag reset
+var _origCloseFullscreen_final2 = closeFullscreen;
 closeFullscreen = function() {
+    openedProfileFromChatList = false;
     currentViewingProfile = 'self';
     currentFriendProfileData = null;
+
     var editWrap = document.querySelector('.profile-edit-btn-wrapper');
     if (editWrap) editWrap.style.display = '';
-    var fbtn = document.getElementById('friendProfileFriendsBtn');
-    if (fbtn) fbtn.remove();
-    _origCloseFullscreenP();
+
+    var fsFriends = document.getElementById('fsProfileFriends');
+    if (fsFriends) {
+        fsFriends.style.cursor = '';
+        fsFriends.onclick = null;
+    }
+
+    _origCloseFullscreen_final2();
 };
 
 setTimeout(function(){
@@ -13299,7 +13361,7 @@ setTimeout(function(){
     attachChatRoomAvatarClick();
 }, 1000);
 
-console.log('Friend Profile reuse system loaded');
+console.log('Friend Profile System (Chat List → Profile → Back to Chat List)');
 
 
 // ============================================================
