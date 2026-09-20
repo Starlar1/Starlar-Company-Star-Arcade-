@@ -423,6 +423,14 @@
                         <div class="role-edit-grid" id="roleEditGrid"></div>
                     </div>
                 </div>
+<!-- ============================================================
+     ✅ FRIENDS LIST SCREEN
+     index.html ရဲ့ fullscreen-body ထဲ၊ fs-settings အပေါ်မှာ ထည့်ပါ
+     ============================================================ -->
+<div class="fs-screen hidden" id="fs-friends-list">
+    <div class="friends-list-container" id="friendsListContainer"></div>
+</div>
+
 
                 <div class="fs-screen hidden" id="fs-shop">
                     <div class="shop-container">
@@ -442,11 +450,6 @@
                 </div>
 
                 <div class="fs-screen hidden" id="fs-mail"><div class="screen-center"><p>No new messages</p></div></div>
-         
-         <!-- FRIENDS LIST SCREEN -->
-<div class="fs-screen hidden" id="fs-friends-list">
-    <div class="friends-list-container" id="friendsListContainer"></div>
-</div>
          
 <!-- ✅ TASKS SCREEN -->
 <div class="fs-screen hidden" id="fs-tasks">
@@ -12584,9 +12587,52 @@ function reportMessage(msg) {
 }
 
 // ============================================================
-//  ✅ STORAGE MONITOR + CLEAR DATA -- FIXED
-//  Available = ဖုန်း Quota - App Used (သုံးရင် သုံးသလောက် ကုန်)
+//  ✅ STORAGE MONITOR + CLEAR DATA -- FULL FINAL
+//  Quota ကို တစ်ခါပဲ ဖတ်၊ သိမ်းထား၊ ပြန်မဖတ်
+//  Available = Stored Quota - App Used (သုံးရင် သုံးသလောက် ကုန်)
 // ============================================================
+
+var STORAGE_QUOTA_KEY = 'deviceStorageQuota';
+
+// ✅ ဖုန်း Quota ကို တစ်ခါပဲ ဖတ်ပြီး IndexedDB မှာ သိမ်း
+// နောက်တိုင်း stored value ကိုပဲ သုံး (browser ပြောင်းလဲမှု မလိုက်)
+function getStoredQuota() {
+    return new Promise(function(resolve) {
+        getFromDB(STORAGE_QUOTA_KEY).then(function(stored) {
+            if (stored && stored.quota && stored.quota > 0) {
+                console.log('Using stored quota:', stored.quota);
+                resolve(stored.quota);
+                return;
+            }
+
+            // ပထမဆုံး အကြိမ် -- တစ်ခါပဲ ဖတ်
+            if (navigator.storage && navigator.storage.estimate) {
+                navigator.storage.estimate().then(function(estimate) {
+                    var quota = estimate.quota || 50 * 1024 * 1024;
+                    setToDB(STORAGE_QUOTA_KEY, { quota: quota, savedAt: Date.now() })
+                    .then(function() {
+                        console.log('Quota saved:', quota);
+                        resolve(quota);
+                    }).catch(function() {
+                        resolve(quota);
+                    });
+                }).catch(function() {
+                    var fallback = 50 * 1024 * 1024;
+                    setToDB(STORAGE_QUOTA_KEY, { quota: fallback, savedAt: Date.now() })
+                    .catch(function() {});
+                    resolve(fallback);
+                });
+            } else {
+                var fallback = 50 * 1024 * 1024;
+                setToDB(STORAGE_QUOTA_KEY, { quota: fallback, savedAt: Date.now() })
+                .catch(function() {});
+                resolve(fallback);
+            }
+        }).catch(function() {
+            resolve(50 * 1024 * 1024);
+        });
+    });
+}
 
 // ✅ App Storage အားလုံး တွက် (Friends + Messages + Others)
 function calculateAppStorage() {
@@ -12595,7 +12641,6 @@ function calculateAppStorage() {
             var transaction = db.transaction(STORE_NAME, 'readonly');
             var store = transaction.objectStore(STORE_NAME);
 
-            // Friends-related keys
             var friendsKeys = ['friendsCache', 'pinnedFriends', 'lockedFriends', 'chatBackgrounds'];
 
             var allKeysReq = store.getAllKeys();
@@ -12603,21 +12648,19 @@ function calculateAppStorage() {
             allKeysReq.onsuccess = function() {
                 var allKeys = allKeysReq.result || [];
 
-                // Messages keys
                 var msgKeys = allKeys.filter(function(key) {
                     return typeof key === 'string' && key.indexOf('messages_') === 0;
                 });
 
-                // Others keys (users, session, tasksState စသည်)
+                // Others (users, session, tasksState, deviceStorageQuota စသည်)
                 var otherKeys = allKeys.filter(function(key) {
                     return friendsKeys.indexOf(key) === -1 &&
-                           !(typeof key === 'string' && key.indexOf('messages_') === 0);
+                           !(typeof key === 'string' && key.indexOf('messages_') === 0) &&
+                           key !== STORAGE_QUOTA_KEY;  // quota key ကို မတွက်
                 });
 
-                var friendsCount = 0;
-                var friendsSize = 0;
-                var msgCount = 0;
-                var msgSize = 0;
+                var friendsCount = 0, friendsSize = 0;
+                var msgCount = 0, msgSize = 0;
                 var othersSize = 0;
 
                 var totalToProcess = friendsKeys.length + msgKeys.length + otherKeys.length;
@@ -12626,8 +12669,7 @@ function calculateAppStorage() {
                     resolve({
                         friendsCount: 0, friendsSize: 0,
                         msgCount: 0, msgSize: 0,
-                        othersSize: 0,
-                        totalSize: 0
+                        othersSize: 0, totalSize: 0
                     });
                     return;
                 }
@@ -12655,11 +12697,9 @@ function calculateAppStorage() {
                             var val = req.result.value;
                             var size = JSON.stringify(val).length;
                             var count = 0;
-
                             if (Array.isArray(val)) count = val.length;
                             else if (typeof val === 'object') count = Object.keys(val).length;
                             else count = 1;
-
                             friendsSize += size;
                             friendsCount += count;
                         }
@@ -12676,7 +12716,6 @@ function calculateAppStorage() {
                             var val = req.result.value;
                             var size = JSON.stringify(val).length;
                             var count = Array.isArray(val) ? val.length : 0;
-
                             msgSize += size;
                             msgCount += count;
                         }
@@ -12703,8 +12742,7 @@ function calculateAppStorage() {
                 resolve({
                     friendsCount: 0, friendsSize: 0,
                     msgCount: 0, msgSize: 0,
-                    othersSize: 0,
-                    totalSize: 0
+                    othersSize: 0, totalSize: 0
                 });
             };
 
@@ -12712,8 +12750,7 @@ function calculateAppStorage() {
             resolve({
                 friendsCount: 0, friendsSize: 0,
                 msgCount: 0, msgSize: 0,
-                othersSize: 0,
-                totalSize: 0
+                othersSize: 0, totalSize: 0
             });
         });
     });
@@ -12724,25 +12761,6 @@ function formatSize(bytes) {
     if (bytes < 1024) return bytes + ' B';
     if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + ' KB';
     return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
-}
-
-// ✅ Browser Storage Quota (ဖုန်း ရနိုင်တဲ့ စုစုပေါင်း)
-function getStorageQuota() {
-    return new Promise(function(resolve) {
-        if (navigator.storage && navigator.storage.estimate) {
-            navigator.storage.estimate().then(function(estimate) {
-                resolve({
-                    usage: estimate.usage || 0,
-                    quota: estimate.quota || 0
-                });
-            }).catch(function() {
-                resolve({ usage: 0, quota: 50 * 1024 * 1024 });
-            });
-        } else {
-            // Fallback -- 50MB estimate
-            resolve({ usage: 0, quota: 50 * 1024 * 1024 });
-        }
-    });
 }
 
 // ✅ Storage Monitor ပြ
@@ -12764,10 +12782,10 @@ function loadStorageMonitor() {
     // App Data အားလုံး
     calculateAppStorage().then(function(data) {
 
-        // Browser Quota
-        getStorageQuota().then(function(quota) {
+        // ✅ Quota ကို သိမ်းထားတာကနေ ယူ (ပြန်မဖတ်)
+        getStoredQuota().then(function(quotaBytes) {
 
-            // ✅ Total Used (App Data တစ်ခုလုံး)
+            // Total Used
             totalEl.textContent = formatSize(data.totalSize);
 
             // Friends
@@ -12779,15 +12797,16 @@ function loadStorageMonitor() {
             msgSizeEl.textContent = formatSize(data.msgSize);
 
             // ============================================================
-            //  ✅ Available = ဖုန်း Quota - App သုံးထားတာ
+            //  ✅ Available = Stored Quota - App Used
+            //  Quota က တစ်ခါ သတ်မှတ်ပြီး ဘယ်တော့မှ မပြောင်း
+            //  ဒါကြောင့် သုံးရင် သုံးသလောက် Available လျော့သာ
             //  ============================================================
-            var totalQuota = quota.quota;
             var appUsed = data.totalSize;
-            var availableBytes = Math.max(0, totalQuota - appUsed);
+            var availableBytes = Math.max(0, quotaBytes - appUsed);
 
             var percentFree = 0;
-            if (totalQuota > 0) {
-                percentFree = Math.round((availableBytes / totalQuota) * 100);
+            if (quotaBytes > 0) {
+                percentFree = Math.round((availableBytes / quotaBytes) * 100);
                 if (percentFree > 100) percentFree = 100;
                 if (percentFree < 0) percentFree = 0;
             }
@@ -12849,7 +12868,6 @@ function clearAllFriendsData() {
         hideLoading();
         isProcessing = false;
         showToast('Friends data cleared');
-        // ✅ Refresh -- Available တက်လာ
         loadStorageMonitor();
         setTimeout(function() {
             if (typeof renderChatList === 'function') renderChatList();
@@ -12899,7 +12917,6 @@ function clearAllMessagesData() {
                 hideLoading();
                 isProcessing = false;
                 showToast('Messages cleared (' + msgKeys.length + ')');
-                // ✅ Refresh -- Available တက်လာ
                 loadStorageMonitor();
                 setTimeout(function() {
                     if (typeof renderChatList === 'function') renderChatList();
@@ -12972,7 +12989,7 @@ deleteMessageFromLocalDB = function(serverId, userId, messageId) {
     }
 })();
 
-console.log('Storage Monitor FIXED -- Available = Quota - App Used');
+console.log('Storage Monitor FULL FINAL -- Quota Stored Once, Available Only Decreases');
 
 // ============================================================
 //  ✅ TASKS SYSTEM -- Join / ရယူမည်
