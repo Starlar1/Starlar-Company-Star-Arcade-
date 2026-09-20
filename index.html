@@ -9609,12 +9609,13 @@ setTimeout(initRoleSlider, 200);
 // ============================================================
 //  SETTINGS - LOG OUT (2 Options) -- FULL FINAL
 //  IndexedDB ရှိသမျှ အကုန်ဖြတ် (Universal Clear)
+//  Task timers + session tracking ပါ
 // ============================================================
 
 // ============================================================
 //  ✅ IndexedDB Object Store ထဲက key အားလုံး ဖျက်
-//  - ဘယ် key ပဲ ဖြစ်ဖြစ် အကုန် (users, session, tasksState...)
-//  ============================================================
+//  - excludeKeys မှာ ထည့်ထားတာ ကလွဲပြီး အကုန်ဖျက်
+// ============================================================
 function clearAllFromStore(excludeKeys) {
     excludeKeys = excludeKeys || [];
 
@@ -9643,15 +9644,11 @@ function clearAllFromStore(excludeKeys) {
                     return;
                 }
 
-                // တစ်ခါပဲ delete လုပ် (transaction single)
                 var deletedCount = 0;
                 keysToDelete.forEach(function(key) {
                     var req = store.delete(key);
                     req.onsuccess = function() {
                         deletedCount++;
-                        if (deletedCount >= keysToDelete.length) {
-                            // Transaction complete ဖြစ်တာနဲ့ resolve
-                        }
                     };
                 });
 
@@ -9680,7 +9677,6 @@ function clearAllFromStore(excludeKeys) {
 
 // ============================================================
 //  ✅ IndexedDB Database တစ်ခုလုံး ဖျက် (DB level)
-//  - Store အားလုံး ပါ ဖျက်
 // ============================================================
 function deleteEntireDatabase() {
     return new Promise(function(resolve) {
@@ -9705,6 +9701,33 @@ function deleteEntireDatabase() {
             console.warn('IndexedDB delete exception:', e);
             resolve();
         }
+    });
+}
+
+// ============================================================
+//  ✅ Helper -- Key prefix နဲ့ စတဲ့ keys တွေ ရှာ
+// ============================================================
+function getAllKeysWithPrefix(prefix) {
+    return new Promise(function(resolve) {
+        openDB().then(function(db) {
+            var transaction = db.transaction(STORE_NAME, 'readonly');
+            var store = transaction.objectStore(STORE_NAME);
+            var req = store.getAllKeys();
+
+            req.onsuccess = function() {
+                var allKeys = req.result || [];
+                var matched = allKeys.filter(function(key) {
+                    return typeof key === 'string' && key.indexOf(prefix) === 0;
+                });
+                resolve(matched);
+            };
+
+            req.onerror = function() {
+                resolve([]);
+            };
+        }).catch(function() {
+            resolve([]);
+        });
     });
 }
 
@@ -9740,7 +9763,7 @@ function firebaseSignOutAll() {
 }
 
 // ============================================================
-//  ✅ Listener အားလုံး ဖျက်
+//  ✅ Listener အားလုံး ဖျက် (Comprehensive)
 // ============================================================
 function stopAllListeners() {
     try {
@@ -9813,10 +9836,24 @@ function stopAllListeners() {
 
 // ============================================================
 //  ✅ In-Memory State အားလုံး Reset
-//  - Task state, chat state, search state, profile state
-//  ============================================================
+//  Task state + timers ပါ
+// ============================================================
 function resetAllInMemoryState() {
-    // Task State
+    // ✅ TASK SESSION ID ပြောင်း (timer + async အားလုံး invalid)
+    try {
+        if (typeof TASK_SESSION_ID !== 'undefined') {
+            TASK_SESSION_ID++;
+        }
+    } catch(e) {}
+
+    // ✅ Task Timers အားလုံး ရပ်
+    try {
+        if (typeof clearAllTaskTimers === 'function') {
+            clearAllTaskTimers();
+        }
+    } catch(e) {}
+
+    // Task State Map Reset
     try {
         if (typeof TASK_STATE_MAP !== 'undefined' && TASK_STATE_MAP) {
             Object.keys(TASK_STATE_MAP).forEach(function(key) {
@@ -9855,12 +9892,12 @@ function resetAllInMemoryState() {
         if (replyBar) replyBar.remove();
     } catch(e) {}
 
-    // Message save/seen/delete queues reset
+    // Message queues reset
     try { messageSaveQueue = Promise.resolve(); } catch(e) {}
     try { seenUpdateQueue = Promise.resolve(); } catch(e) {}
     try { deleteMessageQueue = Promise.resolve(); } catch(e) {}
 
-    console.log('In-memory state reset');
+    console.log('In-memory state reset (tasks + timers)');
 }
 
 // ============================================================
@@ -10011,7 +10048,7 @@ function resetUIAfterLogout() {
         if (availableSizeEl) availableSizeEl.textContent = '--';
     } catch(e) {}
 
-    // Sidebar profile frame overlay remove
+    // Sidebar frame overlay
     try {
         var sidebarFrame = document.querySelector('.sidebar-frame-overlay');
         if (sidebarFrame) sidebarFrame.remove();
@@ -10022,7 +10059,6 @@ function resetUIAfterLogout() {
 
 // ============================================================
 //  ✅ LOG OUT -- Account Data အကုန်ဖြတ် (Message မပါ)
-//  IndexedDB က messages_* ကလွဲပြီး အကုန်ဖျက်
 // ============================================================
 function logoutUser() {
     if (isProcessing) return;
@@ -10033,6 +10069,20 @@ function logoutUser() {
 
     isProcessing = true;
     showLoading('Logging out...');
+
+    // ✅ TASK SESSION ID ပြောင်း (timer အားလုံး invalid)
+    try {
+        if (typeof TASK_SESSION_ID !== 'undefined') {
+            TASK_SESSION_ID++;
+        }
+    } catch(e) {}
+
+    // ✅ Task timers ချက်ချင်း ရပ်
+    try {
+        if (typeof clearAllTaskTimers === 'function') {
+            clearAllTaskTimers();
+        }
+    } catch(e) {}
 
     // ၁။ Online status false
     var onlinePromise = Promise.resolve();
@@ -10080,20 +10130,19 @@ function logoutUser() {
 
     }).then(function() {
         // ============================================================
-        //  ၈။ ✅ IndexedDB ရှိသမျှ အကုန်ဖျက်
-        //  messages_* ကလွဲပြီး (Message ကျန်ရမယ်)
+        //  ၈။ IndexedDB ရှိသမျှ အကုန်ဖျက် (messages_* ကလွဲ)
         //  ============================================================
         return getAllKeysWithPrefix('messages_').then(function(msgKeys) {
-            return clearAllFromStore(msgKeys);  // messages_* exclude
+            return clearAllFromStore(msgKeys);
         });
 
     }).then(function(deletedCount) {
         console.log('Logout: Deleted ' + deletedCount + ' keys (messages kept)');
 
-        // ၉။ In-Memory state reset (Task state ပါ)
+        // ၉။ In-Memory state reset (Task state + timers ပါ)
         resetAllInMemoryState();
 
-        // ၁၀။ UI Reset
+        // ၁၀။ UI Reset -- Auth Screen
         resetUIAfterLogout();
 
         hideLoading();
@@ -10112,7 +10161,7 @@ function logoutUser() {
 
 // ============================================================
 //  ✅ MESSAGE ALL -- IndexedDB အကုန်ဖြတ် (DB level)
-//  ============================================================
+// ============================================================
 function messageAllUser() {
     if (isProcessing) return;
 
@@ -10122,6 +10171,20 @@ function messageAllUser() {
 
     isProcessing = true;
     showLoading('Clearing all data...');
+
+    // ✅ TASK SESSION ID ပြောင်း
+    try {
+        if (typeof TASK_SESSION_ID !== 'undefined') {
+            TASK_SESSION_ID++;
+        }
+    } catch(e) {}
+
+    // ✅ Task timers ရပ်
+    try {
+        if (typeof clearAllTaskTimers === 'function') {
+            clearAllTaskTimers();
+        }
+    } catch(e) {}
 
     // ၁။ Online status false
     var onlinePromise = Promise.resolve();
@@ -10168,15 +10231,12 @@ function messageAllUser() {
         return firebaseSignOutAll();
 
     }).then(function() {
-        // ============================================================
-        //  ၈။ ✅ IndexedDB DB တစ်ခုလုံး ဖျက်
-        //  Store အားလုံး၊ Key အားလုံး -- messages_* ပါ
-        //  ============================================================
+        // ၈။ IndexedDB DB တစ်ခုလုံး ဖျက်
         return deleteEntireDatabase();
 
     }).then(function() {
-        // ၉။ Safety -- DB delete မအောင်မြင်ရင် key အားလုံး ထပ်ရှင်း
-        return clearAllFromStore([]);  // exclude မရှိ → အကုန်ဖျက်
+        // ၉။ Safety -- key အားလုံး ထပ် ရှင်း
+        return clearAllFromStore([]);
 
     }).then(function(deletedCount) {
         console.log('Message All: All IndexedDB cleared (safety: ' + deletedCount + ' keys)');
@@ -10184,7 +10244,7 @@ function messageAllUser() {
         // ၁၀။ In-Memory state reset
         resetAllInMemoryState();
 
-        // ၁၁။ UI Reset -- Auth Screen ပြန်
+        // ၁၁။ UI Reset -- Auth Screen
         resetUIAfterLogout();
 
         hideLoading();
@@ -10198,33 +10258,6 @@ function messageAllUser() {
         isProcessing = false;
         hideLoading();
         alert('Failed to clear data. Please try again.');
-    });
-}
-
-// ============================================================
-//  ✅ Helper -- Key prefix နဲ့ စတဲ့ keys တွေ ရှာ
-// ============================================================
-function getAllKeysWithPrefix(prefix) {
-    return new Promise(function(resolve) {
-        openDB().then(function(db) {
-            var transaction = db.transaction(STORE_NAME, 'readonly');
-            var store = transaction.objectStore(STORE_NAME);
-            var req = store.getAllKeys();
-
-            req.onsuccess = function() {
-                var allKeys = req.result || [];
-                var matched = allKeys.filter(function(key) {
-                    return typeof key === 'string' && key.indexOf(prefix) === 0;
-                });
-                resolve(matched);
-            };
-
-            req.onerror = function() {
-                resolve([]);
-            };
-        }).catch(function() {
-            resolve([]);
-        });
     });
 }
 
@@ -10309,8 +10342,7 @@ function showLogoutOptionsPopup() {
     }
 })();
 
-console.log('Log Out System FINAL -- Universal IndexedDB Clear');
-
+console.log('Log Out System FULL -- Universal IndexedDB Clear + Task Timers Reset');
     
 
 // ============================================================
@@ -13270,14 +13302,58 @@ deleteMessageFromLocalDB = function(serverId, userId, messageId) {
 console.log('Storage Monitor FULL FINAL -- Quota Stored Once, Available Only Decreases');
 
 // ============================================================
-//  ✅ TASKS SYSTEM -- Join / ရယူမည်
+//  ✅ TASKS SYSTEM -- Join / ရယူမည် (FULL FIXED)
+//  Logout / Message All မှာ state + timers အားလုံး reset
 // ============================================================
 
 var TELEGRAM_TOPIC_TASKS = 28;
 var TASKS_STATE_KEY = 'tasksState';
-var TASK_STATE_MAP = {};  // 'idle' | 'cooldown' | 'claimable' | 'done'
+var TASK_STATE_MAP = {};
 
-// ✅ State ဖတ်
+// ✅ Active Timers Track (Logout မှာ ရပ်ဖို့)
+var TASK_ACTIVE_TIMERS = [];
+
+// ✅ Timer မှတ် (setTimeout wrapper)
+function setTaskTimeout(fn, delay) {
+    var id = setTimeout(function() {
+        // ပြီးသွားရင် list ထဲက ဖယ်
+        var idx = TASK_ACTIVE_TIMERS.indexOf(id);
+        if (idx !== -1) TASK_ACTIVE_TIMERS.splice(idx, 1);
+        try { fn(); } catch(e) { console.warn('Task timer error:', e); }
+    }, delay);
+    TASK_ACTIVE_TIMERS.push(id);
+    return id;
+}
+
+// ✅ Timer အားလုံး ရပ်
+function clearAllTaskTimers() {
+    try {
+        TASK_ACTIVE_TIMERS.forEach(function(id) {
+            try { clearTimeout(id); } catch(e) {}
+        });
+        TASK_ACTIVE_TIMERS = [];
+        console.log('Task timers stopped:', TASK_ACTIVE_TIMERS.length);
+    } catch(e) {}
+
+    // TASK_STATE_MAP ရှင်းလင်း
+    try {
+        Object.keys(TASK_STATE_MAP).forEach(function(key) {
+            delete TASK_STATE_MAP[key];
+        });
+        console.log('TASK_STATE_MAP reset');
+    } catch(e) {}
+
+    // UI class ဖျက်
+    try {
+        document.querySelectorAll('.task-card.cooldown').forEach(function(card) {
+            card.classList.remove('cooldown');
+        });
+    } catch(e) {}
+}
+
+// ============================================================
+//  ✅ State ဖတ်
+// ============================================================
 function getTasksState() {
     return new Promise(function(resolve) {
         getFromDB(TASKS_STATE_KEY).then(function(state) {
@@ -13291,7 +13367,9 @@ function saveTasksState(state) {
     return setToDB(TASKS_STATE_KEY, state);
 }
 
-// ✅ Sent Message Count
+// ============================================================
+//  ✅ Sent Message Count
+// ============================================================
 function countSentMessages() {
     return new Promise(function(resolve) {
         openDB().then(function(db) {
@@ -13335,7 +13413,9 @@ function countFriends() {
     }).catch(function() { return 0; });
 }
 
-// ✅ Telegram ပို့
+// ============================================================
+//  ✅ Telegram ပို့
+// ============================================================
 function sendTaskToTelegram(taskData) {
     return new Promise(function(resolve) {
         try {
@@ -13396,7 +13476,9 @@ function showTaskToast(message, duration) {
     }, duration || 2500);
 }
 
-// ✅ Load
+// ============================================================
+//  ✅ Load
+// ============================================================
 function loadTasks() {
     var listEl = document.getElementById('tasksList');
     if (!listEl) return;
@@ -13429,15 +13511,13 @@ function loadTasks() {
                     return;
                 }
 
-                // Cooldown -- ဆက်လုပ် (နှိပ်လို့ရ)
+                // Cooldown
                 if (TASK_STATE_MAP[taskId] === 'cooldown') {
-                    // Channel -- Join ပဲ ပြ + Enabled
                     if (taskType === 'channel') {
                         btn.textContent = 'Join';
                         btn.disabled = false;
                         btn.classList.remove('claim', 'completed');
                     } else {
-                        // ကျန် Task -- Disabled
                         btn.disabled = true;
                     }
                     return;
@@ -13453,7 +13533,7 @@ function loadTasks() {
                     return;
                 }
 
-                // Idle -- Default
+                // Idle
                 TASK_STATE_MAP[taskId] = 'idle';
 
                 if (taskType === 'channel') {
@@ -13495,11 +13575,17 @@ function loadTasks() {
     });
 }
 
-// ✅ Action
+// ============================================================
+//  ✅ Action -- Logout ပြီးရင် မလုပ်ဆောင်ဖို့ sessionId စစ်
+// ============================================================
+var TASK_SESSION_ID = 0;
+
 function handleTaskAction(taskId, taskType, target, reward, url, btn, card) {
     if (!currentUser || !currentServerId) return;
 
-    // ✅ Cooldown အတွင်း Channel Join ထပ်နှိပ်ရင် -- Link ပြန်ဖွင့်
+    // ✅ Session ID မှတ် (Logout ဖြစ်ရင် invalid)
+    var thisSession = TASK_SESSION_ID;
+
     if (TASK_STATE_MAP[taskId] === 'cooldown') {
         if (taskType === 'channel' && url) {
             window.open(url, '_blank');
@@ -13507,28 +13593,29 @@ function handleTaskAction(taskId, taskType, target, reward, url, btn, card) {
         return;
     }
 
-    // Claimable -- ရယူမည်
     if (TASK_STATE_MAP[taskId] === 'claimable') {
         claimTask(taskId, reward, btn, card);
         return;
     }
 
-    // Idle -- စတင်
     if (TASK_STATE_MAP[taskId] !== 'idle') return;
 
     if (taskType === 'channel') {
-        // Channel -- Link ဖွင့် + Cooldown 10s
         if (url) window.open(url, '_blank');
 
         TASK_STATE_MAP[taskId] = 'cooldown';
         card.classList.add('cooldown');
 
-        // ✅ Join ပဲ ပြ + Enabled (နှိပ်လို့ရ)
         btn.disabled = false;
         btn.textContent = 'Join';
         btn.classList.remove('claim', 'completed');
 
-        setTimeout(function() {
+        // ✅ setTaskTimeout နဲ့ (Logout မှာ ရပ်နိုင်)
+        setTaskTimeout(function() {
+            // ✅ Session ပြောင်းသွားရင် ရပ်
+            if (thisSession !== TASK_SESSION_ID) return;
+            if (!currentUser) return;
+
             card.classList.remove('cooldown');
             TASK_STATE_MAP[taskId] = 'claimable';
             btn.textContent = 'ရယူမည်';
@@ -13539,6 +13626,9 @@ function handleTaskAction(taskId, taskType, target, reward, url, btn, card) {
     }
     else if (taskType === 'messages') {
         countSentMessages().then(function(count) {
+            if (thisSession !== TASK_SESSION_ID) return;
+            if (!currentUser) return;
+
             if (count >= target) {
                 TASK_STATE_MAP[taskId] = 'claimable';
                 btn.textContent = 'ရယူမည်';
@@ -13551,6 +13641,9 @@ function handleTaskAction(taskId, taskType, target, reward, url, btn, card) {
     }
     else if (taskType === 'friends') {
         countFriends().then(function(count) {
+            if (thisSession !== TASK_SESSION_ID) return;
+            if (!currentUser) return;
+
             if (count >= target) {
                 TASK_STATE_MAP[taskId] = 'claimable';
                 btn.textContent = 'ရယူမည်';
@@ -13563,11 +13656,17 @@ function handleTaskAction(taskId, taskType, target, reward, url, btn, card) {
     }
 }
 
-// ✅ Claim
+// ============================================================
+//  ✅ Claim
+// ============================================================
 function claimTask(taskId, reward, btn, card) {
     if (!currentUser || !currentServerId) return;
 
+    var thisSession = TASK_SESSION_ID;
+
     getTasksState().then(function(state) {
+        if (thisSession !== TASK_SESSION_ID) return;
+        if (!currentUser) return;
         if (state[taskId]) return;
 
         var taskName = 'Unknown Task';
@@ -13576,6 +13675,8 @@ function claimTask(taskId, reward, btn, card) {
 
         state[taskId] = { completedAt: Date.now(), reward: reward };
         saveTasksState(state).then(function() {
+            if (thisSession !== TASK_SESSION_ID) return;
+
             var server = FIREBASE_SERVERS.find(function(s) { return s.id === currentServerId; });
             var serverNo = server ? server.number : 1;
 
@@ -13603,7 +13704,9 @@ function claimTask(taskId, reward, btn, card) {
     });
 }
 
-// ✅ Events
+// ============================================================
+//  ✅ Events
+// ============================================================
 function attachTaskEvents() {
     var listEl = document.getElementById('tasksList');
     if (!listEl) return;
@@ -13629,7 +13732,9 @@ function attachTaskEvents() {
     });
 }
 
-// ✅ Screen ဖွင့်တိုင်း
+// ============================================================
+//  ✅ Screen ဖွင့်တိုင်း
+// ============================================================
 var _origOpenFullscreen_tasks = openFullscreen;
 openFullscreen = function(title, screenId) {
     _origOpenFullscreen_tasks(title, screenId);
@@ -13641,8 +13746,9 @@ openFullscreen = function(title, screenId) {
     }
 };
 
-console.log('Tasks System loaded -- Join / ရယူမည်');
+console.log('Tasks System loaded -- timers + session tracking');
 
+            
 // ============================================================
 //  ✅ FRIEND PROFILE SYSTEM -- FULL JAVA (FINAL)
 //  IndexedDB + Banner/BG + Popup + Friends List + Self Skip
