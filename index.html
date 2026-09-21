@@ -7731,6 +7731,46 @@ if (firstLoginSaveBtn) {
 }
 
 // ============================================================
+//  FIREBASE AUTH RESTORE GUARD
+//  Browser re-entry can restore IndexedDB faster than Firebase Auth.
+//  Do not enter the app until the selected server's Google Auth session
+//  has been restored; otherwise RTDB write operations (Block/Delete/etc.)
+//  can silently fail after a browser restart.
+// ============================================================
+function waitForFirebaseAuth(serverId, timeoutMs) {
+    timeoutMs = timeoutMs || 8000;
+    return new Promise(function(resolve) {
+        var auth = getAuthForServer(serverId);
+        if (!auth) { resolve(false); return; }
+        if (auth.currentUser) { resolve(true); return; }
+
+        var finished = false;
+        var timer = setTimeout(function() {
+            if (finished) return;
+            finished = true;
+            try { unsubscribe(); } catch(e) {}
+            resolve(!!auth.currentUser);
+        }, timeoutMs);
+
+        var unsubscribe = auth.onAuthStateChanged(function(user) {
+            if (finished) return;
+            if (user) {
+                finished = true;
+                clearTimeout(timer);
+                try { unsubscribe(); } catch(e) {}
+                resolve(true);
+            }
+        }, function() {
+            if (finished) return;
+            finished = true;
+            clearTimeout(timer);
+            try { unsubscribe(); } catch(e) {}
+            resolve(false);
+        });
+    });
+}
+
+// ============================================================
 //  CHECK SESSION (Auto-Login)
 // ============================================================
 function checkSession() {
@@ -7779,15 +7819,22 @@ function checkSession() {
                     currentDb = getDbForServer(serverId);
                     currentAuth = getAuthForServer(serverId);
                     
-                    if (userData.isFirstLogin === undefined || userData.isFirstLogin === true) {
-                        setTimeout(function() {
-                            showFirstLoginPopup();
-                        }, 300);
-                    } else {
-                        enterApp(currentUser);
-                    }
-                    
-                    resolve(true);
+                    waitForFirebaseAuth(serverId, 10000).then(function(authReady) {
+                        if (!authReady) {
+                            console.warn('Firebase Auth restore timed out; returning to login.');
+                            clearSessionFromDB();
+                            resetAllInMemoryState();
+                            resolve(false);
+                            return;
+                        }
+
+                        if (userData.isFirstLogin === undefined || userData.isFirstLogin === true) {
+                            setTimeout(function() { showFirstLoginPopup(); }, 300);
+                        } else {
+                            enterApp(currentUser);
+                        }
+                        resolve(true);
+                    });
                 } else {
                     getUserFromFirebase(email, serverId).then(function(user) {
                         if (user) {
@@ -7825,14 +7872,20 @@ function checkSession() {
                                 currentDb = getDbForServer(serverId);
                                 currentAuth = getAuthForServer(serverId);
                                 
-                                if (userData.isFirstLogin === undefined || userData.isFirstLogin === true) {
-                                    setTimeout(function() {
-                                        showFirstLoginPopup();
-                                    }, 300);
-                                } else {
-                                    enterApp(currentUser);
-                                }
-                                resolve(true);
+                                waitForFirebaseAuth(serverId, 10000).then(function(authReady) {
+                                    if (!authReady) {
+                                        clearSessionFromDB();
+                                        resetAllInMemoryState();
+                                        resolve(false);
+                                        return;
+                                    }
+                                    if (userData.isFirstLogin === undefined || userData.isFirstLogin === true) {
+                                        setTimeout(function() { showFirstLoginPopup(); }, 300);
+                                    } else {
+                                        enterApp(currentUser);
+                                    }
+                                    resolve(true);
+                                });
                             }).catch(function(err) {
                                 clearSessionFromDB();
                                 resolve(false);
@@ -11284,6 +11337,9 @@ function startAppMessageListeners() {
                                     displayMessage(msg);
                                 });
                                 scrollToBottomDebounced();
+                                // Do not delete the Firestore document from the global
+                                // listener. The message must remain available across
+                                // browser re-entry and listener re-subscription.
                                 markAsSeenAndDelete(msg.messageId, sid, msg.senderServer, msg.senderId);
                             } else {
                                 renderChatList();
@@ -12021,7 +12077,14 @@ function trySendToFirestore(messageId, messageData, localMsg, attempt) {
     // ✅ Exponential backoff: 100ms → 200ms → ... → 3s max
     var backoffDelay = Math.min(100 * Math.pow(2, attempt), 3000);
 
-    var chosenServerId = pickRandomFirestoreServer();
+    // Keep one message on one stable Firestore server across retries.
+    // Random server selection on every retry could move the same message between
+    // servers and made browser re-entry/debugging unnecessarily fragile.
+    var chosenServerId = messageData.__firestoreServerId || null;
+    if (!chosenServerId) {
+        chosenServerId = pickRandomFirestoreServer();
+        if (chosenServerId) messageData.__firestoreServerId = chosenServerId;
+    }
 
     if (!chosenServerId) {
         setTimeout(function() {
@@ -12038,7 +12101,10 @@ function trySendToFirestore(messageId, messageData, localMsg, attempt) {
         return;
     }
 
-    setWithTimeout(fsdb, messageId, messageData, 10000)
+    var firestorePayload = Object.assign({}, messageData);
+    delete firestorePayload.__firestoreServerId;
+
+    setWithTimeout(fsdb, messageId, firestorePayload, 10000)
     .then(function() {
         console.log('✅ Sent to Firestore (' + chosenServerId + '):', messageId);
 
@@ -12089,13 +12155,12 @@ function generateMessageId() {
 //  SEEN + DELETE
 // ============================================================
 function markAsSeenAndDelete(messageId, serverId, friendServer, friendId) {
-    updateMessageSeen(friendServer, friendId, messageId);
-
-    var fsdb = getFirestoreForServer(serverId);
-    if (!fsdb) return;
-    fsdb.collection('messages').doc(messageId).delete()
-    .catch(function(err) { console.warn(err); });
+    // Keep the Firestore document alive.  Deleting it here caused the app-level
+    // listener and chat-room listener to race after a browser re-entry.
+    // IndexedDB is updated locally; Firestore delivery is left intact.
+    try { updateMessageSeen(friendServer, friendId, messageId); } catch(e) {}
 }
+
 
 // ============================================================
 //  CHAT INPUT
