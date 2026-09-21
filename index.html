@@ -6670,14 +6670,35 @@ body {
     .profile-card-bio {
         max-height: 60px;
     }
-}</style><script>// ============================================================
-//  STAR ARCADE -- FULL script.js (FINAL, CLEAN, NO DUPLICATES)
+}
+
+.fullscreen-overlay.profile-active .fullscreen-header {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    background: linear-gradient(to bottom, rgba(10, 10, 15, 0.7), transparent);
+    border-bottom: none;
+    pointer-events: auto;
+}
+.fullscreen-overlay.profile-active .fullscreen-header span {
+    color: #fff;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+}
+.fullscreen-overlay.profile-active .fullscreen-header button {
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    border-radius: 50%;
+    color: #fff;
+}
+.fullscreen-overlay.profile-active .fullscreen-body {
+    padding-top: 0;
+}
+</style><script>// ============================================================
+//  STAR ARCADE -- FULL script.js (FINAL, CLEAN)
 //  Version: 2026-09-21
-//  - Firebase 2 servers
-//  - IndexedDB (In-Memory + Batch Flush)
-//  - Firestore Random Server + Auto-Switch + Pending Queue
-//  - No Rate Limit, No UI Freeze
-//  - Profile, Shop, Roles, Friends, Chat, Report, Storage Monitor
 // ============================================================
 
 // ===================================================
@@ -6827,7 +6848,6 @@ var isFirstLoginProcessing = false;
 var authListeners = [];
 var fullscreenStack = [];
 
-// Profile / chat state
 var currentViewingProfile = 'self';
 var currentFriendProfileData = null;
 var openedProfileFromChatList = false;
@@ -7144,7 +7164,7 @@ function updateUserOnlineStatus(userId, serverId, online) {
 }
 
 // ===================================================
-//  LISTENERS - USER DATA
+//  LISTENERS
 // ===================================================
 function listenDiamondUpdates(userId, serverId) {
     if (authListeners.length > 0) {
@@ -7241,7 +7261,6 @@ function enterApp(user) {
     switchTab('chat');
     history.pushState(null, '', location.href);
 
-    // Background setup
     clearMemoryMessages();
     isRenderingChatList = false;
     if (renderChatListTimer) {
@@ -7300,7 +7319,7 @@ function getLeastLoadedServer() {
 }
 
 // ===================================================
-//  NEW ACCOUNT (Google)
+//  NEW ACCOUNT
 // ===================================================
 function handleNewAccount() {
     if (isProcessing) return;
@@ -7386,7 +7405,7 @@ function handleNewAccount() {
 }
 
 // ===================================================
-//  LOGIN (Google + Server No)
+//  LOGIN
 // ===================================================
 function handleLogin() {
     if (isProcessing) return;
@@ -7585,7 +7604,7 @@ function checkSession() {
 }
 
 // ===================================================
-//  CONFIG -- MARKS / FRAMES / BANNERS / BACKGROUNDS / BUBBLES / ROLES
+//  CONFIG
 // ===================================================
 var MARK_CONFIG = {
     marks: [
@@ -7751,17 +7770,15 @@ function loadProfileData() {
     var fsBio = document.getElementById('fsProfileBio');
     var fsFriends = document.getElementById('fsProfileFriends');
 
-    // Reset for self mode
     currentViewingProfile = 'self';
     currentFriendProfileData = null;
 
     var editWrap = document.querySelector('.profile-edit-btn-wrapper');
     if (editWrap) editWrap.style.display = '';
 
-    var fsFriendsEl = document.getElementById('fsProfileFriends');
-    if (fsFriendsEl) {
-        fsFriendsEl.style.cursor = '';
-        fsFriendsEl.onclick = null;
+    if (fsFriends) {
+        fsFriends.style.cursor = '';
+        fsFriends.onclick = null;
     }
 
     if (fsAvatar) fsAvatar.src = currentUser.avatar || 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"%3E%3Ccircle cx="50" cy="50" r="45" fill="%2322222e"/%3E%3Ccircle cx="50" cy="35" r="18" fill="%235a5a6a"/%3E%3Cpath d="M20 75c0-18 12-30 30-30s30 12 30 30" fill="%235a5a6a"/%3E%3C/svg%3E';
@@ -8137,7 +8154,7 @@ function confirmPurchase() {
 }
 
 // ===================================================
-//  SLIDER (Buy + Role)
+//  SLIDERS
 // ===================================================
 var isDragging = false;
 var isRoleDragging = false;
@@ -8372,9 +8389,12 @@ function confirmRolePurchase() {
 }
 
 // ===================================================
-//  FRIENDS CACHE
+//  FRIENDS CACHE / PIN / LOCK / BG
 // ===================================================
 var FRIENDS_CACHE_KEY = 'friendsCache';
+var PINNED_FRIENDS_KEY = 'pinnedFriends';
+var CHAT_BACKGROUNDS_KEY = 'chatBackgrounds';
+var LOCKED_FRIENDS_KEY = 'lockedFriends';
 
 function getFriendsCache() {
     return getFromDB(FRIENDS_CACHE_KEY).then(function(c) { return c || {}; }).catch(function() { return {}; });
@@ -8399,13 +8419,6 @@ function removeFriendFromCache(sid, uid) {
         return saveFriendsCache(cache);
     });
 }
-
-// ===================================================
-//  PINNED / LOCKED / BG
-// ===================================================
-var PINNED_FRIENDS_KEY = 'pinnedFriends';
-var CHAT_BACKGROUNDS_KEY = 'chatBackgrounds';
-var LOCKED_FRIENDS_KEY = 'lockedFriends';
 
 function getPinnedFriends() { return getFromDB(PINNED_FRIENDS_KEY).then(function(p) { return p || {}; }).catch(function() { return {}; }); }
 function savePinnedFriends(p) { return setToDB(PINNED_FRIENDS_KEY, p); }
@@ -8465,7 +8478,7 @@ function getFriendPassword(sid, uid) {
 }
 
 // ===================================================
-//  MESSAGES STORAGE -- IN-MEMORY + BATCH
+//  MESSAGES STORAGE
 // ===================================================
 var memoryMessages = {};
 var pendingSaveKeys = {};
@@ -8520,9 +8533,8 @@ function flushPendingSaves() {
         var tx = db.transaction(STORE_NAME, 'readwrite');
         var store = tx.objectStore(STORE_NAME);
         keys.forEach(function(key) { store.put({ key: key, value: memoryMessages[key] || [] }); });
-        tx.oncomplete = function() { console.log('✅ Flushed ' + keys.length + ' keys'); };
-        tx.onerror = function(e) {
-            console.warn('❌ Flush error');
+        tx.oncomplete = function() { console.log('Flushed ' + keys.length + ' keys'); };
+        tx.onerror = function() {
             keys.forEach(function(key) { pendingSaveKeys[key] = true; });
             if (!flushTimer) flushTimer = setTimeout(flushPendingSaves, 1000);
         };
@@ -8768,7 +8780,7 @@ function stopFriendsListListener() {
 }
 
 // ===================================================
-//  CHAT LIST -- Debounced + Guarded
+//  CHAT LIST
 // ===================================================
 var renderChatListTimer = null;
 var isRenderingChatList = false;
@@ -9149,7 +9161,6 @@ function applyChatRoomData(data) {
     var nameEl = document.getElementById('chatRoomName');
     var markEl = document.getElementById('chatRoomMark');
     var statusEl = document.getElementById('chatRoomStatus');
-    var playEl = document.getElementById('chatRoomPlay');
 
     if (data.avatar) avatarEl.src = data.avatar;
     nameEl.textContent = data.name || 'Player';
@@ -9169,6 +9180,7 @@ function applyChatRoomData(data) {
     if (data.online) { statusEl.textContent = 'Online'; statusEl.classList.add('online'); }
     else { statusEl.textContent = 'Offline'; statusEl.classList.remove('online'); }
 
+    var playEl = document.getElementById('chatRoomPlay');
     if (playEl) { playEl.innerHTML = ''; playEl.style.display = 'none'; }
 }
 
@@ -9329,7 +9341,7 @@ function reportMessage(msg) {
 }
 
 // ===================================================
-//  REPLY
+//  REPLY / COPY / DELETE MESSAGE
 // ===================================================
 function startReply(msg) {
     currentReplyTo = {
@@ -9413,7 +9425,7 @@ function scrollToBottomDebounced() {
 }
 
 // ===================================================
-//  SEND MESSAGE -- NO RATE LIMIT, NO FREEZE
+//  SEND MESSAGE
 // ===================================================
 var MAX_MESSAGE_LENGTH = 10000;
 var MAX_MESSAGE_BYTES = 1000000;
@@ -9426,15 +9438,9 @@ function sendMessage() {
     if (!text) return;
     if (!currentChatTarget) return;
 
-    if (text.length > MAX_MESSAGE_LENGTH) {
-        showToast('Max ' + MAX_MESSAGE_LENGTH.toLocaleString() + ' chars');
-        return;
-    }
+    if (text.length > MAX_MESSAGE_LENGTH) { showToast('Max ' + MAX_MESSAGE_LENGTH.toLocaleString() + ' chars'); return; }
     var byteSize = new Blob([text]).size;
-    if (byteSize > MAX_MESSAGE_BYTES) {
-        showToast('Max 1 MB');
-        return;
-    }
+    if (byteSize > MAX_MESSAGE_BYTES) { showToast('Max 1 MB'); return; }
 
     var target = currentChatTarget;
     var messageId = generateMessageId();
@@ -9477,7 +9483,6 @@ function sendMessage() {
         seen: false
     };
 
-    // 1. Input reset immediately
     input.value = '';
     input.style.height = '';
     input.style.borderColor = '';
@@ -9488,16 +9493,11 @@ function sendMessage() {
 
     clearReplyState();
 
-    // 2. UI update in next frame
     requestAnimationFrame(function() { displayMessage(localMsg); });
-
-    // 3. Debounced scroll
     scrollToBottomDebounced();
 
-    // 4. Save to IndexedDB (async)
     saveMessageToLocalDB(localMsg).catch(function(err) { console.warn('IDB fail:', err); });
 
-    // 5. Firestore on next tick
     setTimeout(function() {
         trySendToFirestore(messageId, messageData, localMsg, 0);
     }, 0);
@@ -9532,7 +9532,7 @@ function trySendToFirestore(messageId, messageData, localMsg, attempt) {
 
     setWithTimeout(fsdb, messageId, messageData, 10000)
     .then(function() {
-        console.log('✅ Sent (' + chosenServerId + '):', messageId);
+        console.log('Sent (' + chosenServerId + '):', messageId);
         localMsg.serverId = chosenServerId;
         saveMessageToLocalDB(localMsg);
         removePendingMessage(messageId);
@@ -9949,7 +9949,7 @@ function stopAppMessageListeners() {
 }
 
 // ===================================================
-//  FRIEND PROFILE (reuse fs-profile)
+//  FRIEND PROFILE + POPUP
 // ===================================================
 function attachChatListAvatarClick() {
     var chatList = document.getElementById('chatList');
@@ -10019,7 +10019,6 @@ function loadFriendProfileIntoFsProfile(d) {
             : '<span class="bio-placeholder">No bio yet...</span>';
     }
 
-    // Frame / Banner / Background / Roles
     var frameImg = FRAME_CONFIG.frames.find(function(f) { return String(f.id) === String(d.frameUse); });
     var profileFrameOverlay = document.getElementById('profileFrameOverlay');
     if (profileFrameOverlay) {
@@ -10292,7 +10291,7 @@ function addFriendFromList(targetData, cb) {
 }
 
 // ===================================================
-//  ONLINE SYSTEM
+//  ONLINE
 // ===================================================
 function setMyOnlineStatus(isOnline) {
     if (!currentUser || !currentServerId) return Promise.resolve();
@@ -10339,7 +10338,7 @@ function detachOnlineEventListeners() {
 }
 
 // ===================================================
-//  FULLSCREEN
+//  FULLSCREEN -- with profile-active fix
 // ===================================================
 function openFullscreen(title, screenId) {
     if (fullscreenStack.length > 0) {
@@ -10359,6 +10358,13 @@ function openFullscreen(title, screenId) {
     fullscreenOverlay.classList.add('active');
     document.body.style.overflow = 'hidden';
 
+    // ✅ Profile screen အတွက် profile-active class
+    if (screenId === 'fs-profile') {
+        fullscreenOverlay.classList.add('profile-active');
+    } else {
+        fullscreenOverlay.classList.remove('profile-active');
+    }
+
     if (screenId === 'fs-settings') setTimeout(loadStorageMonitor, 150);
     if (screenId === 'fs-shop') loadShop();
 }
@@ -10366,12 +10372,19 @@ function openFullscreen(title, screenId) {
 function closeFullscreen() {
     fullscreenOverlay.classList.remove('active');
     fullscreenOverlay.classList.remove('chat-room-active');
+    fullscreenOverlay.classList.remove('profile-active');
     document.body.style.overflow = '';
     fullscreenStack = [];
     openedProfileFromChatList = false;
 }
 
 function goBackFullscreen() {
+    // ✅ Profile-active class ဖျက်
+    if (fullscreenStack[fullscreenStack.length - 1] &&
+        fullscreenStack[fullscreenStack.length - 1].screenId === 'fs-profile') {
+        fullscreenOverlay.classList.remove('profile-active');
+    }
+
     if (openedProfileFromChatList) {
         openedProfileFromChatList = false;
         currentViewingProfile = 'self';
@@ -10382,7 +10395,9 @@ function goBackFullscreen() {
         if (fsFriends) { fsFriends.style.cursor = ''; fsFriends.onclick = null; }
         var fsId = document.getElementById('fsProfileId');
         if (fsId) { fsId.style.display = ''; fsId.onclick = copyUserId; }
-        fullscreenOverlay.classList.remove('active', 'chat-room-active');
+        fullscreenOverlay.classList.remove('active');
+        fullscreenOverlay.classList.remove('chat-room-active');
+        fullscreenOverlay.classList.remove('profile-active');
         document.body.style.overflow = '';
         fullscreenStack = [];
         return;
@@ -10408,6 +10423,13 @@ function goBackFullscreen() {
         document.querySelectorAll('.fs-screen').forEach(function(s) { s.classList.add('hidden'); });
         var target = $(prev.screenId);
         if (target) target.classList.remove('hidden');
+
+        // ✅ နောက် screen က profile ဖြစ်လား စစ်
+        if (prev.screenId === 'fs-profile') {
+            fullscreenOverlay.classList.add('profile-active');
+        } else {
+            fullscreenOverlay.classList.remove('profile-active');
+        }
     }
 }
 
@@ -10594,7 +10616,7 @@ function clearAllMessagesData() {
 }
 
 // ===================================================
-//  LOG OUT SYSTEM
+//  LOG OUT
 // ===================================================
 function getAllKeysWithPrefix(prefix) {
     return new Promise(function(resolve) {
@@ -10694,7 +10716,7 @@ function resetAllInMemoryState() {
 }
 
 function resetUIAfterLogout() {
-    try { fullscreenOverlay.classList.remove('active', 'chat-room-active'); } catch(e) {}
+    try { fullscreenOverlay.classList.remove('active', 'chat-room-active', 'profile-active'); } catch(e) {}
     document.body.style.overflow = '';
     try { sidebar.classList.remove('open'); sidebarOverlay.classList.remove('active'); } catch(e) {}
     try { appWrapper.classList.add('hidden'); } catch(e) {}
@@ -10866,19 +10888,17 @@ function showLogoutOptionsPopup() {
 }
 
 // ===================================================
-//  INIT -- DOMContentLoaded
+//  INIT
 // ===================================================
 document.addEventListener('DOMContentLoaded', function() {
     initDomRefs();
 
-    // Login / auth
     if (newAccountBtn) newAccountBtn.addEventListener('click', handleNewAccount);
     if (loginBtn) loginBtn.addEventListener('click', function() { if (!isProcessing) showLoginPopup(); });
     if (loginPopupClose) loginPopupClose.addEventListener('click', closeLoginPopup);
     if (loginPopup) loginPopup.addEventListener('click', function(e) { if (e.target === loginPopup) closeLoginPopup(); });
     if (loginSubmitBtn) loginSubmitBtn.addEventListener('click', handleLogin);
 
-    // First login popup
     if (firstLoginAvatar) firstLoginAvatar.addEventListener('click', function() { firstLoginAvatarInput.click(); });
     if (firstLoginAvatarInput) firstLoginAvatarInput.addEventListener('change', function(e) {
         var f = e.target.files[0];
@@ -10889,19 +10909,16 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     if (firstLoginSaveBtn) firstLoginSaveBtn.addEventListener('click', handleFirstLoginSave);
 
-    // Sidebar nav
     if (sidebarToggleBtn) sidebarToggleBtn.addEventListener('click', openSidebar);
     if (sidebarCloseBtn) sidebarCloseBtn.addEventListener('click', closeSidebar);
     if (sidebarOverlay) sidebarOverlay.addEventListener('click', closeSidebar);
 
-    // Top bar
     if (searchContainer) searchContainer.addEventListener('click', function() { openFullscreen('Search', 'fs-search'); });
     if (coinCard) coinCard.addEventListener('click', function() { openFullscreen('Diamonds', 'fs-coin'); });
     if (mailBtn) mailBtn.addEventListener('click', function() { openFullscreen('Mail', 'fs-mail'); });
     if (fullscreenBackBtn) fullscreenBackBtn.addEventListener('click', goBackFullscreen);
     if (fullscreenOverlay) fullscreenOverlay.addEventListener('click', function(e) { if (e.target === fullscreenOverlay) closeFullscreen(); });
 
-    // Sidebar buttons
     document.querySelectorAll('.sidebar-btn[data-action]').forEach(function(btn) {
         btn.addEventListener('click', function() {
             var action = btn.dataset.action;
@@ -10912,10 +10929,8 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Profile
     if (profileBtn) profileBtn.addEventListener('click', function() { loadProfileData(); openFullscreen('Profile', 'fs-profile'); });
 
-    // Edit profile
     var openEditBtn = document.getElementById('openEditProfileBtn');
     if (openEditBtn) openEditBtn.addEventListener('click', function() {
         selectedItems.frame = currentUser.frameUse || 'none';
@@ -10952,7 +10967,6 @@ document.addEventListener('DOMContentLoaded', function() {
     var saveEditBtn = document.getElementById('saveEditProfileBtn');
     if (saveEditBtn) saveEditBtn.addEventListener('click', saveEditProfile);
 
-    // Shop tabs
     document.querySelectorAll('.shop-tab-btn').forEach(function(btn) {
         btn.addEventListener('click', function() {
             document.querySelectorAll('.shop-tab-btn').forEach(function(b) { b.classList.remove('active'); });
@@ -10965,19 +10979,16 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Buy popup
     var buyCloseBtn = document.getElementById('buyPopupClose');
     if (buyCloseBtn) buyCloseBtn.addEventListener('click', closeBuyPopup);
     var buyPopup = document.getElementById('buyPopup');
     if (buyPopup) buyPopup.addEventListener('click', function(e) { if (e.target === buyPopup) closeBuyPopup(); });
 
-    // Role buy popup
     var roleBuyCloseBtn = document.getElementById('roleBuyPopupClose');
     if (roleBuyCloseBtn) roleBuyCloseBtn.addEventListener('click', closeRoleBuyPopup);
     var roleBuyPopup = document.getElementById('roleBuyPopup');
     if (roleBuyPopup) roleBuyPopup.addEventListener('click', function(e) { if (e.target === roleBuyPopup) closeRoleBuyPopup(); });
 
-    // Search events
     var sBtn = document.getElementById('searchBtn');
     if (sBtn) sBtn.addEventListener('click', performSearch);
     var sId = document.getElementById('searchUserId');
@@ -10985,7 +10996,6 @@ document.addEventListener('DOMContentLoaded', function() {
     var sSn = document.getElementById('searchServerNo');
     if (sSn) sSn.addEventListener('keypress', function(e) { if (e.key === 'Enter') performSearch(); });
 
-    // Chat input
     var ci = document.getElementById('chatMessageInput');
     var cb = document.getElementById('chatClipBtn');
     var cs = document.getElementById('chatSendBtn');
@@ -11016,29 +11026,23 @@ document.addEventListener('DOMContentLoaded', function() {
         autoResize();
     }
 
-    // Chat room menu button
     var crmb = document.getElementById('chatRoomMenuBtn');
     if (crmb) crmb.addEventListener('click', function(e) { e.stopPropagation(); showChatRoomMenu(); });
 
-    // Chat room back button
     var crbb = document.getElementById('chatRoomBackBtn');
     if (crbb) crbb.addEventListener('click', function() { clearReplyState(); goBackFullscreen(); });
 
-    // Copy user ID
     var fid = document.getElementById('fsProfileId');
     if (fid) fid.addEventListener('click', copyUserId);
 
-    // Storage monitor buttons
     var cf = document.getElementById('clearFriendsBtn');
     if (cf) cf.addEventListener('click', clearAllFriendsData);
-    var cm = document.getElementById('clearMessagesBtn');
-    if (cm) cm.addEventListener('click', clearAllMessagesData);
+    var cm2 = document.getElementById('clearMessagesBtn');
+    if (cm2) cm2.addEventListener('click', clearAllMessagesData);
 
-    // Logout button
     var lb = document.getElementById('settingsLogoutBtn');
     if (lb) lb.addEventListener('click', showLogoutOptionsPopup);
 
-    // Escape key
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape') {
             if (fullscreenOverlay && fullscreenOverlay.classList.contains('active')) closeFullscreen();
@@ -11047,13 +11051,11 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Back button
     window.addEventListener('popstate', function() {
         if (fullscreenOverlay && fullscreenOverlay.classList.contains('active')) closeFullscreen();
         else if (sidebar && sidebar.classList.contains('open')) closeSidebar();
     });
 
-    // Bottom nav
     if (bottomNav) {
         bottomNav.addEventListener('click', function(e) {
             var btn = e.target.closest('.nav-btn');
@@ -11068,11 +11070,9 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Init sliders
     setTimeout(initSlider, 100);
     setTimeout(initRoleSlider, 200);
 
-    // Bio input
     var bioInput = document.getElementById('editBioInput');
     if (bioInput) {
         bioInput.addEventListener('input', function() {
@@ -11097,9 +11097,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // ===================================================
-    //  BOOT
-    // ===================================================
     authOverlay.style.display = 'none';
     authOverlay.classList.add('hidden');
     appWrapper.classList.add('hidden');
