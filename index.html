@@ -9949,13 +9949,13 @@ function showLogoutOptionsPopup() {
 
 console.log('Log Out System FULL FINAL -- Universal IndexedDB Clear (any future keys auto-included)');
 
-// ============================================================
-//  STAR ARCADE -- FULL JS (FINAL)
-//  - Sender UI Freeze Fix (requestAnimationFrame + idleCallback)
-//  - Token Bucket Rate Limit (5 tokens, +1/5s, empty→10s)
-//  - Firestore Random Server + Auto-Switch (no disable)
+   // ============================================================
+//  STAR ARCADE -- FULL JS (FINAL -- NO FREEZE, NO RATE LIMIT)
+//  - Message ဆက်တိုက် ပို့ရ (Rate limit မရှိ)
+//  - UI Freeze မဖြစ် (requestAnimationFrame + idleCallback)
+//  - Firestore Random Server + Auto-Switch
+//  - Pending queue (offline / failed → auto retry)
 //  - IndexedDB Batch + In-Memory
-//  - Debounced + Guarded renderChatList
 // ============================================================
 
 // ============================================================
@@ -9977,7 +9977,7 @@ function getFirestoreForServer(serverId) {
 }
 
 // ============================================================
-//  FIRESTORE -- Random Selection (NO disable, always retry)
+//  FIRESTORE -- Random Selection (NO disable)
 // ============================================================
 function pickRandomFirestoreServer() {
     if (FIREBASE_SERVERS.length === 0) return null;
@@ -10191,7 +10191,7 @@ function getMessagesWith(serverId, userId) {
     });
 }
 
-// ✅ saveMessageToLocalDB -- requestIdleCallback for sort (no main thread block)
+// ✅ Async sort (requestIdleCallback)
 function saveMessageToLocalDB(msg) {
     var friendId = msg.type === 'sent' ? msg.receiverId : msg.senderId;
     var friendServer = msg.type === 'sent' ? msg.receiverServer : msg.senderServer;
@@ -10212,7 +10212,7 @@ function saveMessageToLocalDB(msg) {
     memoryMessages[key] = messages;
     pendingSaveKeys[key] = true;
 
-    // ✅ Sort ကို idle time မှာ (main thread block မဖြစ်)
+    // ✅ Sort ကို idle time မှာ
     if (window.requestIdleCallback) {
         requestIdleCallback(function() {
             messages.sort(function(a, b) { return a.timestamp - b.timestamp; });
@@ -10360,7 +10360,7 @@ function clearMemoryMessages() {
 }
 
 // ============================================================
-//  ✅ SCROLL DEBOUNCE
+//  SCROLL DEBOUNCE
 // ============================================================
 var scrollToBottomTimer = null;
 
@@ -11386,8 +11386,6 @@ function openChatRoomNow(target) {
     if (clipBtn) clipBtn.classList.remove('hidden');
     if (sendBtn) sendBtn.classList.add('hidden');
 
-    resetMessageRateLimit();
-
     getFriendFromCache(target.serverId, target.userId).then(function(cached) {
         if (cached) applyChatRoomData(cached);
     });
@@ -11858,61 +11856,7 @@ function showToast(message) {
 }
 
 // ============================================================
-//  TOKEN BUCKET RATE LIMIT -- 5 tokens, +1 every 5s
-//  Empty bucket → 10s cooldown
-// ============================================================
-var BUCKET_MAX = 5;
-var BUCKET_REFILL_INTERVAL = 5000;
-var BUCKET_EMPTY_COOLDOWN = 10000;
-
-var bucketTokens = BUCKET_MAX;
-var bucketLastRefill = Date.now();
-var bucketCooldownUntil = 0;
-
-function refillBucket() {
-    var now = Date.now();
-    var elapsed = now - bucketLastRefill;
-    var tokensToAdd = Math.floor(elapsed / BUCKET_REFILL_INTERVAL);
-
-    if (tokensToAdd > 0) {
-        bucketTokens = Math.min(BUCKET_MAX, bucketTokens + tokensToAdd);
-        bucketLastRefill = bucketLastRefill + (tokensToAdd * BUCKET_REFILL_INTERVAL);
-    }
-}
-
-function resetMessageRateLimit() {
-    bucketTokens = BUCKET_MAX;
-    bucketLastRefill = Date.now();
-    bucketCooldownUntil = 0;
-    console.log('Rate limit reset -- ' + BUCKET_MAX + ' tokens');
-}
-
-function checkRateLimit() {
-    var now = Date.now();
-
-    if (now < bucketCooldownUntil) {
-        var remain = Math.ceil((bucketCooldownUntil - now) / 1000);
-        showToast('ခေတ္တစောင့်ပါ... ' + remain + 's');
-        return false;
-    }
-
-    refillBucket();
-
-    if (bucketTokens >= 1) {
-        bucketTokens--;
-        console.log('Token used -- remaining: ' + bucketTokens);
-        return true;
-    }
-
-    bucketCooldownUntil = now + BUCKET_EMPTY_COOLDOWN;
-    var remain = Math.ceil(BUCKET_EMPTY_COOLDOWN / 1000);
-    showToast('Message 5 ခု ပြည့်သွား -- ' + remain + 's စောင့်ပါ');
-    console.log('Bucket empty → cooldown ' + remain + 's');
-    return false;
-}
-
-// ============================================================
-//  SEND MESSAGE -- UI Freeze Fix
+//  SEND MESSAGE -- NO RATE LIMIT, NO FREEZE
 // ============================================================
 var MAX_MESSAGE_LENGTH = 10000;
 var MAX_MESSAGE_BYTES = 1000000;
@@ -11928,6 +11872,7 @@ function sendMessage() {
     if (!text) return;
     if (!currentChatTarget) return;
 
+    // Length Check
     if (text.length > MAX_MESSAGE_LENGTH) {
         showToast('Message က ' + MAX_MESSAGE_LENGTH.toLocaleString() + ' စာလုံးထက် မကျော်ရပါ');
         return;
@@ -11936,10 +11881,6 @@ function sendMessage() {
     var byteSize = new Blob([text]).size;
     if (byteSize > MAX_MESSAGE_BYTES) {
         showToast('Message က 1 MB ထက် မကျော်ရပါ');
-        return;
-    }
-
-    if (!checkRateLimit()) {
         return;
     }
 
@@ -11984,7 +11925,7 @@ function sendMessage() {
         seen: false
     };
 
-    // ✅ Input reset ကို ချက်ချင်း (user ချက်ချင်း ဆက်ရိုက်လို့ရ)
+    // ✅ 1. Input reset ကို ချက်ချင်း
     input.value = '';
     input.style.height = '';
     input.style.borderColor = '';
@@ -11995,48 +11936,105 @@ function sendMessage() {
 
     clearReplyState();
 
-    // ✅ UI update -- requestAnimationFrame (main thread block မဖြစ်)
+    // ✅ 2. UI update -- requestAnimationFrame
     requestAnimationFrame(function() {
         displayMessage(localMsg);
     });
 
-    // ✅ Debounced scroll
+    // ✅ 3. Scroll debounced
     scrollToBottomDebounced();
 
-    // ✅ IndexedDB -- fire and forget (async)
+    // ✅ 4. IndexedDB async
     saveMessageToLocalDB(localMsg).catch(function(err) {
-        console.warn('IndexedDB save failed (continuing):', err);
+        console.warn('IndexedDB save failed:', err);
     });
 
-    // ✅ Firestore -- next tick (main thread block မဖြစ်)
+    // ✅ 5. Firestore next tick
     setTimeout(function() {
         trySendToFirestore(messageId, messageData, localMsg, 0);
     }, 0);
 }
 
-// ✅ Firestore Send with Auto-Switch (recursive)
-var MAX_FIRESTORE_RETRY = 10;
+// ============================================================
+//  FIRESTORE SEND -- Auto-Switch + Backoff + Pending Queue
+// ============================================================
+var MAX_FIRESTORE_RETRY = 20;
+var PENDING_MESSAGES_KEY = 'pendingMessages';
+
+function isOnline() {
+    return navigator.onLine;
+}
+
+function savePendingMessage(item) {
+    return getFromDB(PENDING_MESSAGES_KEY).then(function(list) {
+        var messages = Array.isArray(list) ? list : [];
+        if (!messages.some(function(m) { return m.messageId === item.messageId; })) {
+            messages.push(item);
+        }
+        return setToDB(PENDING_MESSAGES_KEY, messages);
+    });
+}
+
+function removePendingMessage(messageId) {
+    return getFromDB(PENDING_MESSAGES_KEY).then(function(list) {
+        var messages = Array.isArray(list) ? list : [];
+        messages = messages.filter(function(m) { return m.messageId !== messageId; });
+        return setToDB(PENDING_MESSAGES_KEY, messages);
+    });
+}
+
+function retryPendingMessages() {
+    return getFromDB(PENDING_MESSAGES_KEY).then(function(list) {
+        var messages = Array.isArray(list) ? list : [];
+        if (messages.length === 0) return;
+        console.log('Retrying ' + messages.length + ' pending messages');
+        messages.forEach(function(item) {
+            trySendToFirestore(item.messageId, item.messageData, item.localMsg, 0);
+        });
+    });
+}
+
+// ✅ Online / Offline listeners
+window.addEventListener('online', function() {
+    console.log('Online → retry pending');
+    showToast('Internet ပြန်ရ -- ပို့နေတယ်...');
+    retryPendingMessages();
+});
+
+window.addEventListener('offline', function() {
+    console.log('Offline');
+    showToast('Internet မရှိ');
+});
 
 function trySendToFirestore(messageId, messageData, localMsg, attempt) {
     if (attempt >= MAX_FIRESTORE_RETRY) {
-        console.error('Max Firestore retry reached');
-        showToast('Message send failed -- please retry');
+        // ✅ Failed → pending queue
+        console.log('Max retry -- queuing for later');
+        savePendingMessage({
+            messageId: messageId,
+            messageData: messageData,
+            localMsg: localMsg
+        });
         return;
     }
+
+    // ✅ Exponential backoff: 100ms → 200ms → ... → 3s max
+    var backoffDelay = Math.min(100 * Math.pow(2, attempt), 3000);
 
     var chosenServerId = pickRandomFirestoreServer();
 
     if (!chosenServerId) {
-        showToast('No server available');
+        setTimeout(function() {
+            trySendToFirestore(messageId, messageData, localMsg, attempt + 1);
+        }, backoffDelay);
         return;
     }
 
     var fsdb = getFirestoreForServer(chosenServerId);
     if (!fsdb) {
-        // ✅ Next tick retry (no block)
         setTimeout(function() {
             trySendToFirestore(messageId, messageData, localMsg, attempt + 1);
-        }, 0);
+        }, backoffDelay);
         return;
     }
 
@@ -12047,15 +12045,16 @@ function trySendToFirestore(messageId, messageData, localMsg, attempt) {
         localMsg.serverId = chosenServerId;
         saveMessageToLocalDB(localMsg);
 
+        removePendingMessage(messageId);
+
         renderChatList();
     })
     .catch(function(err) {
         console.warn('Send error (' + chosenServerId + '):', err.code, '-- retry', attempt + 1);
 
-        // ✅ Next tick retry (no block)
         setTimeout(function() {
             trySendToFirestore(messageId, messageData, localMsg, attempt + 1);
-        }, 0);
+        }, backoffDelay);
     });
 }
 
@@ -12064,7 +12063,7 @@ function setWithTimeout(fsdb, messageId, messageData, timeoutMs) {
 
     return new Promise(function(resolve, reject) {
         var timeoutId = setTimeout(function() {
-            reject({ code: 'timeout', message: 'Firestore timeout' });
+            reject({ code: 'timeout' });
         }, timeoutMs);
 
         fsdb.collection('messages').doc(messageId).set(messageData)
@@ -12527,7 +12526,6 @@ enterApp = function(user) {
         clearTimeout(renderChatListTimer);
         renderChatListTimer = null;
     }
-    resetMessageRateLimit();
 
     _origEnterApp_final(user);
 
@@ -12538,6 +12536,11 @@ enterApp = function(user) {
         goOnline();
         attachOnlineEventListeners();
     }, 900);
+
+    // ✅ Pending messages retry
+    setTimeout(function() {
+        retryPendingMessages();
+    }, 1500);
 };
 
 // ============================================================
@@ -12561,7 +12564,6 @@ logoutUser = function() {
         clearTimeout(renderChatListTimer);
         renderChatListTimer = null;
     }
-    resetMessageRateLimit();
 
     chatRoomUnlocked = {};
 
@@ -12573,7 +12575,7 @@ logoutUser = function() {
     _origLogoutUser_final();
 };
 
-console.log('STAR ARCADE -- FINAL: Sender UI Freeze Fix + Token Bucket + Auto-Switch');   
+console.log('STAR ARCADE -- FINAL: No Rate Limit + No Freeze + Pending Queue');
     
 
 // ============================================================
