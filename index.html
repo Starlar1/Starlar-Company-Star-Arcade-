@@ -9951,9 +9951,10 @@ console.log('Log Out System FULL FINAL -- Universal IndexedDB Clear (any future 
 
 // ============================================================
 //  STAR ARCADE -- FULL JS (FINAL)
-//  - Firestore Multi-Server Auto-Switch (no disable)
-//  - Rate Limit: 5 messages / 10s cooldown
-//  - IndexedDB Batch + In-Memory
+//  - Rate Limit: Token Bucket (5 tokens, +1 every 5s)
+//  - Empty bucket → 10s cooldown
+//  - Firestore: Random Server + Auto-Switch (no disable)
+//  - IndexedDB: Batch + In-Memory
 //  - Debounced + Guarded renderChatList
 // ============================================================
 
@@ -9978,28 +9979,18 @@ function getFirestoreForServer(serverId) {
 // ============================================================
 //  ✅ FIRESTORE -- Random Selection (NO disable, always retry)
 // ============================================================
-
-// ✅ ကျပန်း server ရွေး (exhausted မစစ် -- အားလုံး ရွေးနိုင်)
 function pickRandomFirestoreServer() {
     if (FIREBASE_SERVERS.length === 0) return null;
     var idx = Math.floor(Math.random() * FIREBASE_SERVERS.length);
     return FIREBASE_SERVERS[idx].id;
 }
 
-// ✅ Compatibility functions (အရင် code တွေအတွက်)
-function initFirestoreStatus() {
-    // No-op (status tracking မလိုတော့)
-}
+function initFirestoreStatus() {}
 function markServerExhausted(serverId, error) {
-    // No-op (server ကို ပိတ်မထားတော့)
     console.log('Server error (not disabled):', serverId, error ? error.code : '');
 }
-function resetFirestoreStatus() {
-    // No-op
-}
-function checkExpiredCooldowns() {
-    // No-op
-}
+function resetFirestoreStatus() {}
+function checkExpiredCooldowns() {}
 
 // ============================================================
 //  PLAY CONFIG
@@ -11844,61 +11835,73 @@ function showToast(message) {
 }
 
 // ============================================================
-//  ✅ SEND MESSAGE -- RATE LIMIT + AUTO-SWITCH
-//  Rate: 5 messages / 10s cooldown
-//  Server: random + auto-switch (no disable)
+//  ✅ TOKEN BUCKET RATE LIMIT -- 5 tokens, +1 every 5s
+//  Empty bucket → 10s cooldown
 // ============================================================
 
-var MAX_MESSAGE_LENGTH = 10000;
-var MAX_MESSAGE_BYTES = 1000000;
+var BUCKET_MAX = 5;              // Max tokens = 5
+var BUCKET_REFILL_INTERVAL = 5000; // +1 token every 5s
+var BUCKET_EMPTY_COOLDOWN = 10000; // Empty → 10s cooldown
 
-// ✅ Rate Limit Setup
-var RATE_LIMIT_MAX = 5;              // 5 messages
-var RATE_LIMIT_WINDOW = 10000;       // 10 seconds
-var RATE_LIMIT_COOLDOWN = 10000;     // 10 seconds cooldown after limit
+var bucketTokens = BUCKET_MAX;
+var bucketLastRefill = Date.now();
+var bucketCooldownUntil = 0;
+var bucketRefillTimer = null;
 
-var sentTimestamps = [];             // Recent send timestamps
-var cooldownUntil = 0;               // Cooldown expiry timestamp
+// ✅ Refill tokens based on elapsed time
+function refillBucket() {
+    var now = Date.now();
+    var elapsed = now - bucketLastRefill;
+    var tokensToAdd = Math.floor(elapsed / BUCKET_REFILL_INTERVAL);
+
+    if (tokensToAdd > 0) {
+        bucketTokens = Math.min(BUCKET_MAX, bucketTokens + tokensToAdd);
+        bucketLastRefill = bucketLastRefill + (tokensToAdd * BUCKET_REFILL_INTERVAL);
+    }
+}
 
 // ✅ Reset rate limit (chat room ဖွင့်တိုင်း)
 function resetMessageRateLimit() {
-    sentTimestamps = [];
-    cooldownUntil = 0;
-    console.log('Message rate limit reset');
+    bucketTokens = BUCKET_MAX;
+    bucketLastRefill = Date.now();
+    bucketCooldownUntil = 0;
+    console.log('Rate limit reset -- ' + BUCKET_MAX + ' tokens');
 }
 
-// ✅ Rate limit စစ်
+// ✅ Check rate limit + consume 1 token
 function checkRateLimit() {
     var now = Date.now();
 
-    // Cooldown ရှိသေးလား?
-    if (now < cooldownUntil) {
-        var remain = Math.ceil((cooldownUntil - now) / 1000);
+    // Cooldown ရှိသေးလား? (bucket empty ဖြစ်ခဲ့ရင်)
+    if (now < bucketCooldownUntil) {
+        var remain = Math.ceil((bucketCooldownUntil - now) / 1000);
         showToast('ခေတ္တစောင့်ပါ... ' + remain + 's');
         return false;
     }
 
-    // 10 စက္ကန့်အတွင်း ပို့တဲ့ timestamps တွေ filter
-    sentTimestamps = sentTimestamps.filter(function(t) {
-        return (now - t) < RATE_LIMIT_WINDOW;
-    });
+    // Refill tokens
+    refillBucket();
 
-    // ✅ 5 ခု ပြည့်နေလား?
-    if (sentTimestamps.length >= RATE_LIMIT_MAX) {
-        cooldownUntil = now + RATE_LIMIT_COOLDOWN;
-        var remain = Math.ceil(RATE_LIMIT_COOLDOWN / 1000);
-        showToast('Message ပို့ များလွန်း -- ' + remain + 's စောင့်ပါ');
-        console.log('Rate limit hit → cooldown ' + remain + 's');
-        return false;
+    // ✅ Token ရှိလား?
+    if (bucketTokens >= 1) {
+        bucketTokens--;
+        console.log('Token used -- remaining: ' + bucketTokens);
+        return true;
     }
 
-    return true;
+    // ❌ Token မရှိ → 10s cooldown
+    bucketCooldownUntil = now + BUCKET_EMPTY_COOLDOWN;
+    var remain = Math.ceil(BUCKET_EMPTY_COOLDOWN / 1000);
+    showToast('Message 5 ခု ပြည့်သွား -- ' + remain + 's စောင့်ပါ');
+    console.log('Bucket empty → cooldown ' + remain + 's');
+    return false;
 }
 
-// ✅ Send အောင်မြင်ရင် timestamp မှတ်
-function recordMessageSend() {
-    sentTimestamps.push(Date.now());
-}
+// ============================================================
+//  ✅ SEND MESSAGE -- Rate Limit + Auto-Switch
+// ============================================================
+var MAX_MESSAGE_LENGTH = 10000;
+var MAX_MESSAGE_BYTES = 1000000;
 
 function sendMessage() {
     if (iAmBlockedByThem) {
@@ -11911,20 +11914,19 @@ function sendMessage() {
     if (!text) return;
     if (!currentChatTarget) return;
 
-    // ✅ Length Check
+    // Length Check
     if (text.length > MAX_MESSAGE_LENGTH) {
         showToast('Message က ' + MAX_MESSAGE_LENGTH.toLocaleString() + ' စာလုံးထက် မကျော်ရပါ');
         return;
     }
 
-    // ✅ Byte Size Check
     var byteSize = new Blob([text]).size;
     if (byteSize > MAX_MESSAGE_BYTES) {
         showToast('Message က 1 MB ထက် မကျော်ရပါ');
         return;
     }
 
-    // ✅ Rate Limit Check
+    // ✅ Rate Limit Check (Token Bucket)
     if (!checkRateLimit()) {
         return;
     }
@@ -11970,10 +11972,7 @@ function sendMessage() {
         seen: false
     };
 
-    // ✅ Rate limit မှတ်
-    recordMessageSend();
-
-    // ✅ UI update (ချက်ချင်း)
+    // ✅ UI update
     displayMessage(localMsg);
 
     input.value = '';
@@ -11993,7 +11992,7 @@ function sendMessage() {
         }
     }, 30);
 
-    // ✅ IndexedDB (memory) -- fire and forget
+    // ✅ IndexedDB (memory)
     saveMessageToLocalDB(localMsg).catch(function(err) {
         console.warn('IndexedDB save failed (continuing):', err);
     });
@@ -12002,8 +12001,8 @@ function sendMessage() {
     trySendToFirestore(messageId, messageData, localMsg, 0);
 }
 
-// ✅ Firestore Send with Auto-Switch (recursive, unlimited)
-var MAX_FIRESTORE_RETRY = 10;  // Safety limit (avoid infinite loop)
+// ✅ Firestore Send with Auto-Switch
+var MAX_FIRESTORE_RETRY = 10;
 
 function trySendToFirestore(messageId, messageData, localMsg, attempt) {
     if (attempt >= MAX_FIRESTORE_RETRY) {
@@ -12012,7 +12011,6 @@ function trySendToFirestore(messageId, messageData, localMsg, attempt) {
         return;
     }
 
-    // ✅ ကျပန်း server ရွေး (disable မရှိ)
     var chosenServerId = pickRandomFirestoreServer();
 
     if (!chosenServerId) {
@@ -12024,37 +12022,31 @@ function trySendToFirestore(messageId, messageData, localMsg, attempt) {
     var fsdb = getFirestoreForServer(chosenServerId);
     if (!fsdb) {
         console.warn('Firestore missing for ' + chosenServerId);
-        // ✅ Retry next server
         setTimeout(function() {
             trySendToFirestore(messageId, messageData, localMsg, attempt + 1);
         }, 100);
         return;
     }
 
-    // ✅ Send with timeout
     setWithTimeout(fsdb, messageId, messageData, 10000)
     .then(function() {
         console.log('✅ Sent to Firestore (' + chosenServerId + '):', messageId);
 
-        // ✅ localMsg serverId update + IndexedDB save
         localMsg.serverId = chosenServerId;
         saveMessageToLocalDB(localMsg);
 
-        // ✅ Debounced render
         renderChatList();
     })
     .catch(function(err) {
         var code = err.code || '';
         console.warn('Send error (' + chosenServerId + '):', code, '-- retry attempt', attempt + 1);
 
-        // ✅ Auto-switch -- next server
         setTimeout(function() {
             trySendToFirestore(messageId, messageData, localMsg, attempt + 1);
         }, 100);
     });
 }
 
-// ✅ Timeout wrapper
 function setWithTimeout(fsdb, messageId, messageData, timeoutMs) {
     timeoutMs = timeoutMs || 10000;
 
@@ -12125,7 +12117,6 @@ function markAsSeenAndDelete(messageId, serverId, friendServer, friendId) {
         }
         autoResize();
 
-        // Character Counter
         var len = this.value.length;
         if (len > 9900) {
             this.style.borderColor = '#ff4444';
@@ -12526,7 +12517,6 @@ var _origEnterApp_final = enterApp;
 enterApp = function(user) {
     initFirestoreStatus();
 
-    // ✅ Memory cache + render state + rate limit reset
     clearMemoryMessages();
     isRenderingChatList = false;
     if (renderChatListTimer) {
@@ -12562,7 +12552,6 @@ logoutUser = function() {
     try { clearReplyState(); } catch(e) {}
     if (chatRoomListener) { try { chatRoomListener.off(); } catch(e) {} chatRoomListener = null; }
 
-    // ✅ Render state + rate limit reset
     isRenderingChatList = false;
     if (renderChatListTimer) {
         clearTimeout(renderChatListTimer);
@@ -12572,7 +12561,6 @@ logoutUser = function() {
 
     chatRoomUnlocked = {};
 
-    // ✅ Pending saves flush + memory clear
     if (Object.keys(pendingSaveKeys).length > 0) {
         flushPendingSaves();
     }
@@ -12581,7 +12569,8 @@ logoutUser = function() {
     _origLogoutUser_final();
 };
 
-console.log('STAR ARCADE -- FINAL: Random Server + Auto-Switch + Rate Limit 5/10s');
+console.log('STAR ARCADE -- FINAL: Token Bucket (5 tokens, +1/5s) + Firestore Auto-Switch');
+
     
 
 // ============================================================
