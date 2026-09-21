@@ -9951,10 +9951,10 @@ console.log('Log Out System FULL FINAL -- Universal IndexedDB Clear (any future 
 
 // ============================================================
 //  STAR ARCADE -- FULL JS (FINAL)
-//  - Rate Limit: Token Bucket (5 tokens, +1 every 5s)
-//  - Empty bucket → 10s cooldown
-//  - Firestore: Random Server + Auto-Switch (no disable)
-//  - IndexedDB: Batch + In-Memory
+//  - Sender UI Freeze Fix (requestAnimationFrame + idleCallback)
+//  - Token Bucket Rate Limit (5 tokens, +1/5s, empty→10s)
+//  - Firestore Random Server + Auto-Switch (no disable)
+//  - IndexedDB Batch + In-Memory
 //  - Debounced + Guarded renderChatList
 // ============================================================
 
@@ -9977,7 +9977,7 @@ function getFirestoreForServer(serverId) {
 }
 
 // ============================================================
-//  ✅ FIRESTORE -- Random Selection (NO disable, always retry)
+//  FIRESTORE -- Random Selection (NO disable, always retry)
 // ============================================================
 function pickRandomFirestoreServer() {
     if (FIREBASE_SERVERS.length === 0) return null;
@@ -10161,7 +10161,7 @@ function getFriendPassword(serverId, userId) {
 var chatRoomUnlocked = {};
 
 // ============================================================
-//  ✅ MESSAGES STORAGE -- IN-MEMORY + BATCH FLUSH
+//  MESSAGES STORAGE -- IN-MEMORY + BATCH FLUSH
 // ============================================================
 var memoryMessages = {};
 var pendingSaveKeys = {};
@@ -10191,6 +10191,7 @@ function getMessagesWith(serverId, userId) {
     });
 }
 
+// ✅ saveMessageToLocalDB -- requestIdleCallback for sort (no main thread block)
 function saveMessageToLocalDB(msg) {
     var friendId = msg.type === 'sent' ? msg.receiverId : msg.senderId;
     var friendServer = msg.type === 'sent' ? msg.receiverServer : msg.senderServer;
@@ -10208,10 +10209,19 @@ function saveMessageToLocalDB(msg) {
         messages.push(msg);
     }
 
-    messages.sort(function(a, b) { return a.timestamp - b.timestamp; });
-
     memoryMessages[key] = messages;
     pendingSaveKeys[key] = true;
+
+    // ✅ Sort ကို idle time မှာ (main thread block မဖြစ်)
+    if (window.requestIdleCallback) {
+        requestIdleCallback(function() {
+            messages.sort(function(a, b) { return a.timestamp - b.timestamp; });
+        }, { timeout: 500 });
+    } else {
+        setTimeout(function() {
+            messages.sort(function(a, b) { return a.timestamp - b.timestamp; });
+        }, 50);
+    }
 
     if (!flushTimer) {
         flushTimer = setTimeout(flushPendingSaves, FLUSH_INTERVAL);
@@ -10347,6 +10357,26 @@ function clearMemoryMessages() {
         clearTimeout(flushTimer);
         flushTimer = null;
     }
+}
+
+// ============================================================
+//  ✅ SCROLL DEBOUNCE
+// ============================================================
+var scrollToBottomTimer = null;
+
+function scrollToBottomDebounced() {
+    if (scrollToBottomTimer) return;
+    scrollToBottomTimer = setTimeout(function() {
+        scrollToBottomTimer = null;
+        var messagesEl = document.getElementById('chatRoomMessages');
+        if (messagesEl) {
+            messagesEl.style.scrollBehavior = 'auto';
+            messagesEl.scrollTop = messagesEl.scrollHeight;
+            setTimeout(function() {
+                messagesEl.style.scrollBehavior = 'smooth';
+            }, 100);
+        }
+    }, 100);
 }
 
 // ============================================================
@@ -10675,7 +10705,7 @@ function stopFriendsListListener() {
 }
 
 // ============================================================
-//  ✅ CHAT LIST -- DEBOUNCED + GUARDED
+//  CHAT LIST -- DEBOUNCED + GUARDED (500ms)
 // ============================================================
 var renderChatListTimer = null;
 var isRenderingChatList = false;
@@ -10687,7 +10717,7 @@ function renderChatList() {
     renderChatListTimer = setTimeout(function() {
         renderChatListTimer = null;
         doRenderChatList();
-    }, 200);
+    }, 500);
 }
 
 function doRenderChatList() {
@@ -11250,13 +11280,10 @@ function startAppMessageListeners() {
                             if (currentChatTarget &&
                                 currentChatTarget.userId === msg.senderId &&
                                 currentChatTarget.serverId === msg.senderServer) {
-                                displayMessage(msg);
-                                setTimeout(function() {
-                                    var messagesEl = document.getElementById('chatRoomMessages');
-                                    if (messagesEl) {
-                                        messagesEl.scrollTo({ top: messagesEl.scrollHeight, behavior: 'smooth' });
-                                    }
-                                }, 30);
+                                requestAnimationFrame(function() {
+                                    displayMessage(msg);
+                                });
+                                scrollToBottomDebounced();
                                 markAsSeenAndDelete(msg.messageId, sid, msg.senderServer, msg.senderId);
                             } else {
                                 renderChatList();
@@ -11359,7 +11386,6 @@ function openChatRoomNow(target) {
     if (clipBtn) clipBtn.classList.remove('hidden');
     if (sendBtn) sendBtn.classList.add('hidden');
 
-    // ✅ Chat room ဖွင့်တိုင်း rate limit reset
     resetMessageRateLimit();
 
     getFriendFromCache(target.serverId, target.userId).then(function(cached) {
@@ -11477,13 +11503,10 @@ function startChatRoomMessageListeners(target) {
                         if (currentChatTarget &&
                             currentChatTarget.userId === target.userId &&
                             currentChatTarget.serverId === target.serverId) {
-                            displayMessage(msg);
-                            setTimeout(function() {
-                                var messagesEl = document.getElementById('chatRoomMessages');
-                                if (messagesEl) {
-                                    messagesEl.scrollTo({ top: messagesEl.scrollHeight, behavior: 'smooth' });
-                                }
-                            }, 30);
+                            requestAnimationFrame(function() {
+                                displayMessage(msg);
+                            });
+                            scrollToBottomDebounced();
                             markAsSeenAndDelete(msg.messageId, sid, target.serverId, target.userId);
                         }
                     }
@@ -11835,20 +11858,17 @@ function showToast(message) {
 }
 
 // ============================================================
-//  ✅ TOKEN BUCKET RATE LIMIT -- 5 tokens, +1 every 5s
+//  TOKEN BUCKET RATE LIMIT -- 5 tokens, +1 every 5s
 //  Empty bucket → 10s cooldown
 // ============================================================
-
-var BUCKET_MAX = 5;              // Max tokens = 5
-var BUCKET_REFILL_INTERVAL = 5000; // +1 token every 5s
-var BUCKET_EMPTY_COOLDOWN = 10000; // Empty → 10s cooldown
+var BUCKET_MAX = 5;
+var BUCKET_REFILL_INTERVAL = 5000;
+var BUCKET_EMPTY_COOLDOWN = 10000;
 
 var bucketTokens = BUCKET_MAX;
 var bucketLastRefill = Date.now();
 var bucketCooldownUntil = 0;
-var bucketRefillTimer = null;
 
-// ✅ Refill tokens based on elapsed time
 function refillBucket() {
     var now = Date.now();
     var elapsed = now - bucketLastRefill;
@@ -11860,7 +11880,6 @@ function refillBucket() {
     }
 }
 
-// ✅ Reset rate limit (chat room ဖွင့်တိုင်း)
 function resetMessageRateLimit() {
     bucketTokens = BUCKET_MAX;
     bucketLastRefill = Date.now();
@@ -11868,28 +11887,23 @@ function resetMessageRateLimit() {
     console.log('Rate limit reset -- ' + BUCKET_MAX + ' tokens');
 }
 
-// ✅ Check rate limit + consume 1 token
 function checkRateLimit() {
     var now = Date.now();
 
-    // Cooldown ရှိသေးလား? (bucket empty ဖြစ်ခဲ့ရင်)
     if (now < bucketCooldownUntil) {
         var remain = Math.ceil((bucketCooldownUntil - now) / 1000);
         showToast('ခေတ္တစောင့်ပါ... ' + remain + 's');
         return false;
     }
 
-    // Refill tokens
     refillBucket();
 
-    // ✅ Token ရှိလား?
     if (bucketTokens >= 1) {
         bucketTokens--;
         console.log('Token used -- remaining: ' + bucketTokens);
         return true;
     }
 
-    // ❌ Token မရှိ → 10s cooldown
     bucketCooldownUntil = now + BUCKET_EMPTY_COOLDOWN;
     var remain = Math.ceil(BUCKET_EMPTY_COOLDOWN / 1000);
     showToast('Message 5 ခု ပြည့်သွား -- ' + remain + 's စောင့်ပါ');
@@ -11898,7 +11912,7 @@ function checkRateLimit() {
 }
 
 // ============================================================
-//  ✅ SEND MESSAGE -- Rate Limit + Auto-Switch
+//  SEND MESSAGE -- UI Freeze Fix
 // ============================================================
 var MAX_MESSAGE_LENGTH = 10000;
 var MAX_MESSAGE_BYTES = 1000000;
@@ -11914,7 +11928,6 @@ function sendMessage() {
     if (!text) return;
     if (!currentChatTarget) return;
 
-    // Length Check
     if (text.length > MAX_MESSAGE_LENGTH) {
         showToast('Message က ' + MAX_MESSAGE_LENGTH.toLocaleString() + ' စာလုံးထက် မကျော်ရပါ');
         return;
@@ -11926,7 +11939,6 @@ function sendMessage() {
         return;
     }
 
-    // ✅ Rate Limit Check (Token Bucket)
     if (!checkRateLimit()) {
         return;
     }
@@ -11972,9 +11984,7 @@ function sendMessage() {
         seen: false
     };
 
-    // ✅ UI update
-    displayMessage(localMsg);
-
+    // ✅ Input reset ကို ချက်ချင်း (user ချက်ချင်း ဆက်ရိုက်လို့ရ)
     input.value = '';
     input.style.height = '';
     input.style.borderColor = '';
@@ -11985,23 +11995,26 @@ function sendMessage() {
 
     clearReplyState();
 
-    setTimeout(function() {
-        var messagesEl = document.getElementById('chatRoomMessages');
-        if (messagesEl) {
-            messagesEl.scrollTo({ top: messagesEl.scrollHeight, behavior: 'smooth' });
-        }
-    }, 30);
+    // ✅ UI update -- requestAnimationFrame (main thread block မဖြစ်)
+    requestAnimationFrame(function() {
+        displayMessage(localMsg);
+    });
 
-    // ✅ IndexedDB (memory)
+    // ✅ Debounced scroll
+    scrollToBottomDebounced();
+
+    // ✅ IndexedDB -- fire and forget (async)
     saveMessageToLocalDB(localMsg).catch(function(err) {
         console.warn('IndexedDB save failed (continuing):', err);
     });
 
-    // ✅ Firestore -- Auto-Switch + Retry
-    trySendToFirestore(messageId, messageData, localMsg, 0);
+    // ✅ Firestore -- next tick (main thread block မဖြစ်)
+    setTimeout(function() {
+        trySendToFirestore(messageId, messageData, localMsg, 0);
+    }, 0);
 }
 
-// ✅ Firestore Send with Auto-Switch
+// ✅ Firestore Send with Auto-Switch (recursive)
 var MAX_FIRESTORE_RETRY = 10;
 
 function trySendToFirestore(messageId, messageData, localMsg, attempt) {
@@ -12014,17 +12027,16 @@ function trySendToFirestore(messageId, messageData, localMsg, attempt) {
     var chosenServerId = pickRandomFirestoreServer();
 
     if (!chosenServerId) {
-        console.error('No server available');
         showToast('No server available');
         return;
     }
 
     var fsdb = getFirestoreForServer(chosenServerId);
     if (!fsdb) {
-        console.warn('Firestore missing for ' + chosenServerId);
+        // ✅ Next tick retry (no block)
         setTimeout(function() {
             trySendToFirestore(messageId, messageData, localMsg, attempt + 1);
-        }, 100);
+        }, 0);
         return;
     }
 
@@ -12038,12 +12050,12 @@ function trySendToFirestore(messageId, messageData, localMsg, attempt) {
         renderChatList();
     })
     .catch(function(err) {
-        var code = err.code || '';
-        console.warn('Send error (' + chosenServerId + '):', code, '-- retry attempt', attempt + 1);
+        console.warn('Send error (' + chosenServerId + '):', err.code, '-- retry', attempt + 1);
 
+        // ✅ Next tick retry (no block)
         setTimeout(function() {
             trySendToFirestore(messageId, messageData, localMsg, attempt + 1);
-        }, 100);
+        }, 0);
     });
 }
 
@@ -12128,15 +12140,7 @@ function markAsSeenAndDelete(messageId, serverId, friendServer, friendId) {
     });
 
     input.addEventListener('focus', function() {
-        var messagesEl = document.getElementById('chatRoomMessages');
-        if (!messagesEl) return;
-        messagesEl.style.scrollBehavior = 'auto';
-        setTimeout(function() {
-            messagesEl.scrollTop = messagesEl.scrollHeight;
-            setTimeout(function() {
-                messagesEl.style.scrollBehavior = 'smooth';
-            }, 200);
-        }, 300);
+        scrollToBottomDebounced();
     });
 
     sendBtn.addEventListener('click', function() { sendMessage(); });
@@ -12569,8 +12573,7 @@ logoutUser = function() {
     _origLogoutUser_final();
 };
 
-console.log('STAR ARCADE -- FINAL: Token Bucket (5 tokens, +1/5s) + Firestore Auto-Switch');
-
+console.log('STAR ARCADE -- FINAL: Sender UI Freeze Fix + Token Bucket + Auto-Switch');   
     
 
 // ============================================================
