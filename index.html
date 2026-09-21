@@ -9950,9 +9950,10 @@ function showLogoutOptionsPopup() {
 console.log('Log Out System FULL FINAL -- Universal IndexedDB Clear (any future keys auto-included)');
 
 // ============================================================
-//  STAR ARCADE -- FULL JS (FINAL)
-//  - Firestore (မပြင်ရ -- မူလအတိုင်း)
-//  - IndexedDB Message Storage (Batch + In-Memory -- အသစ်)
+//  STAR ARCADE -- FULL JS (FINAL - FREEZE FIX)
+//  - IndexedDB Message Storage (Batch + In-Memory)
+//  - Firestore Multi-Server Auto-Switch
+//  - Freeze Fix (Debounce + Guard + One-time Attach)
 // ============================================================
 
 // ============================================================
@@ -10108,7 +10109,7 @@ function unpinFriend(serverId, userId) {
 }
 
 // ============================================================
-//  CHAT BACKGROUND (IndexedDB)
+//  CHAT BACKGROUND
 // ============================================================
 var CHAT_BACKGROUNDS_KEY = 'chatBackgrounds';
 
@@ -10179,31 +10180,24 @@ function getFriendPassword(serverId, userId) {
 var chatRoomUnlocked = {};
 
 // ============================================================
-//  ✅ MESSAGES STORAGE -- IN-MEMORY + BATCH FLUSH (NEW)
-//  IndexedDB lock မဖြစ်အောင် memory ထဲ စုပြီး batch ရေး
+//  ✅ MESSAGES STORAGE -- IN-MEMORY + BATCH FLUSH
 // ============================================================
+var memoryMessages = {};
+var pendingSaveKeys = {};
+var flushTimer = null;
+var FLUSH_INTERVAL = 500;
 
-// In-Memory Message Buffer
-var memoryMessages = {};        // { 'messages_serverId:userId': [msg1, msg2, ...] }
-var pendingSaveKeys = {};       // flush လုပ်ရန် စောင့်နေတဲ့ keys
-var flushTimer = null;          // flush timer ID
-var FLUSH_INTERVAL = 500;       // 500ms = batch flush interval
-
-// ✅ Messages Key
 function getMessagesKey(serverId, userId) {
     return 'messages_' + serverId + ':' + userId;
 }
 
-// ✅ Read -- Memory-first, IndexedDB fallback
 function getMessagesWith(serverId, userId) {
     var key = getMessagesKey(serverId, userId);
 
-    // Memory မှာ ရှိရင် -- ချက်ချင်း ပြန်
     if (memoryMessages[key]) {
         return Promise.resolve(memoryMessages[key].slice());
     }
 
-    // Memory မှာ မရှိရင် -- IndexedDB ကနေ load ပြီး memory ထဲ ထည့်
     return new Promise(function(resolve) {
         getFromDB(key).then(function(msgs) {
             var messages = Array.isArray(msgs) ? msgs : [];
@@ -10216,7 +10210,6 @@ function getMessagesWith(serverId, userId) {
     });
 }
 
-// ✅ Write -- Memory ထဲ ချက်ချင်း + batch flush
 function saveMessageToLocalDB(msg) {
     var friendId = msg.type === 'sent' ? msg.receiverId : msg.senderId;
     var friendServer = msg.type === 'sent' ? msg.receiverServer : msg.senderServer;
@@ -10246,7 +10239,6 @@ function saveMessageToLocalDB(msg) {
     return Promise.resolve();
 }
 
-// ✅ Flush -- Pending keys အားလုံးကို ၁ transaction နဲ့ IndexedDB ရေး
 function flushPendingSaves() {
     flushTimer = null;
 
@@ -10265,14 +10257,12 @@ function flushPendingSaves() {
         });
 
         transaction.oncomplete = function() {
-            console.log('✅ Flushed ' + keys.length + ' keys to IndexedDB');
+            console.log('✅ Flushed ' + keys.length + ' keys');
         };
 
         transaction.onerror = function(e) {
             console.warn('❌ Flush error:', e.target.error);
-            keys.forEach(function(key) {
-                pendingSaveKeys[key] = true;
-            });
+            keys.forEach(function(key) { pendingSaveKeys[key] = true; });
             if (!flushTimer) {
                 flushTimer = setTimeout(flushPendingSaves, 1000);
             }
@@ -10280,9 +10270,7 @@ function flushPendingSaves() {
 
         transaction.onabort = function(e) {
             console.warn('❌ Flush aborted');
-            keys.forEach(function(key) {
-                pendingSaveKeys[key] = true;
-            });
+            keys.forEach(function(key) { pendingSaveKeys[key] = true; });
             if (!flushTimer) {
                 flushTimer = setTimeout(flushPendingSaves, 1000);
             }
@@ -10290,16 +10278,13 @@ function flushPendingSaves() {
 
     }).catch(function(err) {
         console.warn('❌ Flush openDB error:', err);
-        keys.forEach(function(key) {
-            pendingSaveKeys[key] = true;
-        });
+        keys.forEach(function(key) { pendingSaveKeys[key] = true; });
         if (!flushTimer) {
             flushTimer = setTimeout(flushPendingSaves, 1000);
         }
     });
 }
 
-// ✅ App ပိတ်ခါနီး flush
 function flushOnExit() {
     if (Object.keys(pendingSaveKeys).length > 0) {
         flushPendingSaves();
@@ -10309,7 +10294,6 @@ function flushOnExit() {
 window.addEventListener('beforeunload', flushOnExit);
 window.addEventListener('pagehide', flushOnExit);
 
-// ✅ Delete -- Message ဖျက် (memory + IndexedDB)
 function deleteMessageFromLocalDB(serverId, userId, messageId) {
     var key = getMessagesKey(serverId, userId);
 
@@ -10327,17 +10311,13 @@ function deleteMessageFromLocalDB(serverId, userId, messageId) {
     return Promise.resolve();
 }
 
-// ✅ Delete All -- Friend တစ်ယောက်လုံး message ဖျက်
 function deleteAllMessagesWith(serverId, userId) {
     var key = getMessagesKey(serverId, userId);
-
     delete memoryMessages[key];
     delete pendingSaveKeys[key];
-
     return deleteFromDB(key);
 }
 
-// ✅ Seen -- စာ ဖတ်ပြီးသား မှတ် (memory + IndexedDB)
 function updateMessageSeen(serverId, userId, messageId) {
     var key = getMessagesKey(serverId, userId);
 
@@ -10348,7 +10328,6 @@ function updateMessageSeen(serverId, userId, messageId) {
         });
         if (idx >= 0) {
             messages[idx].seen = true;
-
             pendingSaveKeys[key] = true;
             if (!flushTimer) {
                 flushTimer = setTimeout(flushPendingSaves, FLUSH_INTERVAL);
@@ -10359,7 +10338,6 @@ function updateMessageSeen(serverId, userId, messageId) {
     return Promise.resolve();
 }
 
-// ✅ Memory Cache Management -- LRU-style cleanup
 var MEMORY_MAX_KEYS = 100;
 
 function trimMemoryCache() {
@@ -10381,7 +10359,6 @@ function trimMemoryCache() {
     }
 }
 
-// ✅ clearMemory -- Logout / switch user မှာ memory ရှင်း
 function clearMemoryMessages() {
     memoryMessages = {};
     pendingSaveKeys = {};
@@ -10717,16 +10694,48 @@ function stopFriendsListListener() {
 }
 
 // ============================================================
-//  CHAT LIST
+//  ✅ CHAT LIST -- DEBOUNCED + GUARDED (FREEZE FIX)
 // ============================================================
+
+// Debounce timer
+var renderChatListTimer = null;
+
+// Guard flag
+var isRenderingChatList = false;
+
+// ✅ Debounced entry point
 function renderChatList() {
+    if (renderChatListTimer) {
+        clearTimeout(renderChatListTimer);
+    }
+    renderChatListTimer = setTimeout(function() {
+        renderChatListTimer = null;
+        doRenderChatList();
+    }, 200);
+}
+
+// ✅ Real render
+function doRenderChatList() {
+    // Guard -- already rendering
+    if (isRenderingChatList) {
+        console.log('renderChatList already running → skip');
+        return;
+    }
+    isRenderingChatList = true;
+
     var listEl = document.getElementById('chatList');
-    if (!listEl) return;
+    if (!listEl) {
+        isRenderingChatList = false;
+        return;
+    }
 
     var existingFriendRows = listEl.querySelectorAll('.chat-list-item:not([data-chat="ai"])');
     existingFriendRows.forEach(function(row) { row.remove(); });
 
-    if (!currentUser || !Array.isArray(currentUser.friendsList) || currentUser.friendsList.length === 0) return;
+    if (!currentUser || !Array.isArray(currentUser.friendsList) || currentUser.friendsList.length === 0) {
+        isRenderingChatList = false;
+        return;
+    }
 
     getFriendsCache().then(function(cache) {
         getPinnedFriends().then(function(pinned) {
@@ -10771,9 +10780,19 @@ function renderChatList() {
                     friends.forEach(function(item) {
                         renderChatListRow(listEl, item);
                     });
+
+                    isRenderingChatList = false;
+                }).catch(function() {
+                    isRenderingChatList = false;
                 });
+            }).catch(function() {
+                isRenderingChatList = false;
             });
+        }).catch(function() {
+            isRenderingChatList = false;
         });
+    }).catch(function() {
+        isRenderingChatList = false;
     });
 }
 
@@ -10875,9 +10894,13 @@ function renderChatListRow(listEl, item) {
 }
 
 // ============================================================
-//  LONG-PRESS HANDLER
+//  ✅ LONG-PRESS HANDLER -- ONE-TIME ATTACH
 // ============================================================
 function attachLongPress(el, callback) {
+    // ✅ One-time attach
+    if (el._longPressAttached) return;
+    el._longPressAttached = true;
+
     var pressTimer = null;
 
     function start() {
@@ -11405,7 +11428,6 @@ function openChatRoomNow(target) {
         });
     }
 
-    // ✅ Message တွေ ဖတ် + ပြ + Instant Scroll
     getMessagesWith(target.serverId, target.userId).then(function(messages) {
         messagesEl.innerHTML = '';
         if (messages.length === 0) {
@@ -11845,8 +11867,18 @@ function showToast(message) {
 }
 
 // ============================================================
-//  SEND MESSAGE -- ✅ FIXED (Parallel IndexedDB + Firestore)
+//  ✅ SEND MESSAGE -- FULL FIXED
+//  - Length check (10,000 chars + 1MB byte)
+//  - Rate limit (100ms)
+//  - Parallel IndexedDB + Firestore
+//  - Debounced renderChatList
 // ============================================================
+
+var lastSendTime = 0;
+var SEND_COOLDOWN = 100;
+var MAX_MESSAGE_LENGTH = 10000;
+var MAX_MESSAGE_BYTES = 1000000;
+
 function sendMessage() {
     if (iAmBlockedByThem) {
         showToast('You cannot send messages to this user');
@@ -11858,6 +11890,27 @@ function sendMessage() {
     if (!text) return;
     if (!currentChatTarget) return;
 
+    // ✅ Length Check
+    if (text.length > MAX_MESSAGE_LENGTH) {
+        showToast('Message က ' + MAX_MESSAGE_LENGTH.toLocaleString() + ' စာလုံးထက် မကျော်ရပါ');
+        return;
+    }
+
+    // ✅ Byte Size Check (Firestore limit)
+    var byteSize = new Blob([text]).size;
+    if (byteSize > MAX_MESSAGE_BYTES) {
+        showToast('Message က 1 MB ထက် မကျော်ရပါ');
+        return;
+    }
+
+    // ✅ Rate Limit
+    var now = Date.now();
+    if (now - lastSendTime < SEND_COOLDOWN) {
+        return;
+    }
+    lastSendTime = now;
+
+    // Server ရွေး
     var chosenServerId = pickRandomFirestoreServer();
     if (!chosenServerId) {
         resetFirestoreStatus();
@@ -11870,7 +11923,7 @@ function sendMessage() {
 
     var target = currentChatTarget;
     var messageId = generateMessageId();
-    var timestamp = Date.now();
+    var timestamp = now;
     var bubbleId = currentUser.bubbleUse || '';
 
     var replyTo = null;
@@ -11920,7 +11973,7 @@ function sendMessage() {
         seen: false
     };
 
-    // ✅ UI ကို ချက်ချင်း update (IndexedDB ကို မစောင့်)
+    // ✅ UI update
     displayMessage(localMsg);
 
     input.value = '';
@@ -11939,18 +11992,16 @@ function sendMessage() {
         }
     }, 30);
 
-    // ✅ IndexedDB -- memory ထဲ ချက်ချင်း (batch flush 500ms နောက်)
-    saveMessageToLocalDB(localMsg).then(function() {
-        console.log('Saved to memory:', messageId);
-    }).catch(function(err) {
+    // ✅ IndexedDB (memory) -- fire and forget
+    saveMessageToLocalDB(localMsg).catch(function(err) {
         console.warn('IndexedDB save failed (continuing):', err);
     });
 
-    // ✅ Firestore -- IndexedDB ကို မစောင့် (parallel)
+    // ✅ Firestore -- parallel
     fsdb.collection('messages').doc(messageId).set(messageData)
     .then(function() {
         console.log('✅ Sent to Firestore (' + chosenServerId + '):', messageId);
-        renderChatList();
+        renderChatList();  // Debounced
     })
     .catch(function(err) {
         console.error('Send error:', err);
@@ -11988,6 +12039,10 @@ function sendMessage() {
             if (!pickRandomFirestoreServer()) {
                 showToast('All servers exhausted');
             }
+        }
+        // ❌ Length error ဆိုရင် user ကို ပြ
+        else if (err.code === 'invalid-argument') {
+            showToast('Message size limit ကျော်နေပါတယ်');
         }
     });
 }
@@ -12041,6 +12096,16 @@ function markAsSeenAndDelete(messageId, serverId, friendServer, friendId) {
             sendBtn.classList.add('hidden');
         }
         autoResize();
+
+        // ✅ Character Counter -- 9000+ warning, 9900+ danger
+        var len = this.value.length;
+        if (len > 9900) {
+            this.style.borderColor = '#ff4444';
+        } else if (len > 9000) {
+            this.style.borderColor = '#ffaa44';
+        } else {
+            this.style.borderColor = '';
+        }
     });
 
     input.addEventListener('focus', function() {
@@ -12437,8 +12502,13 @@ enterApp = function(user) {
         checkExpiredCooldowns();
     }
 
-    // ✅ Memory cache ရှင်း (login အသစ်)
+    // ✅ Memory cache + render state reset
     clearMemoryMessages();
+    isRenderingChatList = false;
+    if (renderChatListTimer) {
+        clearTimeout(renderChatListTimer);
+        renderChatListTimer = null;
+    }
 
     _origEnterApp_final(user);
 
@@ -12467,9 +12537,16 @@ logoutUser = function() {
     try { clearReplyState(); } catch(e) {}
     if (chatRoomListener) { try { chatRoomListener.off(); } catch(e) {} chatRoomListener = null; }
 
+    // ✅ Render state reset
+    isRenderingChatList = false;
+    if (renderChatListTimer) {
+        clearTimeout(renderChatListTimer);
+        renderChatListTimer = null;
+    }
+
     chatRoomUnlocked = {};
 
-    // ✅ Pending saves ကို flush လုပ်ပြီး memory ရှင်း
+    // ✅ Pending saves flush + memory clear
     if (Object.keys(pendingSaveKeys).length > 0) {
         flushPendingSaves();
     }
@@ -12478,7 +12555,7 @@ logoutUser = function() {
     _origLogoutUser_final();
 };
 
-console.log('STAR ARCADE -- Background + Report + Scroll Fix + In-Memory Message Storage');
+console.log('STAR ARCADE -- FINAL: Batch Storage + Debounced Render + Freeze Fix');
     
 
 // ============================================================
