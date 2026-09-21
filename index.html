@@ -3276,17 +3276,6 @@ body {
     cursor: not-allowed;
 }
 
-@keyframes popIn {
-    from {
-        opacity: 0;
-        transform: scale(0.9) translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: scale(1) translateY(0);
-    }
-}
-
 /* ============================================================
    RESPONSIVE
    ============================================================ */
@@ -3949,21 +3938,6 @@ body {
     background-repeat: no-repeat;
 }
 
-/* ✅ Online Dot သေးသေး (Chat List) */
-.chat-list-online-dot {
-    position: absolute;
-    bottom: 1px;
-    right: 1px;
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    background: #44ff88;
-    border: 2px solid var(--bg-body);
-    box-shadow: 0 0 5px rgba(68, 255, 136, 0.7);
-    z-index: 5;
-    animation: onlinePulse 2s ease-in-out infinite;
-}
-
 .chat-list-info {
     flex: 1;
     min-width: 0;
@@ -4258,7 +4232,6 @@ body {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    height: 100%;
     color: var(--text-muted);
     gap: 10px;
     font-size: 13px;
@@ -4950,127 +4923,6 @@ body {
 }
 
 /* ============================================================
-   ✅ CHAT LIST PLAY (G1-G5)
-   ============================================================ */
-.chat-list-play {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    margin-top: 3px;
-    max-width: 100%;
-    overflow: hidden;
-    position: relative;
-}
-
-.chat-list-play-img {
-    width: 16px;
-    height: 16px;
-    border-radius: 4px;
-    object-fit: cover;
-    flex-shrink: 0;
-    background: var(--bg-input);
-    border: 1px solid var(--border-light);
-    position: relative;
-    z-index: 2;
-}
-
-.chat-list-play-name-wrapper {
-    flex: 1;
-    min-width: 0;
-    overflow: hidden;
-    position: relative;
-    z-index: 1;
-}
-
-.chat-list-play-name {
-    font-size: 11px;
-    color: var(--accent);
-    font-weight: 600;
-    white-space: nowrap;
-    display: inline-block;
-    animation: playScroll 8s linear infinite;
-    padding-right: 40px;
-}
-
-@keyframes playScroll {
-    0% { transform: translateX(0); }
-    100% { transform: translateX(-100%); }
-}
-
-@media (max-width: 480px) {
-    .chat-list-play-img {
-        width: 14px;
-        height: 14px;
-    }
-    .chat-list-play-name {
-        font-size: 10px;
-    }
-}
-
-/* ============================================================
-   ✅ CHAT ROOM STATUS + PLAY
-   ============================================================ */
-.chat-room-status-row {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    max-width: 100%;
-    overflow: hidden;
-    white-space: nowrap;
-}
-
-.chat-room-status {
-    font-size: 10px;
-    color: var(--text-muted);
-    font-weight: 600;
-    flex-shrink: 0;
-}
-
-.chat-room-status.online {
-    color: #44ff88;
-}
-
-.chat-room-play {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    max-width: 120px;
-    overflow: hidden;
-    flex-shrink: 1;
-    min-width: 0;
-    position: relative;
-}
-
-.chat-room-play-img {
-    width: 14px;
-    height: 14px;
-    border-radius: 3px;
-    object-fit: cover;
-    flex-shrink: 0;
-    border: 1px solid var(--border-light);
-    background: var(--bg-input);
-    position: relative;
-    z-index: 10;
-}
-
-.chat-room-play-name {
-    font-size: 10px;
-    color: var(--accent);
-    font-weight: 600;
-    white-space: nowrap;
-    display: inline-block;
-    animation: playScroll 6s linear infinite;
-    padding-right: 30px;
-    position: relative;
-    z-index: 1;
-}
-
-@keyframes playScroll {
-    0% { transform: translateX(0); }
-    100% { transform: translateX(-100%); }
-}
-
-/* ============================================================
    PIN
    ============================================================ */
 .chat-list-item.pinned .chat-list-name {
@@ -5281,6 +5133,7 @@ body {
 .password-btn:active {
     transform: scale(0.96);
 }
+
 /* ============================================================
    CHAT BACKGROUND PICKER
    ============================================================ */
@@ -5954,11 +5807,9 @@ body {
     }
 }
 
-
 /* ============================================================
    ✅ PROFILE CARD POPUP + FRIENDS LIST -- FULL CSS (FIXED)
    Banner/BG gap ပျောက် | Avatar banner ပေါ်တင်
-   style.css ရဲ့ အောက်ဆုံးမှာ ထည့်ပါ
    ============================================================ */
 
 /* ============================================================
@@ -6194,8 +6045,6 @@ body {
     overflow: hidden;
     flex-shrink: 0;
     background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
-    /* ✅ banner အောက်ပိုင်း ဖြတ်လိုက် (avatar နေရာ ဖန်တီး) */
-    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
 }
 
 .profile-card-banner-img {
@@ -6496,36 +6345,6 @@ body {
     flex-shrink: 0;
     width: 16px;
     height: 16px;
-}
-
-/* ============================================================
-   ANIMATIONS
-   ============================================================ */
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-
-@keyframes popIn {
-    from {
-        opacity: 0;
-        transform: scale(0.9) translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: scale(1) translateY(0);
-    }
-}
-
-@keyframes onlinePulse {
-    0%, 100% {
-        opacity: 1;
-        transform: scale(1);
-    }
-    50% {
-        opacity: 0.6;
-        transform: scale(0.85);
-    }
 }
 
 /* ============================================================
@@ -7029,7 +6848,7 @@ function saveUserToDB(user) {
             var all = users || {};
             all[user.email] = {
                 accNo: user.accNo || 0,
-                authId: user.authId || '',
+                authId: user.authId || '',  // ✅ authId ကို သေချာ သိမ်း
                 name: user.name,
                 email: user.email,
                 userId: user.userId,
@@ -7100,7 +6919,7 @@ function saveUserToFirebase(userData, serverId) {
 
         db.ref('users/' + userData.userId).set({
             accNo: userData.accNo || 0,
-            authId: userData.authId || '',
+            authId: userData.authId || '',  // ✅ authId ကို သေချာ သိမ်း
             serverNo: serverName,
             email: userData.email,
             name: userData.name,
@@ -7129,10 +6948,16 @@ function saveUserToFirebase(userData, serverId) {
     });
 }
 
+// ✅ Online update -- Auth မရှိရင် skip
 function updateUserOnlineStatus(userId, serverId, online) {
     return new Promise(function(resolve, reject) {
         var db = getDbForServer(serverId);
         if (!db) return reject(new Error('No DB'));
+        var auth = getAuthForServer(serverId);
+        if (!auth || !auth.currentUser) {
+            console.warn('No auth -- skip online update');
+            return resolve();
+        }
         db.ref('users/' + userId + '/online').set(online).then(resolve).catch(reject);
     });
 }
@@ -7166,7 +6991,10 @@ function listenUserDataChanges(userId, serverId) {
         var data = snap.val();
         if (data && currentUser) {
             currentUser.accNo = data.accNo || currentUser.accNo;
-            currentUser.authId = data.authId || currentUser.authId;
+            // ✅ authId ကို data က မရှိရင် မဖျက်
+            if (data.authId) {
+                currentUser.authId = data.authId;
+            }
             currentUser.name = data.name || currentUser.name;
             currentUser.avatar = data.avatar || currentUser.avatar;
             currentUser.bio = data.bio || currentUser.bio;
@@ -7204,6 +7032,33 @@ function updateUIAfterDataChange() {
 }
 
 // ===================================================
+//  ✅ FIREBASE AUTH ENSURE -- Session ပြန်ဝင်ရင် Auth ပြန် sign-in
+// ===================================================
+function ensureFirebaseAuth(serverId, email) {
+    return new Promise(function(resolve) {
+        var auth = getAuthForServer(serverId);
+        if (!auth) return resolve(false);
+
+        // ✅ Firebase Auth မှာ user ရှိပြီးသားလား စစ်
+        if (auth.currentUser && auth.currentUser.email === email) {
+            console.log('Auth already signed in:', email);
+            return resolve(true);
+        }
+
+        // ✅ မရှိသေးရင် Google နဲ့ ပြန် sign-in
+        var provider = new firebase.auth.GoogleAuthProvider();
+        provider.setCustomParameters({ prompt: 'select_account' });
+        auth.signInWithPopup(provider).then(function(result) {
+            console.log('Auth re-signed in:', result.user.email);
+            resolve(true);
+        }).catch(function(err) {
+            console.warn('Auth re-signin failed:', err.code);
+            resolve(false);
+        });
+    });
+}
+
+// ===================================================
 //  ENTER APP
 // ===================================================
 function enterApp(user) {
@@ -7211,50 +7066,57 @@ function enterApp(user) {
     authOverlay.classList.add('hidden');
     appWrapper.classList.remove('hidden');
 
-    userNameEl.textContent = user.name || 'Player';
-    userIdEl.textContent = 'ID ' + (user.userId || '0000000000');
-    coinDisplay.textContent = user.diamond || 0;
-
-    var serverName = FIREBASE_SERVERS.find(function(s) { return s.id === currentServerId; });
-    userServerEl.textContent = serverName ? serverName.name : currentServerId;
-
-    if (user.avatar && user.avatar !== '') profileAvatar.src = user.avatar;
-
-    if (currentDb && currentUser) {
-        listenDiamondUpdates(currentUser.userId, currentServerId);
-        listenUserDataChanges(currentUser.userId, currentServerId);
-    }
-
-    applyFrameToSidebar();
-
-    var defaultBtn = document.querySelector('.nav-btn[data-tab="chat"]');
-    if (defaultBtn) {
-        activeNavBtn = defaultBtn;
-        defaultBtn.classList.add('active');
-    }
-    switchTab('chat');
-    history.pushState(null, '', location.href);
-
-    clearMemoryMessages();
-    isRenderingChatList = false;
-    if (renderChatListTimer) {
-        clearTimeout(renderChatListTimer);
-        renderChatListTimer = null;
-    }
-
-    setTimeout(function() { renderChatList(); }, 100);
-    setTimeout(function() { startFriendsListListener(); }, 500);
-    setTimeout(function() { startAppMessageListeners(); }, 700);
-    setTimeout(function() {
-        goOnline();
-        attachOnlineEventListeners();
-    }, 900);
-    setTimeout(function() { retryPendingMessages(); }, 1500);
-
-    window.addEventListener('beforeunload', function() {
-        if (currentUser && currentServerId) {
-            updateUserOnlineStatus(currentUser.userId, currentServerId, false);
+    // ✅ Firebase Auth ကို ပြန် sign-in လုပ်ပါ
+    ensureFirebaseAuth(currentServerId, user.email).then(function(ok) {
+        if (!ok) {
+            console.warn('Auth not ready -- DB write တွေ fail ဖြစ်နိုင်တယ်');
         }
+
+        userNameEl.textContent = user.name || 'Player';
+        userIdEl.textContent = 'ID ' + (user.userId || '0000000000');
+        coinDisplay.textContent = user.diamond || 0;
+
+        var serverName = FIREBASE_SERVERS.find(function(s) { return s.id === currentServerId; });
+        userServerEl.textContent = serverName ? serverName.name : currentServerId;
+
+        if (user.avatar && user.avatar !== '') profileAvatar.src = user.avatar;
+
+        if (currentDb && currentUser) {
+            listenDiamondUpdates(currentUser.userId, currentServerId);
+            listenUserDataChanges(currentUser.userId, currentServerId);
+        }
+
+        applyFrameToSidebar();
+
+        var defaultBtn = document.querySelector('.nav-btn[data-tab="chat"]');
+        if (defaultBtn) {
+            activeNavBtn = defaultBtn;
+            defaultBtn.classList.add('active');
+        }
+        switchTab('chat');
+        history.pushState(null, '', location.href);
+
+        clearMemoryMessages();
+        isRenderingChatList = false;
+        if (renderChatListTimer) {
+            clearTimeout(renderChatListTimer);
+            renderChatListTimer = null;
+        }
+
+        setTimeout(function() { renderChatList(); }, 100);
+        setTimeout(function() { startFriendsListListener(); }, 500);
+        setTimeout(function() { startAppMessageListeners(); }, 700);
+        setTimeout(function() {
+            goOnline();
+            attachOnlineEventListeners();
+        }, 900);
+        setTimeout(function() { retryPendingMessages(); }, 1500);
+
+        window.addEventListener('beforeunload', function() {
+            if (currentUser && currentServerId) {
+                updateUserOnlineStatus(currentUser.userId, currentServerId, false);
+            }
+        });
     });
 }
 
@@ -7312,7 +7174,7 @@ function handleNewAccount() {
         return auth.signInWithPopup(provider).then(function(result) {
             var user = result.user;
             var email = user.email;
-            var authId = user.uid;
+            var authId = user.uid;  // ✅ Firebase Auth ID
 
             if (!email || !email.includes('@gmail.com')) {
                 throw new Error('Please use a Gmail address');
@@ -7320,6 +7182,8 @@ function handleNewAccount() {
 
             return getUserFromFirebase(email, serverId).then(function(existingUser) {
                 if (existingUser) {
+                    // ✅ existing user -- authId အသစ်ကို update
+                    existingUser.authId = authId;
                     return { userData: existingUser, serverId: serverId, isNew: false };
                 } else {
                     var userId = generateUserId();
@@ -7329,7 +7193,8 @@ function handleNewAccount() {
 
                     return getNextAccNo(getDbForServer(serverId)).then(function(accNo) {
                         var userData = {
-                            accNo: accNo, authId: authId, email: email, name: name,
+                            accNo: accNo, authId: authId,  // ✅ authId သိမ်း
+                            email: email, name: name,
                             userId: userId, diamond: 0, inviteCode: inviteCode,
                             bio: '', play: '', friendsList: [], blockList: [],
                             frameUse: '', bannerUse: '', backgroundUse: '', bubbleUse: '', markUse: '',
@@ -7353,7 +7218,7 @@ function handleNewAccount() {
         var userData = result.userData;
         var serverId = result.serverId;
 
-        saveUserToDB(userData).then(function() {
+        saveUserToDB(userData).then(function() {  // ✅ saveUserToDB ခေါ်
             currentUser = userData;
             currentServerId = serverId;
             currentDb = getDbForServer(serverId);
@@ -7402,13 +7267,19 @@ function handleLogin() {
     auth.signInWithPopup(provider).then(function(result) {
         var user = result.user;
         var email = user.email;
+        var authId = user.uid;  // ✅ Firebase Auth ID
+
         if (!email || !email.includes('@gmail.com')) {
             hideLoading(); isProcessing = false; loginSubmitBtn.disabled = false;
             showLoginPopupError('Please use Gmail');
             return null;
         }
         return getUserFromFirebase(email, serverId).then(function(existingUser) {
-            if (existingUser) return { userData: existingUser, serverId: serverId };
+            if (existingUser) {
+                // ✅ authId အသစ်ကို update
+                existingUser.authId = authId;
+                return { userData: existingUser, serverId: serverId };
+            }
             hideLoading(); isProcessing = false; loginSubmitBtn.disabled = false;
             showLoginPopupError('No account on Server ' + serverNo + '. Create new.');
             return null;
@@ -7420,7 +7291,13 @@ function handleLogin() {
         if (!result) return;
         var userData = result.userData;
         var serverId = result.serverId;
-        saveUserToDB(userData).then(function() {
+
+        // ✅ authId ကို သေချာ ထည့်
+        if (result.userData.authId) {
+            userData.authId = result.userData.authId;
+        }
+
+        saveUserToDB(userData).then(function() {  // ✅ saveUserToDB ခေါ်
             currentUser = userData;
             currentServerId = serverId;
             currentDb = getDbForServer(serverId);
@@ -7498,7 +7375,7 @@ function showLoginPopupError(msg) {
 }
 
 // ===================================================
-//  CHECK SESSION
+//  ✅ CHECK SESSION -- Firebase ကနေ data ပြန် fetch + authId update
 // ===================================================
 function checkSession() {
     return new Promise(function(resolve) {
@@ -7509,32 +7386,50 @@ function checkSession() {
 
             getUserFromDB(email).then(function(local) {
                 if (local) {
-                    var userData = {
-                        accNo: local.accNo || 0, authId: local.authId || '',
-                        name: local.name, email: local.email, userId: local.userId,
-                        serverId: serverId, diamond: local.diamond || 0,
-                        avatar: local.avatar || '', inviteCode: local.inviteCode || '',
-                        bio: local.bio || '', play: local.play || '',
-                        friendsList: local.friendsList || [], blockList: local.blockList || [],
-                        markUse: local.markUse || '', frameUse: local.frameUse || '',
-                        bannerUse: local.bannerUse || '', backgroundUse: local.backgroundUse || '',
-                        bubbleUse: local.bubbleUse || '',
-                        frameOwned: local.frameOwned || [], bannerOwned: local.bannerOwned || [],
-                        backgroundOwned: local.backgroundOwned || [], bubbleOwned: local.bubbleOwned || [],
-                        roleUse: local.roleUse || '', roleOwned: local.roleOwned || [],
-                        isFirstLogin: local.isFirstLogin !== undefined ? local.isFirstLogin : true
-                    };
-                    currentUser = userData;
-                    currentServerId = serverId;
-                    currentDb = getDbForServer(serverId);
-                    currentAuth = getAuthForServer(serverId);
+                    // ✅ Firebase ကနေ data ကို ပြန် fetch (authId အသစ်ရဖို့)
+                    getUserFromFirebase(email, serverId).then(function(fbUser) {
+                        var userData = {
+                            accNo: (fbUser && fbUser.accNo) || local.accNo || 0,
+                            authId: (fbUser && fbUser.authId) || local.authId || '',  // ✅ Firebase က authId ကို ယူ
+                            name: (fbUser && fbUser.name) || local.name,
+                            email: local.email,
+                            userId: local.userId,
+                            serverId: serverId,
+                            diamond: (fbUser && fbUser.diamond !== undefined) ? fbUser.diamond : (local.diamond || 0),
+                            avatar: (fbUser && fbUser.avatar) || local.avatar || '',
+                            inviteCode: local.inviteCode || '',
+                            bio: (fbUser && fbUser.bio) || local.bio || '',
+                            play: (fbUser && fbUser.play) || local.play || '',
+                            friendsList: (fbUser && fbUser.friendsList) || local.friendsList || [],
+                            blockList: (fbUser && fbUser.blockList) || local.blockList || [],
+                            markUse: (fbUser && fbUser.markUse) || local.markUse || '',
+                            frameUse: (fbUser && fbUser.frameUse) || local.frameUse || '',
+                            bannerUse: (fbUser && fbUser.bannerUse) || local.bannerUse || '',
+                            backgroundUse: (fbUser && fbUser.backgroundUse) || local.backgroundUse || '',
+                            bubbleUse: (fbUser && fbUser.bubbleUse) || local.bubbleUse || '',
+                            frameOwned: (fbUser && fbUser.frameOwned) || local.frameOwned || [],
+                            bannerOwned: (fbUser && fbUser.bannerOwned) || local.bannerOwned || [],
+                            backgroundOwned: (fbUser && fbUser.backgroundOwned) || local.backgroundOwned || [],
+                            bubbleOwned: (fbUser && fbUser.bubbleOwned) || local.bubbleOwned || [],
+                            roleUse: (fbUser && fbUser.roleUse) || local.roleUse || '',
+                            roleOwned: (fbUser && fbUser.roleOwned) || local.roleOwned || [],
+                            isFirstLogin: local.isFirstLogin !== undefined ? local.isFirstLogin : true
+                        };
+                        currentUser = userData;
+                        currentServerId = serverId;
+                        currentDb = getDbForServer(serverId);
+                        currentAuth = getAuthForServer(serverId);
 
-                    if (userData.isFirstLogin === undefined || userData.isFirstLogin === true) {
-                        setTimeout(function() { showFirstLoginPopup(); }, 300);
-                    } else {
-                        enterApp(currentUser);
-                    }
-                    resolve(true);
+                        // ✅ authId အသစ်ကို IndexedDB ထဲ သိမ်း
+                        saveUserToDB(userData);
+
+                        if (userData.isFirstLogin === undefined || userData.isFirstLogin === true) {
+                            setTimeout(function() { showFirstLoginPopup(); }, 300);
+                        } else {
+                            enterApp(currentUser);
+                        }
+                        resolve(true);
+                    });
                 } else {
                     getUserFromFirebase(email, serverId).then(function(user) {
                         if (user) {
@@ -9925,9 +9820,6 @@ function stopAppMessageListeners() {
 // ===================================================
 //  FRIEND PROFILE + POPUP
 // ===================================================
-// ⚠️ Chat List Avatar Click ကို ဖြုတ်ထားပါတယ် (Profile Circle နှိပ်ရင် Full Profile မသွားစေရ)
-// attachChatListAvatarClick ကို လုံးလုံး ဖြုတ်ထားပါတယ်
-
 function loadFriendProfileIntoFsProfile(d) {
     currentViewingProfile = 'friend';
     currentFriendProfileData = d;
@@ -10310,7 +10202,6 @@ function openFullscreen(title, screenId) {
     fullscreenOverlay.classList.add('active');
     document.body.style.overflow = 'hidden';
 
-    // ✅ Profile screen အတွက် profile-active class
     if (screenId === 'fs-profile') {
         fullscreenOverlay.classList.add('profile-active');
     } else {
@@ -10331,7 +10222,6 @@ function closeFullscreen() {
 }
 
 function goBackFullscreen() {
-    // ✅ Profile-active class ဖျက်
     if (fullscreenStack[fullscreenStack.length - 1] &&
         fullscreenStack[fullscreenStack.length - 1].screenId === 'fs-profile') {
         fullscreenOverlay.classList.remove('profile-active');
@@ -10376,7 +10266,6 @@ function goBackFullscreen() {
         var target = $(prev.screenId);
         if (target) target.classList.remove('hidden');
 
-        // ✅ နောက် screen က profile ဖြစ်လား စစ်
         if (prev.screenId === 'fs-profile') {
             fullscreenOverlay.classList.add('profile-active');
         } else {
