@@ -722,67 +722,6 @@
 </div>
 
 <!-- ============================================================ -->
-<!-- STAR AI SCREEN -->
-<!-- ============================================================ -->
-<div class="star-ai-screen hidden" id="starAiScreen">
-    <!-- Header -->
-    <div class="star-ai-header">
-        <button class="star-ai-back-btn" id="starAiBackBtn">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                <polyline points="15,18 9,12 15,6"/>
-            </svg>
-        </button>
-        <div class="star-ai-title-wrap">
-            <span class="star-ai-title">Star AI</span>
-            <span class="star-ai-model-name" id="starAiModelName">Star 1.0</span>
-        </div>
-        <button class="star-ai-clear-btn" id="starAiClearBtn" title="Clear all">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M3 6h18"/>
-                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/>
-                <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-                <line x1="10" y1="11" x2="10" y2="17"/>
-                <line x1="14" y1="11" x2="14" y2="17"/>
-            </svg>
-        </button>
-    </div>
-
-    <!-- Messages -->
-    <div class="star-ai-messages" id="starAiMessages">
-        <div class="star-ai-empty-state" id="starAiEmptyState">
-            <div class="star-ai-empty-img-wrap">
-                <img src="https://i.ibb.co/QF8b56Gj/file-00000000e6fc8211ad946f92b60b511c.png" alt="Star AI" />
-            </div>
-            <h3>Star AI မှ ကြိုဆိုပါတယ်</h3>
-            <p>မေးခွန်း ရေးပြီး စတင်လိုက်ပါ</p>
-        </div>
-    </div>
-
-    <!-- Floating Input Bar -->
-    <div class="star-ai-input-bar-wrap">
-        <div class="star-ai-input-bar">
-            <button class="star-ai-model-selector-btn" id="starAiModelSelectorBtn" title="Model">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
-                </svg>
-            </button>
-            <textarea id="starAiInput" class="star-ai-input" placeholder="Star AI ကို မေးပါ..." rows="1"></textarea>
-            <button class="star-ai-icon-btn" id="starAiVideoBtn" title="Video Request">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <polygon points="23 7 16 12 23 17 23 7"/>
-                    <rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
-                </svg>
-            </button>
-            <button class="star-ai-send-btn hidden" id="starAiSendBtn" title="Send">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/>
-                </svg>
-            </button>
-        </div>
-    </div>
-</div>
-
-<!-- ============================================================ -->
 <!-- MODEL SELECTOR POPUP -->
 <!-- ============================================================ -->
 <div class="star-model-popup-overlay hidden" id="starModelPopupOverlay">
@@ -797,7 +736,19 @@
             </button>
         </div>
         <div class="star-model-popup-body">
-            <button class="star-model-item active" data-model="star1">
+            <button class="star-model-item active" data-model="auto">
+                <div class="star-model-icon">A</div>
+                <div class="star-model-info">
+                    <div class="star-model-item-name">Auto</div>
+                    <div class="star-model-item-desc">ကျပန်း ရွေးပေးမည်</div>
+                </div>
+                <div class="star-model-check">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                        <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                </div>
+            </button>
+            <button class="star-model-item" data-model="star1">
                 <div class="star-model-icon">1</div>
                 <div class="star-model-info">
                     <div class="star-model-item-name">Star 1.0</div>
@@ -809,63 +760,51 @@
                     </svg>
                 </div>
             </button>
-            <!-- Model အသစ် ထည့်ဖို့ နေရာ -->
-        </div>
-    </div>
-</div>
-
-<!-- ============================================================ -->
-<!-- VIDEO REQUEST POPUP -->
-<!-- ============================================================ -->
-<div class="vid-popup-overlay hidden" id="vidPopupOverlay">
-    <div class="vid-popup" id="vidPopup">
-        <div class="vid-popup-header">
-            <span class="vid-popup-title">Video Request</span>
-            <button class="vid-popup-close" id="vidPopupCloseBtn">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                    <line x1="18" y1="6" x2="6" y2="18"/>
-                    <line x1="6" y1="6" x2="18" y2="18"/>
-                </svg>
-            </button>
-        </div>
-
-        <div class="vid-popup-body">
-            <div class="vid-popup-section">
-                <div class="vid-popup-section-label">Images (Max 6)</div>
-                <div class="vid-popup-images-grid" id="vidPopupImagesGrid"></div>
-                <div class="vid-popup-hint">ပုံ ၅ ပုံ = ဇာတ်ကောင် / ပုံ ၆ ခုမြောက် = Background</div>
-            </div>
-
-            <div class="vid-popup-section">
-                <div class="vid-popup-section-label">Style</div>
-                <input type="text" class="vid-popup-input" id="vidPopupStyleInput" placeholder="ဥပမာ -- 2D Anime, 3D Realistic..." />
-                <div class="vid-popup-style-chips">
-                    <span class="vid-popup-chip" data-style="2D Anime">2D Anime</span>
-                    <span class="vid-popup-chip" data-style="3D Realistic">3D Realistic</span>
-                    <span class="vid-popup-chip" data-style="Cartoon">Cartoon</span>
-                    <span class="vid-popup-chip" data-style="Cinematic">Cinematic</span>
+            <button class="star-model-item" data-model="star2">
+                <div class="star-model-icon">2</div>
+                <div class="star-model-info">
+                    <div class="star-model-item-name">Star 2.0</div>
+                    <div class="star-model-item-desc">RokTeam AI</div>
                 </div>
-            </div>
-
-            <div class="vid-popup-section">
-                <div class="vid-popup-section-label">Prompt</div>
-                <textarea class="vid-popup-textarea" id="vidPopupPromptInput" rows="3" placeholder="ခိုင်းမဲ့ စာ ရေးပါ..."></textarea>
-            </div>
-        </div>
-
-        <div class="vid-popup-footer">
-            <button class="vid-popup-send-btn" id="vidPopupSendBtn">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/>
-                </svg>
-                <span>ပေးပို့မည်</span>
+                <div class="star-model-check">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                        <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                </div>
+            </button>
+            <button class="star-model-item" data-model="star3">
+                <div class="star-model-icon">3</div>
+                <div class="star-model-info">
+                    <div class="star-model-item-name">Star 3.0</div>
+                    <div class="star-model-item-desc">Vireonix AI</div>
+                </div>
+                <div class="star-model-check">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                        <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                </div>
+            </button>
+            <button class="star-model-item" data-model="star4">
+                <div class="star-model-icon">4</div>
+                <div class="star-model-info">
+                    <div class="star-model-item-name">Star 4.0</div>
+                    <div class="star-model-item-desc">Keyless AI (GPT-4o)</div>
+                </div>
+                <div class="star-model-check">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                        <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                </div>
             </button>
         </div>
     </div>
 </div>
+
+
     <script src="script.js"></script>
 </body>
 </html>
+
 <style>/* ============================================================
    FILE: style.css (FULL WITH MARK SUPPORT + GOOGLE BUTTON)
    ============================================================ */
@@ -7325,7 +7264,7 @@ body {
 }
 
 /* ============================================================
-   STAR AI (v3 -- Dark BG + Floating Light Bar)
+   STAR AI (v4 -- Dark BG + Dark Soft Bar + Simple Loading)
    ============================================================ */
 
 /* ---------- Screen ---------- */
@@ -7503,7 +7442,6 @@ body {
     cursor: pointer;
     position: relative;
     transition: transform 0.15s ease;
-    /* ✅ Text selection -- စာကြောင်း ဖိပြီး copy လို့ရ */
     user-select: text;
     -webkit-user-select: text;
     -webkit-touch-callout: default;
@@ -7535,86 +7473,40 @@ body {
     -webkit-user-select: none;
 }
 
-/* ---------- ✨ LOADING (ကြယ် လိမ်မော် + လှုပ်ရှား) ---------- */
+/* ---------- ✅ LOADING (စာ + အစက် ၃ စက်) ---------- */
 .star-ai-loading-bubble {
-    background: linear-gradient(135deg, #1a1a24, #22222e);
-    border: 1px solid rgba(255, 109, 31, 0.2);
+    background: var(--bg-card, #1a1a24);
+    border: 1px solid var(--border, #22222e);
     border-radius: 18px;
     border-bottom-left-radius: 4px;
-    padding: 14px 18px;
+    padding: 12px 16px;
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 8px;
     position: relative;
-    overflow: hidden;
-}
-
-.star-ai-loading-bubble::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(90deg, transparent, rgba(255, 109, 31, 0.08), transparent);
-    animation: starAiShimmer 2s ease-in-out infinite;
-}
-
-@keyframes starAiShimmer {
-    0% { transform: translateX(-100%); }
-    100% { transform: translateX(100%); }
-}
-
-.star-ai-loading-star {
-    width: 32px;
-    height: 32px;
-    flex-shrink: 0;
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.star-ai-loading-star svg {
-    width: 100%;
-    height: 100%;
-    fill: url(#starAiGrad);
-    animation: starAiStarSpin 2s linear infinite;
-    filter: drop-shadow(0 0 8px rgba(255, 109, 31, 0.8));
-}
-
-/* Gradient ကို inline SVG defs မှာ ထည့် -- fallback */
-.star-ai-loading-star {
-    color: #ff6d1f;
-}
-
-@keyframes starAiStarSpin {
-    0% { transform: rotate(0deg) scale(1); }
-    50% { transform: rotate(180deg) scale(1.15); }
-    100% { transform: rotate(360deg) scale(1); }
 }
 
 .star-ai-loading-text {
     font-size: 13px;
-    color: rgba(232, 232, 240, 0.85);
+    color: var(--text-sub, #9a9aaa);
     font-weight: 500;
-    letter-spacing: 0.3px;
-    position: relative;
-    z-index: 1;
+    letter-spacing: 0.2px;
 }
 
 .star-ai-loading-dots {
     display: inline-flex;
-    gap: 3px;
-    margin-left: 4px;
-    position: relative;
-    z-index: 1;
+    gap: 4px;
+    align-items: center;
 }
 
 .star-ai-loading-dots span {
-    width: 4px;
-    height: 4px;
+    width: 5px;
+    height: 5px;
     border-radius: 50%;
     background: var(--accent, #ff6d1f);
     animation: starAiDotBounce 1.4s ease-in-out infinite;
-    box-shadow: 0 0 6px rgba(255, 109, 31, 0.8);
+    box-shadow: 0 0 6px rgba(255, 109, 31, 0.6);
+    display: inline-block;
 }
 
 .star-ai-loading-dots span:nth-child(2) { animation-delay: 0.2s; }
@@ -7622,7 +7514,7 @@ body {
 
 @keyframes starAiDotBounce {
     0%, 60%, 100% { transform: translateY(0); opacity: 0.5; }
-    30% { transform: translateY(-6px); opacity: 1; }
+    30% { transform: translateY(-5px); opacity: 1; }
 }
 
 /* ---------- Typing cursor ---------- */
@@ -7643,7 +7535,7 @@ body {
     50% { opacity: 0; }
 }
 
-/* ---------- Floating Input Bar (Light + Soft Shadow) ---------- */
+/* ---------- ✅ Floating Input Bar (Dark Soft) ---------- */
 .star-ai-input-bar-wrap {
     position: absolute;
     bottom: 0;
@@ -7651,7 +7543,7 @@ body {
     right: 0;
     padding: 12px 14px;
     padding-bottom: calc(12px + env(safe-area-inset-bottom, 4px));
-    background: linear-gradient(to top, rgba(10, 10, 15, 0.95) 60%, transparent);
+    background: linear-gradient(to top, rgba(10, 10, 15, 0.98) 60%, transparent);
     pointer-events: none;
     z-index: 10;
 }
@@ -7661,24 +7553,26 @@ body {
     align-items: flex-end;
     gap: 6px;
     padding: 6px 6px 6px 10px;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(245, 247, 250, 0.96));
+    /* ✅ အမဲ အနု */
+    background: linear-gradient(135deg, rgba(30, 30, 40, 0.95), rgba(22, 22, 32, 0.95));
     border-radius: 26px;
     box-shadow:
-        0 12px 40px rgba(0, 0, 0, 0.4),
-        0 4px 12px rgba(255, 109, 31, 0.15),
-        0 0 0 1px rgba(255, 255, 255, 0.5) inset;
-    border: 1px solid rgba(255, 255, 255, 0.6);
+        0 12px 40px rgba(0, 0, 0, 0.5),
+        0 4px 12px rgba(255, 109, 31, 0.08),
+        0 0 0 1px rgba(255, 255, 255, 0.04) inset;
+    border: 1px solid rgba(255, 255, 255, 0.06);
     pointer-events: auto;
-    transition: box-shadow 0.3s ease, transform 0.2s ease;
+    transition: box-shadow 0.3s ease, transform 0.2s ease, border-color 0.2s ease;
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
 }
 
 .star-ai-input-bar:focus-within {
     box-shadow:
-        0 16px 48px rgba(0, 0, 0, 0.5),
-        0 6px 20px rgba(255, 109, 31, 0.3),
-        0 0 0 1px rgba(255, 109, 31, 0.3) inset;
+        0 16px 48px rgba(0, 0, 0, 0.6),
+        0 6px 20px rgba(255, 109, 31, 0.25),
+        0 0 0 1px rgba(255, 109, 31, 0.2) inset;
+    border-color: rgba(255, 109, 31, 0.25);
     transform: translateY(-2px);
 }
 
@@ -7687,7 +7581,7 @@ body {
     padding: 8px 4px;
     border: none;
     background: transparent;
-    color: #1a1d24;
+    color: var(--text-main, #e8e8f0);
     font-size: 14px;
     outline: none;
     font-family: inherit;
@@ -7701,14 +7595,14 @@ body {
     -webkit-user-select: text;
 }
 
-.star-ai-input::placeholder { color: #a8b0bd; }
+.star-ai-input::placeholder { color: rgba(154, 154, 170, 0.6); }
 
 .star-ai-model-selector-btn {
     width: 34px;
     height: 34px;
     border-radius: 50%;
     border: none;
-    background: linear-gradient(135deg, rgba(255, 109, 31, 0.12), rgba(255, 109, 31, 0.06));
+    background: rgba(255, 109, 31, 0.1);
     color: var(--accent, #ff6d1f);
     cursor: pointer;
     display: flex;
@@ -7719,8 +7613,8 @@ body {
 }
 
 .star-ai-model-selector-btn:active {
-    background: linear-gradient(135deg, rgba(255, 109, 31, 0.25), rgba(255, 109, 31, 0.15));
-    transform: scale(0.92) rotate(15deg);
+    background: rgba(255, 109, 31, 0.2);
+    transform: scale(0.92) rotate(30deg);
 }
 
 .star-ai-icon-btn {
@@ -7728,8 +7622,8 @@ body {
     height: 36px;
     border-radius: 50%;
     border: none;
-    background: #f0f2f5;
-    color: #6b7280;
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--text-sub, #9a9aaa);
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -7739,7 +7633,7 @@ body {
 }
 
 .star-ai-icon-btn:active {
-    background: #e5e8ed;
+    background: rgba(255, 255, 255, 0.12);
     transform: scale(0.92);
     color: var(--accent, #ff6d1f);
 }
@@ -8065,6 +7959,22 @@ body {
     color: var(--accent, #ff6d1f);
     padding-left: 2px;
     letter-spacing: 0.3px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.vid-popup-optional {
+    font-size: 11px;
+    color: var(--text-muted, #5a5a6a);
+    font-weight: 500;
+    text-transform: lowercase;
+}
+
+.vid-popup-required {
+    color: #ff4444;
+    font-weight: 800;
+    font-size: 14px;
 }
 
 .vid-popup-images-grid {
@@ -8222,8 +8132,15 @@ body {
     transition: all 0.2s ease;
 }
 
-.vid-popup-send-btn:active { transform: scale(0.97); opacity: 0.9; }
-.vid-popup-send-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+.vid-popup-send-btn:active:not(:disabled) { transform: scale(0.97); opacity: 0.9; }
+
+.vid-popup-send-btn:disabled {
+    background: var(--bg-input, #16161f);
+    color: var(--text-muted, #5a5a6a);
+    box-shadow: none;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
 
 /* ---------- Mobile ---------- */
 @media (max-width: 480px) {
@@ -13531,7 +13448,7 @@ document.addEventListener('DOMContentLoaded', function() {
 })();
 
 // ============================================================
-// STAR AI + VIDEO POPUP (v3 -- Dark BG + Copy/Delete + Retry)
+// STAR AI + VIDEO POPUP (v5 -- 4 Models + Auto)
 // script.js ရဲ့ အောက်ဆုံးမှာ ထည့်ပါ
 // ============================================================
 
@@ -13539,19 +13456,72 @@ document.addEventListener('DOMContentLoaded', function() {
     'use strict';
 
     // ===================================================
-    //  STAR AI CONFIG
+    //  ✅ MODEL CONFIG (4 Models + Auto)
     // ===================================================
     var STAR_MODELS = {
-        star1: { name: 'Star 1.0', model: 'openai', desc: 'Pollinations AI' }
-        // ✅ နောက်မှ model အသစ် ထည့်ဖို့ နေရာ
+        star1: {
+            name: 'Star 1.0',
+            desc: 'Pollinations AI',
+            endpoint: 'https://text.pollinations.ai/openai',
+            model: 'openai',
+            headers: function() {
+                return { 'Content-Type': 'application/json' };
+            },
+            buildBody: function(messages) {
+                return {
+                    model: 'openai',
+                    messages: messages,
+                    max_tokens: 1024,
+                    temperature: 0.7
+                };
+            }
+        },
+        star2: {
+            name: 'Star 2.0',
+            desc: 'RokTeam AI',
+            endpoint: 'https://rokremasteredapi.rokteam.org/v1/chat/completions',
+            model: 'default',
+            headers: function() {
+                return { 'Content-Type': 'application/json' };
+            },
+            buildBody: function(messages) {
+                return {
+                    model: 'default',
+                    messages: messages
+                };
+            }
+        },
+        star3: {
+            name: 'Star 3.0',
+            desc: 'Vireonix AI',
+            endpoint: 'https://vireonix.ai/v1/chat/completions',
+            model: 'auto',
+            headers: function() {
+                return { 'Content-Type': 'application/json' };
+            },
+            buildBody: function(messages) {
+                return {
+                    model: 'auto',
+                    messages: messages
+                };
+            }
+        },
+        star4: {
+            name: 'Star 4.0',
+            desc: 'Keyless AI (GPT-4o)',
+            endpoint: 'https://keylessai.thryx.workers.dev/v1/chat/completions',
+            model: 'gpt-4o',
+            headers: function() {
+                return { 'Content-Type': 'application/json' };
+            },
+            buildBody: function(messages) {
+                return {
+                    model: 'gpt-4o',
+                    messages: messages
+                };
+            }
+        }
     };
-
-    // ✅ Multiple Endpoints (Retry + Fallback)
-    var STAR_ENDPOINTS = [
-        'https://text.pollinations.ai/openai',
-        'https://text.pollinations.ai/openai/',  // Trailing slash
-        'https://text.pollinations.ai/'          // Root fallback
-    ];
 
     // Telegram
     var STAR_TELEGRAM_BOT = '7869159797:AAEX6EbdQpo39CV6bV2pzItm6zwphh2UXbY';
@@ -13561,7 +13531,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // ===================================================
     //  STATE
     // ===================================================
-    var starAiCurrentModel = 'star1';
+    var starAiCurrentModel = 'auto';  // ✅ Default = Auto
     var starAiMessages = [];
     var starAiIsLoading = false;
     var STAR_AI_DB_KEY = 'starAiMessages';
@@ -13603,29 +13573,34 @@ document.addEventListener('DOMContentLoaded', function() {
         return (prefix || 'm') + '_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
     }
 
-    function escapeHtmlSafe(s) {
-        if (!s) return '';
-        return String(s).replace(/[&<>"']/g, function(c) {
-            return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c];
-        });
+    // ✅ Random Model (Auto)
+    function getRandomModelKey() {
+        var keys = ['star1', 'star2', 'star3', 'star4'];
+        return keys[Math.floor(Math.random() * keys.length)];
+    }
+
+    // ✅ Active Model Key (auto ဖြစ်ရင် random)
+    function getActiveModelKey() {
+        if (starAiCurrentModel === 'auto') {
+            return getRandomModelKey();
+        }
+        return starAiCurrentModel;
     }
 
     // ===================================================
-    //  ✅ AI CALL -- Retry + Multiple Endpoints
+    //  ✅ AI CALL -- Single Model
     // ===================================================
-    function callStarAISingle(endpoint, model, messages) {
-        var controller = new AbortController();
-        var timeoutId = setTimeout(function() { controller.abort(); }, 25000);
+    function callStarAISingle(modelKey, messages) {
+        var config = STAR_MODELS[modelKey];
+        if (!config) return Promise.reject(new Error('Model not found'));
 
-        return fetch(endpoint, {
+        var controller = new AbortController();
+        var timeoutId = setTimeout(function() { controller.abort(); }, 30000);
+
+        return fetch(config.endpoint, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                model: model,
-                messages: messages,
-                max_tokens: 1024,
-                temperature: 0.7
-            }),
+            headers: config.headers(),
+            body: JSON.stringify(config.buildBody(messages)),
             signal: controller.signal
         })
         .then(function(res) {
@@ -13639,11 +13614,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 var content = data.choices[0].message.content;
                 if (content && content.trim()) return content;
             }
-            // ✅ Root endpoint မှာ array ပြန်လာတာမျိုး
-            if (Array.isArray(data) && data[0] && data[0].content) {
-                return data[0].content;
-            }
+            // ✅ Fallback formats
+            if (Array.isArray(data) && data[0] && data[0].content) return data[0].content;
             if (typeof data === 'string') return data;
+            if (data && data.response) return data.response;
             throw new Error('Empty response');
         })
         .catch(function(err) {
@@ -13652,31 +13626,30 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    // ✅ Call with Fallback (model တစ်ခု fail ဖြစ်ရင် ကျန်တာ စမ်း)
     function callStarAI(messages) {
-        var model = STAR_MODELS[starAiCurrentModel] || STAR_MODELS.star1;
-        var modelName = model.model;
+        var primaryKey = getActiveModelKey();
 
-        // ✅ Endpoint တစ်ခုချင်း စမ်း
+        // ✅ Auto ဖြစ်ရင် -- primary ကနေ စပြီး ကျန်တာ fallback
+        // ✅ Model ရွေးထားရင် -- အဲ့ model ကနေ စပြီး ကျန်တာ fallback
+        var order = [primaryKey];
+        Object.keys(STAR_MODELS).forEach(function(k) {
+            if (order.indexOf(k) === -1) order.push(k);
+        });
+
         var idx = 0;
-        function tryEndpoint() {
-            if (idx >= STAR_ENDPOINTS.length) {
-                return Promise.reject(new Error('Failed to fetch. Internet စစ်ပါ။'));
+        function tryNext() {
+            if (idx >= order.length) {
+                return Promise.reject(new Error('AI အားလုံး မရပါ။ Internet စစ်ပါ။'));
             }
-            var ep = STAR_ENDPOINTS[idx++];
-            return callStarAISingle(ep, modelName, messages).catch(function(err) {
-                console.warn('Endpoint fail:', ep, err.message);
-                return tryEndpoint();
+            var key = order[idx++];
+            return callStarAISingle(key, messages).catch(function(err) {
+                console.warn('Model ' + key + ' failed:', err.message);
+                return tryNext();
             });
         }
 
-        // ✅ Retry 2 ခါ (endpoint တစ်ခုလုံး fail ဖြစ်ရင် ပြန်)
-        return tryEndpoint().catch(function(err) {
-            console.warn('All endpoints failed, retry once...');
-            idx = 0;
-            return tryEndpoint().catch(function() {
-                throw err;
-            });
-        });
+        return tryNext();
     }
 
     // ===================================================
@@ -13747,12 +13720,9 @@ document.addEventListener('DOMContentLoaded', function() {
         bubble.appendChild(textNode);
         bubble.appendChild(timeEl);
 
-        // ✅ စာကို နှိပ်ရင် Copy/Delete menu (Text select လုပ်နေရင် menu မဖွင့်)
         bubble.addEventListener('click', function(e) {
-            // Text selection ရှိရင် menu မဖွင့်
             var sel = window.getSelection();
             if (sel && sel.toString().trim().length > 0) return;
-            // Link/Image ဖြစ်ရင် skip
             if (e.target.tagName === 'A' || e.target.tagName === 'IMG') return;
             e.stopPropagation();
             starAiShowMsgMenu(msg, row, bubble);
@@ -13769,7 +13739,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // ===================================================
-    //  MESSAGE MENU (Copy + Delete)
+    //  MESSAGE MENU
     // ===================================================
     function starAiShowMsgMenu(msg, row, bubble) {
         var ex = document.querySelector('.star-ai-msg-menu');
@@ -13857,7 +13827,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // ===================================================
-    //  ✨ LOADING UI (ကြယ် လိမ်မော် + Gradient)
+    //  LOADING
     // ===================================================
     function starAiShowLoading() {
         var el = document.getElementById('starAiMessages');
@@ -13873,28 +13843,6 @@ document.addEventListener('DOMContentLoaded', function() {
         var bubble = document.createElement('div');
         bubble.className = 'star-ai-loading-bubble';
 
-        // ✅ ကြယ် SVG -- gradient + animation
-        var starWrap = document.createElement('div');
-        starWrap.className = 'star-ai-loading-star';
-        starWrap.innerHTML =
-            '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">' +
-                '<defs>' +
-                    '<linearGradient id="starAiGrad" x1="0%" y1="0%" x2="100%" y2="100%">' +
-                        '<stop offset="0%" style="stop-color:#ff9a4a;stop-opacity:1" />' +
-                        '<stop offset="50%" style="stop-color:#ff6d1f;stop-opacity:1" />' +
-                        '<stop offset="100%" style="stop-color:#e0550a;stop-opacity:1" />' +
-                    '</linearGradient>' +
-                '</defs>' +
-                '<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" fill="url(#starAiGrad)"/>' +
-            '</svg>';
-
-        var textWrap = document.createElement('div');
-        textWrap.style.display = 'flex';
-        textWrap.style.alignItems = 'center';
-        textWrap.style.gap = '4px';
-        textWrap.style.position = 'relative';
-        textWrap.style.zIndex = '1';
-
         var textEl = document.createElement('span');
         textEl.className = 'star-ai-loading-text';
         textEl.textContent = 'Star ရေးနေသည်';
@@ -13903,11 +13851,8 @@ document.addEventListener('DOMContentLoaded', function() {
         dots.className = 'star-ai-loading-dots';
         dots.innerHTML = '<span></span><span></span><span></span>';
 
-        textWrap.appendChild(textEl);
-        textWrap.appendChild(dots);
-
-        bubble.appendChild(starWrap);
-        bubble.appendChild(textWrap);
+        bubble.appendChild(textEl);
+        bubble.appendChild(dots);
         row.appendChild(bubble);
         el.appendChild(row);
         starAiScrollBottom();
@@ -14060,18 +14005,27 @@ document.addEventListener('DOMContentLoaded', function() {
 
         var nameEl = document.getElementById('starAiModelName');
         if (nameEl) {
-            var m = STAR_MODELS[starAiCurrentModel];
-            nameEl.textContent = m ? m.name : 'Star 1.0';
+            if (starAiCurrentModel === 'auto') {
+                nameEl.textContent = 'Auto';
+            } else {
+                var m = STAR_MODELS[starAiCurrentModel];
+                nameEl.textContent = m ? m.name : 'Auto';
+            }
         }
     }
 
     function starModelSelect(key) {
-        if (!STAR_MODELS[key]) return;
+        if (key !== 'auto' && !STAR_MODELS[key]) return;
         starAiCurrentModel = key;
         updateStarModelActive();
         starModelPopupClose();
-        var m = STAR_MODELS[key];
-        showToastSafe(m.name + ' ရွေးထားသည်');
+
+        if (key === 'auto') {
+            showToastSafe('Auto ရွေးထားသည်');
+        } else {
+            var m = STAR_MODELS[key];
+            showToastSafe(m.name + ' ရွေးထားသည်');
+        }
     }
 
     // ===================================================
@@ -14089,6 +14043,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (promptInput) promptInput.value = '';
 
         vidPopupRenderImages();
+        vidPopupUpdateSendBtn();
         overlay.classList.remove('hidden');
     }
 
@@ -14096,6 +14051,22 @@ document.addEventListener('DOMContentLoaded', function() {
         var overlay = document.getElementById('vidPopupOverlay');
         if (overlay) overlay.classList.add('hidden');
         vidPopupImages = [];
+    }
+
+    function vidPopupUpdateSendBtn() {
+        var styleInput = document.getElementById('vidPopupStyleInput');
+        var promptInput = document.getElementById('vidPopupPromptInput');
+        var sendBtn = document.getElementById('vidPopupSendBtn');
+        if (!sendBtn) return;
+
+        var style = styleInput ? styleInput.value.trim() : '';
+        var prompt = promptInput ? promptInput.value.trim() : '';
+
+        if (style && prompt) {
+            sendBtn.disabled = false;
+        } else {
+            sendBtn.disabled = true;
+        }
     }
 
     function vidPopupRenderImages() {
@@ -14217,8 +14188,12 @@ document.addEventListener('DOMContentLoaded', function() {
         var prompt = promptInput ? promptInput.value.trim() : '';
         var imgCount = vidPopupImages.filter(function(x) { return x; }).length;
 
-        if (!style && !prompt && imgCount === 0) {
-            showToastSafe('Style / Prompt / Image တစ်ခုခု ထည့်ပါ');
+        if (!style) {
+            showToastSafe('Style ရေးပါ');
+            return;
+        }
+        if (!prompt) {
+            showToastSafe('Prompt ရေးပါ');
             return;
         }
 
@@ -14240,8 +14215,8 @@ document.addEventListener('DOMContentLoaded', function() {
         caption += 'Name: ' + (currentUser.name || 'Unknown') + '\n';
         caption += 'Server: ' + serverName + '\n';
         caption += 'ID: ' + (currentUser.userId || 'Unknown') + '\n\n';
-        if (style) caption += 'Style: ' + style + '\n';
-        if (prompt) caption += 'Prompt: ' + prompt + '\n';
+        caption += 'Style: ' + style + '\n';
+        caption += 'Prompt: ' + prompt + '\n';
         caption += 'Images: ' + imgCount + '/6\n\n';
         caption += new Date().toLocaleString('en-US', { timeZone: 'Asia/Yangon' });
 
@@ -14255,10 +14230,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
             vidPopupClose();
 
-            // ✅ User message save
+            // User message save
             var userSummary = 'Video Request';
-            if (style) userSummary += '\nStyle: ' + style;
-            if (prompt) userSummary += '\nPrompt: ' + prompt;
+            userSummary += '\nStyle: ' + style;
+            userSummary += '\nPrompt: ' + prompt;
             if (imgCount > 0) userSummary += '\nImages: ' + imgCount + '/6';
 
             starAiMessages.push({
@@ -14270,7 +14245,7 @@ document.addEventListener('DOMContentLoaded', function() {
             starDbSave(STAR_AI_DB_KEY, starAiMessages);
             starAiRender();
 
-            // ✅ AI Reply
+            // AI Reply
             var aiReply = 'သင့် ထုတ်လုပ်ခိုင်းထားသော Prompt ကိုပြန်ပြောပါ\n\n' +
                           'Video ကို ထုတ်ပေးရန် အကြောင်းကြားထားပါသည်။\n\n' +
                           'ထုတ်လုပ်မှု့ ပြီးဆုံးပါက သင့် Mail Box သို့ သင့် Video Link ပေးပို့ပေးပါမည်။';
@@ -14452,10 +14427,19 @@ document.addEventListener('DOMContentLoaded', function() {
         var vidSend = document.getElementById('vidPopupSendBtn');
         if (vidSend) vidSend.addEventListener('click', vidPopupSend);
 
+        // ✅ Validation inputs
+        var styleInput = document.getElementById('vidPopupStyleInput');
+        var promptInput = document.getElementById('vidPopupPromptInput');
+        if (styleInput) styleInput.addEventListener('input', vidPopupUpdateSendBtn);
+        if (promptInput) promptInput.addEventListener('input', vidPopupUpdateSendBtn);
+
         document.querySelectorAll('.vid-popup-chip').forEach(function(chip) {
             chip.addEventListener('click', function() {
-                var styleInput = document.getElementById('vidPopupStyleInput');
-                if (styleInput) styleInput.value = this.dataset.style || '';
+                var si = document.getElementById('vidPopupStyleInput');
+                if (si) {
+                    si.value = this.dataset.style || '';
+                    vidPopupUpdateSendBtn();
+                }
             });
         });
 
@@ -14472,7 +14456,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 
         updateStarModelActive();
-        console.log('Star AI Ready (v3)');
+        console.log('Star AI Ready (v5 -- 4 Models + Auto)');
     }
 
     if (document.readyState === 'loading') {
