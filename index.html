@@ -12725,7 +12725,7 @@ function openSidebar() { sidebar.classList.add('open'); sidebarOverlay.classList
 function closeSidebar() { sidebar.classList.remove('open'); sidebarOverlay.classList.remove('active'); document.body.style.overflow = ''; }
 
 // ===================================================
-//  STORAGE MONITOR (Message + Image အတူတူ)
+//  STORAGE MONITOR (Message + Image + AI Chat)
 // ===================================================
 var STORAGE_QUOTA_KEY = 'deviceStorageQuota';
 
@@ -12748,7 +12748,7 @@ function getStoredQuota() {
     });
 }
 
-// ✅ Message + Image အတူတူ တွက်
+// ✅ Message + Image + AI Chat အတူတူ တွက်
 function calculateAppStorage() {
     return new Promise(function(resolve) {
         openDB().then(function(db) {
@@ -12762,25 +12762,31 @@ function calculateAppStorage() {
                 var msgKeys = allKeys.filter(function(k) {
                     return typeof k === 'string' && k.indexOf('messages_') === 0;
                 });
+                // ✅ AI Chat key
+                var aiChatKey = 'starAiSessions';
+                var hasAiChat = allKeys.indexOf(aiChatKey) !== -1;
                 var otherKeys = allKeys.filter(function(k) {
                     return friendsKeys.indexOf(k) === -1 &&
                            !(typeof k === 'string' && k.indexOf('messages_') === 0) &&
-                           k !== STORAGE_QUOTA_KEY;
+                           k !== STORAGE_QUOTA_KEY &&
+                           k !== aiChatKey;
                 });
 
                 var friendsCount = 0, friendsSize = 0;
                 var msgCount = 0, msgSize = 0;
-                var textCount = 0, textSize = 0;    // ✅ Text အရေအတွက်
-                var imageCount = 0, imageSize = 0;  // ✅ Image အရေအတွက်
+                var textCount = 0, textSize = 0;
+                var imageCount = 0, imageSize = 0;
+                var aiChatSize = 0;
                 var othersSize = 0;
 
-                var total = friendsKeys.length + msgKeys.length + otherKeys.length;
+                var total = friendsKeys.length + msgKeys.length + otherKeys.length + (hasAiChat ? 1 : 0);
                 if (total === 0) {
                     return resolve({
                         friendsCount: 0, friendsSize: 0,
                         msgCount: 0, msgSize: 0,
                         textCount: 0, textSize: 0,
                         imageCount: 0, imageSize: 0,
+                        aiChatSize: 0,
                         othersSize: 0, totalSize: 0
                     });
                 }
@@ -12798,8 +12804,9 @@ function calculateAppStorage() {
                             textSize: textSize,
                             imageCount: imageCount,
                             imageSize: imageSize,
+                            aiChatSize: aiChatSize,
                             othersSize: othersSize,
-                            totalSize: friendsSize + msgSize + othersSize
+                            totalSize: friendsSize + msgSize + aiChatSize + othersSize
                         });
                     }
                 }
@@ -12846,6 +12853,40 @@ function calculateAppStorage() {
                     r.onerror = finish;
                 });
 
+                // ✅ AI Chat (starAiSessions)
+                if (hasAiChat) {
+                    var rAi = store.get(aiChatKey);
+                    rAi.onsuccess = function() {
+                        if (rAi.result && rAi.result.value !== undefined) {
+                            var v = rAi.result.value;
+                            if (Array.isArray(v)) {
+                                // ✅ Session တစ်ခုချင်း size
+                                v.forEach(function(session) {
+                                    if (session && Array.isArray(session.messages)) {
+                                        session.messages.forEach(function(msg) {
+                                            var size = JSON.stringify(msg).length;
+                                            aiChatSize += size;
+                                            msgSize += size;   // ✅ msgSize ထဲ ထည့် (Total မှာ ပါဖို့)
+                                            msgCount++;
+                                            textCount++;
+                                            textSize += size;
+                                        });
+                                    }
+                                    // Session metadata (title, id)
+                                    aiChatSize += JSON.stringify({
+                                        id: session.id,
+                                        title: session.title,
+                                        createdAt: session.createdAt,
+                                        updatedAt: session.updatedAt
+                                    }).length;
+                                });
+                            }
+                        }
+                        finish();
+                    };
+                    rAi.onerror = finish;
+                }
+
                 // Other keys
                 otherKeys.forEach(function(k) {
                     var r = store.get(k);
@@ -12864,6 +12905,7 @@ function calculateAppStorage() {
                     msgCount: 0, msgSize: 0,
                     textCount: 0, textSize: 0,
                     imageCount: 0, imageSize: 0,
+                    aiChatSize: 0,
                     othersSize: 0, totalSize: 0
                 });
             };
@@ -12873,6 +12915,7 @@ function calculateAppStorage() {
                 msgCount: 0, msgSize: 0,
                 textCount: 0, textSize: 0,
                 imageCount: 0, imageSize: 0,
+                aiChatSize: 0,
                 othersSize: 0, totalSize: 0
             });
         });
@@ -12904,7 +12947,7 @@ function loadStorageMonitor() {
             friendsCountEl.textContent = data.friendsCount;
             friendsSizeEl.textContent = formatSize(data.friendsSize);
 
-            // ✅ Message count -- Text + Image အတူတူ
+            // ✅ Message count -- Text + Image + AI Chat
             if (msgCountEl) msgCountEl.textContent = data.msgCount;
             if (msgSizeEl) msgSizeEl.textContent = formatSize(data.msgSize);
 
@@ -12944,10 +12987,10 @@ function clearAllFriendsData() {
     });
 }
 
-// ✅ Message + Image အတူတူ ဖျက်
+// ✅ Message + Image + AI Chat အတူတူ ဖျက်
 function clearAllMessagesData() {
     if (isProcessing) return;
-    if (!confirm('Clear all messages data?\n(Text + Image အားလုံး ဖျက်မယ်)')) return;
+    if (!confirm('Clear all messages data?\n(Text + Image + AI Chat အားလုံး ဖျက်မယ်)')) return;
     isProcessing = true;
     showLoading('Clearing...');
     openDB().then(function(db) {
@@ -12956,29 +12999,54 @@ function clearAllMessagesData() {
         var req = store.getAllKeys();
         req.onsuccess = function() {
             var keys = req.result || [];
-            // ✅ messages_ key အားလုံး (Text + Image အတူတူ)
+            // ✅ messages_ key အားလုံး (Text + Image)
             var msgKeys = keys.filter(function(k) {
                 return typeof k === 'string' && k.indexOf('messages_') === 0;
             });
-            if (msgKeys.length === 0) {
+            // ✅ AI Chat key
+            var aiChatKey = 'starAiSessions';
+            var hasAiChat = keys.indexOf(aiChatKey) !== -1;
+
+            var toDelete = msgKeys.slice();
+            if (hasAiChat) toDelete.push(aiChatKey);
+
+            if (toDelete.length === 0) {
                 hideLoading(); isProcessing = false;
                 showToast('No messages');
                 return;
             }
-            Promise.all(msgKeys.map(function(k) {
+
+            // ✅ Memory ထဲက messages အားလုံး ဖျက်
+            if (typeof memoryMessages !== 'undefined') {
+                memoryMessages = {};
+            }
+            if (typeof pendingSaveKeys !== 'undefined') {
+                pendingSaveKeys = {};
+            }
+
+            // ✅ AI Chat memory ဖျက်
+            if (typeof starSessions !== 'undefined' && Array.isArray(starSessions)) {
+                starSessions = [];
+                if (typeof currentSessionId !== 'undefined') {
+                    currentSessionId = null;
+                }
+            }
+
+            Promise.all(toDelete.map(function(k) {
                 return deleteFromDB(k).catch(function() {});
             })).then(function() {
-                // ✅ Memory ထဲက messages အားလုံး ဖျက်
-                if (typeof memoryMessages !== 'undefined') {
-                    memoryMessages = {};
-                }
-                if (typeof pendingSaveKeys !== 'undefined') {
-                    pendingSaveKeys = {};
-                }
                 hideLoading(); isProcessing = false;
-                showToast('Cleared ' + msgKeys.length + ' chats (Text + Image)');
+                var parts = [];
+                if (msgKeys.length > 0) parts.push(msgKeys.length + ' chats');
+                if (hasAiChat) parts.push('AI Chat');
+                showToast('Cleared: ' + parts.join(' + '));
                 loadStorageMonitor();
                 setTimeout(renderChatList, 300);
+
+                // ✅ AI Chat Screen ဖွင့်ထားရင် refresh
+                if (typeof starAiRender === 'function') {
+                    try { starAiRender(); } catch(e) {}
+                }
             });
         };
     }).catch(function() {
