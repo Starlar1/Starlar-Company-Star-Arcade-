@@ -677,7 +677,7 @@
     </div>
 
 <!-- ============================================================ -->
-<!-- ✅ IMAGE SEND SYSTEM (အသစ် - ရှိပြီးသား code မထိခိုက်) -->
+<!-- ✅ IMAGE + GIF + LINK SYSTEM (အသစ်) -->
 <!-- ============================================================ -->
 
 <!-- Image Send Popup -->
@@ -6723,7 +6723,7 @@ body {
 }
 
 /* ============================================================
-   ✅ IMAGE SEND + VIEWER (အသစ်)
+   ✅ IMAGE + GIF + LINK SYSTEM (အသစ်)
    ============================================================ */
 
 /* ---------- Image Send Popup ---------- */
@@ -6738,12 +6738,16 @@ body {
     padding: 20px;
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
-    animation: fadeIn 0.2s ease;
+    animation: imgSysFadeIn 0.2s ease;
+}
+
+.img-send-popup-overlay.hidden {
+    display: none !important;
 }
 
 .img-send-popup {
-    background: var(--bg-header);
-    border: 1px solid var(--border);
+    background: var(--bg-header, #121218);
+    border: 1px solid var(--border, #22222e);
     border-radius: 18px;
     padding: 18px;
     max-width: 340px;
@@ -6752,7 +6756,7 @@ body {
     display: flex;
     flex-direction: column;
     gap: 14px;
-    animation: popIn 0.25s ease;
+    animation: imgSysPopIn 0.25s ease;
 }
 
 .img-send-preview-wrap {
@@ -6760,11 +6764,11 @@ body {
     max-height: 50vh;
     border-radius: 12px;
     overflow: hidden;
-    background: var(--bg-input);
+    background: var(--bg-input, #16161f);
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 1px solid var(--border-light);
+    border: 1px solid var(--border-light, #2a2a38);
 }
 
 .img-send-preview-wrap img {
@@ -6777,7 +6781,7 @@ body {
 .img-send-instruction {
     text-align: center;
     font-size: 13px;
-    color: var(--text-muted);
+    color: var(--text-muted, #5a5a6a);
     margin: 0;
 }
 
@@ -6789,11 +6793,11 @@ body {
 .img-send-slider-track {
     width: 100%;
     height: 50px;
-    background: var(--bg-input);
+    background: var(--bg-input, #16161f);
     border-radius: 25px;
     position: relative;
     overflow: hidden;
-    border: 2px solid var(--border-light);
+    border: 2px solid var(--border-light, #2a2a38);
     box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
@@ -6804,7 +6808,7 @@ body {
     border-radius: 25px;
     transition: width 0.05s linear;
     background-size: 200% 100%;
-    animation: shimmer 1.5s linear infinite;
+    animation: imgSysShimmer 1.5s linear infinite;
 }
 
 .img-send-slider-circle {
@@ -6829,7 +6833,7 @@ body {
     -webkit-user-select: none;
     touch-action: none;
     border: 2px solid rgba(255, 255, 255, 0.3);
-    animation: pulse-glow 2s ease-in-out infinite;
+    animation: imgSysPulseGlow 2s ease-in-out infinite;
 }
 
 .img-send-slider-circle:active {
@@ -6841,7 +6845,7 @@ body {
 .img-send-slider-circle.completed {
     background: radial-gradient(circle at 30% 30%, #66ffaa, #44ff88);
     border-color: rgba(68, 255, 136, 0.5);
-    animation: success-pulse 0.6s ease-out;
+    animation: imgSysSuccessPulse 0.6s ease-out;
     box-shadow:
         0 0 30px rgba(68, 255, 136, 0.8),
         0 0 60px rgba(68, 255, 136, 0.4);
@@ -6850,10 +6854,10 @@ body {
 .img-send-cancel-btn {
     width: 100%;
     padding: 12px;
-    border: 1.5px solid var(--border-light);
+    border: 1.5px solid var(--border-light, #2a2a38);
     border-radius: 12px;
-    background: var(--bg-input);
-    color: var(--text-sub);
+    background: var(--bg-input, #16161f);
+    color: var(--text-sub, #9a9aaa);
     font-size: 14px;
     font-weight: 700;
     font-family: inherit;
@@ -6863,10 +6867,17 @@ body {
 
 .img-send-cancel-btn:active {
     transform: scale(0.97);
-    background: var(--bg-hover);
+    background: var(--bg-hover, #22222e);
 }
 
 /* ---------- Chat Message Image ---------- */
+.chat-message-image-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    position: relative;
+}
+
 .chat-message-image {
     max-width: 220px;
     max-height: 280px;
@@ -6874,8 +6885,8 @@ body {
     object-fit: cover;
     display: block;
     cursor: pointer;
-    background: var(--bg-input);
-    border: 1px solid var(--border-light);
+    background: var(--bg-input, #16161f);
+    border: 1px solid var(--border-light, #2a2a38);
     transition: transform 0.15s ease;
 }
 
@@ -6883,10 +6894,141 @@ body {
     transform: scale(0.97);
 }
 
-.chat-message-image-wrapper {
+/* ✅ GIF image */
+.chat-message-gif {
+    object-fit: contain;
+    image-rendering: auto;
+    /* ✅ Animation auto play (browser default) */
+}
+
+/* ✅ GIF badge */
+.chat-gif-badge {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    background: rgba(0, 0, 0, 0.7);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 800;
+    padding: 2px 6px;
+    border-radius: 4px;
+    letter-spacing: 0.5px;
+    pointer-events: none;
+    z-index: 2;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+}
+
+/* ---------- Link (Chat Text) ---------- */
+.chat-link {
+    color: #4da6ff;
+    text-decoration: underline;
+    text-decoration-color: rgba(77, 166, 255, 0.5);
+    text-underline-offset: 2px;
+    word-break: break-all;
+    transition: color 0.15s ease;
+    font-weight: 600;
+}
+
+.chat-link:hover,
+.chat-link:active {
+    color: #80c0ff;
+    text-decoration-color: #80c0ff;
+}
+
+/* Sent message ထဲမှာ link အရောင် */
+.chat-message.sent .chat-link {
+    color: #a8d5ff;
+    text-decoration-color: rgba(168, 213, 255, 0.6);
+}
+
+.chat-message.sent .chat-link:hover,
+.chat-message.sent .chat-link:active {
+    color: #d0e8ff;
+}
+
+/* ---------- Link Preview Card ---------- */
+.link-preview-container {
+    margin-top: 8px;
+    max-width: 100%;
+}
+
+.link-preview-card {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    background: rgba(0, 0, 0, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    overflow: hidden;
+    text-decoration: none;
+    color: inherit;
+    transition: all 0.15s ease;
+    cursor: pointer;
+}
+
+.link-preview-card:hover,
+.link-preview-card:active {
+    background: rgba(0, 0, 0, 0.4);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.link-preview-img-wrap {
+    width: 100%;
+    max-height: 140px;
+    overflow: hidden;
+    background: var(--bg-input, #16161f);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.link-preview-img-wrap img {
+    width: 100%;
+    max-height: 140px;
+    object-fit: cover;
+    display: block;
+}
+
+.link-preview-info {
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+}
+
+.link-preview-domain {
+    font-size: 10px;
+    color: var(--text-muted, #5a5a6a);
+    text-transform: lowercase;
+    letter-spacing: 0.3px;
+}
+
+.link-preview-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-main, #e8e8f0);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.3;
+}
+
+.link-preview-desc {
+    font-size: 11px;
+    color: var(--text-sub, #9a9aaa);
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    word-break: break-word;
+}
+
+/* Sent message ထဲမှာ preview */
+.chat-message.sent .link-preview-card {
+    background: rgba(0, 0, 0, 0.2);
+    border-color: rgba(255, 255, 255, 0.15);
 }
 
 /* ---------- Image Viewer ---------- */
@@ -6897,7 +7039,11 @@ body {
     z-index: 10020;
     display: flex;
     flex-direction: column;
-    animation: fadeIn 0.2s ease;
+    animation: imgSysFadeIn 0.2s ease;
+}
+
+.img-viewer-overlay.hidden {
+    display: none !important;
 }
 
 .img-viewer-close {
@@ -6961,7 +7107,7 @@ body {
     padding: 12px 28px;
     border: none;
     border-radius: 24px;
-    background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+    background: linear-gradient(135deg, #ff6d1f, #e0550a);
     color: #fff;
     font-size: 15px;
     font-weight: 700;
@@ -6978,6 +7124,44 @@ body {
 
 .img-viewer-download-btn svg {
     flex-shrink: 0;
+}
+
+/* ---------- Keyframes ---------- */
+@keyframes imgSysFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes imgSysPopIn {
+    from { opacity: 0; transform: scale(0.9) translateY(20px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+@keyframes imgSysShimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+
+@keyframes imgSysPulseGlow {
+    0%, 100% {
+        box-shadow:
+            0 0 20px rgba(255, 109, 31, 0.6),
+            0 0 40px rgba(255, 109, 31, 0.3),
+            inset 0 -3px 8px rgba(0, 0, 0, 0.2);
+    }
+    50% {
+        box-shadow:
+            0 0 30px rgba(255, 109, 31, 0.8),
+            0 0 60px rgba(255, 109, 31, 0.4),
+            inset 0 -3px 8px rgba(0, 0, 0, 0.2);
+    }
+}
+
+@keyframes imgSysSuccessPulse {
+    0% { transform: scale(1); }
+    30% { transform: scale(1.2); }
+    60% { transform: scale(0.95); }
+    100% { transform: scale(1); }
 }
 
 /* ---------- Mobile ---------- */
@@ -7001,6 +7185,19 @@ body {
     .chat-message-image {
         max-width: 180px;
         max-height: 240px;
+    }
+
+    .link-preview-img-wrap,
+    .link-preview-img-wrap img {
+        max-height: 100px;
+    }
+
+    .link-preview-title {
+        font-size: 12px;
+    }
+
+    .link-preview-desc {
+        font-size: 10px;
     }
 }</style><script>// ============================================================
 //  STAR ARCADE -- FULL script.js (FINAL, CLEAN)
@@ -11503,7 +11700,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // ============================================================
-// ✅ IMAGE SEND SYSTEM (အသစ်)
+// ✅ IMAGE SEND + GIF + LINK SYSTEM (အသစ်)
 // script.js ရဲ့ အောက်ဆုံးမှာ ထည့်ပါ
 // ရှိပြီးသား code လုံးလုံး မထိခိုက်ပါ
 // ============================================================
@@ -11512,18 +11709,138 @@ document.addEventListener('DOMContentLoaded', function() {
     'use strict';
 
     // ===================================================
-    //  STATE
+    //  CONSTANTS
     // ===================================================
     var IMG_MAX_SIZE = 5 * 1024 * 1024; // 5MB
+    var LINK_REGEX = /(https?:\/\/[^\s<>"']+)/gi;
+    var URL_ONLY_REGEX = /^https?:\/\/[^\s<>"']+$/i;
+
+    // ===================================================
+    //  STATE
+    // ===================================================
     var imgSendCurrentData = null;
     var imgSendDragging = false;
     var imgSystemInited = false;
+    var linkPreviewCache = {};  // { url: { title, desc, image, domain } }
+
+    // ===================================================
+    //  HELPER -- Link ဖြစ်လား စစ်
+    // ===================================================
+    function isUrl(text) {
+        if (!text) return false;
+        return URL_ONLY_REGEX.test(text.trim());
+    }
+
+    function extractUrl(text) {
+        if (!text) return null;
+        var match = text.match(LINK_REGEX);
+        return match ? match[0] : null;
+    }
+
+    function escapeHtmlLocal(s) {
+        if (!s) return '';
+        return String(s).replace(/[&<>"']/g, function(c) {
+            return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c];
+        });
+    }
+
+    function getDomain(url) {
+        try {
+            var u = new URL(url);
+            return u.hostname.replace('www.', '');
+        } catch(e) { return ''; }
+    }
+
+    // ===================================================
+    //  TEXT ထဲက LINK ကို CLICKABLE လုပ်
+    // ===================================================
+    function linkifyText(text) {
+        if (!text) return '';
+        var escaped = escapeHtmlLocal(text);
+        return escaped.replace(LINK_REGEX, function(url) {
+            // HTML entity ပြန် decode (escapeHtmlLocal က & ကို &amp; လုပ်ထား)
+            var realUrl = url.replace(/&amp;/g, '&');
+            return '<a href="' + realUrl + '" target="_blank" rel="noopener noreferrer" class="chat-link">' + url + '</a>';
+        });
+    }
+
+    // ===================================================
+    //  LINK PREVIEW
+    // ===================================================
+    function renderLinkPreview(url) {
+        if (!url) return '';
+        var domain = getDomain(url);
+
+        // ✅ Cache မှာ ရှိရင် ယူ
+        if (linkPreviewCache[url]) {
+            return buildPreviewHtml(url, linkPreviewCache[url], domain);
+        }
+
+        // ✅ Cache မရှိရင် basic preview ပြ + background fetch
+        fetchLinkPreview(url);
+
+        return buildPreviewHtml(url, null, domain);
+    }
+
+    function buildPreviewHtml(url, data, domain) {
+        var title = (data && data.title) ? data.title : domain;
+        var desc = (data && data.desc) ? data.desc : url;
+        var image = (data && data.image) ? data.image : '';
+
+        var imgHtml = image
+            ? '<div class="link-preview-img-wrap"><img src="' + escapeHtmlLocal(image) + '" alt="preview" onerror="this.parentNode.style.display=\'none\'" /></div>'
+            : '';
+
+        return '<a href="' + escapeHtmlLocal(url) + '" target="_blank" rel="noopener noreferrer" class="link-preview-card">' +
+                    imgHtml +
+                    '<div class="link-preview-info">' +
+                        '<div class="link-preview-domain">' + escapeHtmlLocal(domain) + '</div>' +
+                        '<div class="link-preview-title">' + escapeHtmlLocal(title) + '</div>' +
+                        '<div class="link-preview-desc">' + escapeHtmlLocal(desc.substring(0, 120)) + '</div>' +
+                    '</div>' +
+                '</a>';
+    }
+
+    // ✅ Link Preview Fetch (using noembed.com -- CORS friendly)
+    function fetchLinkPreview(url) {
+        // YouTube / Other Open Graph
+        var apiUrl = 'https://noembed.com/embed?url=' + encodeURIComponent(url);
+
+        fetch(apiUrl, { method: 'GET' })
+            .then(function(res) { return res.json(); })
+            .then(function(data) {
+                if (data && (data.title || data.thumbnail_url)) {
+                    linkPreviewCache[url] = {
+                        title: data.title || getDomain(url),
+                        desc: data.description || url,
+                        image: data.thumbnail_url || ''
+                    };
+                    // ✅ ပြီးသား message တွေကို update
+                    updateLinkPreviews(url);
+                }
+            })
+            .catch(function() {
+                // Fail ဖြစ်ရင် cache မှာ empty သိမ်း
+                linkPreviewCache[url] = { title: getDomain(url), desc: url, image: '' };
+            });
+    }
+
+    // ✅ Preview fetch ပြီးရင် update
+    function updateLinkPreviews(url) {
+        var previews = document.querySelectorAll('[data-link-preview="' + url + '"]');
+        previews.forEach(function(el) {
+            var data = linkPreviewCache[url];
+            if (!data) return;
+            var domain = getDomain(url);
+            el.outerHTML = buildPreviewHtml(url, data, domain);
+        });
+    }
 
     // ===================================================
     //  IMAGE SEND POPUP
     // ===================================================
-    function imgSendOpenPopup(dataUrl) {
-        imgSendCurrentData = dataUrl;
+    function imgSendOpenPopup(dataUrl, isGif) {
+        imgSendCurrentData = { dataUrl: dataUrl, isGif: !!isGif };
         var popup = document.getElementById('imgSendPopup');
         var preview = document.getElementById('imgSendPreview');
         var circle = document.getElementById('imgSendSliderCircle');
@@ -11552,7 +11869,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function imgSendOpenPicker() {
         var input = document.createElement('input');
         input.type = 'file';
-        input.accept = 'image/*';
+        input.accept = 'image/*,image/gif';
         input.onchange = function(e) {
             var file = e.target.files[0];
             if (!file) return;
@@ -11566,11 +11883,19 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
 
+            var isGif = file.type === 'image/gif';
+
             var reader = new FileReader();
             reader.onload = function(ev) {
-                imgSendCompress(ev.target.result, 800, 0.7).then(function(compressed) {
-                    imgSendOpenPopup(compressed);
-                });
+                if (isGif) {
+                    // ✅ GIF ကို compress မလုပ် (animation ပျောက်မယ်)
+                    imgSendOpenPopup(ev.target.result, true);
+                } else {
+                    // ✅ တခြား ပုံတွေ compress
+                    imgSendCompress(ev.target.result, 800, 0.7).then(function(compressed) {
+                        imgSendOpenPopup(compressed, false);
+                    });
+                }
             };
             reader.readAsDataURL(file);
         };
@@ -11578,7 +11903,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // ===================================================
-    //  IMAGE COMPRESS
+    //  IMAGE COMPRESS (GIF မဟုတ်ရင်)
     // ===================================================
     function imgSendCompress(dataUrl, maxWidth, quality) {
         return new Promise(function(resolve) {
@@ -11611,8 +11936,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // ===================================================
     //  SEND IMAGE MESSAGE
     // ===================================================
-    function imgSendMessage(dataUrl) {
+    function imgSendMessage(data) {
         if (!window.currentChatTarget || !window.currentUser) return;
+        if (!data || !data.dataUrl) return;
 
         var target = window.currentChatTarget;
         var messageId = (typeof generateMessageId === 'function') ? generateMessageId() : ('img' + Date.now());
@@ -11624,8 +11950,8 @@ document.addEventListener('DOMContentLoaded', function() {
             receiverId: target.userId,
             receiverServer: target.serverId,
             text: '',
-            imageData: dataUrl,
-            messageType: 'image',
+            imageData: data.dataUrl,
+            messageType: data.isGif ? 'gif' : 'image',  // ✅ GIF ခွဲ
             bubbleId: '',
             seen: false,
             timestamp: timestamp,
@@ -11639,8 +11965,8 @@ document.addEventListener('DOMContentLoaded', function() {
             receiverId: target.userId,
             receiverServer: target.serverId,
             text: '',
-            imageData: dataUrl,
-            messageType: 'image',
+            imageData: data.dataUrl,
+            messageType: data.isGif ? 'gif' : 'image',
             bubbleId: '',
             timestamp: timestamp,
             serverId: null,
@@ -11649,31 +11975,92 @@ document.addEventListener('DOMContentLoaded', function() {
             seen: false
         };
 
-        // ✅ UI မှာ ချက်ချင်းပြ
         requestAnimationFrame(function() { imgDisplayMessage(localMsg); });
         if (typeof scrollToBottomDebounced === 'function') scrollToBottomDebounced();
 
-        // ✅ Local DB သိမ်း
         if (typeof saveMessageToLocalDB === 'function') {
             saveMessageToLocalDB(localMsg).catch(function(err) {
                 console.warn('IDB fail:', err);
             });
         }
 
-        // ✅ Firestore ပို့
         setTimeout(function() {
             if (typeof trySendToFirestore === 'function') {
                 trySendToFirestore(messageId, messageData, localMsg, 0);
             }
         }, 0);
 
-        if (typeof showToast === 'function') showToast('Image sent');
+        if (typeof showToast === 'function') showToast(data.isGif ? 'GIF sent' : 'Image sent');
     }
 
     // ===================================================
-    //  DISPLAY IMAGE MESSAGE
+    //  DISPLAY IMAGE MESSAGE (GIF support)
     // ===================================================
     function imgDisplayMessage(msg) {
+        var messagesEl = document.getElementById('chatRoomMessages');
+        if (!messagesEl) return;
+        if (messagesEl.querySelector('[data-message-id="' + msg.messageId + '"]')) return;
+
+        var empty = messagesEl.querySelector('.chat-empty-state');
+        if (empty) empty.remove();
+
+        var date = new Date(msg.timestamp);
+        var hours = date.getHours();
+        var minutes = date.getMinutes().toString().padStart(2, '0');
+        var ampm = hours >= 12 ? 'PM' : 'AM';
+        hours = hours % 12; hours = hours ? hours : 12;
+        var timeStr = hours + ':' + minutes + ' ' + ampm;
+
+        var isSent = msg.type === 'sent';
+        var isGif = msg.messageType === 'gif';
+
+        var wrapper = document.createElement('div');
+        wrapper.className = 'chat-message-wrapper ' + (isSent ? 'sent' : 'received');
+        wrapper.dataset.messageId = msg.messageId;
+
+        var msgDiv = document.createElement('div');
+        msgDiv.className = 'chat-message ' + (isSent ? 'sent' : 'received');
+        msgDiv.style.padding = '6px';
+
+        var imgWrapper = document.createElement('div');
+        imgWrapper.className = 'chat-message-image-wrapper';
+
+        var img = document.createElement('img');
+        img.className = 'chat-message-image' + (isGif ? ' chat-message-gif' : '');
+        img.src = msg.imageData;
+        img.alt = isGif ? 'gif' : 'image';
+        // ✅ GIF ဆိုရင် auto play (browser က default auto)
+        // img.loading = 'eager';
+
+        img.addEventListener('click', function(e) {
+            e.stopPropagation();
+            imgViewerOpen(msg.imageData, isGif);
+        });
+
+        imgWrapper.appendChild(img);
+
+        if (isGif) {
+            var gifBadge = document.createElement('span');
+            gifBadge.className = 'chat-gif-badge';
+            gifBadge.textContent = 'GIF';
+            imgWrapper.appendChild(gifBadge);
+        }
+
+        var timeEl = document.createElement('span');
+        timeEl.className = 'chat-message-time';
+        timeEl.textContent = timeStr;
+
+        msgDiv.appendChild(imgWrapper);
+        msgDiv.appendChild(timeEl);
+
+        wrapper.appendChild(msgDiv);
+        messagesEl.appendChild(wrapper);
+    }
+
+    // ===================================================
+    //  DISPLAY TEXT MESSAGE (Link support)
+    // ===================================================
+    function displayTextMessageWithLink(msg) {
         var messagesEl = document.getElementById('chatRoomMessages');
         if (!messagesEl) return;
         if (messagesEl.querySelector('[data-message-id="' + msg.messageId + '"]')) return;
@@ -11693,53 +12080,95 @@ document.addEventListener('DOMContentLoaded', function() {
         wrapper.className = 'chat-message-wrapper ' + (isSent ? 'sent' : 'received');
         wrapper.dataset.messageId = msg.messageId;
 
+        // ✅ Reply quote (ရှိရင်)
+        if (msg.replyTo && msg.replyTo.messageId) {
+            var rq = document.createElement('div');
+            rq.className = 'msg-reply-quote';
+            rq.dataset.replyId = msg.replyTo.messageId;
+            rq.innerHTML = '<div class="msg-reply-name">' + escapeHtmlLocal(msg.replyTo.name || 'Message') + '</div>' +
+                           '<div class="msg-reply-text">' + escapeHtmlLocal((msg.replyTo.text || '').substring(0, 80)) + '</div>';
+            rq.addEventListener('click', function(e) {
+                e.stopPropagation();
+                var t = messagesEl.querySelector('[data-message-id="' + rq.dataset.replyId + '"]');
+                if (t) { t.scrollIntoView({ behavior: 'smooth', block: 'center' }); t.classList.add('highlight'); setTimeout(function() { t.classList.remove('highlight'); }, 1500); }
+            });
+            wrapper.appendChild(rq);
+        }
+
         var msgDiv = document.createElement('div');
         msgDiv.className = 'chat-message ' + (isSent ? 'sent' : 'received');
-        msgDiv.style.padding = '6px';
 
-        var imgWrapper = document.createElement('div');
-        imgWrapper.className = 'chat-message-image-wrapper';
+        // ✅ Bubble ရှိရင်
+        if (msg.bubbleId && msg.bubbleId !== '') {
+            var bubble = (typeof BUBBLE_CONFIG !== 'undefined')
+                ? BUBBLE_CONFIG.bubbles.find(function(b) { return b.id === msg.bubbleId; })
+                : null;
+            if (bubble) {
+                msgDiv.classList.add('has-bubble');
+                msgDiv.style.setProperty('--bubble-image', 'url("' + bubble.image + '")');
+            }
+        }
 
-        var img = document.createElement('img');
-        img.className = 'chat-message-image';
-        img.src = msg.imageData;
-        img.alt = 'image';
+        // ✅ Text + Link
+        var textHtml = linkifyText(msg.text || '').replace(/\n/g, '<br>');
+        var textEl = document.createElement('span');
+        textEl.className = 'msg-text';
+        textEl.innerHTML = textHtml;
 
-        img.addEventListener('click', function(e) {
-            e.stopPropagation();
-            imgViewerOpen(msg.imageData);
+        // ✅ Link click ကို stopPropagation (menu မဖွင့်ဖို့)
+        textEl.querySelectorAll('a.chat-link').forEach(function(a) {
+            a.addEventListener('click', function(e) {
+                e.stopPropagation();
+                // Default browser behavior (open link)
+            });
         });
 
-        imgWrapper.appendChild(img);
+        msgDiv.appendChild(textEl);
 
         var timeEl = document.createElement('span');
         timeEl.className = 'chat-message-time';
         timeEl.textContent = timeStr;
-
-        msgDiv.appendChild(imgWrapper);
         msgDiv.appendChild(timeEl);
+
+        // ✅ Link Preview (URL-only message ဆိုရင်)
+        var trimmed = (msg.text || '').trim();
+        if (isUrl(trimmed) && !msg.bubbleId) {
+            var previewContainer = document.createElement('div');
+            previewContainer.className = 'link-preview-container';
+            previewContainer.setAttribute('data-link-preview', trimmed);
+            previewContainer.innerHTML = renderLinkPreview(trimmed);
+            msgDiv.appendChild(previewContainer);
+        }
+
+        msgDiv.addEventListener('click', function(e) {
+            // Link ကို နှိပ်ရင် menu မဖွင့်
+            if (e.target.tagName === 'A' || e.target.closest('a')) return;
+            e.stopPropagation();
+            if (typeof showMessageMenu === 'function') showMessageMenu(msg, wrapper);
+        });
 
         wrapper.appendChild(msgDiv);
         messagesEl.appendChild(wrapper);
     }
 
     // ===================================================
-    //  IMAGE VIEWER
+    //  IMAGE VIEWER (GIF support)
     // ===================================================
-    function imgViewerOpen(src) {
+    function imgViewerOpen(src, isGif) {
         var overlay = document.getElementById('imgViewerOverlay');
         var img = document.getElementById('imgViewerImg');
         var dlBtn = document.getElementById('imgViewerDownloadBtn');
         if (!overlay || !img) return;
 
         img.src = src;
+        img.alt = isGif ? 'gif' : 'image';
         overlay.classList.remove('hidden');
 
         if (dlBtn) {
             var newDlBtn = dlBtn.cloneNode(true);
             dlBtn.parentNode.replaceChild(newDlBtn, dlBtn);
             newDlBtn.addEventListener('click', function() {
-                imgViewerDownload(src);
+                imgViewerDownload(src, isGif);
             });
         }
     }
@@ -11751,12 +12180,13 @@ document.addEventListener('DOMContentLoaded', function() {
         if (img) img.src = '';
     }
 
-    function imgViewerDownload(src) {
+    function imgViewerDownload(src, isGif) {
         try {
+            var ext = isGif ? '.gif' : '.jpg';
             if (src.indexOf('data:') === 0) {
                 var a = document.createElement('a');
                 a.href = src;
-                a.download = 'star_arcade_' + Date.now() + '.jpg';
+                a.download = 'star_arcade_' + Date.now() + ext;
                 document.body.appendChild(a);
                 a.click();
                 document.body.removeChild(a);
@@ -11770,7 +12200,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     var url = URL.createObjectURL(blob);
                     var a = document.createElement('a');
                     a.href = url;
-                    a.download = 'star_arcade_' + Date.now() + '.jpg';
+                    a.download = 'star_arcade_' + Date.now() + ext;
                     document.body.appendChild(a);
                     a.click();
                     document.body.removeChild(a);
@@ -11916,16 +12346,15 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
 
-        console.log('✅ Image System Ready');
+        console.log('✅ Image + GIF + Link System Ready');
     }
 
     // ===================================================
-    //  PATCH displayMessage (image support)
+    //  PATCH displayMessage (Image + GIF + Link)
     //  ရှိပြီးသား displayMessage ကို မဖျက် -- Wrap
     // ===================================================
     function patchDisplayMessage() {
         if (typeof window.displayMessage !== 'function') {
-            // displayMessage မရှိသေးရင် နောက်မှ ထပ် ကြိုးစား
             setTimeout(patchDisplayMessage, 300);
             return;
         }
@@ -11933,37 +12362,43 @@ document.addEventListener('DOMContentLoaded', function() {
 
         var original = window.displayMessage;
         window.displayMessage = function(msg) {
-            if (msg && msg.messageType === 'image' && msg.imageData) {
+            if (!msg) return original.apply(this, arguments);
+
+            // ✅ Image / GIF message
+            if ((msg.messageType === 'image' || msg.messageType === 'gif') && msg.imageData) {
                 return imgDisplayMessage(msg);
             }
+
+            // ✅ Text message -- Link support
+            // ရှိပြီးသား function ကို ခေါ်ပြီး Link ပါရင် အစားထိုး
+            if (msg.text && LINK_REGEX.test(msg.text)) {
+                return displayTextMessageWithLink(msg);
+            }
+
             return original.apply(this, arguments);
         };
         window.displayMessage._imgPatched = true;
-        console.log('✅ displayMessage patched for images');
+        console.log('✅ displayMessage patched (Image + GIF + Link)');
     }
 
     // ===================================================
-    //  START (DOMContentLoaded ပြီးမှ)
+    //  START
     // ===================================================
     function start() {
-        // Element ရှိပြီးသားလား စစ်
         if (document.getElementById('imgSendPopup')) {
             initImageSystem();
         } else {
-            // DOM မရှိသေးရင် နောက်မှ ထပ်
             setTimeout(start, 300);
             return;
         }
         patchDisplayMessage();
     }
 
-    // DOMContentLoaded ပြီးသား ဖြစ်နိုင်တယ်
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', function() {
             setTimeout(start, 700);
         });
     } else {
-        // DOMContentLoaded ပြီးသား
         setTimeout(start, 700);
     }
 
