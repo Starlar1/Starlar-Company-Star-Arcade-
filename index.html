@@ -325,53 +325,6 @@
                     </div>
                 </div>
 
-<!-- ============================================================ -->
-<!-- ✅ IMAGE SEND POPUP (အသစ်) -->
-<!-- ============================================================ -->
-<div class="img-send-popup-overlay hidden" id="imgSendPopup">
-    <div class="img-send-popup">
-        <div class="img-send-preview-wrap">
-            <img id="imgSendPreview" src="" alt="preview" />
-        </div>
-        <p class="img-send-instruction">Slide to send image</p>
-        <div class="img-send-slider-container">
-            <div class="img-send-slider-track" id="imgSendSliderTrack">
-                <div class="img-send-slider-filled" id="imgSendSliderFilled"></div>
-                <div class="img-send-slider-circle" id="imgSendSliderCircle">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                        <polyline points="9,18 15,12 9,6"/>
-                    </svg>
-                </div>
-            </div>
-        </div>
-        <button class="img-send-cancel-btn" id="imgSendCancelBtn">Cancel</button>
-    </div>
-</div>
-
-<!-- ============================================================ -->
-<!-- ✅ IMAGE VIEWER (အသစ်) -->
-<!-- ============================================================ -->
-<div class="img-viewer-overlay hidden" id="imgViewerOverlay">
-    <button class="img-viewer-close" id="imgViewerClose">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <line x1="18" y1="6" x2="6" y2="18"/>
-            <line x1="6" y1="6" x2="18" y2="18"/>
-        </svg>
-    </button>
-    <div class="img-viewer-body">
-        <img id="imgViewerImg" src="" alt="full" />
-    </div>
-    <div class="img-viewer-footer">
-        <button class="img-viewer-download-btn" id="imgViewerDownloadBtn">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                <polyline points="7,10 12,15 17,10"/>
-                <line x1="12" y1="15" x2="12" y2="3"/>
-            </svg>
-            <span>Download</span>
-        </button>
-    </div>
-</div>
 
                 <div class="fs-screen hidden" id="fs-coin"><div class="screen-center"><p>Diamond balance and transactions</p></div></div>
 
@@ -722,6 +675,54 @@
             </div>
         </div>
     </div>
+
+<!-- ============================================================ -->
+<!-- ✅ IMAGE SEND SYSTEM (အသစ် - ရှိပြီးသား code မထိခိုက်) -->
+<!-- ============================================================ -->
+
+<!-- Image Send Popup -->
+<div class="img-send-popup-overlay hidden" id="imgSendPopup">
+    <div class="img-send-popup">
+        <div class="img-send-preview-wrap">
+            <img id="imgSendPreview" src="" alt="preview" />
+        </div>
+        <p class="img-send-instruction">Slide the circle to send</p>
+        <div class="img-send-slider-container">
+            <div class="img-send-slider-track" id="imgSendSliderTrack">
+                <div class="img-send-slider-filled" id="imgSendSliderFilled"></div>
+                <div class="img-send-slider-circle" id="imgSendSliderCircle">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <polyline points="9,18 15,12 9,6"/>
+                    </svg>
+                </div>
+            </div>
+        </div>
+        <button class="img-send-cancel-btn" id="imgSendCancelBtn">Cancel</button>
+    </div>
+</div>
+
+<!-- Image Viewer -->
+<div class="img-viewer-overlay hidden" id="imgViewerOverlay">
+    <button class="img-viewer-close" id="imgViewerClose">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+    </button>
+    <div class="img-viewer-body">
+        <img id="imgViewerImg" src="" alt="full" />
+    </div>
+    <div class="img-viewer-footer">
+        <button class="img-viewer-download-btn" id="imgViewerDownloadBtn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="7,10 12,15 17,10"/>
+                <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            <span>Download</span>
+        </button>
+    </div>
+</div>
 
     <script src="script.js"></script>
 </body>
