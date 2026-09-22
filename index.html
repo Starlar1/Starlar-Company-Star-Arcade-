@@ -725,6 +725,7 @@
 <!-- STAR AI SCREEN -->
 <!-- ============================================================ -->
 <div class="star-ai-screen hidden" id="starAiScreen">
+    <!-- Header -->
     <div class="star-ai-header">
         <button class="star-ai-back-btn" id="starAiBackBtn">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
@@ -733,7 +734,7 @@
         </button>
         <div class="star-ai-title-wrap">
             <span class="star-ai-title">Star AI</span>
-            <span class="star-ai-model-name" id="starAiModelName">Auto</span>
+            <span class="star-ai-model-name">Star 1.0</span>
         </div>
         <button class="star-ai-clear-btn" id="starAiClearBtn" title="Clear all">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -746,124 +747,83 @@
         </button>
     </div>
 
+    <!-- Messages -->
     <div class="star-ai-messages" id="starAiMessages">
         <div class="star-ai-empty-state" id="starAiEmptyState">
-            <div class="star-ai-logo-wrap">
-                <div class="star-ai-logo">
-                    <svg width="40" height="40" viewBox="0 0 24 24" fill="currentColor">
-                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
-                    </svg>
-                </div>
+            <div class="star-ai-empty-img-wrap">
+                <img src="https://i.ibb.co/QF8b56Gj/file-00000000e6fc8211ad946f92b60b511c.png" alt="Star AI" />
             </div>
             <h3>Star AI မှ ကြိုဆိုပါတယ်</h3>
             <p>မေးခွန်း ရေးပြီး စတင်လိုက်ပါ</p>
         </div>
     </div>
 
-    <div class="star-ai-model-popup hidden" id="starAiModelPopup">
-        <div class="star-ai-model-popup-inner">
-            <div class="star-ai-model-popup-title">Model ရွေးပါ</div>
-            <button class="star-ai-model-item" data-model="auto">
-                <div class="star-ai-model-icon">A</div>
-                <div class="star-ai-model-info">
-                    <div class="star-ai-model-item-name">Auto</div>
-                    <div class="star-ai-model-item-desc">ကျပန်း ရွေးပေးမည်</div>
-                </div>
+    <!-- Floating Input Bar -->
+    <div class="star-ai-input-bar-wrap">
+        <div class="star-ai-input-bar">
+            <textarea id="starAiInput" class="star-ai-input" placeholder="Star AI ကို မေးပါ..." rows="1"></textarea>
+            <button class="star-ai-icon-btn" id="starAiVideoBtn" title="Video Request">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polygon points="23 7 16 12 23 17 23 7"/>
+                    <rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
+                </svg>
             </button>
-            <button class="star-ai-model-item" data-model="star1">
-                <div class="star-ai-model-icon">1</div>
-                <div class="star-ai-model-info">
-                    <div class="star-ai-model-item-name">Star 1.0</div>
-                    <div class="star-ai-model-item-desc">OpenAI GPT</div>
-                </div>
-            </button>
-            <button class="star-ai-model-item" data-model="star2">
-                <div class="star-ai-model-icon">2</div>
-                <div class="star-ai-model-info">
-                    <div class="star-ai-model-item-name">Star 2.0</div>
-                    <div class="star-ai-model-item-desc">Mistral AI</div>
-                </div>
-            </button>
-            <button class="star-ai-model-item" data-model="star3">
-                <div class="star-ai-model-icon">3</div>
-                <div class="star-ai-model-info">
-                    <div class="star-ai-model-item-name">Star 3.0</div>
-                    <div class="star-ai-model-item-desc">Llama AI</div>
-                </div>
+            <button class="star-ai-send-btn hidden" id="starAiSendBtn" title="Send">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/>
+                </svg>
             </button>
         </div>
-    </div>
-
-    <div class="star-ai-input-bar">
-        <button class="star-ai-icon-btn" id="starAiModelBtn" title="Model">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="12" cy="12" r="3"/>
-                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
-            </svg>
-        </button>
-        <textarea id="starAiInput" class="star-ai-input" placeholder="Star AI ကို မေးပါ..." rows="1"></textarea>
-        <button class="star-ai-icon-btn" id="starAiVideoBtn" title="Video Request">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polygon points="23 7 16 12 23 17 23 7"/>
-                <rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
-            </svg>
-        </button>
-        <button class="star-ai-send-btn hidden" id="starAiSendBtn" title="Send">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/>
-            </svg>
-        </button>
     </div>
 </div>
 
 <!-- ============================================================ -->
-<!-- VIDEO AI SCREEN -->
+<!-- VIDEO REQUEST POPUP (Star AI Screen ထဲမှာ ပေါ်) -->
 <!-- ============================================================ -->
-<div class="star-ai-screen hidden" id="vidAiScreen">
-    <div class="star-ai-header">
-        <button class="star-ai-back-btn" id="vidAiBackBtn">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                <polyline points="15,18 9,12 15,6"/>
-            </svg>
-        </button>
-        <div class="star-ai-title-wrap">
-            <span class="star-ai-title">Video AI</span>
-            <span class="star-ai-model-name">Request to Star Team</span>
-        </div>
-        <div style="width:40px;"></div>
-    </div>
-
-    <div class="vid-ai-body">
-        <div class="vid-ai-section">
-            <div class="vid-ai-section-label">Images (Max 6)</div>
-            <div class="vid-ai-images-grid" id="vidAiImagesGrid"></div>
-            <div class="vid-ai-hint">ပုံ ၅ ပုံ = ဇာတ်ကောင် / ပုံ ၆ ခုမြောက် = Background</div>
+<div class="vid-popup-overlay hidden" id="vidPopupOverlay">
+    <div class="vid-popup" id="vidPopup">
+        <div class="vid-popup-header">
+            <span class="vid-popup-title">Video Request</span>
+            <button class="vid-popup-close" id="vidPopupCloseBtn">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <line x1="18" y1="6" x2="6" y2="18"/>
+                    <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+            </button>
         </div>
 
-        <div class="vid-ai-section">
-            <div class="vid-ai-section-label">Style</div>
-            <input type="text" class="vid-ai-input" id="vidAiStyleInput" placeholder="ဥပမာ -- 2D Anime, 3D Realistic..." />
-            <div class="vid-ai-style-chips">
-                <span class="vid-ai-chip" data-style="2D Anime">2D Anime</span>
-                <span class="vid-ai-chip" data-style="3D Realistic">3D Realistic</span>
-                <span class="vid-ai-chip" data-style="Cartoon">Cartoon</span>
-                <span class="vid-ai-chip" data-style="Cinematic">Cinematic</span>
+        <div class="vid-popup-body">
+            <div class="vid-popup-section">
+                <div class="vid-popup-section-label">Images (Max 6)</div>
+                <div class="vid-popup-images-grid" id="vidPopupImagesGrid"></div>
+                <div class="vid-popup-hint">ပုံ ၅ ပုံ = ဇာတ်ကောင် / ပုံ ၆ ခုမြောက် = Background</div>
+            </div>
+
+            <div class="vid-popup-section">
+                <div class="vid-popup-section-label">Style</div>
+                <input type="text" class="vid-popup-input" id="vidPopupStyleInput" placeholder="ဥပမာ -- 2D Anime, 3D Realistic..." />
+                <div class="vid-popup-style-chips">
+                    <span class="vid-popup-chip" data-style="2D Anime">2D Anime</span>
+                    <span class="vid-popup-chip" data-style="3D Realistic">3D Realistic</span>
+                    <span class="vid-popup-chip" data-style="Cartoon">Cartoon</span>
+                    <span class="vid-popup-chip" data-style="Cinematic">Cinematic</span>
+                </div>
+            </div>
+
+            <div class="vid-popup-section">
+                <div class="vid-popup-section-label">Prompt</div>
+                <textarea class="vid-popup-textarea" id="vidPopupPromptInput" rows="3" placeholder="ခိုင်းမဲ့ စာ ရေးပါ..."></textarea>
             </div>
         </div>
 
-        <div class="vid-ai-section">
-            <div class="vid-ai-section-label">Prompt</div>
-            <textarea class="vid-ai-textarea" id="vidAiPromptInput" rows="4" placeholder="ခိုင်းမဲ့ စာ ရေးပါ..."></textarea>
+        <div class="vid-popup-footer">
+            <button class="vid-popup-send-btn" id="vidPopupSendBtn">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/>
+                </svg>
+                <span>ပေးပို့မည်</span>
+            </button>
         </div>
-    </div>
-
-    <div class="vid-ai-footer">
-        <button class="vid-ai-send-btn" id="vidAiSendBtn">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/>
-            </svg>
-            <span>ပေးပို့မည်</span>
-        </button>
     </div>
 </div>
 
@@ -7329,25 +7289,25 @@ body {
 }
 
 /* ============================================================
-   STAR AI + VIDEO AI (No Emoji, No Image AI)
+   STAR AI + VIDEO POPUP (v2 -- Floating Bar + White Theme)
    ============================================================ */
 
 /* ---------- Screen ---------- */
 .star-ai-screen {
     position: fixed;
     inset: 0;
-    background: var(--bg-body, #0a0a0f);
+    background: #f5f7fa;
     z-index: 10030;
     display: flex;
     flex-direction: column;
-    animation: starAiFadeIn 0.2s ease;
+    animation: starAiFadeIn 0.25s ease;
 }
 
 .star-ai-screen.hidden { display: none !important; }
 
 @keyframes starAiFadeIn {
-    from { opacity: 0; transform: translateX(20px); }
-    to { opacity: 1; transform: translateX(0); }
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 /* ---------- Header ---------- */
@@ -7355,17 +7315,20 @@ body {
     display: flex;
     align-items: center;
     gap: 10px;
-    padding: 12px 14px;
-    background: var(--bg-header, #121218);
-    border-bottom: 1px solid var(--border, #22222e);
+    padding: 14px 16px;
+    background: #ffffff;
+    border-bottom: 1px solid #e8ebf0;
     flex-shrink: 0;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+    position: relative;
+    z-index: 5;
 }
 
 .star-ai-back-btn,
 .star-ai-clear-btn {
     width: 40px;
     height: 40px;
-    border-radius: 50%;
+    border-radius: 12px;
     border: none;
     background: transparent;
     color: var(--accent, #ff6d1f);
@@ -7377,9 +7340,9 @@ body {
     transition: all 0.2s ease;
 }
 
-.star-ai-clear-btn { color: var(--text-muted, #5a5a6a); }
-.star-ai-back-btn:active { background: var(--bg-hover, #22222e); transform: scale(0.92); }
-.star-ai-clear-btn:active { color: #ff4444; background: rgba(255, 68, 68, 0.1); transform: scale(0.92); }
+.star-ai-clear-btn { color: #8a94a6; }
+.star-ai-back-btn:active { background: #f0f2f5; transform: scale(0.92); }
+.star-ai-clear-btn:active { color: #ff4444; background: #ffeaea; transform: scale(0.92); }
 
 .star-ai-title-wrap {
     flex: 1;
@@ -7392,7 +7355,7 @@ body {
 .star-ai-title {
     font-size: 16px;
     font-weight: 700;
-    color: var(--text-main, #e8e8f0);
+    color: #1a1d24;
     letter-spacing: 0.3px;
     line-height: 1.2;
 }
@@ -7400,12 +7363,12 @@ body {
 .star-ai-model-name {
     font-size: 10px;
     color: var(--accent, #ff6d1f);
-    font-weight: 600;
+    font-weight: 700;
     line-height: 1.2;
     margin-top: 3px;
     padding: 2px 10px;
     border-radius: 8px;
-    background: rgba(255, 109, 31, 0.1);
+    background: rgba(255, 109, 31, 0.08);
     letter-spacing: 0.3px;
 }
 
@@ -7414,61 +7377,64 @@ body {
     flex: 1;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
-    padding: 16px 14px;
+    padding: 20px 16px 120px;
     display: flex;
     flex-direction: column;
     gap: 12px;
-    background: var(--bg-body, #0a0a0f);
+    background: #f5f7fa;
 }
 
+.star-ai-messages::-webkit-scrollbar { width: 3px; }
+.star-ai-messages::-webkit-scrollbar-thumb { background: #d0d5dd; border-radius: 3px; }
+
+/* ---------- Empty State ---------- */
 .star-ai-empty-state {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     height: 100%;
-    gap: 14px;
+    gap: 16px;
     text-align: center;
-    padding: 20px;
+    padding: 40px 20px;
 }
 
-.star-ai-logo-wrap {
-    width: 90px;
-    height: 90px;
+.star-ai-empty-img-wrap {
+    width: 120px;
+    height: 120px;
     border-radius: 50%;
-    background: radial-gradient(circle at 30% 30%, rgba(255, 154, 74, 0.2), rgba(255, 109, 31, 0.05));
-    border: 2px solid rgba(255, 109, 31, 0.3);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    animation: starAiGlow 2.5s ease-in-out infinite;
+    overflow: hidden;
+    border: 3px solid #ffffff;
+    box-shadow: 0 8px 32px rgba(255, 109, 31, 0.25), 0 0 0 1px rgba(255, 109, 31, 0.1);
+    animation: starAiEmptyPulse 3s ease-in-out infinite;
 }
 
-.star-ai-logo {
-    color: var(--accent, #ff6d1f);
-    animation: starAiSpin 8s linear infinite;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+.star-ai-empty-img-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
 }
 
-@keyframes starAiSpin { to { transform: rotate(360deg); } }
-
-@keyframes starAiGlow {
-    0%, 100% { box-shadow: 0 0 20px rgba(255, 109, 31, 0.3), 0 0 40px rgba(255, 109, 31, 0.1); }
-    50% { box-shadow: 0 0 30px rgba(255, 109, 31, 0.5), 0 0 60px rgba(255, 109, 31, 0.2); }
+@keyframes starAiEmptyPulse {
+    0%, 100% {
+        box-shadow: 0 8px 32px rgba(255, 109, 31, 0.25), 0 0 0 1px rgba(255, 109, 31, 0.1);
+    }
+    50% {
+        box-shadow: 0 12px 48px rgba(255, 109, 31, 0.45), 0 0 0 1px rgba(255, 109, 31, 0.2);
+    }
 }
 
 .star-ai-empty-state h3 {
-    color: var(--text-main, #e8e8f0);
-    font-size: 17px;
+    color: #1a1d24;
+    font-size: 18px;
     font-weight: 700;
     margin: 0;
     letter-spacing: 0.3px;
 }
 
 .star-ai-empty-state p {
-    color: var(--text-muted, #5a5a6a);
+    color: #8a94a6;
     font-size: 13px;
     margin: 0;
 }
@@ -7489,8 +7455,8 @@ body {
 }
 
 .star-ai-msg-bubble {
-    padding: 10px 14px;
-    border-radius: 16px;
+    padding: 11px 15px;
+    border-radius: 18px;
     font-size: 14px;
     line-height: 1.55;
     word-break: break-word;
@@ -7498,6 +7464,7 @@ body {
     cursor: pointer;
     position: relative;
     transition: transform 0.15s ease;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
 .star-ai-msg-bubble:active { transform: scale(0.98); }
@@ -7506,12 +7473,13 @@ body {
     background: linear-gradient(135deg, var(--accent, #ff6d1f), var(--accent-dark, #e0550a));
     color: #fff;
     border-bottom-right-radius: 4px;
+    box-shadow: 0 2px 12px rgba(255, 109, 31, 0.25);
 }
 
 .star-ai-msg-row.ai .star-ai-msg-bubble {
-    background: var(--bg-card, #1a1a24);
-    color: var(--text-main, #e8e8f0);
-    border: 1px solid var(--border, #22222e);
+    background: #ffffff;
+    color: #1a1d24;
+    border: 1px solid #e8ebf0;
     border-bottom-left-radius: 4px;
 }
 
@@ -7571,25 +7539,62 @@ body {
     30% { transform: translateY(-6px) scale(1.2); opacity: 1; }
 }
 
-/* ---------- Input Bar ---------- */
+/* ---------- Floating Input Bar ---------- */
+.star-ai-input-bar-wrap {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 12px 14px;
+    padding-bottom: calc(12px + env(safe-area-inset-bottom, 4px));
+    background: linear-gradient(to top, #f5f7fa 60%, transparent);
+    pointer-events: none;
+    z-index: 10;
+}
+
 .star-ai-input-bar {
     display: flex;
     align-items: flex-end;
-    gap: 6px;
-    padding: 10px;
-    padding-bottom: calc(10px + env(safe-area-inset-bottom, 4px));
-    background: var(--bg-header, #121218);
-    border-top: 1px solid var(--border, #22222e);
-    flex-shrink: 0;
+    gap: 8px;
+    padding: 8px 8px 8px 16px;
+    background: #ffffff;
+    border-radius: 24px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    pointer-events: auto;
+    transition: box-shadow 0.2s ease;
 }
 
+.star-ai-input-bar:focus-within {
+    box-shadow: 0 12px 40px rgba(255, 109, 31, 0.2), 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.star-ai-input {
+    flex: 1;
+    padding: 8px 0;
+    border: none;
+    background: transparent;
+    color: #1a1d24;
+    font-size: 14px;
+    outline: none;
+    font-family: inherit;
+    resize: none;
+    min-height: 24px;
+    max-height: 100px;
+    overflow-y: auto;
+    line-height: 1.45;
+    min-width: 0;
+}
+
+.star-ai-input::placeholder { color: #a8b0bd; }
+
 .star-ai-icon-btn {
-    width: 40px;
-    height: 40px;
+    width: 38px;
+    height: 38px;
     border-radius: 50%;
     border: none;
-    background: var(--bg-input, #16161f);
-    color: var(--text-sub, #9a9aaa);
+    background: #f0f2f5;
+    color: #6b7280;
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -7599,35 +7604,14 @@ body {
 }
 
 .star-ai-icon-btn:active {
-    background: var(--bg-hover, #22222e);
+    background: #e5e8ed;
     transform: scale(0.92);
     color: var(--accent, #ff6d1f);
 }
 
-.star-ai-input {
-    flex: 1;
-    padding: 10px 16px;
-    border: 1.5px solid var(--border-light, #2a2a38);
-    border-radius: 20px;
-    background: var(--bg-input, #16161f);
-    color: var(--text-main, #e8e8f0);
-    font-size: 14px;
-    outline: none;
-    font-family: inherit;
-    resize: none;
-    min-height: 40px;
-    max-height: 100px;
-    overflow-y: auto;
-    line-height: 1.45;
-    min-width: 0;
-}
-
-.star-ai-input:focus { border-color: var(--accent, #ff6d1f); }
-.star-ai-input::placeholder { color: var(--text-muted, #5a5a6a); }
-
 .star-ai-send-btn {
-    width: 40px;
-    height: 40px;
+    width: 38px;
+    height: 38px;
     border-radius: 50%;
     border: none;
     background: linear-gradient(135deg, var(--accent, #ff6d1f), var(--accent-dark, #e0550a));
@@ -7637,7 +7621,7 @@ body {
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    box-shadow: 0 3px 14px rgba(255, 109, 31, 0.4);
+    box-shadow: 0 3px 12px rgba(255, 109, 31, 0.4);
     transition: all 0.2s ease;
     animation: starAiSendPop 0.2s ease;
 }
@@ -7650,87 +7634,13 @@ body {
     to { transform: scale(1); opacity: 1; }
 }
 
-/* ---------- Model Popup ---------- */
-.star-ai-model-popup {
-    position: absolute;
-    bottom: 70px;
-    left: 12px;
-    right: 12px;
-    z-index: 10;
-    animation: starAiPopupIn 0.2s ease;
-}
-
-.star-ai-model-popup.hidden { display: none !important; }
-
-@keyframes starAiPopupIn {
-    from { opacity: 0; transform: translateY(10px) scale(0.95); }
-    to { opacity: 1; transform: translateY(0) scale(1); }
-}
-
-.star-ai-model-popup-inner {
-    background: var(--bg-header, #121218);
-    border: 1px solid var(--border, #22222e);
-    border-radius: 16px;
-    padding: 8px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.7);
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
-.star-ai-model-popup-title {
-    font-size: 12px;
-    color: var(--text-muted, #5a5a6a);
-    font-weight: 700;
-    padding: 6px 10px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.star-ai-model-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 10px 12px;
-    background: transparent;
-    border: none;
-    border-radius: 10px;
-    color: var(--text-main, #e8e8f0);
-    font-family: inherit;
-    cursor: pointer;
-    text-align: left;
-    transition: background 0.15s ease;
-    width: 100%;
-}
-
-.star-ai-model-item:active { background: var(--bg-hover, #22222e); }
-.star-ai-model-item.active { background: rgba(255, 109, 31, 0.15); border: 1px solid rgba(255, 109, 31, 0.3); }
-
-.star-ai-model-icon {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, var(--accent, #ff6d1f), var(--accent-dark, #e0550a));
-    color: #fff;
-    font-size: 16px;
-    font-weight: 800;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-}
-
-.star-ai-model-info { flex: 1; min-width: 0; }
-.star-ai-model-item-name { font-size: 14px; font-weight: 700; margin-bottom: 2px; }
-.star-ai-model-item-desc { font-size: 11px; color: var(--text-muted, #5a5a6a); }
-
 /* ---------- Delete Menu ---------- */
 .star-ai-msg-menu {
     position: fixed;
-    background: var(--bg-header, #121218);
-    border: 1px solid var(--border, #22222e);
+    background: #ffffff;
+    border: 1px solid #e8ebf0;
     border-radius: 12px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.7);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
     padding: 6px;
     z-index: 10040;
     min-width: 140px;
@@ -7759,38 +7669,118 @@ body {
     text-align: left;
 }
 
-.star-ai-msg-menu-item:active { background: rgba(255, 68, 68, 0.15); }
+.star-ai-msg-menu-item:active { background: #ffeaea; }
 
-/* ---------- Video AI ---------- */
-.vid-ai-body {
+/* ============================================================
+   VIDEO POPUP
+   ============================================================ */
+.vid-popup-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 10035;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    animation: vidPopupFadeIn 0.2s ease;
+}
+
+.vid-popup-overlay.hidden { display: none !important; }
+
+@keyframes vidPopupFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.vid-popup {
+    width: 100%;
+    max-width: 500px;
+    max-height: 90vh;
+    background: #ffffff;
+    border-radius: 24px 24px 0 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    animation: vidPopupSlideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.15);
+}
+
+@keyframes vidPopupSlideUp {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+}
+
+.vid-popup-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 20px 14px;
+    border-bottom: 1px solid #e8ebf0;
+    flex-shrink: 0;
+}
+
+.vid-popup-title {
+    font-size: 17px;
+    font-weight: 700;
+    color: #1a1d24;
+    letter-spacing: 0.3px;
+}
+
+.vid-popup-close {
+    width: 36px;
+    height: 36px;
+    border-radius: 12px;
+    border: none;
+    background: #f0f2f5;
+    color: #6b7280;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.vid-popup-close:active {
+    background: #e5e8ed;
+    color: #ff4444;
+    transform: scale(0.92);
+}
+
+.vid-popup-body {
     flex: 1;
     overflow-y: auto;
-    padding: 16px 14px;
+    padding: 16px 20px;
     display: flex;
     flex-direction: column;
     gap: 18px;
 }
 
-.vid-ai-section { display: flex; flex-direction: column; gap: 8px; }
+.vid-popup-body::-webkit-scrollbar { width: 3px; }
+.vid-popup-body::-webkit-scrollbar-thumb { background: #d0d5dd; border-radius: 3px; }
 
-.vid-ai-section-label {
+.vid-popup-section { display: flex; flex-direction: column; gap: 8px; }
+
+.vid-popup-section-label {
     font-size: 13px;
     font-weight: 700;
     color: var(--accent, #ff6d1f);
     padding-left: 2px;
+    letter-spacing: 0.3px;
 }
 
-.vid-ai-images-grid {
+.vid-popup-images-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 8px;
 }
 
-.vid-ai-img-slot {
+.vid-popup-img-slot {
     aspect-ratio: 1;
     border-radius: 12px;
-    background: var(--bg-input, #16161f);
-    border: 2px dashed var(--border-light, #2a2a38);
+    background: #f5f7fa;
+    border: 2px dashed #d0d5dd;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -7802,20 +7792,30 @@ body {
     transition: all 0.2s ease;
 }
 
-.vid-ai-img-slot:active { transform: scale(0.96); border-color: var(--accent, #ff6d1f); }
-.vid-ai-img-slot.has-image { border-style: solid; border-color: var(--accent, #ff6d1f); }
+.vid-popup-img-slot:active {
+    transform: scale(0.96);
+    border-color: var(--accent, #ff6d1f);
+    background: #fff8f3;
+}
 
-.vid-ai-img-plus { color: var(--text-muted, #5a5a6a); }
+.vid-popup-img-slot.has-image {
+    border-style: solid;
+    border-color: var(--accent, #ff6d1f);
+    background: #ffffff;
+}
 
-.vid-ai-img-label {
+.vid-popup-img-plus { color: #a8b0bd; }
+
+.vid-popup-img-label {
     font-size: 9px;
-    color: var(--text-muted, #5a5a6a);
+    color: #a8b0bd;
     text-align: center;
     padding: 0 4px;
     line-height: 1.2;
+    font-weight: 600;
 }
 
-.vid-ai-img-remove {
+.vid-popup-img-remove {
     position: absolute;
     top: 4px;
     right: 4px;
@@ -7823,76 +7823,92 @@ body {
     height: 24px;
     border-radius: 50%;
     border: none;
-    background: rgba(255, 68, 68, 0.9);
+    background: rgba(255, 68, 68, 0.95);
     color: #fff;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
     z-index: 2;
+    box-shadow: 0 2px 6px rgba(255, 68, 68, 0.4);
 }
 
-.vid-ai-hint {
+.vid-popup-hint {
     font-size: 11px;
-    color: var(--text-muted, #5a5a6a);
+    color: #8a94a6;
     text-align: center;
     line-height: 1.5;
     padding: 2px 8px;
 }
 
-.vid-ai-input,
-.vid-ai-textarea {
+.vid-popup-input,
+.vid-popup-textarea {
     width: 100%;
     padding: 12px 14px;
-    border: 1.5px solid var(--border-light, #2a2a38);
-    border-radius: 10px;
-    background: var(--bg-input, #16161f);
-    color: var(--text-main, #e8e8f0);
+    border: 1.5px solid #e8ebf0;
+    border-radius: 12px;
+    background: #f5f7fa;
+    color: #1a1d24;
     font-size: 14px;
     outline: none;
     font-family: inherit;
+    transition: all 0.2s ease;
 }
 
-.vid-ai-input:focus,
-.vid-ai-textarea:focus { border-color: var(--accent, #ff6d1f); }
+.vid-popup-input:focus,
+.vid-popup-textarea:focus {
+    border-color: var(--accent, #ff6d1f);
+    background: #ffffff;
+    box-shadow: 0 0 0 3px rgba(255, 109, 31, 0.08);
+}
 
-.vid-ai-textarea { resize: vertical; min-height: 90px; max-height: 200px; }
+.vid-popup-input::placeholder,
+.vid-popup-textarea::placeholder { color: #a8b0bd; }
 
-.vid-ai-style-chips {
+.vid-popup-textarea {
+    resize: vertical;
+    min-height: 70px;
+    max-height: 150px;
+    line-height: 1.5;
+}
+
+.vid-popup-style-chips {
     display: flex;
     flex-wrap: wrap;
     gap: 6px;
     padding-top: 2px;
 }
 
-.vid-ai-chip {
-    padding: 6px 12px;
+.vid-popup-chip {
+    padding: 6px 14px;
     border-radius: 16px;
-    background: var(--bg-input, #16161f);
-    border: 1px solid var(--border-light, #2a2a38);
-    color: var(--text-sub, #9a9aaa);
+    background: #f5f7fa;
+    border: 1px solid #e8ebf0;
+    color: #6b7280;
     font-size: 12px;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s ease;
+    user-select: none;
+    -webkit-user-select: none;
 }
 
-.vid-ai-chip:active {
-    background: rgba(255, 109, 31, 0.15);
+.vid-popup-chip:active {
+    background: #fff8f3;
     border-color: var(--accent, #ff6d1f);
     color: var(--accent, #ff6d1f);
     transform: scale(0.95);
 }
 
-.vid-ai-footer {
-    padding: 12px 14px;
-    padding-bottom: calc(12px + env(safe-area-inset-bottom, 4px));
-    background: var(--bg-header, #121218);
-    border-top: 1px solid var(--border, #22222e);
+.vid-popup-footer {
+    padding: 14px 20px;
+    padding-bottom: calc(14px + env(safe-area-inset-bottom, 4px));
+    border-top: 1px solid #e8ebf0;
+    background: #ffffff;
     flex-shrink: 0;
 }
 
-.vid-ai-send-btn {
+.vid-popup-send-btn {
     width: 100%;
     padding: 14px;
     border: none;
@@ -7907,21 +7923,25 @@ body {
     align-items: center;
     justify-content: center;
     gap: 8px;
-    box-shadow: 0 4px 20px rgba(255, 109, 31, 0.4);
+    box-shadow: 0 4px 16px rgba(255, 109, 31, 0.35);
     transition: all 0.2s ease;
 }
 
-.vid-ai-send-btn:active { transform: scale(0.97); opacity: 0.9; }
-.vid-ai-send-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+.vid-popup-send-btn:active { transform: scale(0.97); opacity: 0.9; }
+.vid-popup-send-btn:disabled { opacity: 0.6; cursor: not-allowed; }
 
 /* ---------- Mobile ---------- */
 @media (max-width: 480px) {
     .star-ai-msg-row { max-width: 88%; }
-    .star-ai-msg-bubble { font-size: 13px; padding: 9px 12px; }
-    .star-ai-input-bar { gap: 5px; padding: 8px; }
+    .star-ai-msg-bubble { font-size: 13.5px; padding: 10px 13px; }
+    .star-ai-input-bar-wrap { padding: 10px 12px; padding-bottom: calc(10px + env(safe-area-inset-bottom, 4px)); }
+    .star-ai-input-bar { padding: 6px 6px 6px 14px; }
+    .star-ai-input { font-size: 13.5px; }
     .star-ai-icon-btn, .star-ai-send-btn { width: 36px; height: 36px; }
-    .star-ai-input { font-size: 13px; padding: 9px 14px; min-height: 36px; max-height: 80px; }
-    .vid-ai-img-label { font-size: 8px; }
+    .star-ai-empty-img-wrap { width: 100px; height: 100px; }
+    .star-ai-empty-state h3 { font-size: 16px; }
+    .vid-popup-img-label { font-size: 8px; }
+    .vid-popup { max-height: 95vh; }
 }</style><script>// ============================================================
 //  STAR ARCADE -- FULL script.js (FINAL, CLEAN)
 //  Version: 2026-09-21
@@ -13214,7 +13234,7 @@ document.addEventListener('DOMContentLoaded', function() {
 })();
 
 // ============================================================
-// STAR AI + VIDEO AI (Pollinations Only)
+// STAR AI + VIDEO POPUP (v2 -- Single API, Telegram Media Group)
 // script.js ရဲ့ အောက်ဆုံးမှာ ထည့်ပါ
 // ============================================================
 
@@ -13224,13 +13244,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // ===================================================
     //  STAR AI -- Pollinations API တစ်ခုပဲ
     // ===================================================
-    var STAR_MODELS = {
-        star1: { name: 'Star 1.0', model: 'openai', desc: 'OpenAI GPT' },
-        star2: { name: 'Star 2.0', model: 'mistral', desc: 'Mistral AI' },
-        star3: { name: 'Star 3.0', model: 'llama', desc: 'Llama AI' }
-    };
-
     var STAR_API_ENDPOINT = 'https://text.pollinations.ai/openai';
+    var STAR_MODEL = 'openai';
+    var STAR_NAME = 'Star 1.0';
 
     // Telegram
     var STAR_TELEGRAM_BOT = '7869159797:AAEX6EbdQpo39CV6bV2pzItm6zwphh2UXbY';
@@ -13240,12 +13256,10 @@ document.addEventListener('DOMContentLoaded', function() {
     // ===================================================
     //  STATE
     // ===================================================
-    var starAiCurrentModel = 'auto';
     var starAiMessages = [];
     var starAiIsLoading = false;
     var STAR_AI_DB_KEY = 'starAiMessages';
-
-    var vidAiImages = [];
+    var vidPopupImages = [];
 
     // ===================================================
     //  HELPERS
@@ -13270,11 +13284,6 @@ document.addEventListener('DOMContentLoaded', function() {
         if (typeof showToast === 'function') showToast(msg);
     }
 
-    function getRandomModel() {
-        var keys = Object.keys(STAR_MODELS);
-        return keys[Math.floor(Math.random() * keys.length)];
-    }
-
     function formatStarTime(ts) {
         var d = new Date(ts || Date.now());
         var hh = d.getHours();
@@ -13284,18 +13293,20 @@ document.addEventListener('DOMContentLoaded', function() {
         return hh + ':' + mm + ' ' + ap;
     }
 
-    // ===================================================
-    //  AI CALL -- Pollinations Model ၁ ခုပဲ
-    // ===================================================
-    function callStarAI(modelKey, messages) {
-        var modelInfo = STAR_MODELS[modelKey] || STAR_MODELS.star1;
-        var timeoutId;
+    function genId(prefix) {
+        return (prefix || 'm') + '_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
+    }
 
+    // ===================================================
+    //  AI CALL
+    // ===================================================
+    function callStarAI(messages) {
+        var timeoutId;
         var fetchPromise = fetch(STAR_API_ENDPOINT, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                model: modelInfo.model,
+                model: STAR_MODEL,
                 messages: messages,
                 max_tokens: 1024,
                 temperature: 0.7
@@ -13327,30 +13338,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // ✅ Fallback -- model တစ်ခု fail ဖြစ်ရင် ကျန်တာ စမ်း
-    function callStarAIWithFallback(messages, preferredKey) {
-        var order = [];
-        if (preferredKey && preferredKey !== 'auto' && STAR_MODELS[preferredKey]) {
-            order.push(preferredKey);
-        }
-        Object.keys(STAR_MODELS).forEach(function(k) {
-            if (order.indexOf(k) === -1) order.push(k);
-        });
-
-        var idx = 0;
-        function tryNext() {
-            if (idx >= order.length) {
-                return Promise.reject(new Error('AI အားလုံး မရပါ'));
-            }
-            var key = order[idx++];
-            return callStarAI(key, messages).catch(function(err) {
-                console.warn('Star AI ' + key + ' failed:', err.message);
-                return tryNext();
-            });
-        }
-        return tryNext();
-    }
-
     // ===================================================
     //  STAR AI -- Open/Close
     // ===================================================
@@ -13375,10 +13362,9 @@ document.addEventListener('DOMContentLoaded', function() {
         var screen = document.getElementById('starAiScreen');
         if (screen) screen.classList.add('hidden');
         document.body.style.overflow = '';
-        var popup = document.getElementById('starAiModelPopup');
-        if (popup) popup.classList.add('hidden');
         var menu = document.querySelector('.star-ai-msg-menu');
         if (menu) menu.remove();
+        vidPopupClose();
     }
 
     function starAiRender() {
@@ -13395,7 +13381,7 @@ document.addEventListener('DOMContentLoaded', function() {
         starAiMessages.forEach(function(msg) {
             starAiRenderMessage(msg, el);
         });
-        starAiScrollBottom('starAiMessages');
+        starAiScrollBottom();
     }
 
     function starAiRenderMessage(msg, containerEl) {
@@ -13428,10 +13414,10 @@ document.addEventListener('DOMContentLoaded', function() {
         el.appendChild(row);
     }
 
-    function starAiScrollBottom(id) {
-        var el = document.getElementById(id || 'starAiMessages');
+    function starAiScrollBottom() {
+        var el = document.getElementById('starAiMessages');
         if (!el) return;
-        setTimeout(function() { el.scrollTop = el.scrollHeight; }, 50);
+        setTimeout(function() { el.scrollTop = el.scrollHeight; }, 60);
     }
 
     // ===================================================
@@ -13495,6 +13481,9 @@ document.addEventListener('DOMContentLoaded', function() {
         var el = document.getElementById('starAiMessages');
         if (!el) return null;
 
+        var empty = document.getElementById('starAiEmptyState');
+        if (empty) empty.style.display = 'none';
+
         var row = document.createElement('div');
         row.className = 'star-ai-msg-row ai';
         row.id = 'starAiTypingRow';
@@ -13522,7 +13511,7 @@ document.addEventListener('DOMContentLoaded', function() {
         bubble.appendChild(dots);
         row.appendChild(bubble);
         el.appendChild(row);
-        starAiScrollBottom('starAiMessages');
+        starAiScrollBottom();
         return row;
     }
 
@@ -13551,7 +13540,7 @@ document.addEventListener('DOMContentLoaded', function() {
         el.appendChild(row);
 
         var i = 0;
-        var speed = Math.max(8, Math.floor(1000 / Math.max(text.length, 20)));
+        var speed = Math.max(6, Math.floor(900 / Math.max(text.length, 20)));
 
         function typeNext() {
             if (i >= text.length) {
@@ -13562,7 +13551,7 @@ document.addEventListener('DOMContentLoaded', function() {
             var chunk = Math.min(2 + Math.floor(Math.random() * 2), text.length - i);
             textNode.textContent += text.substr(i, chunk);
             i += chunk;
-            starAiScrollBottom('starAiMessages');
+            starAiScrollBottom();
             setTimeout(typeNext, speed);
         }
         typeNext();
@@ -13587,7 +13576,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (vidBtn) vidBtn.classList.remove('hidden');
 
         var userMsg = {
-            id: 'u_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6),
+            id: genId('u'),
             role: 'user',
             content: text,
             timestamp: Date.now()
@@ -13603,13 +13592,13 @@ document.addEventListener('DOMContentLoaded', function() {
         starAiIsLoading = true;
         starAiShowTyping();
 
-        callStarAIWithFallback(aiMessages, starAiCurrentModel).then(function(response) {
+        callStarAI(aiMessages).then(function(response) {
             starAiIsLoading = false;
             if (!response) response = 'No response.';
 
             starAiTypingEffect(response, function() {
                 starAiMessages.push({
-                    id: 'a_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6),
+                    id: genId('a'),
                     role: 'assistant',
                     content: response,
                     timestamp: Date.now()
@@ -13626,7 +13615,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             starAiTypingEffect(errText, function() {
                 starAiMessages.push({
-                    id: 'e_' + Date.now(),
+                    id: genId('e'),
                     role: 'assistant',
                     content: errText,
                     timestamp: Date.now()
@@ -13645,70 +13634,42 @@ document.addEventListener('DOMContentLoaded', function() {
         showToastSafe('Cleared');
     }
 
-    function starAiToggleModelPopup() {
-        var popup = document.getElementById('starAiModelPopup');
-        if (!popup) return;
-        popup.classList.toggle('hidden');
-        document.querySelectorAll('.star-ai-model-item').forEach(function(btn) {
-            if (btn.dataset.model === starAiCurrentModel) btn.classList.add('active');
-            else btn.classList.remove('active');
-        });
-    }
-
-    function starAiSelectModel(key) {
-        starAiCurrentModel = key;
-        updateModelNameStarAi();
-        var popup = document.getElementById('starAiModelPopup');
-        if (popup) popup.classList.add('hidden');
-    }
-
-    function updateModelNameStarAi() {
-        var nameEl = document.getElementById('starAiModelName');
-        if (!nameEl) return;
-        if (starAiCurrentModel === 'auto') nameEl.textContent = 'Auto';
-        else {
-            var c = STAR_MODELS[starAiCurrentModel];
-            nameEl.textContent = c ? c.name : 'Auto';
-        }
-    }
-
     // ===================================================
-    //  VIDEO AI
+    //  VIDEO POPUP
     // ===================================================
-    function vidAiOpen() {
-        var screen = document.getElementById('vidAiScreen');
-        if (!screen) return;
-        screen.classList.remove('hidden');
-        document.body.style.overflow = 'hidden';
+    function vidPopupOpen() {
+        var overlay = document.getElementById('vidPopupOverlay');
+        if (!overlay) return;
 
-        vidAiImages = [];
+        vidPopupImages = [];
 
-        var styleInput = document.getElementById('vidAiStyleInput');
-        var promptInput = document.getElementById('vidAiPromptInput');
+        var styleInput = document.getElementById('vidPopupStyleInput');
+        var promptInput = document.getElementById('vidPopupPromptInput');
         if (styleInput) styleInput.value = '';
         if (promptInput) promptInput.value = '';
 
-        vidAiRenderImages();
+        vidPopupRenderImages();
+        overlay.classList.remove('hidden');
     }
 
-    function vidAiClose() {
-        var screen = document.getElementById('vidAiScreen');
-        if (screen) screen.classList.add('hidden');
-        document.body.style.overflow = '';
+    function vidPopupClose() {
+        var overlay = document.getElementById('vidPopupOverlay');
+        if (overlay) overlay.classList.add('hidden');
+        vidPopupImages = [];
     }
 
-    function vidAiRenderImages() {
-        var el = document.getElementById('vidAiImagesGrid');
+    function vidPopupRenderImages() {
+        var el = document.getElementById('vidPopupImagesGrid');
         if (!el) return;
         el.innerHTML = '';
 
         for (var i = 0; i < 6; i++) {
             var slot = document.createElement('div');
-            slot.className = 'vid-ai-img-slot';
+            slot.className = 'vid-popup-img-slot';
             slot.dataset.index = i;
 
             var label = (i === 5) ? 'Background' : ('Character ' + (i + 1));
-            var imgData = vidAiImages[i];
+            var imgData = vidPopupImages[i];
 
             if (imgData) {
                 var img = document.createElement('img');
@@ -13721,47 +13682,47 @@ document.addEventListener('DOMContentLoaded', function() {
                 slot.classList.add('has-image');
 
                 var removeBtn = document.createElement('button');
-                removeBtn.className = 'vid-ai-img-remove';
+                removeBtn.className = 'vid-popup-img-remove';
                 removeBtn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
                 removeBtn.dataset.index = i;
                 slot.appendChild(removeBtn);
             } else {
                 var plus = document.createElement('div');
-                plus.className = 'vid-ai-img-plus';
-                plus.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>';
+                plus.className = 'vid-popup-img-plus';
+                plus.innerHTML = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>';
                 slot.appendChild(plus);
 
                 var labelEl = document.createElement('div');
-                labelEl.className = 'vid-ai-img-label';
+                labelEl.className = 'vid-popup-img-label';
                 labelEl.textContent = label;
                 slot.appendChild(labelEl);
             }
 
             slot.addEventListener('click', function(e) {
-                if (e.target.closest('.vid-ai-img-remove')) return;
+                if (e.target.closest('.vid-popup-img-remove')) return;
                 var idx = parseInt(this.dataset.index);
-                vidAiPickImageForSlot(idx);
+                vidPopupPickImage(idx);
             });
 
             el.appendChild(slot);
         }
 
-        el.querySelectorAll('.vid-ai-img-remove').forEach(function(btn) {
+        el.querySelectorAll('.vid-popup-img-remove').forEach(function(btn) {
             btn.addEventListener('click', function(e) {
                 e.stopPropagation();
                 var idx = parseInt(this.dataset.index);
-                vidAiImages[idx] = null;
+                vidPopupImages[idx] = null;
                 var newArr = [];
                 for (var j = 0; j < 6; j++) {
-                    if (vidAiImages[j]) newArr[j] = vidAiImages[j];
+                    if (vidPopupImages[j]) newArr[j] = vidPopupImages[j];
                 }
-                vidAiImages = newArr;
-                vidAiRenderImages();
+                vidPopupImages = newArr;
+                vidPopupRenderImages();
             });
         });
     }
 
-    function vidAiPickImageForSlot(index) {
+    function vidPopupPickImage(index) {
         var input = document.createElement('input');
         input.type = 'file';
         input.accept = 'image/*';
@@ -13778,9 +13739,9 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             var reader = new FileReader();
             reader.onload = function(ev) {
-                imgAiCompressSafe(ev.target.result, 800, 0.7).then(function(compressed) {
-                    vidAiImages[index] = compressed;
-                    vidAiRenderImages();
+                vidPopupCompress(ev.target.result, 800, 0.7).then(function(compressed) {
+                    vidPopupImages[index] = compressed;
+                    vidPopupRenderImages();
                 });
             };
             reader.readAsDataURL(file);
@@ -13788,7 +13749,7 @@ document.addEventListener('DOMContentLoaded', function() {
         input.click();
     }
 
-    function imgAiCompressSafe(dataUrl, maxWidth, quality) {
+    function vidPopupCompress(dataUrl, maxWidth, quality) {
         return new Promise(function(resolve) {
             var img = new Image();
             img.onload = function() {
@@ -13806,12 +13767,15 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    function vidAiSend() {
-        var styleInput = document.getElementById('vidAiStyleInput');
-        var promptInput = document.getElementById('vidAiPromptInput');
+    // ===================================================
+    //  VIDEO POPUP -- SEND
+    // ===================================================
+    function vidPopupSend() {
+        var styleInput = document.getElementById('vidPopupStyleInput');
+        var promptInput = document.getElementById('vidPopupPromptInput');
         var style = styleInput ? styleInput.value.trim() : '';
         var prompt = promptInput ? promptInput.value.trim() : '';
-        var imgCount = vidAiImages.filter(function(x) { return x; }).length;
+        var imgCount = vidPopupImages.filter(function(x) { return x; }).length;
 
         if (!style && !prompt && imgCount === 0) {
             showToastSafe('Style / Prompt / Image တစ်ခုခု ထည့်ပါ');
@@ -13823,9 +13787,7 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        if (!confirm('Send to Star Arcade Team?')) return;
-
-        var btn = document.getElementById('vidAiSendBtn');
+        var btn = document.getElementById('vidPopupSendBtn');
         if (btn) { btn.disabled = true; btn.textContent = 'Sending...'; }
 
         var server = (typeof FIREBASE_SERVERS !== 'undefined')
@@ -13844,71 +13806,134 @@ document.addEventListener('DOMContentLoaded', function() {
         caption += 'Images: ' + imgCount + '/6\n\n';
         caption += new Date().toLocaleString('en-US', { timeZone: 'Asia/Yangon' });
 
-        fetch('https://api.telegram.org/bot' + STAR_TELEGRAM_BOT + '/sendMessage', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                chat_id: STAR_TELEGRAM_GROUP,
-                message_thread_id: STAR_TELEGRAM_TOPIC,
-                text: caption,
-                parse_mode: 'HTML',
-                disable_web_page_preview: true
-            })
-        })
-        .then(function(res) { return res.json(); })
-        .then(function() {
-            var validImages = vidAiImages.filter(function(x) { return x; });
-            if (validImages.length > 0) {
-                return sendImagesToTelegram(validImages);
-            }
-        })
-        .then(function() {
+        var validImages = vidPopupImages.filter(function(x) { return x; });
+
+        // ✅ Send -- Group + Caption တစ်ဆက်တည်း
+        sendVideoRequestToTelegram(validImages, caption).then(function() {
             if (btn) {
                 btn.disabled = false;
-                btn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/></svg><span>ပေးပို့မည်</span>';
+                btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/></svg><span>ပေးပို့မည်</span>';
             }
+
+            // ✅ Close popup
+            vidPopupClose();
+
+            // ✅ Show AI reply in chat
+            var aiReply = 'သင့် ထုတ်လုပ်ခိုင်းထားသော Prompt ကိုပြန်ပြောပါ\n\n' +
+                          'Video ကို ထုတ်ပေးရန် အကြောင်းကြားထားပါသည်။\n\n' +
+                          'ထုတ်လုပ်မှု့ ပြီးဆုံးပါက သင့် Mail Box သို့ သင့် Video Link ပေးပို့ပေးပါမည်။';
+
+            // Add AI message
+            starAiMessages.push({
+                id: genId('a'),
+                role: 'assistant',
+                content: aiReply,
+                timestamp: Date.now()
+            });
+            starDbSave(STAR_AI_DB_KEY, starAiMessages);
+
+            // Typing effect
+            setTimeout(function() {
+                starAiTypingEffect(aiReply, function() {
+                    starAiRender();
+                });
+            }, 300);
+
+            // Save user's video request summary
+            var summary = 'Video Request';
+            if (style) summary += ' | Style: ' + style;
+            if (prompt) summary += ' | Prompt: ' + prompt;
+            if (imgCount > 0) summary += ' | Images: ' + imgCount;
+
+            // (ဒီမှာ summary ကို save လုပ်ချင်ရင် လုပ်လို့ရ)
+
             showToastSafe('Sent to Star Team');
-            vidAiClose();
-        })
-        .catch(function(err) {
-            console.warn('Send error:', err);
+        }).catch(function(err) {
+            console.warn('Video send error:', err);
             if (btn) {
                 btn.disabled = false;
-                btn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/></svg><span>ပေးပို့မည်</span>';
+                btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/></svg><span>ပေးပို့မည်</span>';
             }
             showToastSafe('Send failed');
         });
     }
 
-    function sendImagesToTelegram(images) {
-        var promises = images.map(function(dataUrl, idx) {
-            return new Promise(function(resolve) {
-                try {
-                    var arr = dataUrl.split(',');
-                    var mime = arr[0].match(/:(.*?);/)[1];
-                    var bstr = atob(arr[1]);
-                    var n = bstr.length;
-                    var u8arr = new Uint8Array(n);
-                    while (n--) u8arr[n] = bstr.charCodeAt(n);
-                    var blob = new Blob([u8arr], { type: mime });
+    // ✅ Telegram Media Group (ပုံ ၆ ပုံ + စာ တစ်ဆက်တည်း)
+    function sendVideoRequestToTelegram(images, caption) {
+        // ✅ Image မရှိရင် စာပဲ ပို့
+        if (!images || images.length === 0) {
+            return fetch('https://api.telegram.org/bot' + STAR_TELEGRAM_BOT + '/sendMessage', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    chat_id: STAR_TELEGRAM_GROUP,
+                    message_thread_id: STAR_TELEGRAM_TOPIC,
+                    text: caption,
+                    parse_mode: 'HTML',
+                    disable_web_page_preview: true
+                })
+            })
+            .then(function(res) { return res.json(); })
+            .then(function() { return true; });
+        }
 
-                    var formData = new FormData();
-                    formData.append('chat_id', STAR_TELEGRAM_GROUP);
-                    formData.append('message_thread_id', STAR_TELEGRAM_TOPIC);
-                    formData.append('photo', blob, 'image_' + (idx + 1) + '.jpg');
-                    formData.append('caption', 'Image ' + (idx + 1));
+        // ✅ Image ရှိရင် -- FormData နဲ့ Media Group
+        var formData = new FormData();
+        formData.append('chat_id', STAR_TELEGRAM_GROUP);
+        formData.append('message_thread_id', STAR_TELEGRAM_TOPIC);
 
-                    fetch('https://api.telegram.org/bot' + STAR_TELEGRAM_BOT + '/sendPhoto', {
-                        method: 'POST',
-                        body: formData
-                    })
-                    .then(function(r) { return r.json(); })
-                    .then(function() { resolve(); })
-                    .catch(function() { resolve(); });
-                } catch(e) { resolve(); }
-            });
+        var media = [];
+        images.forEach(function(dataUrl, idx) {
+            var arr = dataUrl.split(',');
+            var mime = arr[0].match(/:(.*?);/)[1];
+            var bstr = atob(arr[1]);
+            var n = bstr.length;
+            var u8arr = new Uint8Array(n);
+            while (n--) u8arr[n] = bstr.charCodeAt(n);
+            var blob = new Blob([u8arr], { type: mime });
+
+            var attachName = 'attach://photo_' + idx;
+            formData.append('photo_' + idx, blob, 'image_' + (idx + 1) + '.jpg');
+
+            var mediaItem = {
+                type: 'photo',
+                media: attachName
+            };
+            // ✅ ပထမဆုံး ပုံမှာ Caption ထည့်
+            if (idx === 0) {
+                mediaItem.caption = caption;
+                mediaItem.parse_mode = 'HTML';
+            }
+            media.push(mediaItem);
         });
-        return Promise.all(promises);
+
+        formData.append('media', JSON.stringify(media));
+
+        return fetch('https://api.telegram.org/bot' + STAR_TELEGRAM_BOT + '/sendMediaGroup', {
+            method: 'POST',
+            body: formData
+        })
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+            if (!data.ok) {
+                console.warn('Media group error:', data.description);
+                // ✅ Fallback: စာပဲ ပို့
+                return fetch('https://api.telegram.org/bot' + STAR_TELEGRAM_BOT + '/sendMessage', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        chat_id: STAR_TELEGRAM_GROUP,
+                        message_thread_id: STAR_TELEGRAM_TOPIC,
+                        text: caption,
+                        parse_mode: 'HTML',
+                        disable_web_page_preview: true
+                    })
+                })
+                .then(function(r) { return r.json(); })
+                .then(function() { return true; });
+            }
+            return true;
+        });
     }
 
     // ===================================================
@@ -13935,11 +13960,6 @@ document.addEventListener('DOMContentLoaded', function() {
         if (backBtn) backBtn.addEventListener('click', starAiClose);
         var clearBtn = document.getElementById('starAiClearBtn');
         if (clearBtn) clearBtn.addEventListener('click', starAiClear);
-        var modelBtn = document.getElementById('starAiModelBtn');
-        if (modelBtn) modelBtn.addEventListener('click', function(e) {
-            e.stopPropagation();
-            starAiToggleModelPopup();
-        });
 
         var input = document.getElementById('starAiInput');
         var sendBtn = document.getElementById('starAiSendBtn');
@@ -13967,27 +13987,25 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         if (sendBtn) sendBtn.addEventListener('click', starAiSend);
         if (vidBtn) vidBtn.addEventListener('click', function() {
-            starAiClose();
-            setTimeout(vidAiOpen, 200);
+            vidPopupOpen();
         });
 
-        // Model popup
-        document.querySelectorAll('.star-ai-model-item').forEach(function(btn) {
-            btn.addEventListener('click', function() {
-                starAiSelectModel(this.dataset.model);
+        // Video Popup buttons
+        var vidClose = document.getElementById('vidPopupCloseBtn');
+        if (vidClose) vidClose.addEventListener('click', vidPopupClose);
+        var vidOverlay = document.getElementById('vidPopupOverlay');
+        if (vidOverlay) {
+            vidOverlay.addEventListener('click', function(e) {
+                if (e.target === vidOverlay) vidPopupClose();
             });
-        });
-
-        // Video AI buttons
-        var vidBack = document.getElementById('vidAiBackBtn');
-        if (vidBack) vidBack.addEventListener('click', vidAiClose);
-        var vidSend = document.getElementById('vidAiSendBtn');
-        if (vidSend) vidSend.addEventListener('click', vidAiSend);
+        }
+        var vidSend = document.getElementById('vidPopupSendBtn');
+        if (vidSend) vidSend.addEventListener('click', vidPopupSend);
 
         // Style chips
-        document.querySelectorAll('.vid-ai-chip').forEach(function(chip) {
+        document.querySelectorAll('.vid-popup-chip').forEach(function(chip) {
             chip.addEventListener('click', function() {
-                var styleInput = document.getElementById('vidAiStyleInput');
+                var styleInput = document.getElementById('vidPopupStyleInput');
                 if (styleInput) styleInput.value = this.dataset.style || '';
             });
         });
@@ -13996,14 +14014,16 @@ document.addEventListener('DOMContentLoaded', function() {
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') {
                 var s1 = document.getElementById('starAiScreen');
-                var s2 = document.getElementById('vidAiScreen');
-                if (s1 && !s1.classList.contains('hidden')) starAiClose();
-                else if (s2 && !s2.classList.contains('hidden')) vidAiClose();
+                var vp = document.getElementById('vidPopupOverlay');
+                if (vp && !vp.classList.contains('hidden')) {
+                    vidPopupClose();
+                } else if (s1 && !s1.classList.contains('hidden')) {
+                    starAiClose();
+                }
             }
         });
 
-        updateModelNameStarAi();
-        console.log('Star AI Ready');
+        console.log('Star AI Ready (v2)');
     }
 
     if (document.readyState === 'loading') {
