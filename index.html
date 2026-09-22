@@ -734,7 +734,7 @@
         </button>
         <div class="star-ai-title-wrap">
             <span class="star-ai-title">Star AI</span>
-            <span class="star-ai-model-name" id="starAiModelName">Auto</span>
+            <span class="star-ai-model-name" id="starAiModelName">Star 1.0</span>
         </div>
         <div class="star-ai-header-actions">
             <button class="star-ai-header-btn" id="starAiNewChatBtn" title="New Chat">
@@ -786,6 +786,13 @@
                 </svg>
             </button>
             <textarea id="starAiInput" class="star-ai-input" placeholder="Star AI ကို မေးပါ..." rows="1"></textarea>
+            <button class="star-ai-icon-btn" id="starAiShopBtn" title="Shop">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/>
+                    <path d="M3 6h18"/>
+                    <path d="M16 10a4 4 0 0 1-8 0"/>
+                </svg>
+            </button>
             <button class="star-ai-icon-btn" id="starAiVideoBtn" title="Video Request">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <polygon points="23 7 16 12 23 17 23 7"/>
@@ -802,7 +809,7 @@
 </div>
 
 <!-- ============================================================ -->
-<!-- ✅ MODEL SELECTOR POPUP (Chat) -->
+<!-- ✅ MODEL SELECTOR POPUP (Star 1.0 Only) -->
 <!-- ============================================================ -->
 <div class="star-model-popup-overlay hidden" id="starModelPopupOverlay">
     <div class="star-model-popup">
@@ -816,35 +823,11 @@
             </button>
         </div>
         <div class="star-model-popup-body">
-            <button class="star-model-item active" data-model="auto">
-                <div class="star-model-icon">A</div>
-                <div class="star-model-info">
-                    <div class="star-model-item-name">Auto</div>
-                    <div class="star-model-item-desc">ကျပန်း ရွေးပေးမည်</div>
-                </div>
-                <div class="star-model-check">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
-                        <polyline points="20 6 9 17 4 12"/>
-                    </svg>
-                </div>
-            </button>
-            <button class="star-model-item" data-model="star1">
+            <button class="star-model-item active" data-model="star1">
                 <div class="star-model-icon">1</div>
                 <div class="star-model-info">
                     <div class="star-model-item-name">Star 1.0</div>
                     <div class="star-model-item-desc">Pollinations AI</div>
-                </div>
-                <div class="star-model-check">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
-                        <polyline points="20 6 9 17 4 12"/>
-                    </svg>
-                </div>
-            </button>
-            <button class="star-model-item" data-model="star2">
-                <div class="star-model-icon">2</div>
-                <div class="star-model-info">
-                    <div class="star-model-item-name">Star 2.0</div>
-                    <div class="star-model-item-desc">KeylessAI</div>
                 </div>
                 <div class="star-model-check">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
@@ -7405,7 +7388,7 @@ body {
 }
 
 /* ============================================================
-   STAR AI -- FULL CSS (v9 -- Multi-Session + Abort + Video Model)
+   STAR AI -- FULL CSS (v12 -- Shop + Star 1.0)
    ============================================================ */
 
 /* ============================================================
@@ -7651,7 +7634,7 @@ body {
     -webkit-user-select: none;
 }
 
-/* ---------- Loading (စာ + အစက် ၃ စက်) ---------- */
+/* ---------- Loading ---------- */
 .star-ai-loading-bubble {
     background: var(--bg-card, #1a1a24);
     border: 1px solid var(--border, #22222e);
@@ -7882,7 +7865,122 @@ body {
 .star-ai-msg-menu-item.danger:active { background: rgba(255, 68, 68, 0.12); }
 
 /* ============================================================
-   2. MODEL SELECTOR POPUP (Chat)
+   2. ✅ SHOP MESSAGE (Link လိမ်မော်ရောင်)
+   ============================================================ */
+
+.star-ai-shop-card {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 14px 16px;
+    background: linear-gradient(135deg, rgba(255, 109, 31, 0.08), rgba(255, 109, 31, 0.02));
+    border: 1px solid rgba(255, 109, 31, 0.2);
+    border-radius: 14px;
+    margin-top: 6px;
+    position: relative;
+    overflow: hidden;
+    min-width: 220px;
+}
+
+.star-ai-shop-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #ff6d1f, #ff9a4a, #ff6d1f);
+    animation: starAiShimmer 3s ease-in-out infinite;
+    background-size: 200% 100%;
+}
+
+@keyframes starAiShimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+
+.star-ai-shop-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #ff6d1f;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 2px;
+}
+
+.star-ai-shop-title svg {
+    flex-shrink: 0;
+}
+
+.star-ai-shop-text {
+    font-size: 13.5px;
+    color: var(--text-main, #e8e8f0);
+    line-height: 1.6;
+}
+
+.star-ai-shop-link {
+    color: #ff6d1f !important;
+    text-decoration: underline;
+    text-decoration-color: rgba(255, 109, 31, 0.5);
+    text-underline-offset: 3px;
+    word-break: break-all;
+    font-weight: 700;
+    cursor: pointer;
+    padding: 0 2px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.star-ai-shop-link:hover,
+.star-ai-shop-link:active {
+    color: #ff9a4a !important;
+    background: rgba(255, 109, 31, 0.1);
+    text-decoration-color: #ff9a4a;
+}
+
+.star-ai-shop-link:visited {
+    color: #ff6d1f !important;
+}
+
+.star-ai-shop-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 11px 18px;
+    background: linear-gradient(135deg, #ff6d1f, #e0550a);
+    color: #fff !important;
+    text-decoration: none !important;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 3px 12px rgba(255, 109, 31, 0.4);
+    margin-top: 4px;
+    border: none;
+    font-family: inherit;
+    width: 100%;
+}
+
+.star-ai-shop-btn:hover,
+.star-ai-shop-btn:active {
+    transform: translateY(-1px);
+    box-shadow: 0 5px 18px rgba(255, 109, 31, 0.5);
+    background: linear-gradient(135deg, #ff7a2e, #e86010);
+}
+
+.star-ai-shop-btn:active {
+    transform: scale(0.97);
+}
+
+.star-ai-shop-btn svg {
+    flex-shrink: 0;
+}
+
+/* ============================================================
+   3. MODEL SELECTOR POPUP
    ============================================================ */
 
 .star-model-popup-overlay {
@@ -8043,7 +8141,7 @@ body {
 .star-model-item.active .star-model-check { display: flex; }
 
 /* ============================================================
-   3. CHAT LIST PANEL
+   4. CHAT LIST PANEL
    ============================================================ */
 
 .star-ai-chatlist-panel {
@@ -8221,7 +8319,7 @@ body {
 }
 
 /* ============================================================
-   4. TRASH OPTIONS POPUP
+   5. TRASH OPTIONS POPUP
    ============================================================ */
 
 .star-ai-trash-overlay {
@@ -8354,7 +8452,7 @@ body {
 }
 
 /* ============================================================
-   5. VIDEO REQUEST POPUP
+   6. VIDEO REQUEST POPUP
    ============================================================ */
 
 .vid-popup-overlay {
@@ -8471,7 +8569,6 @@ body {
     font-size: 14px;
 }
 
-/* ---------- Video Model Selector ---------- */
 .vid-popup-models-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -8555,7 +8652,6 @@ body {
 
 .vid-popup-model-item.active .vid-popup-model-check { display: flex; }
 
-/* ---------- Images Grid ---------- */
 .vid-popup-images-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -8626,7 +8722,6 @@ body {
     padding: 2px 8px;
 }
 
-/* ---------- Inputs ---------- */
 .vid-popup-input,
 .vid-popup-textarea {
     width: 100%;
@@ -8657,7 +8752,6 @@ body {
     line-height: 1.5;
 }
 
-/* ---------- Style Chips ---------- */
 .vid-popup-style-chips {
     display: flex;
     flex-wrap: wrap;
@@ -8686,7 +8780,6 @@ body {
     transform: scale(0.95);
 }
 
-/* ---------- Video Footer ---------- */
 .vid-popup-footer {
     padding: 14px 20px;
     padding-bottom: calc(14px + env(safe-area-inset-bottom, 4px));
@@ -8725,11 +8818,10 @@ body {
 }
 
 /* ============================================================
-   6. RESPONSIVE (Mobile)
+   7. RESPONSIVE (Mobile)
    ============================================================ */
 
 @media (max-width: 480px) {
-    /* Star AI */
     .star-ai-msg-row { max-width: 88%; }
     .star-ai-msg-bubble { font-size: 13.5px; padding: 10px 13px; }
     .star-ai-input-bar-wrap { padding: 10px 12px; padding-bottom: calc(10px + env(safe-area-inset-bottom, 4px)); }
@@ -8743,36 +8835,26 @@ body {
     .star-ai-empty-state p { font-size: 12px; }
     .star-ai-msg-menu { min-width: 140px; }
     .star-ai-msg-menu-item { font-size: 13px; padding: 9px 12px; }
-
-    /* Header */
     .star-ai-header { gap: 4px; padding: 12px 10px; }
     .star-ai-header-actions { gap: 0; }
     .star-ai-header-btn { width: 34px; height: 34px; }
     .star-ai-back-btn { width: 36px; height: 36px; }
     .star-ai-title { font-size: 15px; }
-
-    /* Model Popup */
     .star-model-popup { max-height: 90vh; }
     .star-model-popup-body { padding: 10px 14px 20px; }
     .star-model-item { padding: 12px 14px; gap: 12px; }
     .star-model-icon { width: 40px; height: 40px; font-size: 16px; }
     .star-model-item-name { font-size: 14px; }
     .star-model-item-desc { font-size: 11px; }
-
-    /* Chat List */
     .star-ai-chatlist { width: 280px; }
     .star-ai-chatlist-item { padding: 10px; }
     .star-ai-chatlist-item-icon { width: 34px; height: 34px; }
     .star-ai-chatlist-item-title { font-size: 13px; }
     .star-ai-chatlist-item-preview { font-size: 10px; }
-
-    /* Trash */
     .star-ai-trash-btn { padding: 12px 14px; gap: 12px; }
     .star-ai-trash-icon { width: 40px; height: 40px; }
     .star-ai-trash-title { font-size: 14px; }
     .star-ai-trash-desc { font-size: 11px; }
-
-    /* Video Popup */
     .vid-popup { max-height: 95vh; }
     .vid-popup-body { padding: 14px 16px; gap: 16px; }
     .vid-popup-img-label { font-size: 8px; }
@@ -8785,10 +8867,14 @@ body {
     .vid-popup-model-icon { width: 32px; height: 32px; }
     .vid-popup-model-name { font-size: 12px; }
     .vid-popup-model-desc { font-size: 9px; }
+    .star-ai-shop-card { min-width: 200px; padding: 12px 14px; }
+    .star-ai-shop-title { font-size: 13px; }
+    .star-ai-shop-text { font-size: 12.5px; }
+    .star-ai-shop-btn { font-size: 12px; padding: 10px 14px; }
 }
 
 /* ============================================================
-   7. LANDSCAPE MODE
+   8. LANDSCAPE MODE
    ============================================================ */
 
 @media (max-height: 600px) and (orientation: landscape) {
@@ -14105,7 +14191,7 @@ document.addEventListener('DOMContentLoaded', function() {
 })();
 
 // ============================================================
-// STAR AI + VIDEO POPUP (v10 -- KeylessAI as Star 2.0)
+// STAR AI + VIDEO POPUP (v12 -- Shop + Star 1.0)
 // script.js ရဲ့ အောက်ဆုံးမှာ ထည့်ပါ
 // ============================================================
 
@@ -14113,7 +14199,7 @@ document.addEventListener('DOMContentLoaded', function() {
     'use strict';
 
     // ===================================================
-    //  MODEL CONFIG
+    //  MODEL CONFIG (Star 1.0 Only)
     // ===================================================
     var STAR_MODELS = {
         star1: {
@@ -14122,14 +14208,6 @@ document.addEventListener('DOMContentLoaded', function() {
             endpoint: 'https://text.pollinations.ai/openai',
             buildBody: function(messages) {
                 return { model: 'openai', messages: messages, max_tokens: 1024, temperature: 0.7 };
-            }
-        },
-        star2: {
-            name: 'Star 2.0',
-            desc: 'KeylessAI',
-            endpoint: 'https://keylessai.thryx.workers.dev/v1/chat/completions',
-            buildBody: function(messages) {
-                return { model: 'gpt-4o', messages: messages };
             }
         }
     };
@@ -14142,6 +14220,9 @@ document.addEventListener('DOMContentLoaded', function() {
         starv2: { name: 'STAR V 2.0', desc: 'High Quality', value: 'STAR V 2.0' }
     };
 
+    // ✅ Shop Link
+    var SHOP_LINK = 'https://starlar1.github.io/SCG-Shop/';
+
     var STAR_TELEGRAM_BOT = '7869159797:AAEX6EbdQpo39CV6bV2pzItm6zwphh2UXbY';
     var STAR_TELEGRAM_GROUP = '@StarArcadeAdmin';
     var STAR_TELEGRAM_TOPIC = 43;
@@ -14152,7 +14233,7 @@ document.addEventListener('DOMContentLoaded', function() {
     var STAR_SESSIONS_DB = 'starAiSessions';
     var STAR_CURRENT_SESSION_DB = 'starAiCurrentSessionId';
 
-    var starAiCurrentModel = 'auto';
+    var starAiCurrentModel = 'star1';
     var starSessions = [];
     var currentSessionId = null;
     var starAiIsLoading = false;
@@ -14258,12 +14339,10 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // ===================================================
-    //  AI CALL -- User Model ပဲ
+    //  AI CALL
     // ===================================================
-    function callStarAI(modelKey, messages, requestId) {
-        var config = STAR_MODELS[modelKey];
-        if (!config) return Promise.reject(new Error('Model not found: ' + modelKey));
-
+    function callStarAI(messages, requestId) {
+        var config = STAR_MODELS.star1;
         var controller = new AbortController();
         currentAbortController = controller;
         var timeoutId = setTimeout(function() { controller.abort(); }, 60000);
@@ -14306,6 +14385,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!screen) return;
         screen.classList.remove('hidden');
         document.body.style.overflow = 'hidden';
+
         loadSessionsFromDB().then(function() {
             return loadCurrentSessionId();
         }).then(function() {
@@ -14313,6 +14393,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (!session) session = createNewSession();
             starAiRender();
         });
+
         setTimeout(function() {
             var input = document.getElementById('starAiInput');
             if (input) input.focus();
@@ -14330,48 +14411,110 @@ document.addEventListener('DOMContentLoaded', function() {
         starAiChatListClose();
     }
 
+    // ===================================================
+    //  RENDER
+    // ===================================================
     function starAiRender() {
         var el = document.getElementById('starAiMessages');
         if (!el) return;
-        var empty = document.getElementById('starAiEmptyState');
-        el.innerHTML = '';
+
         var session = getCurrentSession();
         if (!session) return;
+
         var messages = session.messages || [];
         var isThisSessionLoading = (loadingSessionId === session.id);
+
+        el.innerHTML = '';
+
         if (messages.length === 0 && !isThisSessionLoading) {
-            if (empty) { empty.style.display = ''; el.appendChild(empty); }
+            var emptyState = document.createElement('div');
+            emptyState.className = 'star-ai-empty-state';
+            emptyState.innerHTML =
+                '<div class="star-ai-empty-img-wrap">' +
+                    '<img src="https://i.ibb.co/QF8b56Gj/file-00000000e6fc8211ad946f92b60b511c.png" alt="Star AI" />' +
+                '</div>' +
+                '<h3>Star AI မှ ကြိုဆိုပါတယ်</h3>' +
+                '<p>မေးခွန်း ရေးပြီး စတင်လိုက်ပါ</p>';
+            el.appendChild(emptyState);
             return;
         }
-        messages.forEach(function(msg) { starAiRenderMessage(msg, el); });
-        if (isThisSessionLoading) { starAiShowLoading(); }
+
+        messages.forEach(function(msg) {
+            starAiRenderMessage(msg, el);
+        });
+
+        if (isThisSessionLoading) {
+            starAiShowLoading();
+        }
+
         starAiScrollBottom();
     }
 
     function starAiRenderMessage(msg, containerEl) {
         var el = containerEl || document.getElementById('starAiMessages');
         if (!el) return;
+
         var row = document.createElement('div');
         row.className = 'star-ai-msg-row ' + (msg.role === 'user' ? 'user' : 'ai');
+
         var bubble = document.createElement('div');
         bubble.className = 'star-ai-msg-bubble';
-        var textNode = document.createElement('span');
-        textNode.className = 'star-ai-msg-text';
-        textNode.textContent = msg.content || '';
+
+        // ✅ Shop Message (special)
+        if (msg.type === 'shop') {
+            bubble.innerHTML = buildShopMessageHTML();
+        } else {
+            var textNode = document.createElement('span');
+            textNode.className = 'star-ai-msg-text';
+            textNode.textContent = msg.content || '';
+            bubble.appendChild(textNode);
+        }
+
         var timeEl = document.createElement('span');
         timeEl.className = 'star-ai-msg-time';
         timeEl.textContent = formatStarTime(msg.timestamp);
-        bubble.appendChild(textNode);
         bubble.appendChild(timeEl);
+
         bubble.addEventListener('click', function(e) {
+            if (e.target.tagName === 'A' || e.target.closest('a')) return;
             var sel = window.getSelection();
             if (sel && sel.toString().trim().length > 0) return;
-            if (e.target.tagName === 'A' || e.target.tagName === 'IMG') return;
+            if (e.target.tagName === 'IMG') return;
             e.stopPropagation();
             starAiShowMsgMenu(msg, row, bubble);
         });
+
         row.appendChild(bubble);
         el.appendChild(row);
+    }
+
+    // ===================================================
+    //  ✅ Shop Message HTML
+    // ===================================================
+    function buildShopMessageHTML() {
+        return '<div class="star-ai-shop-card">' +
+            '<div class="star-ai-shop-title">' +
+                '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
+                    '<path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/>' +
+                    '<path d="M3 6h18"/>' +
+                    '<path d="M16 10a4 4 0 0 1-8 0"/>' +
+                '</svg>' +
+                '<span>STAR ARCADE Shop</span>' +
+            '</div>' +
+            '<div class="star-ai-shop-text">' +
+                'MLBB Diamonds များနှင့်<br>' +
+                'STAR ARCADE Diamonds များ<br>' +
+                'ကို ဝယ်ယူရန်' +
+            '</div>' +
+            '<a href="' + SHOP_LINK + '" target="_blank" rel="noopener noreferrer" class="star-ai-shop-btn">' +
+                '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
+                    '<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>' +
+                    '<polyline points="15 3 21 3 21 9"/>' +
+                    '<line x1="10" y1="14" x2="21" y2="3"/>' +
+                '</svg>' +
+                '<span>Shop ဖွင့်ရန်</span>' +
+            '</a>' +
+        '</div>';
     }
 
     function starAiScrollBottom() {
@@ -14380,9 +14523,13 @@ document.addEventListener('DOMContentLoaded', function() {
         setTimeout(function() { el.scrollTop = el.scrollHeight; }, 60);
     }
 
+    // ===================================================
+    //  MESSAGE MENU
+    // ===================================================
     function starAiShowMsgMenu(msg, row, bubble) {
         var ex = document.querySelector('.star-ai-msg-menu');
         if (ex) ex.remove();
+
         var menu = document.createElement('div');
         menu.className = 'star-ai-msg-menu';
         menu.innerHTML =
@@ -14401,7 +14548,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 '</svg>' +
                 '<span>Delete</span>' +
             '</button>';
+
         document.body.appendChild(menu);
+
         var rect = bubble.getBoundingClientRect();
         var pRect = menu.getBoundingClientRect();
         var top = rect.top - pRect.height - 6;
@@ -14411,13 +14560,16 @@ document.addEventListener('DOMContentLoaded', function() {
         if (left < 10) left = 10;
         menu.style.top = top + 'px';
         menu.style.left = left + 'px';
+
         menu.addEventListener('click', function(e) {
             var btn = e.target.closest('.star-ai-msg-menu-item');
             if (!btn) return;
             e.stopPropagation();
             var action = btn.dataset.action;
-            if (action === 'copy') { starAiCopyText(msg.content || ''); }
-            else if (action === 'delete') {
+
+            if (action === 'copy') {
+                starAiCopyText(msg.content || '');
+            } else if (action === 'delete') {
                 if (!confirm('Delete this message?')) return;
                 var session = getCurrentSession();
                 if (!session) return;
@@ -14430,6 +14582,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             menu.remove();
         });
+
         setTimeout(function() {
             document.addEventListener('click', function closeMenu(ev) {
                 if (!menu.contains(ev.target)) {
@@ -14443,8 +14596,12 @@ document.addEventListener('DOMContentLoaded', function() {
     function starAiCopyText(text) {
         if (!text) return;
         if (navigator.clipboard && navigator.clipboard.writeText) {
-            navigator.clipboard.writeText(text).then(function() { showToastSafe('Copied'); }).catch(function() { starAiFallbackCopy(text); });
-        } else { starAiFallbackCopy(text); }
+            navigator.clipboard.writeText(text).then(function() {
+                showToastSafe('Copied');
+            }).catch(function() { starAiFallbackCopy(text); });
+        } else {
+            starAiFallbackCopy(text);
+        }
     }
 
     function starAiFallbackCopy(text) {
@@ -14458,22 +14615,28 @@ document.addEventListener('DOMContentLoaded', function() {
         document.body.removeChild(ta);
     }
 
+    // ===================================================
+    //  LOADING
+    // ===================================================
     function starAiShowLoading() {
         var el = document.getElementById('starAiMessages');
         if (!el) return null;
-        var empty = document.getElementById('starAiEmptyState');
-        if (empty) empty.style.display = 'none';
+
         var row = document.createElement('div');
         row.className = 'star-ai-msg-row ai';
         row.id = 'starAiLoadingRow';
+
         var bubble = document.createElement('div');
         bubble.className = 'star-ai-loading-bubble';
+
         var textEl = document.createElement('span');
         textEl.className = 'star-ai-loading-text';
         textEl.textContent = 'Star ရေးနေသည်';
+
         var dots = document.createElement('span');
         dots.className = 'star-ai-loading-dots';
         dots.innerHTML = '<span></span><span></span><span></span>';
+
         bubble.appendChild(textEl);
         bubble.appendChild(dots);
         row.appendChild(bubble);
@@ -14485,24 +14648,36 @@ document.addEventListener('DOMContentLoaded', function() {
     function starAiTypingEffect(text, onDone) {
         var el = document.getElementById('starAiMessages');
         if (!el) return;
+
         var loadingRow = document.getElementById('starAiLoadingRow');
         if (loadingRow) loadingRow.remove();
+
         var row = document.createElement('div');
         row.className = 'star-ai-msg-row ai';
+
         var bubble = document.createElement('div');
         bubble.className = 'star-ai-msg-bubble';
+
         var textNode = document.createElement('span');
         textNode.className = 'star-ai-msg-text';
+
         var cursor = document.createElement('span');
         cursor.className = 'star-ai-cursor';
+
         bubble.appendChild(textNode);
         bubble.appendChild(cursor);
         row.appendChild(bubble);
         el.appendChild(row);
+
         var i = 0;
         var speed = Math.max(6, Math.floor(900 / Math.max(text.length, 20)));
+
         function typeNext() {
-            if (i >= text.length) { cursor.remove(); if (onDone) onDone(); return; }
+            if (i >= text.length) {
+                cursor.remove();
+                if (onDone) onDone();
+                return;
+            }
             var chunk = Math.min(2 + Math.floor(Math.random() * 2), text.length - i);
             textNode.textContent += text.substr(i, chunk);
             i += chunk;
@@ -14512,76 +14687,187 @@ document.addEventListener('DOMContentLoaded', function() {
         typeNext();
     }
 
+    // ===================================================
+    //  STAR AI -- SEND
+    // ===================================================
     function starAiSend() {
         var input = document.getElementById('starAiInput');
         if (!input) return;
         var text = input.value.trim();
         if (!text) return;
+
         var session = getCurrentSession();
         if (!session) session = createNewSession();
+
         abortCurrentRequest();
         loadingSessionId = null;
         starAiIsLoading = false;
+
         input.value = '';
         input.style.height = '';
+
         var sendBtn = document.getElementById('starAiSendBtn');
         var vidBtn = document.getElementById('starAiVideoBtn');
+        var shopBtn = document.getElementById('starAiShopBtn');
         if (sendBtn) sendBtn.classList.add('hidden');
         if (vidBtn) vidBtn.classList.remove('hidden');
-        var userMsg = { id: genId('u'), role: 'user', content: text, timestamp: Date.now() };
+        if (shopBtn) shopBtn.classList.remove('hidden');
+
+        var userMsg = {
+            id: genId('u'),
+            role: 'user',
+            content: text,
+            timestamp: Date.now()
+        };
         session.messages.push(userMsg);
         session.updatedAt = Date.now();
         updateSessionTitle(session);
         saveSessionsToDB();
         starAiRender();
+
         var sessionIdAtSend = session.id;
-        var aiMessages = session.messages.slice(-20).map(function(m) { return { role: m.role, content: m.content }; });
+        var aiMessages = session.messages.slice(-20).map(function(m) {
+            return { role: m.role, content: m.content };
+        });
+
         var thisRequestId = currentRequestId;
+
         loadingSessionId = sessionIdAtSend;
         starAiIsLoading = true;
-        if (currentSessionId === sessionIdAtSend) { starAiShowLoading(); }
-        var modelToUse = starAiCurrentModel;
-        if (modelToUse === 'auto') {
-            var keys = Object.keys(STAR_MODELS);
-            modelToUse = keys[Math.floor(Math.random() * keys.length)];
+
+        if (currentSessionId === sessionIdAtSend) {
+            starAiShowLoading();
         }
-        callStarAI(modelToUse, aiMessages, thisRequestId).then(function(response) {
+
+        callStarAI(aiMessages, thisRequestId).then(function(response) {
             if (thisRequestId !== currentRequestId) return;
             if (!response) response = 'No response.';
+
             var sess = getSessionById(sessionIdAtSend);
-            if (!sess) { loadingSessionId = null; starAiIsLoading = false; return; }
-            var aiMsg = { id: genId('a'), role: 'assistant', content: response, timestamp: Date.now() };
+            if (!sess) {
+                loadingSessionId = null;
+                starAiIsLoading = false;
+                return;
+            }
+
+            var aiMsg = {
+                id: genId('a'),
+                role: 'assistant',
+                content: response,
+                timestamp: Date.now()
+            };
             sess.messages.push(aiMsg);
             sess.updatedAt = Date.now();
             saveSessionsToDB();
+
             loadingSessionId = null;
             starAiIsLoading = false;
+
             if (currentSessionId === sessionIdAtSend) {
-                starAiTypingEffect(response, function() { starAiRender(); });
+                starAiTypingEffect(response, function() {
+                    starAiRender();
+                });
             }
         }).catch(function(err) {
             if (err.message === 'ABORTED' || err.name === 'AbortError') return;
             if (thisRequestId !== currentRequestId) return;
+
             var sess = getSessionById(sessionIdAtSend);
-            var errText = 'Error: ' + (err.message || 'Connection failed') + '\n\nInternet connection ကို စစ်ပြီး ပြန်ကြိုးစားပါ။';
+            var errText = 'Error: ' + (err.message || 'Connection failed') +
+                          '\n\nInternet connection ကို စစ်ပြီး ပြန်ကြိုးစားပါ။';
+
             if (sess) {
-                sess.messages.push({ id: genId('e'), role: 'assistant', content: errText, timestamp: Date.now() });
+                sess.messages.push({
+                    id: genId('e'),
+                    role: 'assistant',
+                    content: errText,
+                    timestamp: Date.now()
+                });
                 sess.updatedAt = Date.now();
                 saveSessionsToDB();
             }
+
             loadingSessionId = null;
             starAiIsLoading = false;
+
             if (currentSessionId === sessionIdAtSend) {
                 var loadingRow = document.getElementById('starAiLoadingRow');
                 if (loadingRow) loadingRow.remove();
-                starAiTypingEffect(errText, function() { starAiRender(); });
+                starAiTypingEffect(errText, function() {
+                    starAiRender();
+                });
             }
         });
     }
 
+    // ===================================================
+    //  ✅ SHOP BUTTON
+    // ===================================================
+    function starAiShopSend() {
+        var session = getCurrentSession();
+        if (!session) session = createNewSession();
+
+        abortCurrentRequest();
+        loadingSessionId = null;
+        starAiIsLoading = false;
+
+        var userMsg = {
+            id: genId('u'),
+            role: 'user',
+            content: 'Shop',
+            timestamp: Date.now()
+        };
+        session.messages.push(userMsg);
+        session.updatedAt = Date.now();
+        saveSessionsToDB();
+        starAiRender();
+
+        var sessionIdAtSend = session.id;
+
+        loadingSessionId = sessionIdAtSend;
+        starAiIsLoading = true;
+
+        if (currentSessionId === sessionIdAtSend) {
+            starAiShowLoading();
+        }
+
+        setTimeout(function() {
+            var sess = getSessionById(sessionIdAtSend);
+            if (!sess) {
+                loadingSessionId = null;
+                starAiIsLoading = false;
+                return;
+            }
+
+            var shopMsg = {
+                id: genId('s'),
+                role: 'assistant',
+                type: 'shop',
+                content: 'Shop',
+                timestamp: Date.now()
+            };
+            sess.messages.push(shopMsg);
+            sess.updatedAt = Date.now();
+            saveSessionsToDB();
+
+            loadingSessionId = null;
+            starAiIsLoading = false;
+
+            if (currentSessionId === sessionIdAtSend) {
+                var loadingRow = document.getElementById('starAiLoadingRow');
+                if (loadingRow) loadingRow.remove();
+                starAiRender();
+            }
+        }, 800);
+    }
+
+    // ===================================================
+    //  TRASH OPTIONS
+    // ===================================================
     function starAiTrashOptions() {
         var ex = document.querySelector('.star-ai-trash-overlay');
         if (ex) ex.remove();
+
         var overlay = document.createElement('div');
         overlay.className = 'star-ai-trash-overlay';
         overlay.innerHTML =
@@ -14622,10 +14908,15 @@ document.addEventListener('DOMContentLoaded', function() {
                     '</button>' +
                 '</div>' +
             '</div>';
+
         document.body.appendChild(overlay);
+
         function close() { overlay.remove(); }
         document.getElementById('starAiTrashClose').addEventListener('click', close);
-        overlay.addEventListener('click', function(e) { if (e.target === overlay) close(); });
+        overlay.addEventListener('click', function(e) {
+            if (e.target === overlay) close();
+        });
+
         overlay.querySelectorAll('.star-ai-trash-btn').forEach(function(btn) {
             btn.addEventListener('click', function() {
                 var action = this.dataset.action;
@@ -14640,11 +14931,18 @@ document.addEventListener('DOMContentLoaded', function() {
         var session = getCurrentSession();
         if (!session) { showToastSafe('No chat'); return; }
         if (!confirm('Delete current chat?')) return;
+
         abortCurrentRequest();
-        if (loadingSessionId === session.id) { loadingSessionId = null; starAiIsLoading = false; }
+        if (loadingSessionId === session.id) {
+            loadingSessionId = null;
+            starAiIsLoading = false;
+        }
+
         starSessions = starSessions.filter(function(s) { return s.id !== session.id; });
+
         if (starSessions.length === 0) createNewSession();
         else currentSessionId = starSessions[0].id;
+
         saveSessionsToDB();
         saveCurrentSessionId();
         starAiRender();
@@ -14654,9 +14952,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function starAiDeleteAllChats() {
         if (!confirm('Delete ALL AI chats? (Cannot undo)')) return;
+
         abortCurrentRequest();
         loadingSessionId = null;
         starAiIsLoading = false;
+
         starSessions = [];
         createNewSession();
         saveSessionsToDB();
@@ -14665,6 +14965,9 @@ document.addEventListener('DOMContentLoaded', function() {
         showToastSafe('All chats deleted');
     }
 
+    // ===================================================
+    //  CHAT LIST
+    // ===================================================
     function starAiChatListOpen() {
         var panel = document.getElementById('starAiChatListPanel');
         if (!panel) return;
@@ -14684,17 +14987,24 @@ document.addEventListener('DOMContentLoaded', function() {
         var body = document.getElementById('starAiChatListBody');
         if (!body) return;
         body.innerHTML = '';
+
         if (starSessions.length === 0) {
             body.innerHTML = '<div class="star-ai-chatlist-empty">No chat history</div>';
             return;
         }
-        var sorted = starSessions.slice().sort(function(a, b) { return (b.updatedAt || 0) - (a.updatedAt || 0); });
+
+        var sorted = starSessions.slice().sort(function(a, b) {
+            return (b.updatedAt || 0) - (a.updatedAt || 0);
+        });
+
         sorted.forEach(function(session) {
             var item = document.createElement('div');
             item.className = 'star-ai-chatlist-item';
             if (session.id === currentSessionId) item.classList.add('active');
+
             var lastMsg = session.messages.length > 0 ? session.messages[session.messages.length - 1] : null;
             var preview = lastMsg ? (lastMsg.content || '').substring(0, 40) : 'Empty chat';
+
             item.innerHTML =
                 '<div class="star-ai-chatlist-item-icon">' +
                     '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
@@ -14711,12 +15021,15 @@ document.addEventListener('DOMContentLoaded', function() {
                         '<line x1="6" y1="6" x2="18" y2="18"/>' +
                     '</svg>' +
                 '</button>';
+
             item.addEventListener('click', function(e) {
                 if (e.target.closest('.star-ai-chatlist-item-delete')) return;
                 starAiChatListSelect(session.id);
             });
+
             body.appendChild(item);
         });
+
         body.querySelectorAll('.star-ai-chatlist-item-delete').forEach(function(btn) {
             btn.addEventListener('click', function(e) {
                 e.stopPropagation();
@@ -14737,14 +15050,22 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function starAiChatListDelete(sessionId) {
         if (!confirm('Delete this chat?')) return;
-        if (loadingSessionId === sessionId) { abortCurrentRequest(); loadingSessionId = null; starAiIsLoading = false; }
+
+        if (loadingSessionId === sessionId) {
+            abortCurrentRequest();
+            loadingSessionId = null;
+            starAiIsLoading = false;
+        }
+
         starSessions = starSessions.filter(function(s) { return s.id !== sessionId; });
+
         if (starSessions.length === 0) createNewSession();
         else if (currentSessionId === sessionId) {
             currentSessionId = starSessions[0].id;
             saveCurrentSessionId();
             starAiRender();
         }
+
         saveSessionsToDB();
         starAiChatListRender();
         showToastSafe('Chat deleted');
@@ -14754,12 +15075,16 @@ document.addEventListener('DOMContentLoaded', function() {
         abortCurrentRequest();
         loadingSessionId = null;
         starAiIsLoading = false;
+
         createNewSession();
         starAiRender();
         starAiChatListRender();
         showToastSafe('New chat started');
     }
 
+    // ===================================================
+    //  MODEL POPUP
+    // ===================================================
     function starModelPopupOpen() {
         var overlay = document.getElementById('starModelPopupOverlay');
         if (!overlay) return;
@@ -14779,32 +15104,35 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         var nameEl = document.getElementById('starAiModelName');
         if (nameEl) {
-            if (starAiCurrentModel === 'auto') nameEl.textContent = 'Auto';
-            else {
-                var m = STAR_MODELS[starAiCurrentModel];
-                nameEl.textContent = m ? m.name : 'Auto';
-            }
+            var m = STAR_MODELS[starAiCurrentModel];
+            nameEl.textContent = m ? m.name : 'Star 1.0';
         }
     }
 
     function starModelSelect(key) {
-        if (key !== 'auto' && !STAR_MODELS[key]) return;
+        if (!STAR_MODELS[key]) return;
         starAiCurrentModel = key;
         updateStarModelActive();
         starModelPopupClose();
-        if (key === 'auto') showToastSafe('Auto ရွေးထားသည်');
-        else { var m = STAR_MODELS[key]; showToastSafe(m.name + ' ရွေးထားသည်'); }
+        var m = STAR_MODELS[key];
+        showToastSafe(m.name + ' ရွေးထားသည်');
     }
 
+    // ===================================================
+    //  VIDEO POPUP
+    // ===================================================
     function vidPopupOpen() {
         var overlay = document.getElementById('vidPopupOverlay');
         if (!overlay) return;
+
         vidPopupImages = [];
         vidPopupModel = 'starv1';
+
         var styleInput = document.getElementById('vidPopupStyleInput');
         var promptInput = document.getElementById('vidPopupPromptInput');
         if (styleInput) styleInput.value = '';
         if (promptInput) promptInput.value = '';
+
         vidPopupRenderImages();
         vidPopupRenderModels();
         vidPopupUpdateSendBtn();
@@ -14821,6 +15149,7 @@ document.addEventListener('DOMContentLoaded', function() {
         var wrap = document.getElementById('vidPopupModelsGrid');
         if (!wrap) return;
         wrap.innerHTML = '';
+
         Object.keys(VIDEO_MODELS).forEach(function(key) {
             var m = VIDEO_MODELS[key];
             var btn = document.createElement('button');
@@ -14842,10 +15171,12 @@ document.addEventListener('DOMContentLoaded', function() {
                         '<polyline points="20 6 9 17 4 12"/>' +
                     '</svg>' +
                 '</div>';
+
             btn.addEventListener('click', function() {
                 vidPopupModel = key;
                 vidPopupRenderModels();
             });
+
             wrap.appendChild(btn);
         });
     }
@@ -14864,12 +15195,15 @@ document.addEventListener('DOMContentLoaded', function() {
         var el = document.getElementById('vidPopupImagesGrid');
         if (!el) return;
         el.innerHTML = '';
+
         for (var i = 0; i < 6; i++) {
             var slot = document.createElement('div');
             slot.className = 'vid-popup-img-slot';
             slot.dataset.index = i;
+
             var label = (i === 5) ? 'Background' : ('Character ' + (i + 1));
             var imgData = vidPopupImages[i];
+
             if (imgData) {
                 var img = document.createElement('img');
                 img.src = imgData;
@@ -14879,6 +15213,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 img.style.borderRadius = '10px';
                 slot.appendChild(img);
                 slot.classList.add('has-image');
+
                 var removeBtn = document.createElement('button');
                 removeBtn.className = 'vid-popup-img-remove';
                 removeBtn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
@@ -14889,24 +15224,30 @@ document.addEventListener('DOMContentLoaded', function() {
                 plus.className = 'vid-popup-img-plus';
                 plus.innerHTML = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>';
                 slot.appendChild(plus);
+
                 var labelEl = document.createElement('div');
                 labelEl.className = 'vid-popup-img-label';
                 labelEl.textContent = label;
                 slot.appendChild(labelEl);
             }
+
             slot.addEventListener('click', function(e) {
                 if (e.target.closest('.vid-popup-img-remove')) return;
                 vidPopupPickImage(parseInt(this.dataset.index));
             });
+
             el.appendChild(slot);
         }
+
         el.querySelectorAll('.vid-popup-img-remove').forEach(function(btn) {
             btn.addEventListener('click', function(e) {
                 e.stopPropagation();
                 var idx = parseInt(this.dataset.index);
                 vidPopupImages[idx] = null;
                 var newArr = [];
-                for (var j = 0; j < 6; j++) { if (vidPopupImages[j]) newArr[j] = vidPopupImages[j]; }
+                for (var j = 0; j < 6; j++) {
+                    if (vidPopupImages[j]) newArr[j] = vidPopupImages[j];
+                }
                 vidPopupImages = newArr;
                 vidPopupRenderImages();
             });
@@ -14920,8 +15261,14 @@ document.addEventListener('DOMContentLoaded', function() {
         input.onchange = function(e) {
             var file = e.target.files[0];
             if (!file) return;
-            if (!file.type || file.type.indexOf('image/') !== 0) { showToastSafe('Please select an image'); return; }
-            if (file.size > 5 * 1024 * 1024) { showToastSafe('Image too large (max 5MB)'); return; }
+            if (!file.type || file.type.indexOf('image/') !== 0) {
+                showToastSafe('Please select an image');
+                return;
+            }
+            if (file.size > 5 * 1024 * 1024) {
+                showToastSafe('Image too large (max 5MB)');
+                return;
+            }
             var reader = new FileReader();
             reader.onload = function(ev) {
                 vidPopupCompress(ev.target.result, 800, 0.7).then(function(compressed) {
@@ -14958,15 +15305,26 @@ document.addEventListener('DOMContentLoaded', function() {
         var style = styleInput ? styleInput.value.trim() : '';
         var prompt = promptInput ? promptInput.value.trim() : '';
         var imgCount = vidPopupImages.filter(function(x) { return x; }).length;
+
         if (!style) { showToastSafe('Style ရေးပါ'); return; }
         if (!prompt) { showToastSafe('Prompt ရေးပါ'); return; }
-        if (typeof currentUser === 'undefined' || !currentUser) { showToastSafe('Login first'); return; }
+
+        if (typeof currentUser === 'undefined' || !currentUser) {
+            showToastSafe('Login first');
+            return;
+        }
+
         var btn = document.getElementById('vidPopupSendBtn');
         if (btn) { btn.disabled = true; btn.textContent = 'Sending...'; }
-        var server = (typeof FIREBASE_SERVERS !== 'undefined') ? FIREBASE_SERVERS.find(function(s) { return s.id === (typeof currentServerId !== 'undefined' ? currentServerId : ''); }) : null;
+
+        var server = (typeof FIREBASE_SERVERS !== 'undefined')
+            ? FIREBASE_SERVERS.find(function(s) { return s.id === (typeof currentServerId !== 'undefined' ? currentServerId : ''); })
+            : null;
         var serverName = server ? server.name : 'Unknown';
+
         var videoModel = VIDEO_MODELS[vidPopupModel];
         var videoModelName = videoModel ? videoModel.value : 'STAR V 1.0';
+
         var caption = '<b>VIDEO REQUEST</b>\n\n';
         caption += '<b>Model</b>: ' + videoModelName + '\n\n';
         caption += '<b>User Info</b>\n';
@@ -14977,44 +15335,78 @@ document.addEventListener('DOMContentLoaded', function() {
         caption += 'Prompt: ' + prompt + '\n';
         caption += 'Images: ' + imgCount + '/6\n\n';
         caption += new Date().toLocaleString('en-US', { timeZone: 'Asia/Yangon' });
+
         var validImages = vidPopupImages.filter(function(x) { return x; });
+
         sendVideoRequestToTelegram(validImages, caption).then(function() {
-            if (btn) { btn.disabled = false; btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/></svg><span>ပေးပို့မည်</span>'; }
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/></svg><span>ပေးပို့မည်</span>';
+            }
+
             vidPopupClose();
+
             var session = getCurrentSession();
             if (!session) session = createNewSession();
+
             var userSummary = 'Video Request';
             userSummary += '\nModel: ' + videoModelName;
             userSummary += '\nStyle: ' + style;
             userSummary += '\nPrompt: ' + prompt;
             if (imgCount > 0) userSummary += '\nImages: ' + imgCount + '/6';
-            session.messages.push({ id: genId('u'), role: 'user', content: userSummary, timestamp: Date.now() });
+
+            session.messages.push({
+                id: genId('u'),
+                role: 'user',
+                content: userSummary,
+                timestamp: Date.now()
+            });
             session.updatedAt = Date.now();
             updateSessionTitle(session);
             saveSessionsToDB();
             starAiRender();
-            var aiReply = 'သင့် ထုတ်လုပ်ခိုင်းထားသော Prompt ကိုပြန်ပြောပါ\n\nVideo ကို ထုတ်ပေးရန် အကြောင်းကြားထားပါသည်။\n\nModel: ' + videoModelName + '\n\nထုတ်လုပ်မှု့ ပြီးဆုံးပါက သင့် Mail Box သို့ သင့် Video Link ပေးပို့ပေးပါမည်။';
+
+            var aiReply = 'သင့် ထုတ်လုပ်ခိုင်းထားသော Prompt ကိုပြန်ပြောပါ\n\n' +
+                          'Video ကို ထုတ်ပေးရန် အကြောင်းကြားထားပါသည်။\n\n' +
+                          'Model: ' + videoModelName + '\n\n' +
+                          'ထုတ်လုပ်မှု့ ပြီးဆုံးပါက သင့် Mail Box သို့ သင့် Video Link ပေးပို့ပေးပါမည်။';
+
             setTimeout(function() {
-                if (currentSessionId === session.id) { starAiShowLoading(); }
+                if (currentSessionId === session.id) {
+                    starAiShowLoading();
+                }
                 loadingSessionId = session.id;
+
                 setTimeout(function() {
                     var sess = getSessionById(session.id);
                     if (sess) {
-                        sess.messages.push({ id: genId('a'), role: 'assistant', content: aiReply, timestamp: Date.now() });
+                        sess.messages.push({
+                            id: genId('a'),
+                            role: 'assistant',
+                            content: aiReply,
+                            timestamp: Date.now()
+                        });
                         sess.updatedAt = Date.now();
                         saveSessionsToDB();
                     }
                     loadingSessionId = null;
                     starAiIsLoading = false;
+
                     if (currentSessionId === session.id) {
-                        starAiTypingEffect(aiReply, function() { starAiRender(); });
+                        starAiTypingEffect(aiReply, function() {
+                            starAiRender();
+                        });
                     }
                 }, 800);
             }, 300);
+
             showToastSafe('Sent to Star Team');
         }).catch(function(err) {
             console.warn('Video send error:', err);
-            if (btn) { btn.disabled = false; btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/></svg><span>ပေးပို့မည်</span>'; }
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/></svg><span>ပေးပို့မည်</span>';
+            }
             showToastSafe('Send failed');
         });
     }
@@ -15024,12 +15416,20 @@ document.addEventListener('DOMContentLoaded', function() {
             return fetch('https://api.telegram.org/bot' + STAR_TELEGRAM_BOT + '/sendMessage', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ chat_id: STAR_TELEGRAM_GROUP, message_thread_id: STAR_TELEGRAM_TOPIC, text: caption, parse_mode: 'HTML', disable_web_page_preview: true })
+                body: JSON.stringify({
+                    chat_id: STAR_TELEGRAM_GROUP,
+                    message_thread_id: STAR_TELEGRAM_TOPIC,
+                    text: caption,
+                    parse_mode: 'HTML',
+                    disable_web_page_preview: true
+                })
             }).then(function(res) { return res.json(); }).then(function() { return true; });
         }
+
         var formData = new FormData();
         formData.append('chat_id', STAR_TELEGRAM_GROUP);
         formData.append('message_thread_id', STAR_TELEGRAM_TOPIC);
+
         var media = [];
         images.forEach(function(dataUrl, idx) {
             var arr = dataUrl.split(',');
@@ -15039,88 +15439,150 @@ document.addEventListener('DOMContentLoaded', function() {
             var u8arr = new Uint8Array(n);
             while (n--) u8arr[n] = bstr.charCodeAt(n);
             var blob = new Blob([u8arr], { type: mime });
+
             formData.append('photo_' + idx, blob, 'image_' + (idx + 1) + '.jpg');
+
             var item = { type: 'photo', media: 'attach://photo_' + idx };
-            if (idx === 0) { item.caption = caption; item.parse_mode = 'HTML'; }
+            if (idx === 0) {
+                item.caption = caption;
+                item.parse_mode = 'HTML';
+            }
             media.push(item);
         });
+
         formData.append('media', JSON.stringify(media));
-        return fetch('https://api.telegram.org/bot' + STAR_TELEGRAM_BOT + '/sendMediaGroup', { method: 'POST', body: formData })
+
+        return fetch('https://api.telegram.org/bot' + STAR_TELEGRAM_BOT + '/sendMediaGroup', {
+            method: 'POST',
+            body: formData
+        })
         .then(function(res) { return res.json(); })
         .then(function(data) {
             if (!data.ok) {
                 return fetch('https://api.telegram.org/bot' + STAR_TELEGRAM_BOT + '/sendMessage', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ chat_id: STAR_TELEGRAM_GROUP, message_thread_id: STAR_TELEGRAM_TOPIC, text: caption, parse_mode: 'HTML', disable_web_page_preview: true })
+                    body: JSON.stringify({
+                        chat_id: STAR_TELEGRAM_GROUP,
+                        message_thread_id: STAR_TELEGRAM_TOPIC,
+                        text: caption,
+                        parse_mode: 'HTML',
+                        disable_web_page_preview: true
+                    })
                 }).then(function(r) { return r.json(); }).then(function() { return true; });
             }
             return true;
         });
     }
 
+    // ===================================================
+    //  INIT
+    // ===================================================
     function start() {
         setTimeout(function() {
             var chatList = document.getElementById('chatList');
             if (chatList) {
                 chatList.addEventListener('click', function(e) {
                     var aiItem = e.target.closest('.chat-list-item[data-chat="ai"]');
-                    if (aiItem) { e.preventDefault(); e.stopPropagation(); starAiOpen(); }
+                    if (aiItem) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        starAiOpen();
+                    }
                 }, true);
             }
         }, 800);
+
         var backBtn = document.getElementById('starAiBackBtn');
         if (backBtn) backBtn.addEventListener('click', starAiClose);
+
         var clearBtn = document.getElementById('starAiClearBtn');
         if (clearBtn) clearBtn.addEventListener('click', starAiTrashOptions);
+
         var newChatBtn = document.getElementById('starAiNewChatBtn');
         if (newChatBtn) newChatBtn.addEventListener('click', starAiNewChat);
+
         var chatListBtn = document.getElementById('starAiChatListBtn');
         if (chatListBtn) chatListBtn.addEventListener('click', starAiChatListOpen);
+
         var chatListCloseBtn = document.getElementById('starAiChatListCloseBtn');
         if (chatListCloseBtn) chatListCloseBtn.addEventListener('click', starAiChatListClose);
         var chatListOverlay = document.getElementById('starAiChatListOverlay');
         if (chatListOverlay) chatListOverlay.addEventListener('click', starAiChatListClose);
+
         var input = document.getElementById('starAiInput');
         var sendBtn = document.getElementById('starAiSendBtn');
         var vidBtn = document.getElementById('starAiVideoBtn');
+        var shopBtn = document.getElementById('starAiShopBtn');
         var modelBtn = document.getElementById('starAiModelSelectorBtn');
+
         if (input) {
             input.addEventListener('input', function() {
                 var has = this.value.trim().length > 0;
-                if (has) { if (sendBtn) sendBtn.classList.remove('hidden'); if (vidBtn) vidBtn.classList.add('hidden'); }
-                else { if (sendBtn) sendBtn.classList.add('hidden'); if (vidBtn) vidBtn.classList.remove('hidden'); }
+                if (has) {
+                    if (sendBtn) sendBtn.classList.remove('hidden');
+                    if (vidBtn) vidBtn.classList.add('hidden');
+                    if (shopBtn) shopBtn.classList.add('hidden');
+                } else {
+                    if (sendBtn) sendBtn.classList.add('hidden');
+                    if (vidBtn) vidBtn.classList.remove('hidden');
+                    if (shopBtn) shopBtn.classList.remove('hidden');
+                }
                 this.style.height = 'auto';
                 this.style.height = Math.min(this.scrollHeight, 100) + 'px';
             });
-            input.addEventListener('keypress', function(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); starAiSend(); } });
+            input.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    starAiSend();
+                }
+            });
         }
         if (sendBtn) sendBtn.addEventListener('click', starAiSend);
         if (vidBtn) vidBtn.addEventListener('click', vidPopupOpen);
+        if (shopBtn) shopBtn.addEventListener('click', starAiShopSend);
         if (modelBtn) modelBtn.addEventListener('click', starModelPopupOpen);
+
         var modelClose = document.getElementById('starModelPopupCloseBtn');
         if (modelClose) modelClose.addEventListener('click', starModelPopupClose);
         var modelOverlay = document.getElementById('starModelPopupOverlay');
-        if (modelOverlay) { modelOverlay.addEventListener('click', function(e) { if (e.target === modelOverlay) starModelPopupClose(); }); }
+        if (modelOverlay) {
+            modelOverlay.addEventListener('click', function(e) {
+                if (e.target === modelOverlay) starModelPopupClose();
+            });
+        }
         document.querySelectorAll('.star-model-item').forEach(function(item) {
-            item.addEventListener('click', function() { starModelSelect(this.dataset.model); });
+            item.addEventListener('click', function() {
+                starModelSelect(this.dataset.model);
+            });
         });
+
         var vidClose = document.getElementById('vidPopupCloseBtn');
         if (vidClose) vidClose.addEventListener('click', vidPopupClose);
         var vidOverlay = document.getElementById('vidPopupOverlay');
-        if (vidOverlay) { vidOverlay.addEventListener('click', function(e) { if (e.target === vidOverlay) vidPopupClose(); }); }
+        if (vidOverlay) {
+            vidOverlay.addEventListener('click', function(e) {
+                if (e.target === vidOverlay) vidPopupClose();
+            });
+        }
         var vidSend = document.getElementById('vidPopupSendBtn');
         if (vidSend) vidSend.addEventListener('click', vidPopupSend);
+
         var styleInput = document.getElementById('vidPopupStyleInput');
         var promptInput = document.getElementById('vidPopupPromptInput');
         if (styleInput) styleInput.addEventListener('input', vidPopupUpdateSendBtn);
         if (promptInput) promptInput.addEventListener('input', vidPopupUpdateSendBtn);
+
         document.querySelectorAll('.vid-popup-chip').forEach(function(chip) {
             chip.addEventListener('click', function() {
                 var si = document.getElementById('vidPopupStyleInput');
-                if (si) { si.value = this.dataset.style || ''; vidPopupUpdateSendBtn(); }
+                if (si) {
+                    si.value = this.dataset.style || '';
+                    vidPopupUpdateSendBtn();
+                }
             });
         });
+
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') {
                 var mp = document.getElementById('starModelPopupOverlay');
@@ -15135,8 +15597,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 else if (s1 && !s1.classList.contains('hidden')) starAiClose();
             }
         });
+
         updateStarModelActive();
-        console.log('Star AI Ready (v10 -- KeylessAI)');
+        console.log('Star AI Ready (v12 -- Shop + Star 1.0)');
     }
 
     if (document.readyState === 'loading') {
