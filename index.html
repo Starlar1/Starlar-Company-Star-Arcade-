@@ -11503,429 +11503,468 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // ============================================================
-//  ✅ IMAGE SEND + VIEWER SYSTEM (အသစ်)
-//  ရှိပြီးသား code တွေကို လုံးဝ မထိခိုက်ပါ
+// ✅ IMAGE SEND SYSTEM (အသစ်)
+// script.js ရဲ့ အောက်ဆုံးမှာ ထည့်ပါ
+// ရှိပြီးသား code လုံးလုံး မထိခိုက်ပါ
 // ============================================================
 
-var IMAGE_MAX_SIZE = 5 * 1024 * 1024; // 5MB
-var currentSendImageData = null;
-var isImgDragging = false;
+(function() {
+    'use strict';
 
-// ---------- Image Send Popup ဖွင့်/ပိတ် ----------
-function openImageSendPopup(imageDataUrl) {
-    currentSendImageData = imageDataUrl;
-    var popup = document.getElementById('imgSendPopup');
-    var preview = document.getElementById('imgSendPreview');
-    var circle = document.getElementById('imgSendSliderCircle');
-    var filled = document.getElementById('imgSendSliderFilled');
-    if (!popup || !preview) return;
+    // ===================================================
+    //  STATE
+    // ===================================================
+    var IMG_MAX_SIZE = 5 * 1024 * 1024; // 5MB
+    var imgSendCurrentData = null;
+    var imgSendDragging = false;
+    var imgSystemInited = false;
 
-    preview.src = imageDataUrl;
-    circle.style.left = '-4px';
-    filled.style.width = '0%';
-    circle.classList.remove('completed');
-    popup.classList.remove('hidden');
-}
+    // ===================================================
+    //  IMAGE SEND POPUP
+    // ===================================================
+    function imgSendOpenPopup(dataUrl) {
+        imgSendCurrentData = dataUrl;
+        var popup = document.getElementById('imgSendPopup');
+        var preview = document.getElementById('imgSendPreview');
+        var circle = document.getElementById('imgSendSliderCircle');
+        var filled = document.getElementById('imgSendSliderFilled');
+        if (!popup || !preview) return;
 
-function closeImageSendPopup() {
-    var popup = document.getElementById('imgSendPopup');
-    if (popup) popup.classList.add('hidden');
-    currentSendImageData = null;
-    var circle = document.getElementById('imgSendSliderCircle');
-    var filled = document.getElementById('imgSendSliderFilled');
-    if (circle) { circle.style.left = '-4px'; circle.classList.remove('completed'); }
-    if (filled) filled.style.width = '0%';
-}
-
-// ---------- Image Slider ----------
-function initImageSendSlider() {
-    var circle = document.getElementById('imgSendSliderCircle');
-    var track = document.getElementById('imgSendSliderTrack');
-    var filled = document.getElementById('imgSendSliderFilled');
-    if (!circle || !track) return;
-
-    function getMaxX() { return track.offsetWidth - circle.offsetWidth; }
-
-    function update(clientX) {
-        var rect = track.getBoundingClientRect();
-        var x = clientX - rect.left - circle.offsetWidth / 2;
-        var maxX = getMaxX();
-        x = Math.max(0, Math.min(x, maxX));
-        var pct = (x / maxX) * 100;
-        circle.style.left = x + 'px';
-        filled.style.width = pct + '%';
-        if (pct >= 95) {
-            circle.classList.add('completed');
-            setTimeout(function() {
-                if (currentSendImageData) {
-                    sendImageMessage(currentSendImageData);
-                }
-                closeImageSendPopup();
-            }, 300);
-        }
+        preview.src = dataUrl;
+        if (circle) { circle.style.left = '-4px'; circle.classList.remove('completed'); }
+        if (filled) filled.style.width = '0%';
+        popup.classList.remove('hidden');
     }
 
-    circle.addEventListener('mousedown', function(e) {
-        isImgDragging = true;
-        circle.style.cursor = 'grabbing';
-        e.preventDefault();
-    });
-    document.addEventListener('mousemove', function(e) {
-        if (!isImgDragging) return;
-        update(e.clientX);
-    });
-    document.addEventListener('mouseup', function() {
-        if (isImgDragging) {
-            isImgDragging = false;
-            circle.style.cursor = 'grab';
-            var left = parseFloat(circle.style.left) || 0;
-            if (left / getMaxX() < 0.95) {
-                circle.style.left = '-4px';
-                filled.style.width = '0%';
-                circle.classList.remove('completed');
+    function imgSendClosePopup() {
+        var popup = document.getElementById('imgSendPopup');
+        if (popup) popup.classList.add('hidden');
+        imgSendCurrentData = null;
+        var circle = document.getElementById('imgSendSliderCircle');
+        var filled = document.getElementById('imgSendSliderFilled');
+        if (circle) { circle.style.left = '-4px'; circle.classList.remove('completed'); }
+        if (filled) filled.style.width = '0%';
+    }
+
+    // ===================================================
+    //  IMAGE PICKER
+    // ===================================================
+    function imgSendOpenPicker() {
+        var input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'image/*';
+        input.onchange = function(e) {
+            var file = e.target.files[0];
+            if (!file) return;
+
+            if (!file.type || file.type.indexOf('image/') !== 0) {
+                if (typeof showToast === 'function') showToast('Please select an image');
+                return;
             }
-        }
-    });
-    circle.addEventListener('touchstart', function(e) {
-        isImgDragging = true;
-        e.preventDefault();
-    }, { passive: false });
-    document.addEventListener('touchmove', function(e) {
-        if (!isImgDragging) return;
-        update(e.touches[0].clientX);
-        e.preventDefault();
-    }, { passive: false });
-    document.addEventListener('touchend', function() {
-        if (isImgDragging) {
-            isImgDragging = false;
-            var left = parseFloat(circle.style.left) || 0;
-            if (left / getMaxX() < 0.95) {
-                circle.style.left = '-4px';
-                filled.style.width = '0%';
-                circle.classList.remove('completed');
+            if (file.size > IMG_MAX_SIZE) {
+                if (typeof showToast === 'function') showToast('Image too large (max 5MB)');
+                return;
             }
-        }
-    });
-}
 
-// ---------- Chat Input က Clip Button ကို Override ----------
-function initImageClipButton() {
-    var clipBtn = document.getElementById('chatClipBtn');
-    if (!clipBtn) return;
-
-    // ✅ ရှိပြီးသား listener ကို clone နဲ့ အစားထိုး
-    var newBtn = clipBtn.cloneNode(true);
-    clipBtn.parentNode.replaceChild(newBtn, clipBtn);
-
-    newBtn.addEventListener('click', function() {
-        if (!currentChatTarget) { showToast('Open chat first'); return; }
-        if (iAmBlockedByThem) { showToast('You cannot send'); return; }
-        openImagePicker();
-    });
-}
-
-// ---------- Image Picker ----------
-function openImagePicker() {
-    var input = document.createElement('input');
-    input.type = 'file';
-    input.accept = 'image/*';
-    input.onchange = function(e) {
-        var file = e.target.files[0];
-        if (!file) return;
-
-        if (!file.type.startsWith('image/')) {
-            showToast('Please select an image');
-            return;
-        }
-
-        if (file.size > IMAGE_MAX_SIZE) {
-            showToast('Image too large (max 5MB)');
-            return;
-        }
-
-        var reader = new FileReader();
-        reader.onload = function(ev) {
-            // ✅ Compress လုပ် (ပုံကြီးရင် သေးအောင်)
-            compressImage(ev.target.result, 800, 0.7).then(function(compressed) {
-                openImageSendPopup(compressed);
-            });
+            var reader = new FileReader();
+            reader.onload = function(ev) {
+                imgSendCompress(ev.target.result, 800, 0.7).then(function(compressed) {
+                    imgSendOpenPopup(compressed);
+                });
+            };
+            reader.readAsDataURL(file);
         };
-        reader.readAsDataURL(file);
-    };
-    input.click();
-}
+        input.click();
+    }
 
-// ---------- Image Compress ----------
-function compressImage(dataUrl, maxWidth, quality) {
-    return new Promise(function(resolve) {
-        var img = new Image();
-        img.onload = function() {
-            var canvas = document.createElement('canvas');
-            var width = img.width;
-            var height = img.height;
+    // ===================================================
+    //  IMAGE COMPRESS
+    // ===================================================
+    function imgSendCompress(dataUrl, maxWidth, quality) {
+        return new Promise(function(resolve) {
+            var img = new Image();
+            img.onload = function() {
+                try {
+                    var canvas = document.createElement('canvas');
+                    var width = img.width;
+                    var height = img.height;
 
-            if (width > maxWidth) {
-                height = Math.round((height * maxWidth) / width);
-                width = maxWidth;
-            }
+                    if (width > maxWidth) {
+                        height = Math.round((height * maxWidth) / width);
+                        width = maxWidth;
+                    }
 
-            canvas.width = width;
-            canvas.height = height;
-            var ctx = canvas.getContext('2d');
-            ctx.drawImage(img, 0, 0, width, height);
-
-            var compressed = canvas.toDataURL('image/jpeg', quality);
-            resolve(compressed);
-        };
-        img.onerror = function() { resolve(dataUrl); };
-        img.src = dataUrl;
-    });
-}
-
-// ---------- Image Message ပို့ ----------
-function sendImageMessage(imageDataUrl) {
-    if (!currentChatTarget || !currentUser) return;
-
-    var target = currentChatTarget;
-    var messageId = generateMessageId();
-    var timestamp = Date.now();
-
-    var messageData = {
-        senderId: currentUser.userId,
-        senderServer: currentServerId,
-        receiverId: target.userId,
-        receiverServer: target.serverId,
-        text: '',                        // text မပါ
-        imageData: imageDataUrl,         // ✅ image data
-        messageType: 'image',            // ✅ type
-        bubbleId: '',
-        seen: false,
-        timestamp: timestamp,
-        replyTo: null
-    };
-
-    var localMsg = {
-        messageId: messageId,
-        senderId: currentUser.userId,
-        senderServer: currentServerId,
-        receiverId: target.userId,
-        receiverServer: target.serverId,
-        text: '',
-        imageData: imageDataUrl,
-        messageType: 'image',
-        bubbleId: '',
-        timestamp: timestamp,
-        serverId: null,
-        type: 'sent',
-        replyTo: null,
-        seen: false
-    };
-
-    // ✅ UI မှာ ချက်ချင်းပြ
-    requestAnimationFrame(function() { displayMessage(localMsg); });
-    scrollToBottomDebounced();
-
-    // ✅ Local DB သိမ်း
-    saveMessageToLocalDB(localMsg).catch(function(err) {
-        console.warn('IDB fail:', err);
-    });
-
-    // ✅ Firestore ပို့
-    setTimeout(function() {
-        trySendToFirestore(messageId, messageData, localMsg, 0);
-    }, 0);
-
-    showToast('Image sent');
-}
-
-// ---------- Image Viewer ----------
-function openImageViewer(imageSrc) {
-    var overlay = document.getElementById('imgViewerOverlay');
-    var img = document.getElementById('imgViewerImg');
-    var dlBtn = document.getElementById('imgViewerDownloadBtn');
-    if (!overlay || !img) return;
-
-    img.src = imageSrc;
-    overlay.classList.remove('hidden');
-
-    // Download button
-    if (dlBtn) {
-        // listener အဟောင်း ဖျက်
-        var newDlBtn = dlBtn.cloneNode(true);
-        dlBtn.parentNode.replaceChild(newDlBtn, dlBtn);
-
-        newDlBtn.addEventListener('click', function() {
-            downloadImage(imageSrc);
+                    canvas.width = width;
+                    canvas.height = height;
+                    var ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+                    resolve(canvas.toDataURL('image/jpeg', quality));
+                } catch(e) {
+                    resolve(dataUrl);
+                }
+            };
+            img.onerror = function() { resolve(dataUrl); };
+            img.src = dataUrl;
         });
     }
-}
 
-function closeImageViewer() {
-    var overlay = document.getElementById('imgViewerOverlay');
-    if (overlay) overlay.classList.add('hidden');
-    var img = document.getElementById('imgViewerImg');
-    if (img) img.src = '';
-}
+    // ===================================================
+    //  SEND IMAGE MESSAGE
+    // ===================================================
+    function imgSendMessage(dataUrl) {
+        if (!window.currentChatTarget || !window.currentUser) return;
 
-function downloadImage(imageSrc) {
-    try {
-        // ✅ Data URL ဖြစ်ရင် direct download
-        if (imageSrc.startsWith('data:')) {
-            var a = document.createElement('a');
-            a.href = imageSrc;
-            a.download = 'star_arcade_' + Date.now() + '.jpg';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            showToast('Downloaded');
-            return;
+        var target = window.currentChatTarget;
+        var messageId = (typeof generateMessageId === 'function') ? generateMessageId() : ('img' + Date.now());
+        var timestamp = Date.now();
+
+        var messageData = {
+            senderId: window.currentUser.userId,
+            senderServer: window.currentServerId,
+            receiverId: target.userId,
+            receiverServer: target.serverId,
+            text: '',
+            imageData: dataUrl,
+            messageType: 'image',
+            bubbleId: '',
+            seen: false,
+            timestamp: timestamp,
+            replyTo: null
+        };
+
+        var localMsg = {
+            messageId: messageId,
+            senderId: window.currentUser.userId,
+            senderServer: window.currentServerId,
+            receiverId: target.userId,
+            receiverServer: target.serverId,
+            text: '',
+            imageData: dataUrl,
+            messageType: 'image',
+            bubbleId: '',
+            timestamp: timestamp,
+            serverId: null,
+            type: 'sent',
+            replyTo: null,
+            seen: false
+        };
+
+        // ✅ UI မှာ ချက်ချင်းပြ
+        requestAnimationFrame(function() { imgDisplayMessage(localMsg); });
+        if (typeof scrollToBottomDebounced === 'function') scrollToBottomDebounced();
+
+        // ✅ Local DB သိမ်း
+        if (typeof saveMessageToLocalDB === 'function') {
+            saveMessageToLocalDB(localMsg).catch(function(err) {
+                console.warn('IDB fail:', err);
+            });
         }
 
-        // ✅ URL ဖြစ်ရင် fetch ပြီး download
-        fetch(imageSrc)
-            .then(function(res) { return res.blob(); })
-            .then(function(blob) {
-                var url = URL.createObjectURL(blob);
+        // ✅ Firestore ပို့
+        setTimeout(function() {
+            if (typeof trySendToFirestore === 'function') {
+                trySendToFirestore(messageId, messageData, localMsg, 0);
+            }
+        }, 0);
+
+        if (typeof showToast === 'function') showToast('Image sent');
+    }
+
+    // ===================================================
+    //  DISPLAY IMAGE MESSAGE
+    // ===================================================
+    function imgDisplayMessage(msg) {
+        var messagesEl = document.getElementById('chatRoomMessages');
+        if (!messagesEl) return;
+        if (messagesEl.querySelector('[data-message-id="' + msg.messageId + '"]')) return;
+
+        var empty = messagesEl.querySelector('.chat-empty-state');
+        if (empty) empty.remove();
+
+        var date = new Date(msg.timestamp);
+        var hours = date.getHours();
+        var minutes = date.getMinutes().toString().padStart(2, '0');
+        var ampm = hours >= 12 ? 'PM' : 'AM';
+        hours = hours % 12; hours = hours ? hours : 12;
+        var timeStr = hours + ':' + minutes + ' ' + ampm;
+
+        var isSent = msg.type === 'sent';
+        var wrapper = document.createElement('div');
+        wrapper.className = 'chat-message-wrapper ' + (isSent ? 'sent' : 'received');
+        wrapper.dataset.messageId = msg.messageId;
+
+        var msgDiv = document.createElement('div');
+        msgDiv.className = 'chat-message ' + (isSent ? 'sent' : 'received');
+        msgDiv.style.padding = '6px';
+
+        var imgWrapper = document.createElement('div');
+        imgWrapper.className = 'chat-message-image-wrapper';
+
+        var img = document.createElement('img');
+        img.className = 'chat-message-image';
+        img.src = msg.imageData;
+        img.alt = 'image';
+
+        img.addEventListener('click', function(e) {
+            e.stopPropagation();
+            imgViewerOpen(msg.imageData);
+        });
+
+        imgWrapper.appendChild(img);
+
+        var timeEl = document.createElement('span');
+        timeEl.className = 'chat-message-time';
+        timeEl.textContent = timeStr;
+
+        msgDiv.appendChild(imgWrapper);
+        msgDiv.appendChild(timeEl);
+
+        wrapper.appendChild(msgDiv);
+        messagesEl.appendChild(wrapper);
+    }
+
+    // ===================================================
+    //  IMAGE VIEWER
+    // ===================================================
+    function imgViewerOpen(src) {
+        var overlay = document.getElementById('imgViewerOverlay');
+        var img = document.getElementById('imgViewerImg');
+        var dlBtn = document.getElementById('imgViewerDownloadBtn');
+        if (!overlay || !img) return;
+
+        img.src = src;
+        overlay.classList.remove('hidden');
+
+        if (dlBtn) {
+            var newDlBtn = dlBtn.cloneNode(true);
+            dlBtn.parentNode.replaceChild(newDlBtn, dlBtn);
+            newDlBtn.addEventListener('click', function() {
+                imgViewerDownload(src);
+            });
+        }
+    }
+
+    function imgViewerClose() {
+        var overlay = document.getElementById('imgViewerOverlay');
+        if (overlay) overlay.classList.add('hidden');
+        var img = document.getElementById('imgViewerImg');
+        if (img) img.src = '';
+    }
+
+    function imgViewerDownload(src) {
+        try {
+            if (src.indexOf('data:') === 0) {
                 var a = document.createElement('a');
-                a.href = url;
+                a.href = src;
                 a.download = 'star_arcade_' + Date.now() + '.jpg';
                 document.body.appendChild(a);
                 a.click();
                 document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-                showToast('Downloaded');
-            })
-            .catch(function() {
-                // ✅ Fallback -- tab အသစ်မှာ ဖွင့်
-                window.open(imageSrc, '_blank');
-                showToast('Opened in new tab');
-            });
-    } catch(e) {
-        console.error('Download error:', e);
-        showToast('Download failed');
-    }
-}
+                if (typeof showToast === 'function') showToast('Downloaded');
+                return;
+            }
 
-// ---------- displayMessage ကို Override (Image support) ----------
-// ✅ ရှိပြီးသား displayMessage ကို wrap လုပ်
-var _originalDisplayMessage = null;
-function patchDisplayMessageForImage() {
-    if (typeof displayMessage !== 'function') return;
-    if (_originalDisplayMessage) return; // ပြီးသား patch ဖြစ်ပြီ
-
-    _originalDisplayMessage = displayMessage;
-
-    window.displayMessage = function(msg) {
-        // ✅ Image message ဖြစ်ရင် အသစ် function ကို ခေါ်
-        if (msg.messageType === 'image' && msg.imageData) {
-            return displayImageMessage(msg);
+            fetch(src)
+                .then(function(res) { return res.blob(); })
+                .then(function(blob) {
+                    var url = URL.createObjectURL(blob);
+                    var a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'star_arcade_' + Date.now() + '.jpg';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                    if (typeof showToast === 'function') showToast('Downloaded');
+                })
+                .catch(function() {
+                    window.open(src, '_blank');
+                    if (typeof showToast === 'function') showToast('Opened in new tab');
+                });
+        } catch(e) {
+            console.error('Download error:', e);
+            if (typeof showToast === 'function') showToast('Download failed');
         }
-        // ✅ မဟုတ်ရင် မူရင်း function ကို ခေါ်
-        return _originalDisplayMessage.apply(this, arguments);
-    };
-}
-
-// ---------- Image Message ကို UI မှာ ပြ ----------
-function displayImageMessage(msg) {
-    var messagesEl = document.getElementById('chatRoomMessages');
-    if (!messagesEl) return;
-    if (messagesEl.querySelector('[data-message-id="' + msg.messageId + '"]')) return;
-
-    var empty = messagesEl.querySelector('.chat-empty-state');
-    if (empty) empty.remove();
-
-    var date = new Date(msg.timestamp);
-    var hours = date.getHours();
-    var minutes = date.getMinutes().toString().padStart(2, '0');
-    var ampm = hours >= 12 ? 'PM' : 'AM';
-    hours = hours % 12; hours = hours ? hours : 12;
-    var timeStr = hours + ':' + minutes + ' ' + ampm;
-
-    var isSent = msg.type === 'sent';
-    var wrapper = document.createElement('div');
-    wrapper.className = 'chat-message-wrapper ' + (isSent ? 'sent' : 'received');
-    wrapper.dataset.messageId = msg.messageId;
-
-    // ✅ Image wrapper
-    var imgWrapper = document.createElement('div');
-    imgWrapper.className = 'chat-message-image-wrapper';
-
-    var img = document.createElement('img');
-    img.className = 'chat-message-image';
-    img.src = msg.imageData;
-    img.alt = 'image';
-
-    // ✅ Image နှိပ်ရင် Viewer ဖွင့်
-    img.addEventListener('click', function(e) {
-        e.stopPropagation();
-        openImageViewer(msg.imageData);
-    });
-
-    imgWrapper.appendChild(img);
-
-    // ✅ Time
-    var timeEl = document.createElement('span');
-    timeEl.className = 'chat-message-time';
-    timeEl.textContent = timeStr;
-
-    var msgDiv = document.createElement('div');
-    msgDiv.className = 'chat-message ' + (isSent ? 'sent' : 'received');
-    msgDiv.style.padding = '6px';
-
-    msgDiv.appendChild(imgWrapper);
-    msgDiv.appendChild(timeEl);
-
-    // ✅ Long press နဲ့ menu (reply/copy/report/delete)
-    msgDiv.addEventListener('click', function(e) {
-        e.stopPropagation();
-        // Image message အတွက် menu ကို မပြ (image က viewer ဖွင့်တာ)
-    });
-
-    wrapper.appendChild(msgDiv);
-    messagesEl.appendChild(wrapper);
-}
-
-// ---------- Patch saveMessageToLocalDB (image support) ----------
-// ⚠️ saveMessageToLocalDB က imageData ကို သိမ်းပြီးသား (Object.assign ကြောင့်)
-// ဒါကြောင့် ဘာမှ မပြင်လည် ရပါတယ်
-
-// ---------- Patch trySendToFirestore (image support) ----------
-// ⚠️ messageData ထဲမှာ imageData ပါပြီးသား
-// ဒါကြောင့် ဘာမှ မပြင်လည် ရပါတယ်
-
-// ---------- Init ----------
-function initImageSystem() {
-    initImageSendSlider();
-    initImageClipButton();
-    patchDisplayMessageForImage();
-
-    // Cancel button
-    var cancelBtn = document.getElementById('imgSendCancelBtn');
-    if (cancelBtn) {
-        cancelBtn.addEventListener('click', closeImageSendPopup);
     }
 
-    // Popup overlay click
-    var popup = document.getElementById('imgSendPopup');
-    if (popup) {
-        popup.addEventListener('click', function(e) {
-            if (e.target === popup) closeImageSendPopup();
+    // ===================================================
+    //  IMAGE SLIDER
+    // ===================================================
+    function imgSendInitSlider() {
+        var circle = document.getElementById('imgSendSliderCircle');
+        var track = document.getElementById('imgSendSliderTrack');
+        var filled = document.getElementById('imgSendSliderFilled');
+        if (!circle || !track) return;
+
+        function getMaxX() { return track.offsetWidth - circle.offsetWidth; }
+
+        function update(clientX) {
+            var rect = track.getBoundingClientRect();
+            var x = clientX - rect.left - circle.offsetWidth / 2;
+            var maxX = getMaxX();
+            x = Math.max(0, Math.min(x, maxX));
+            var pct = (maxX > 0) ? (x / maxX) * 100 : 0;
+            circle.style.left = x + 'px';
+            filled.style.width = pct + '%';
+            if (pct >= 95) {
+                circle.classList.add('completed');
+                setTimeout(function() {
+                    if (imgSendCurrentData) {
+                        imgSendMessage(imgSendCurrentData);
+                    }
+                    imgSendClosePopup();
+                }, 300);
+            }
+        }
+
+        circle.addEventListener('mousedown', function(e) {
+            imgSendDragging = true;
+            circle.style.cursor = 'grabbing';
+            e.preventDefault();
+        });
+        document.addEventListener('mousemove', function(e) {
+            if (!imgSendDragging) return;
+            update(e.clientX);
+        });
+        document.addEventListener('mouseup', function() {
+            if (imgSendDragging) {
+                imgSendDragging = false;
+                circle.style.cursor = 'grab';
+                var left = parseFloat(circle.style.left) || 0;
+                if (getMaxX() > 0 && (left / getMaxX()) < 0.95) {
+                    circle.style.left = '-4px';
+                    filled.style.width = '0%';
+                    circle.classList.remove('completed');
+                }
+            }
+        });
+        circle.addEventListener('touchstart', function(e) {
+            imgSendDragging = true;
+            e.preventDefault();
+        }, { passive: false });
+        document.addEventListener('touchmove', function(e) {
+            if (!imgSendDragging) return;
+            update(e.touches[0].clientX);
+            e.preventDefault();
+        }, { passive: false });
+        document.addEventListener('touchend', function() {
+            if (imgSendDragging) {
+                imgSendDragging = false;
+                var left = parseFloat(circle.style.left) || 0;
+                if (getMaxX() > 0 && (left / getMaxX()) < 0.95) {
+                    circle.style.left = '-4px';
+                    filled.style.width = '0%';
+                    circle.classList.remove('completed');
+                }
+            }
         });
     }
 
-    // Viewer close
-    var viewerClose = document.getElementById('imgViewerClose');
-    if (viewerClose) {
-        viewerClose.addEventListener('click', closeImageViewer);
-    }
+    // ===================================================
+    //  CLIP BUTTON
+    // ===================================================
+    function imgSendInitClipButton() {
+        var clipBtn = document.getElementById('chatClipBtn');
+        if (!clipBtn) return;
 
-    // Viewer overlay click
-    var viewerOverlay = document.getElementById('imgViewerOverlay');
-    if (viewerOverlay) {
-        viewerOverlay.addEventListener('click', function(e) {
-            if (e.target === viewerOverlay) closeImageViewer();
+        // ✅ ရှိပြီးသား listener ကို မဖျက်ဘဲ handler အသစ် ထပ်ထည့်
+        clipBtn.addEventListener('click', function() {
+            var ct = window.currentChatTarget;
+            if (!ct) {
+                if (typeof showToast === 'function') showToast('Open chat first');
+                return;
+            }
+            if (window.iAmBlockedByThem) {
+                if (typeof showToast === 'function') showToast('You cannot send');
+                return;
+            }
+            imgSendOpenPicker();
         });
     }
 
-    console.log('✅ Image System Ready');
-}</script>
+    // ===================================================
+    //  INIT
+    // ===================================================
+    function initImageSystem() {
+        if (imgSystemInited) return;
+        imgSystemInited = true;
+
+        imgSendInitSlider();
+        imgSendInitClipButton();
+
+        var cancelBtn = document.getElementById('imgSendCancelBtn');
+        if (cancelBtn) {
+            cancelBtn.addEventListener('click', imgSendClosePopup);
+        }
+
+        var popup = document.getElementById('imgSendPopup');
+        if (popup) {
+            popup.addEventListener('click', function(e) {
+                if (e.target === popup) imgSendClosePopup();
+            });
+        }
+
+        var viewerClose = document.getElementById('imgViewerClose');
+        if (viewerClose) {
+            viewerClose.addEventListener('click', imgViewerClose);
+        }
+
+        var viewerOverlay = document.getElementById('imgViewerOverlay');
+        if (viewerOverlay) {
+            viewerOverlay.addEventListener('click', function(e) {
+                if (e.target === viewerOverlay) imgViewerClose();
+            });
+        }
+
+        console.log('✅ Image System Ready');
+    }
+
+    // ===================================================
+    //  PATCH displayMessage (image support)
+    //  ရှိပြီးသား displayMessage ကို မဖျက် -- Wrap
+    // ===================================================
+    function patchDisplayMessage() {
+        if (typeof window.displayMessage !== 'function') {
+            // displayMessage မရှိသေးရင် နောက်မှ ထပ် ကြိုးစား
+            setTimeout(patchDisplayMessage, 300);
+            return;
+        }
+        if (window.displayMessage._imgPatched) return;
+
+        var original = window.displayMessage;
+        window.displayMessage = function(msg) {
+            if (msg && msg.messageType === 'image' && msg.imageData) {
+                return imgDisplayMessage(msg);
+            }
+            return original.apply(this, arguments);
+        };
+        window.displayMessage._imgPatched = true;
+        console.log('✅ displayMessage patched for images');
+    }
+
+    // ===================================================
+    //  START (DOMContentLoaded ပြီးမှ)
+    // ===================================================
+    function start() {
+        // Element ရှိပြီးသားလား စစ်
+        if (document.getElementById('imgSendPopup')) {
+            initImageSystem();
+        } else {
+            // DOM မရှိသေးရင် နောက်မှ ထပ်
+            setTimeout(start, 300);
+            return;
+        }
+        patchDisplayMessage();
+    }
+
+    // DOMContentLoaded ပြီးသား ဖြစ်နိုင်တယ်
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(start, 700);
+        });
+    } else {
+        // DOMContentLoaded ပြီးသား
+        setTimeout(start, 700);
+    }
+
+})();</script>
