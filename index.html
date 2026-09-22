@@ -722,7 +722,69 @@
 </div>
 
 <!-- ============================================================ -->
-<!-- MODEL SELECTOR POPUP -->
+<!-- ✅ STAR AI SCREEN -->
+<!-- ============================================================ -->
+<div class="star-ai-screen hidden" id="starAiScreen">
+    <!-- Header -->
+    <div class="star-ai-header">
+        <button class="star-ai-back-btn" id="starAiBackBtn">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="15,18 9,12 15,6"/>
+            </svg>
+        </button>
+        <div class="star-ai-title-wrap">
+            <span class="star-ai-title">Star AI</span>
+            <span class="star-ai-model-name" id="starAiModelName">Auto</span>
+        </div>
+        <button class="star-ai-clear-btn" id="starAiClearBtn" title="Clear all">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 6h18"/>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/>
+                <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                <line x1="10" y1="11" x2="10" y2="17"/>
+                <line x1="14" y1="11" x2="14" y2="17"/>
+            </svg>
+        </button>
+    </div>
+
+    <!-- Messages -->
+    <div class="star-ai-messages" id="starAiMessages">
+        <div class="star-ai-empty-state" id="starAiEmptyState">
+            <div class="star-ai-empty-img-wrap">
+                <img src="https://i.ibb.co/QF8b56Gj/file-00000000e6fc8211ad946f92b60b511c.png" alt="Star AI" />
+            </div>
+            <h3>Star AI မှ ကြိုဆိုပါတယ်</h3>
+            <p>မေးခွန်း ရေးပြီး စတင်လိုက်ပါ</p>
+        </div>
+    </div>
+
+    <!-- Floating Input Bar -->
+    <div class="star-ai-input-bar-wrap">
+        <div class="star-ai-input-bar">
+            <button class="star-ai-model-selector-btn" id="starAiModelSelectorBtn" title="Model">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="3"/>
+                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                </svg>
+            </button>
+            <textarea id="starAiInput" class="star-ai-input" placeholder="Star AI ကို မေးပါ..." rows="1"></textarea>
+            <button class="star-ai-icon-btn" id="starAiVideoBtn" title="Video Request">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polygon points="23 7 16 12 23 17 23 7"/>
+                    <rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
+                </svg>
+            </button>
+            <button class="star-ai-send-btn hidden" id="starAiSendBtn" title="Send">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- ✅ MODEL SELECTOR POPUP -->
 <!-- ============================================================ -->
 <div class="star-model-popup-overlay hidden" id="starModelPopupOverlay">
     <div class="star-model-popup">
@@ -800,6 +862,61 @@
     </div>
 </div>
 
+<!-- ============================================================ -->
+<!-- ✅ VIDEO REQUEST POPUP -->
+<!-- ============================================================ -->
+<div class="vid-popup-overlay hidden" id="vidPopupOverlay">
+    <div class="vid-popup" id="vidPopup">
+        <div class="vid-popup-header">
+            <span class="vid-popup-title">Video Request</span>
+            <button class="vid-popup-close" id="vidPopupCloseBtn">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <line x1="18" y1="6" x2="6" y2="18"/>
+                    <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+            </button>
+        </div>
+
+        <div class="vid-popup-body">
+            <div class="vid-popup-section">
+                <div class="vid-popup-section-label">
+                    Images <span class="vid-popup-optional">(Optional)</span>
+                </div>
+                <div class="vid-popup-images-grid" id="vidPopupImagesGrid"></div>
+                <div class="vid-popup-hint">ပုံ ၅ ပုံ = ဇာတ်ကောင် / ပုံ ၆ ခုမြောက် = Background</div>
+            </div>
+
+            <div class="vid-popup-section">
+                <div class="vid-popup-section-label">
+                    Style <span class="vid-popup-required">*</span>
+                </div>
+                <input type="text" class="vid-popup-input" id="vidPopupStyleInput" placeholder="ဥပမာ -- 2D Anime, 3D Realistic..." />
+                <div class="vid-popup-style-chips">
+                    <span class="vid-popup-chip" data-style="2D Anime">2D Anime</span>
+                    <span class="vid-popup-chip" data-style="3D Realistic">3D Realistic</span>
+                    <span class="vid-popup-chip" data-style="Cartoon">Cartoon</span>
+                    <span class="vid-popup-chip" data-style="Cinematic">Cinematic</span>
+                </div>
+            </div>
+
+            <div class="vid-popup-section">
+                <div class="vid-popup-section-label">
+                    Prompt <span class="vid-popup-required">*</span>
+                </div>
+                <textarea class="vid-popup-textarea" id="vidPopupPromptInput" rows="3" placeholder="ခိုင်းမဲ့ စာ ရေးပါ..."></textarea>
+            </div>
+        </div>
+
+        <div class="vid-popup-footer">
+            <button class="vid-popup-send-btn" id="vidPopupSendBtn" disabled>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/>
+                </svg>
+                <span>ပေးပို့မည်</span>
+            </button>
+        </div>
+    </div>
+</div>
 
     <script src="script.js"></script>
 </body>
@@ -13448,8 +13565,9 @@ document.addEventListener('DOMContentLoaded', function() {
 })();
 
 // ============================================================
-// STAR AI + VIDEO POPUP (v5 -- 4 Models + Auto)
+// STAR AI + VIDEO POPUP (FULL v5 -- 4 Models + Auto)
 // script.js ရဲ့ အောက်ဆုံးမှာ ထည့်ပါ
+// ရှိပြီးသား code လုံးလုံး မထိခိုက်ပါ
 // ============================================================
 
 (function() {
@@ -13531,7 +13649,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // ===================================================
     //  STATE
     // ===================================================
-    var starAiCurrentModel = 'auto';  // ✅ Default = Auto
+    var starAiCurrentModel = 'auto';
     var starAiMessages = [];
     var starAiIsLoading = false;
     var STAR_AI_DB_KEY = 'starAiMessages';
@@ -13573,13 +13691,11 @@ document.addEventListener('DOMContentLoaded', function() {
         return (prefix || 'm') + '_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
     }
 
-    // ✅ Random Model (Auto)
     function getRandomModelKey() {
         var keys = ['star1', 'star2', 'star3', 'star4'];
         return keys[Math.floor(Math.random() * keys.length)];
     }
 
-    // ✅ Active Model Key (auto ဖြစ်ရင် random)
     function getActiveModelKey() {
         if (starAiCurrentModel === 'auto') {
             return getRandomModelKey();
@@ -13588,7 +13704,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // ===================================================
-    //  ✅ AI CALL -- Single Model
+    //  AI CALL -- Single
     // ===================================================
     function callStarAISingle(modelKey, messages) {
         var config = STAR_MODELS[modelKey];
@@ -13614,7 +13730,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 var content = data.choices[0].message.content;
                 if (content && content.trim()) return content;
             }
-            // ✅ Fallback formats
             if (Array.isArray(data) && data[0] && data[0].content) return data[0].content;
             if (typeof data === 'string') return data;
             if (data && data.response) return data.response;
@@ -13626,12 +13741,9 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // ✅ Call with Fallback (model တစ်ခု fail ဖြစ်ရင် ကျန်တာ စမ်း)
+    // ✅ Fallback -- primary fail ဖြစ်ရင် ကျန်တာ စမ်း
     function callStarAI(messages) {
         var primaryKey = getActiveModelKey();
-
-        // ✅ Auto ဖြစ်ရင် -- primary ကနေ စပြီး ကျန်တာ fallback
-        // ✅ Model ရွေးထားရင် -- အဲ့ model ကနေ စပြီး ကျန်တာ fallback
         var order = [primaryKey];
         Object.keys(STAR_MODELS).forEach(function(k) {
             if (order.indexOf(k) === -1) order.push(k);
