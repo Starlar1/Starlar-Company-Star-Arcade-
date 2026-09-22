@@ -7381,7 +7381,12 @@ body {
 }
 
 /* ============================================================
-   STAR AI (v4 -- Dark BG + Dark Soft Bar + Simple Loading)
+   STAR AI + MODEL SELECTOR + VIDEO POPUP (FULL v5)
+   style.css ရဲ့ အောက်ဆုံးမှာ ထည့်ပါ
+   ============================================================ */
+
+/* ============================================================
+   1. STAR AI SCREEN
    ============================================================ */
 
 /* ---------- Screen ---------- */
@@ -7465,7 +7470,7 @@ body {
     letter-spacing: 0.3px;
 }
 
-/* ---------- Messages ---------- */
+/* ---------- Messages Area ---------- */
 .star-ai-messages {
     flex: 1;
     overflow-y: auto;
@@ -7590,7 +7595,7 @@ body {
     -webkit-user-select: none;
 }
 
-/* ---------- ✅ LOADING (စာ + အစက် ၃ စက်) ---------- */
+/* ---------- LOADING (စာ + အစက် ၃ စက်) ---------- */
 .star-ai-loading-bubble {
     background: var(--bg-card, #1a1a24);
     border: 1px solid var(--border, #22222e);
@@ -7634,7 +7639,7 @@ body {
     30% { transform: translateY(-5px); opacity: 1; }
 }
 
-/* ---------- Typing cursor ---------- */
+/* ---------- Typing Cursor ---------- */
 .star-ai-cursor {
     display: inline-block;
     width: 2px;
@@ -7652,7 +7657,7 @@ body {
     50% { opacity: 0; }
 }
 
-/* ---------- ✅ Floating Input Bar (Dark Soft) ---------- */
+/* ---------- Floating Input Bar ---------- */
 .star-ai-input-bar-wrap {
     position: absolute;
     bottom: 0;
@@ -7670,7 +7675,6 @@ body {
     align-items: flex-end;
     gap: 6px;
     padding: 6px 6px 6px 10px;
-    /* ✅ အမဲ အနု */
     background: linear-gradient(135deg, rgba(30, 30, 40, 0.95), rgba(22, 22, 32, 0.95));
     border-radius: 26px;
     box-shadow:
@@ -7823,8 +7827,9 @@ body {
 .star-ai-msg-menu-item.danger:active { background: rgba(255, 68, 68, 0.12); }
 
 /* ============================================================
-   MODEL SELECTOR POPUP
+   2. MODEL SELECTOR POPUP
    ============================================================ */
+
 .star-model-popup-overlay {
     position: fixed;
     inset: 0;
@@ -7857,6 +7862,7 @@ body {
     box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.5);
     border: 1px solid rgba(255, 255, 255, 0.06);
     border-bottom: none;
+    max-height: 85vh;
 }
 
 @keyframes starModelSlideUp {
@@ -7906,7 +7912,11 @@ body {
     flex-direction: column;
     gap: 8px;
     padding-bottom: calc(24px + env(safe-area-inset-bottom, 4px));
+    overflow-y: auto;
 }
+
+.star-model-popup-body::-webkit-scrollbar { width: 3px; }
+.star-model-popup-body::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 3px; }
 
 .star-model-item {
     display: flex;
@@ -7978,8 +7988,9 @@ body {
 .star-model-item.active .star-model-check { display: flex; }
 
 /* ============================================================
-   VIDEO POPUP
+   3. VIDEO REQUEST POPUP
    ============================================================ */
+
 .vid-popup-overlay {
     position: fixed;
     inset: 0;
@@ -8094,6 +8105,7 @@ body {
     font-size: 14px;
 }
 
+/* ---------- Video Images Grid ---------- */
 .vid-popup-images-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -8164,6 +8176,7 @@ body {
     padding: 2px 8px;
 }
 
+/* ---------- Video Inputs ---------- */
 .vid-popup-input,
 .vid-popup-textarea {
     width: 100%;
@@ -8194,6 +8207,7 @@ body {
     line-height: 1.5;
 }
 
+/* ---------- Video Style Chips ---------- */
 .vid-popup-style-chips {
     display: flex;
     flex-wrap: wrap;
@@ -8222,6 +8236,7 @@ body {
     transform: scale(0.95);
 }
 
+/* ---------- Video Footer ---------- */
 .vid-popup-footer {
     padding: 14px 20px;
     padding-bottom: calc(14px + env(safe-area-inset-bottom, 4px));
@@ -8259,8 +8274,12 @@ body {
     opacity: 0.6;
 }
 
-/* ---------- Mobile ---------- */
+/* ============================================================
+   4. RESPONSIVE (Mobile)
+   ============================================================ */
+
 @media (max-width: 480px) {
+    /* Star AI */
     .star-ai-msg-row { max-width: 88%; }
     .star-ai-msg-bubble { font-size: 13.5px; padding: 10px 13px; }
     .star-ai-input-bar-wrap { padding: 10px 12px; padding-bottom: calc(10px + env(safe-area-inset-bottom, 4px)); }
@@ -8271,8 +8290,53 @@ body {
     .star-ai-model-selector-btn { width: 32px; height: 32px; }
     .star-ai-empty-img-wrap { width: 100px; height: 100px; }
     .star-ai-empty-state h3 { font-size: 16px; }
-    .vid-popup-img-label { font-size: 8px; }
+    .star-ai-empty-state p { font-size: 12px; }
+    .star-ai-msg-menu { min-width: 140px; }
+    .star-ai-msg-menu-item { font-size: 13px; padding: 9px 12px; }
+
+    /* Model Popup */
+    .star-model-popup { max-height: 90vh; }
+    .star-model-popup-body { padding: 10px 14px 20px; }
+    .star-model-item { padding: 12px 14px; gap: 12px; }
+    .star-model-icon { width: 40px; height: 40px; font-size: 16px; }
+    .star-model-item-name { font-size: 14px; }
+    .star-model-item-desc { font-size: 11px; }
+
+    /* Video Popup */
     .vid-popup { max-height: 95vh; }
+    .vid-popup-body { padding: 14px 16px; gap: 16px; }
+    .vid-popup-img-label { font-size: 8px; }
+    .vid-popup-section-label { font-size: 12px; }
+    .vid-popup-input,
+    .vid-popup-textarea { font-size: 13px; padding: 11px 12px; }
+    .vid-popup-chip { font-size: 11px; padding: 5px 12px; }
+    .vid-popup-send-btn { font-size: 14px; padding: 13px; }
+}
+
+/* ============================================================
+   5. EXTRA -- Tablet / Landscape
+   ============================================================ */
+
+@media (max-height: 600px) and (orientation: landscape) {
+    .star-model-popup,
+    .vid-popup {
+        max-height: 95vh;
+        border-radius: 20px 20px 0 0;
+    }
+    .star-model-popup-body,
+    .vid-popup-body {
+        padding: 10px 16px 16px;
+    }
+    .vid-popup-images-grid {
+        grid-template-columns: repeat(6, 1fr);
+    }
+    .star-ai-empty-img-wrap {
+        width: 80px;
+        height: 80px;
+    }
+    .star-ai-messages {
+        padding: 12px 14px 100px;
+    }
 }</style><script>// ============================================================
 //  STAR ARCADE -- FULL script.js (FINAL, CLEAN)
 //  Version: 2026-09-21
