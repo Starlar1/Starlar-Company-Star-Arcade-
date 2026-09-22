@@ -11006,7 +11006,7 @@ function openSidebar() { sidebar.classList.add('open'); sidebarOverlay.classList
 function closeSidebar() { sidebar.classList.remove('open'); sidebarOverlay.classList.remove('active'); document.body.style.overflow = ''; }
 
 // ===================================================
-//  STORAGE MONITOR
+//  STORAGE MONITOR (Message + Image အတူတူ)
 // ===================================================
 var STORAGE_QUOTA_KEY = 'deviceStorageQuota';
 
@@ -11029,6 +11029,7 @@ function getStoredQuota() {
     });
 }
 
+// ✅ Message + Image အတူတူ တွက်
 function calculateAppStorage() {
     return new Promise(function(resolve) {
         openDB().then(function(db) {
@@ -11038,25 +11039,53 @@ function calculateAppStorage() {
             var req = store.getAllKeys();
             req.onsuccess = function() {
                 var allKeys = req.result || [];
-                var msgKeys = allKeys.filter(function(k) { return typeof k === 'string' && k.indexOf('messages_') === 0; });
+                // ✅ messages_ key အားလုံး (Text + Image အတူတူ)
+                var msgKeys = allKeys.filter(function(k) {
+                    return typeof k === 'string' && k.indexOf('messages_') === 0;
+                });
                 var otherKeys = allKeys.filter(function(k) {
-                    return friendsKeys.indexOf(k) === -1 && !(typeof k === 'string' && k.indexOf('messages_') === 0) && k !== STORAGE_QUOTA_KEY;
+                    return friendsKeys.indexOf(k) === -1 &&
+                           !(typeof k === 'string' && k.indexOf('messages_') === 0) &&
+                           k !== STORAGE_QUOTA_KEY;
                 });
 
-                var friendsCount = 0, friendsSize = 0, msgCount = 0, msgSize = 0, othersSize = 0;
+                var friendsCount = 0, friendsSize = 0;
+                var msgCount = 0, msgSize = 0;
+                var textCount = 0, textSize = 0;    // ✅ Text အရေအတွက်
+                var imageCount = 0, imageSize = 0;  // ✅ Image အရေအတွက်
+                var othersSize = 0;
+
                 var total = friendsKeys.length + msgKeys.length + otherKeys.length;
-                if (total === 0) return resolve({ friendsCount: 0, friendsSize: 0, msgCount: 0, msgSize: 0, othersSize: 0, totalSize: 0 });
+                if (total === 0) {
+                    return resolve({
+                        friendsCount: 0, friendsSize: 0,
+                        msgCount: 0, msgSize: 0,
+                        textCount: 0, textSize: 0,
+                        imageCount: 0, imageSize: 0,
+                        othersSize: 0, totalSize: 0
+                    });
+                }
 
                 var done = 0;
                 function finish() {
                     done++;
-                    if (done >= total) resolve({
-                        friendsCount: friendsCount, friendsSize: friendsSize,
-                        msgCount: msgCount, msgSize: msgSize,
-                        othersSize: othersSize,
-                        totalSize: friendsSize + msgSize + othersSize
-                    });
+                    if (done >= total) {
+                        resolve({
+                            friendsCount: friendsCount,
+                            friendsSize: friendsSize,
+                            msgCount: msgCount,
+                            msgSize: msgSize,
+                            textCount: textCount,
+                            textSize: textSize,
+                            imageCount: imageCount,
+                            imageSize: imageSize,
+                            othersSize: othersSize,
+                            totalSize: friendsSize + msgSize + othersSize
+                        });
+                    }
                 }
+
+                // Friends keys
                 friendsKeys.forEach(function(k) {
                     var r = store.get(k);
                     r.onsuccess = function() {
@@ -11069,29 +11098,65 @@ function calculateAppStorage() {
                     };
                     r.onerror = finish;
                 });
+
+                // ✅ Messages keys -- Text + Image အတူတူ
                 msgKeys.forEach(function(k) {
                     var r = store.get(k);
                     r.onsuccess = function() {
                         if (r.result && r.result.value !== undefined) {
                             var v = r.result.value;
-                            msgSize += JSON.stringify(v).length;
-                            msgCount += Array.isArray(v) ? v.length : 0;
+                            if (Array.isArray(v)) {
+                                v.forEach(function(msg) {
+                                    var size = JSON.stringify(msg).length;
+                                    msgSize += size;
+                                    msgCount++;
+
+                                    // ✅ Image ခွဲ
+                                    if (msg && (msg.messageType === 'image' || msg.messageType === 'gif') && msg.imageData) {
+                                        imageCount++;
+                                        imageSize += size;
+                                    } else {
+                                        textCount++;
+                                        textSize += size;
+                                    }
+                                });
+                            }
                         }
                         finish();
                     };
                     r.onerror = finish;
                 });
+
+                // Other keys
                 otherKeys.forEach(function(k) {
                     var r = store.get(k);
                     r.onsuccess = function() {
-                        if (r.result && r.result.value !== undefined) othersSize += JSON.stringify(r.result.value).length;
+                        if (r.result && r.result.value !== undefined) {
+                            othersSize += JSON.stringify(r.result.value).length;
+                        }
                         finish();
                     };
                     r.onerror = finish;
                 });
             };
-            req.onerror = function() { resolve({ friendsCount: 0, friendsSize: 0, msgCount: 0, msgSize: 0, othersSize: 0, totalSize: 0 }); };
-        }).catch(function() { resolve({ friendsCount: 0, friendsSize: 0, msgCount: 0, msgSize: 0, othersSize: 0, totalSize: 0 }); });
+            req.onerror = function() {
+                resolve({
+                    friendsCount: 0, friendsSize: 0,
+                    msgCount: 0, msgSize: 0,
+                    textCount: 0, textSize: 0,
+                    imageCount: 0, imageSize: 0,
+                    othersSize: 0, totalSize: 0
+                });
+            };
+        }).catch(function() {
+            resolve({
+                friendsCount: 0, friendsSize: 0,
+                msgCount: 0, msgSize: 0,
+                textCount: 0, textSize: 0,
+                imageCount: 0, imageSize: 0,
+                othersSize: 0, totalSize: 0
+            });
+        });
     });
 }
 
@@ -11119,8 +11184,10 @@ function loadStorageMonitor() {
             totalEl.textContent = formatSize(data.totalSize);
             friendsCountEl.textContent = data.friendsCount;
             friendsSizeEl.textContent = formatSize(data.friendsSize);
-            msgCountEl.textContent = data.msgCount;
-            msgSizeEl.textContent = formatSize(data.msgSize);
+
+            // ✅ Message count -- Text + Image အတူတူ
+            if (msgCountEl) msgCountEl.textContent = data.msgCount;
+            if (msgSizeEl) msgSizeEl.textContent = formatSize(data.msgSize);
 
             var available = Math.max(0, q - data.totalSize);
             var percent = q > 0 ? Math.round((available / q) * 100) : 0;
@@ -11158,9 +11225,10 @@ function clearAllFriendsData() {
     });
 }
 
+// ✅ Message + Image အတူတူ ဖျက်
 function clearAllMessagesData() {
     if (isProcessing) return;
-    if (!confirm('Clear messages data?')) return;
+    if (!confirm('Clear all messages data?\n(Text + Image အားလုံး ဖျက်မယ်)')) return;
     isProcessing = true;
     showLoading('Clearing...');
     openDB().then(function(db) {
@@ -11169,16 +11237,35 @@ function clearAllMessagesData() {
         var req = store.getAllKeys();
         req.onsuccess = function() {
             var keys = req.result || [];
-            var msgKeys = keys.filter(function(k) { return typeof k === 'string' && k.indexOf('messages_') === 0; });
-            if (msgKeys.length === 0) { hideLoading(); isProcessing = false; showToast('No messages'); return; }
-            Promise.all(msgKeys.map(function(k) { return deleteFromDB(k).catch(function() {}); })).then(function() {
+            // ✅ messages_ key အားလုံး (Text + Image အတူတူ)
+            var msgKeys = keys.filter(function(k) {
+                return typeof k === 'string' && k.indexOf('messages_') === 0;
+            });
+            if (msgKeys.length === 0) {
                 hideLoading(); isProcessing = false;
-                showToast('Cleared ' + msgKeys.length);
+                showToast('No messages');
+                return;
+            }
+            Promise.all(msgKeys.map(function(k) {
+                return deleteFromDB(k).catch(function() {});
+            })).then(function() {
+                // ✅ Memory ထဲက messages အားလုံး ဖျက်
+                if (typeof memoryMessages !== 'undefined') {
+                    memoryMessages = {};
+                }
+                if (typeof pendingSaveKeys !== 'undefined') {
+                    pendingSaveKeys = {};
+                }
+                hideLoading(); isProcessing = false;
+                showToast('Cleared ' + msgKeys.length + ' chats (Text + Image)');
                 loadStorageMonitor();
                 setTimeout(renderChatList, 300);
             });
         };
-    }).catch(function() { hideLoading(); isProcessing = false; showToast('Failed'); });
+    }).catch(function() {
+        hideLoading(); isProcessing = false;
+        showToast('Failed');
+    });
 }
 
 // ===================================================
@@ -11192,7 +11279,9 @@ function getAllKeysWithPrefix(prefix) {
             var req = store.getAllKeys();
             req.onsuccess = function() {
                 var keys = req.result || [];
-                resolve(keys.filter(function(k) { return typeof k === 'string' && k.indexOf(prefix) === 0; }));
+                resolve(keys.filter(function(k) {
+                    return typeof k === 'string' && k.indexOf(prefix) === 0;
+                }));
             };
             req.onerror = function() { resolve([]); };
         }).catch(function() { resolve([]); });
@@ -11225,7 +11314,12 @@ function deleteEntireDatabase() {
             var req = indexedDB.deleteDatabase('StarArcadeDB');
             req.onsuccess = function() { resolve(); };
             req.onerror = function() { resolve(); };
-            req.onblocked = function() { setTimeout(function() { try { indexedDB.deleteDatabase('StarArcadeDB'); } catch(e) {} resolve(); }, 500); };
+            req.onblocked = function() {
+                setTimeout(function() {
+                    try { indexedDB.deleteDatabase('StarArcadeDB'); } catch(e) {}
+                    resolve();
+                }, 500);
+            };
         } catch(e) { resolve(); }
     });
 }
