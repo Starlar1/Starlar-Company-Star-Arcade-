@@ -734,7 +734,7 @@
         </button>
         <div class="star-ai-title-wrap">
             <span class="star-ai-title">Star AI</span>
-            <span class="star-ai-model-name">Star 1.0</span>
+            <span class="star-ai-model-name" id="starAiModelName">Star 1.0</span>
         </div>
         <button class="star-ai-clear-btn" id="starAiClearBtn" title="Clear all">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -761,6 +761,11 @@
     <!-- Floating Input Bar -->
     <div class="star-ai-input-bar-wrap">
         <div class="star-ai-input-bar">
+            <button class="star-ai-model-selector-btn" id="starAiModelSelectorBtn" title="Model">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                </svg>
+            </button>
             <textarea id="starAiInput" class="star-ai-input" placeholder="Star AI ကို မေးပါ..." rows="1"></textarea>
             <button class="star-ai-icon-btn" id="starAiVideoBtn" title="Video Request">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -778,7 +783,39 @@
 </div>
 
 <!-- ============================================================ -->
-<!-- VIDEO REQUEST POPUP (Star AI Screen ထဲမှာ ပေါ်) -->
+<!-- MODEL SELECTOR POPUP -->
+<!-- ============================================================ -->
+<div class="star-model-popup-overlay hidden" id="starModelPopupOverlay">
+    <div class="star-model-popup">
+        <div class="star-model-popup-header">
+            <span class="star-model-popup-title">Model ရွေးပါ</span>
+            <button class="star-model-popup-close" id="starModelPopupCloseBtn">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <line x1="18" y1="6" x2="6" y2="18"/>
+                    <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+            </button>
+        </div>
+        <div class="star-model-popup-body">
+            <button class="star-model-item active" data-model="star1">
+                <div class="star-model-icon">1</div>
+                <div class="star-model-info">
+                    <div class="star-model-item-name">Star 1.0</div>
+                    <div class="star-model-item-desc">Pollinations AI</div>
+                </div>
+                <div class="star-model-check">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                        <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                </div>
+            </button>
+            <!-- Model အသစ် ထည့်ဖို့ နေရာ -->
+        </div>
+    </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- VIDEO REQUEST POPUP -->
 <!-- ============================================================ -->
 <div class="vid-popup-overlay hidden" id="vidPopupOverlay">
     <div class="vid-popup" id="vidPopup">
@@ -826,7 +863,6 @@
         </div>
     </div>
 </div>
-
     <script src="script.js"></script>
 </body>
 </html>
@@ -7289,14 +7325,14 @@ body {
 }
 
 /* ============================================================
-   STAR AI + VIDEO POPUP (v2 -- Floating Bar + White Theme)
+   STAR AI (v3 -- Dark BG + Floating Light Bar)
    ============================================================ */
 
 /* ---------- Screen ---------- */
 .star-ai-screen {
     position: fixed;
     inset: 0;
-    background: #f5f7fa;
+    background: var(--bg-body, #0a0a0f);
     z-index: 10030;
     display: flex;
     flex-direction: column;
@@ -7316,10 +7352,11 @@ body {
     align-items: center;
     gap: 10px;
     padding: 14px 16px;
-    background: #ffffff;
-    border-bottom: 1px solid #e8ebf0;
+    background: rgba(18, 18, 24, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
     flex-shrink: 0;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
     position: relative;
     z-index: 5;
 }
@@ -7340,9 +7377,9 @@ body {
     transition: all 0.2s ease;
 }
 
-.star-ai-clear-btn { color: #8a94a6; }
-.star-ai-back-btn:active { background: #f0f2f5; transform: scale(0.92); }
-.star-ai-clear-btn:active { color: #ff4444; background: #ffeaea; transform: scale(0.92); }
+.star-ai-clear-btn { color: var(--text-muted, #5a5a6a); }
+.star-ai-back-btn:active { background: rgba(255, 109, 31, 0.1); transform: scale(0.92); }
+.star-ai-clear-btn:active { color: #ff4444; background: rgba(255, 68, 68, 0.1); transform: scale(0.92); }
 
 .star-ai-title-wrap {
     flex: 1;
@@ -7355,7 +7392,7 @@ body {
 .star-ai-title {
     font-size: 16px;
     font-weight: 700;
-    color: #1a1d24;
+    color: var(--text-main, #e8e8f0);
     letter-spacing: 0.3px;
     line-height: 1.2;
 }
@@ -7368,7 +7405,7 @@ body {
     margin-top: 3px;
     padding: 2px 10px;
     border-radius: 8px;
-    background: rgba(255, 109, 31, 0.08);
+    background: rgba(255, 109, 31, 0.12);
     letter-spacing: 0.3px;
 }
 
@@ -7377,15 +7414,15 @@ body {
     flex: 1;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
-    padding: 20px 16px 120px;
+    padding: 20px 16px 130px;
     display: flex;
     flex-direction: column;
     gap: 12px;
-    background: #f5f7fa;
+    background: var(--bg-body, #0a0a0f);
 }
 
 .star-ai-messages::-webkit-scrollbar { width: 3px; }
-.star-ai-messages::-webkit-scrollbar-thumb { background: #d0d5dd; border-radius: 3px; }
+.star-ai-messages::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 3px; }
 
 /* ---------- Empty State ---------- */
 .star-ai-empty-state {
@@ -7404,8 +7441,8 @@ body {
     height: 120px;
     border-radius: 50%;
     overflow: hidden;
-    border: 3px solid #ffffff;
-    box-shadow: 0 8px 32px rgba(255, 109, 31, 0.25), 0 0 0 1px rgba(255, 109, 31, 0.1);
+    border: 3px solid rgba(255, 109, 31, 0.3);
+    box-shadow: 0 8px 32px rgba(255, 109, 31, 0.25);
     animation: starAiEmptyPulse 3s ease-in-out infinite;
 }
 
@@ -7418,15 +7455,17 @@ body {
 
 @keyframes starAiEmptyPulse {
     0%, 100% {
-        box-shadow: 0 8px 32px rgba(255, 109, 31, 0.25), 0 0 0 1px rgba(255, 109, 31, 0.1);
+        box-shadow: 0 8px 32px rgba(255, 109, 31, 0.25);
+        border-color: rgba(255, 109, 31, 0.3);
     }
     50% {
-        box-shadow: 0 12px 48px rgba(255, 109, 31, 0.45), 0 0 0 1px rgba(255, 109, 31, 0.2);
+        box-shadow: 0 12px 48px rgba(255, 109, 31, 0.45);
+        border-color: rgba(255, 109, 31, 0.5);
     }
 }
 
 .star-ai-empty-state h3 {
-    color: #1a1d24;
+    color: var(--text-main, #e8e8f0);
     font-size: 18px;
     font-weight: 700;
     margin: 0;
@@ -7434,7 +7473,7 @@ body {
 }
 
 .star-ai-empty-state p {
-    color: #8a94a6;
+    color: var(--text-muted, #5a5a6a);
     font-size: 13px;
     margin: 0;
 }
@@ -7464,7 +7503,10 @@ body {
     cursor: pointer;
     position: relative;
     transition: transform 0.15s ease;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    /* ✅ Text selection -- စာကြောင်း ဖိပြီး copy လို့ရ */
+    user-select: text;
+    -webkit-user-select: text;
+    -webkit-touch-callout: default;
 }
 
 .star-ai-msg-bubble:active { transform: scale(0.98); }
@@ -7473,13 +7515,13 @@ body {
     background: linear-gradient(135deg, var(--accent, #ff6d1f), var(--accent-dark, #e0550a));
     color: #fff;
     border-bottom-right-radius: 4px;
-    box-shadow: 0 2px 12px rgba(255, 109, 31, 0.25);
+    box-shadow: 0 4px 16px rgba(255, 109, 31, 0.25);
 }
 
 .star-ai-msg-row.ai .star-ai-msg-bubble {
-    background: #ffffff;
-    color: #1a1d24;
-    border: 1px solid #e8ebf0;
+    background: var(--bg-card, #1a1a24);
+    color: var(--text-main, #e8e8f0);
+    border: 1px solid var(--border, #22222e);
     border-bottom-left-radius: 4px;
 }
 
@@ -7489,23 +7531,101 @@ body {
     opacity: 0.6;
     margin-top: 4px;
     text-align: right;
+    user-select: none;
+    -webkit-user-select: none;
 }
 
-/* ---------- Typing ---------- */
-.star-ai-writing-star {
-    display: inline-flex;
+/* ---------- ✨ LOADING (ကြယ် လိမ်မော် + လှုပ်ရှား) ---------- */
+.star-ai-loading-bubble {
+    background: linear-gradient(135deg, #1a1a24, #22222e);
+    border: 1px solid rgba(255, 109, 31, 0.2);
+    border-radius: 18px;
+    border-bottom-left-radius: 4px;
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: relative;
+    overflow: hidden;
+}
+
+.star-ai-loading-bubble::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(255, 109, 31, 0.08), transparent);
+    animation: starAiShimmer 2s ease-in-out infinite;
+}
+
+@keyframes starAiShimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+.star-ai-loading-star {
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+    position: relative;
+    display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--accent, #ff6d1f);
-    animation: starAiStarPulse 1s ease-in-out infinite;
-    vertical-align: middle;
 }
 
-@keyframes starAiStarPulse {
-    0%, 100% { transform: scale(1); opacity: 1; }
-    50% { transform: scale(1.3); opacity: 0.6; }
+.star-ai-loading-star svg {
+    width: 100%;
+    height: 100%;
+    fill: url(#starAiGrad);
+    animation: starAiStarSpin 2s linear infinite;
+    filter: drop-shadow(0 0 8px rgba(255, 109, 31, 0.8));
 }
 
+/* Gradient ကို inline SVG defs မှာ ထည့် -- fallback */
+.star-ai-loading-star {
+    color: #ff6d1f;
+}
+
+@keyframes starAiStarSpin {
+    0% { transform: rotate(0deg) scale(1); }
+    50% { transform: rotate(180deg) scale(1.15); }
+    100% { transform: rotate(360deg) scale(1); }
+}
+
+.star-ai-loading-text {
+    font-size: 13px;
+    color: rgba(232, 232, 240, 0.85);
+    font-weight: 500;
+    letter-spacing: 0.3px;
+    position: relative;
+    z-index: 1;
+}
+
+.star-ai-loading-dots {
+    display: inline-flex;
+    gap: 3px;
+    margin-left: 4px;
+    position: relative;
+    z-index: 1;
+}
+
+.star-ai-loading-dots span {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--accent, #ff6d1f);
+    animation: starAiDotBounce 1.4s ease-in-out infinite;
+    box-shadow: 0 0 6px rgba(255, 109, 31, 0.8);
+}
+
+.star-ai-loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+.star-ai-loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes starAiDotBounce {
+    0%, 60%, 100% { transform: translateY(0); opacity: 0.5; }
+    30% { transform: translateY(-6px); opacity: 1; }
+}
+
+/* ---------- Typing cursor ---------- */
 .star-ai-cursor {
     display: inline-block;
     width: 2px;
@@ -7514,6 +7634,8 @@ body {
     margin-left: 2px;
     vertical-align: middle;
     animation: starAiBlink 0.8s step-end infinite;
+    user-select: none;
+    -webkit-user-select: none;
 }
 
 @keyframes starAiBlink {
@@ -7521,25 +7643,7 @@ body {
     50% { opacity: 0; }
 }
 
-.star-ai-typing-dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: var(--accent, #ff6d1f);
-    animation: starAiTyping 1.4s ease-in-out infinite;
-    box-shadow: 0 0 8px rgba(255, 109, 31, 0.6);
-    display: inline-block;
-}
-
-.star-ai-typing-dot:nth-child(2) { animation-delay: 0.2s; }
-.star-ai-typing-dot:nth-child(3) { animation-delay: 0.4s; }
-
-@keyframes starAiTyping {
-    0%, 60%, 100% { transform: translateY(0) scale(1); opacity: 0.6; }
-    30% { transform: translateY(-6px) scale(1.2); opacity: 1; }
-}
-
-/* ---------- Floating Input Bar ---------- */
+/* ---------- Floating Input Bar (Light + Soft Shadow) ---------- */
 .star-ai-input-bar-wrap {
     position: absolute;
     bottom: 0;
@@ -7547,7 +7651,7 @@ body {
     right: 0;
     padding: 12px 14px;
     padding-bottom: calc(12px + env(safe-area-inset-bottom, 4px));
-    background: linear-gradient(to top, #f5f7fa 60%, transparent);
+    background: linear-gradient(to top, rgba(10, 10, 15, 0.95) 60%, transparent);
     pointer-events: none;
     z-index: 10;
 }
@@ -7555,23 +7659,32 @@ body {
 .star-ai-input-bar {
     display: flex;
     align-items: flex-end;
-    gap: 8px;
-    padding: 8px 8px 8px 16px;
-    background: #ffffff;
-    border-radius: 24px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.06);
-    border: 1px solid rgba(255, 255, 255, 0.8);
+    gap: 6px;
+    padding: 6px 6px 6px 10px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(245, 247, 250, 0.96));
+    border-radius: 26px;
+    box-shadow:
+        0 12px 40px rgba(0, 0, 0, 0.4),
+        0 4px 12px rgba(255, 109, 31, 0.15),
+        0 0 0 1px rgba(255, 255, 255, 0.5) inset;
+    border: 1px solid rgba(255, 255, 255, 0.6);
     pointer-events: auto;
-    transition: box-shadow 0.2s ease;
+    transition: box-shadow 0.3s ease, transform 0.2s ease;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
 }
 
 .star-ai-input-bar:focus-within {
-    box-shadow: 0 12px 40px rgba(255, 109, 31, 0.2), 0 2px 8px rgba(0, 0, 0, 0.06);
+    box-shadow:
+        0 16px 48px rgba(0, 0, 0, 0.5),
+        0 6px 20px rgba(255, 109, 31, 0.3),
+        0 0 0 1px rgba(255, 109, 31, 0.3) inset;
+    transform: translateY(-2px);
 }
 
 .star-ai-input {
     flex: 1;
-    padding: 8px 0;
+    padding: 8px 4px;
     border: none;
     background: transparent;
     color: #1a1d24;
@@ -7584,13 +7697,35 @@ body {
     overflow-y: auto;
     line-height: 1.45;
     min-width: 0;
+    user-select: text;
+    -webkit-user-select: text;
 }
 
 .star-ai-input::placeholder { color: #a8b0bd; }
 
+.star-ai-model-selector-btn {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: none;
+    background: linear-gradient(135deg, rgba(255, 109, 31, 0.12), rgba(255, 109, 31, 0.06));
+    color: var(--accent, #ff6d1f);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+}
+
+.star-ai-model-selector-btn:active {
+    background: linear-gradient(135deg, rgba(255, 109, 31, 0.25), rgba(255, 109, 31, 0.15));
+    transform: scale(0.92) rotate(15deg);
+}
+
 .star-ai-icon-btn {
-    width: 38px;
-    height: 38px;
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
     border: none;
     background: #f0f2f5;
@@ -7610,8 +7745,8 @@ body {
 }
 
 .star-ai-send-btn {
-    width: 38px;
-    height: 38px;
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
     border: none;
     background: linear-gradient(135deg, var(--accent, #ff6d1f), var(--accent-dark, #e0550a));
@@ -7621,7 +7756,7 @@ body {
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    box-shadow: 0 3px 12px rgba(255, 109, 31, 0.4);
+    box-shadow: 0 3px 12px rgba(255, 109, 31, 0.5);
     transition: all 0.2s ease;
     animation: starAiSendPop 0.2s ease;
 }
@@ -7634,17 +7769,19 @@ body {
     to { transform: scale(1); opacity: 1; }
 }
 
-/* ---------- Delete Menu ---------- */
+/* ---------- Message Menu (Copy + Delete) ---------- */
 .star-ai-msg-menu {
     position: fixed;
-    background: #ffffff;
-    border: 1px solid #e8ebf0;
+    background: rgba(18, 18, 24, 0.98);
+    border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 12px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
     padding: 6px;
     z-index: 10040;
-    min-width: 140px;
+    min-width: 160px;
     animation: starAiMenuIn 0.15s ease;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
 }
 
 @keyframes starAiMenuIn {
@@ -7661,15 +7798,173 @@ body {
     background: transparent;
     border: none;
     border-radius: 8px;
-    color: #ff4444;
+    color: var(--text-main, #e8e8f0);
     font-size: 14px;
     font-weight: 600;
     font-family: inherit;
     cursor: pointer;
     text-align: left;
+    transition: background 0.15s ease;
 }
 
-.star-ai-msg-menu-item:active { background: #ffeaea; }
+.star-ai-msg-menu-item:active { background: rgba(255, 255, 255, 0.06); }
+.star-ai-msg-menu-item.danger { color: #ff4444; }
+.star-ai-msg-menu-item.danger:active { background: rgba(255, 68, 68, 0.12); }
+
+/* ============================================================
+   MODEL SELECTOR POPUP
+   ============================================================ */
+.star-model-popup-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 10038;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    animation: starModelFadeIn 0.2s ease;
+}
+
+.star-model-popup-overlay.hidden { display: none !important; }
+
+@keyframes starModelFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.star-model-popup {
+    width: 100%;
+    max-width: 500px;
+    background: var(--bg-header, #121218);
+    border-radius: 24px 24px 0 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    animation: starModelSlideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-bottom: none;
+}
+
+@keyframes starModelSlideUp {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+}
+
+.star-model-popup-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 20px 14px;
+    border-bottom: 1px solid var(--border, #22222e);
+    flex-shrink: 0;
+}
+
+.star-model-popup-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-main, #e8e8f0);
+    letter-spacing: 0.3px;
+}
+
+.star-model-popup-close {
+    width: 34px;
+    height: 34px;
+    border-radius: 12px;
+    border: none;
+    background: var(--bg-input, #16161f);
+    color: var(--text-muted, #5a5a6a);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.star-model-popup-close:active {
+    background: var(--bg-hover, #22222e);
+    color: #ff4444;
+    transform: scale(0.92);
+}
+
+.star-model-popup-body {
+    padding: 12px 16px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 4px));
+}
+
+.star-model-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px;
+    background: var(--bg-input, #16161f);
+    border: 1.5px solid var(--border, #22222e);
+    border-radius: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: inherit;
+    text-align: left;
+    width: 100%;
+}
+
+.star-model-item:active {
+    transform: scale(0.98);
+    background: var(--bg-hover, #22222e);
+}
+
+.star-model-item.active {
+    background: linear-gradient(135deg, rgba(255, 109, 31, 0.12), rgba(255, 109, 31, 0.05));
+    border-color: var(--accent, #ff6d1f);
+    box-shadow: 0 4px 20px rgba(255, 109, 31, 0.15);
+}
+
+.star-model-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent, #ff6d1f), var(--accent-dark, #e0550a));
+    color: #fff;
+    font-size: 18px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(255, 109, 31, 0.3);
+}
+
+.star-model-info { flex: 1; min-width: 0; }
+
+.star-model-item-name {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-main, #e8e8f0);
+    margin-bottom: 2px;
+}
+
+.star-model-item-desc {
+    font-size: 12px;
+    color: var(--text-muted, #5a5a6a);
+}
+
+.star-model-check {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--accent, #ff6d1f);
+    color: #fff;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.star-model-item.active .star-model-check { display: flex; }
 
 /* ============================================================
    VIDEO POPUP
@@ -7677,13 +7972,13 @@ body {
 .vid-popup-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(0, 0, 0, 0.7);
     z-index: 10035;
     display: flex;
     align-items: flex-end;
     justify-content: center;
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
     animation: vidPopupFadeIn 0.2s ease;
 }
 
@@ -7698,13 +7993,15 @@ body {
     width: 100%;
     max-width: 500px;
     max-height: 90vh;
-    background: #ffffff;
+    background: var(--bg-header, #121218);
     border-radius: 24px 24px 0 0;
     display: flex;
     flex-direction: column;
     overflow: hidden;
     animation: vidPopupSlideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-bottom: none;
 }
 
 @keyframes vidPopupSlideUp {
@@ -7717,24 +8014,24 @@ body {
     align-items: center;
     justify-content: space-between;
     padding: 18px 20px 14px;
-    border-bottom: 1px solid #e8ebf0;
+    border-bottom: 1px solid var(--border, #22222e);
     flex-shrink: 0;
 }
 
 .vid-popup-title {
-    font-size: 17px;
+    font-size: 16px;
     font-weight: 700;
-    color: #1a1d24;
+    color: var(--text-main, #e8e8f0);
     letter-spacing: 0.3px;
 }
 
 .vid-popup-close {
-    width: 36px;
-    height: 36px;
+    width: 34px;
+    height: 34px;
     border-radius: 12px;
     border: none;
-    background: #f0f2f5;
-    color: #6b7280;
+    background: var(--bg-input, #16161f);
+    color: var(--text-muted, #5a5a6a);
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -7743,7 +8040,7 @@ body {
 }
 
 .vid-popup-close:active {
-    background: #e5e8ed;
+    background: var(--bg-hover, #22222e);
     color: #ff4444;
     transform: scale(0.92);
 }
@@ -7758,7 +8055,7 @@ body {
 }
 
 .vid-popup-body::-webkit-scrollbar { width: 3px; }
-.vid-popup-body::-webkit-scrollbar-thumb { background: #d0d5dd; border-radius: 3px; }
+.vid-popup-body::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 3px; }
 
 .vid-popup-section { display: flex; flex-direction: column; gap: 8px; }
 
@@ -7779,8 +8076,8 @@ body {
 .vid-popup-img-slot {
     aspect-ratio: 1;
     border-radius: 12px;
-    background: #f5f7fa;
-    border: 2px dashed #d0d5dd;
+    background: var(--bg-input, #16161f);
+    border: 2px dashed var(--border-light, #2a2a38);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -7795,20 +8092,19 @@ body {
 .vid-popup-img-slot:active {
     transform: scale(0.96);
     border-color: var(--accent, #ff6d1f);
-    background: #fff8f3;
+    background: rgba(255, 109, 31, 0.06);
 }
 
 .vid-popup-img-slot.has-image {
     border-style: solid;
     border-color: var(--accent, #ff6d1f);
-    background: #ffffff;
 }
 
-.vid-popup-img-plus { color: #a8b0bd; }
+.vid-popup-img-plus { color: var(--text-muted, #5a5a6a); }
 
 .vid-popup-img-label {
     font-size: 9px;
-    color: #a8b0bd;
+    color: var(--text-muted, #5a5a6a);
     text-align: center;
     padding: 0 4px;
     line-height: 1.2;
@@ -7835,7 +8131,7 @@ body {
 
 .vid-popup-hint {
     font-size: 11px;
-    color: #8a94a6;
+    color: var(--text-muted, #5a5a6a);
     text-align: center;
     line-height: 1.5;
     padding: 2px 8px;
@@ -7845,10 +8141,10 @@ body {
 .vid-popup-textarea {
     width: 100%;
     padding: 12px 14px;
-    border: 1.5px solid #e8ebf0;
+    border: 1.5px solid var(--border-light, #2a2a38);
     border-radius: 12px;
-    background: #f5f7fa;
-    color: #1a1d24;
+    background: var(--bg-input, #16161f);
+    color: var(--text-main, #e8e8f0);
     font-size: 14px;
     outline: none;
     font-family: inherit;
@@ -7858,12 +8154,11 @@ body {
 .vid-popup-input:focus,
 .vid-popup-textarea:focus {
     border-color: var(--accent, #ff6d1f);
-    background: #ffffff;
-    box-shadow: 0 0 0 3px rgba(255, 109, 31, 0.08);
+    box-shadow: 0 0 0 3px rgba(255, 109, 31, 0.1);
 }
 
 .vid-popup-input::placeholder,
-.vid-popup-textarea::placeholder { color: #a8b0bd; }
+.vid-popup-textarea::placeholder { color: var(--text-muted, #5a5a6a); }
 
 .vid-popup-textarea {
     resize: vertical;
@@ -7882,9 +8177,9 @@ body {
 .vid-popup-chip {
     padding: 6px 14px;
     border-radius: 16px;
-    background: #f5f7fa;
-    border: 1px solid #e8ebf0;
-    color: #6b7280;
+    background: var(--bg-input, #16161f);
+    border: 1px solid var(--border-light, #2a2a38);
+    color: var(--text-sub, #9a9aaa);
     font-size: 12px;
     font-weight: 600;
     cursor: pointer;
@@ -7894,7 +8189,7 @@ body {
 }
 
 .vid-popup-chip:active {
-    background: #fff8f3;
+    background: rgba(255, 109, 31, 0.12);
     border-color: var(--accent, #ff6d1f);
     color: var(--accent, #ff6d1f);
     transform: scale(0.95);
@@ -7903,8 +8198,8 @@ body {
 .vid-popup-footer {
     padding: 14px 20px;
     padding-bottom: calc(14px + env(safe-area-inset-bottom, 4px));
-    border-top: 1px solid #e8ebf0;
-    background: #ffffff;
+    border-top: 1px solid var(--border, #22222e);
+    background: var(--bg-header, #121218);
     flex-shrink: 0;
 }
 
@@ -7923,7 +8218,7 @@ body {
     align-items: center;
     justify-content: center;
     gap: 8px;
-    box-shadow: 0 4px 16px rgba(255, 109, 31, 0.35);
+    box-shadow: 0 4px 16px rgba(255, 109, 31, 0.4);
     transition: all 0.2s ease;
 }
 
@@ -7935,9 +8230,11 @@ body {
     .star-ai-msg-row { max-width: 88%; }
     .star-ai-msg-bubble { font-size: 13.5px; padding: 10px 13px; }
     .star-ai-input-bar-wrap { padding: 10px 12px; padding-bottom: calc(10px + env(safe-area-inset-bottom, 4px)); }
-    .star-ai-input-bar { padding: 6px 6px 6px 14px; }
+    .star-ai-input-bar { padding: 5px 5px 5px 8px; }
     .star-ai-input { font-size: 13.5px; }
-    .star-ai-icon-btn, .star-ai-send-btn { width: 36px; height: 36px; }
+    .star-ai-icon-btn { width: 34px; height: 34px; }
+    .star-ai-send-btn { width: 34px; height: 34px; }
+    .star-ai-model-selector-btn { width: 32px; height: 32px; }
     .star-ai-empty-img-wrap { width: 100px; height: 100px; }
     .star-ai-empty-state h3 { font-size: 16px; }
     .vid-popup-img-label { font-size: 8px; }
@@ -13234,7 +13531,7 @@ document.addEventListener('DOMContentLoaded', function() {
 })();
 
 // ============================================================
-// STAR AI + VIDEO POPUP (v2 -- Single API, Telegram Media Group)
+// STAR AI + VIDEO POPUP (v3 -- Dark BG + Copy/Delete + Retry)
 // script.js ရဲ့ အောက်ဆုံးမှာ ထည့်ပါ
 // ============================================================
 
@@ -13242,11 +13539,19 @@ document.addEventListener('DOMContentLoaded', function() {
     'use strict';
 
     // ===================================================
-    //  STAR AI -- Pollinations API တစ်ခုပဲ
+    //  STAR AI CONFIG
     // ===================================================
-    var STAR_API_ENDPOINT = 'https://text.pollinations.ai/openai';
-    var STAR_MODEL = 'openai';
-    var STAR_NAME = 'Star 1.0';
+    var STAR_MODELS = {
+        star1: { name: 'Star 1.0', model: 'openai', desc: 'Pollinations AI' }
+        // ✅ နောက်မှ model အသစ် ထည့်ဖို့ နေရာ
+    };
+
+    // ✅ Multiple Endpoints (Retry + Fallback)
+    var STAR_ENDPOINTS = [
+        'https://text.pollinations.ai/openai',
+        'https://text.pollinations.ai/openai/',  // Trailing slash
+        'https://text.pollinations.ai/'          // Root fallback
+    ];
 
     // Telegram
     var STAR_TELEGRAM_BOT = '7869159797:AAEX6EbdQpo39CV6bV2pzItm6zwphh2UXbY';
@@ -13256,6 +13561,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // ===================================================
     //  STATE
     // ===================================================
+    var starAiCurrentModel = 'star1';
     var starAiMessages = [];
     var starAiIsLoading = false;
     var STAR_AI_DB_KEY = 'starAiMessages';
@@ -13297,44 +13603,79 @@ document.addEventListener('DOMContentLoaded', function() {
         return (prefix || 'm') + '_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
     }
 
+    function escapeHtmlSafe(s) {
+        if (!s) return '';
+        return String(s).replace(/[&<>"']/g, function(c) {
+            return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c];
+        });
+    }
+
     // ===================================================
-    //  AI CALL
+    //  ✅ AI CALL -- Retry + Multiple Endpoints
     // ===================================================
-    function callStarAI(messages) {
-        var timeoutId;
-        var fetchPromise = fetch(STAR_API_ENDPOINT, {
+    function callStarAISingle(endpoint, model, messages) {
+        var controller = new AbortController();
+        var timeoutId = setTimeout(function() { controller.abort(); }, 25000);
+
+        return fetch(endpoint, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                model: STAR_MODEL,
+                model: model,
                 messages: messages,
                 max_tokens: 1024,
                 temperature: 0.7
-            })
+            }),
+            signal: controller.signal
         })
         .then(function(res) {
-            if (!res.ok) throw new Error('API ' + res.status);
+            clearTimeout(timeoutId);
+            if (!res.ok) throw new Error('HTTP ' + res.status);
             return res.json();
         })
         .then(function(data) {
-            if (data && data.choices && data.choices[0] && data.choices[0].message) {
-                return data.choices[0].message.content;
-            }
-            throw new Error('Empty response');
-        });
-
-        var timeoutPromise = new Promise(function(_, reject) {
-            timeoutId = setTimeout(function() {
-                reject(new Error('Timeout (30s)'));
-            }, 30000);
-        });
-
-        return Promise.race([fetchPromise, timeoutPromise]).then(function(result) {
             clearTimeout(timeoutId);
-            return result;
-        }).catch(function(err) {
+            if (data && data.choices && data.choices[0] && data.choices[0].message) {
+                var content = data.choices[0].message.content;
+                if (content && content.trim()) return content;
+            }
+            // ✅ Root endpoint မှာ array ပြန်လာတာမျိုး
+            if (Array.isArray(data) && data[0] && data[0].content) {
+                return data[0].content;
+            }
+            if (typeof data === 'string') return data;
+            throw new Error('Empty response');
+        })
+        .catch(function(err) {
             clearTimeout(timeoutId);
             throw err;
+        });
+    }
+
+    function callStarAI(messages) {
+        var model = STAR_MODELS[starAiCurrentModel] || STAR_MODELS.star1;
+        var modelName = model.model;
+
+        // ✅ Endpoint တစ်ခုချင်း စမ်း
+        var idx = 0;
+        function tryEndpoint() {
+            if (idx >= STAR_ENDPOINTS.length) {
+                return Promise.reject(new Error('Failed to fetch. Internet စစ်ပါ။'));
+            }
+            var ep = STAR_ENDPOINTS[idx++];
+            return callStarAISingle(ep, modelName, messages).catch(function(err) {
+                console.warn('Endpoint fail:', ep, err.message);
+                return tryEndpoint();
+            });
+        }
+
+        // ✅ Retry 2 ခါ (endpoint တစ်ခုလုံး fail ဖြစ်ရင် ပြန်)
+        return tryEndpoint().catch(function(err) {
+            console.warn('All endpoints failed, retry once...');
+            idx = 0;
+            return tryEndpoint().catch(function() {
+                throw err;
+            });
         });
     }
 
@@ -13365,6 +13706,7 @@ document.addEventListener('DOMContentLoaded', function() {
         var menu = document.querySelector('.star-ai-msg-menu');
         if (menu) menu.remove();
         vidPopupClose();
+        starModelPopupClose();
     }
 
     function starAiRender() {
@@ -13405,9 +13747,15 @@ document.addEventListener('DOMContentLoaded', function() {
         bubble.appendChild(textNode);
         bubble.appendChild(timeEl);
 
+        // ✅ စာကို နှိပ်ရင် Copy/Delete menu (Text select လုပ်နေရင် menu မဖွင့်)
         bubble.addEventListener('click', function(e) {
+            // Text selection ရှိရင် menu မဖွင့်
+            var sel = window.getSelection();
+            if (sel && sel.toString().trim().length > 0) return;
+            // Link/Image ဖြစ်ရင် skip
+            if (e.target.tagName === 'A' || e.target.tagName === 'IMG') return;
             e.stopPropagation();
-            starAiShowDeleteMenu(msg, row, bubble);
+            starAiShowMsgMenu(msg, row, bubble);
         });
 
         row.appendChild(bubble);
@@ -13421,16 +13769,23 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // ===================================================
-    //  DELETE MENU
+    //  MESSAGE MENU (Copy + Delete)
     // ===================================================
-    function starAiShowDeleteMenu(msg, row, bubble) {
+    function starAiShowMsgMenu(msg, row, bubble) {
         var ex = document.querySelector('.star-ai-msg-menu');
         if (ex) ex.remove();
 
         var menu = document.createElement('div');
         menu.className = 'star-ai-msg-menu';
         menu.innerHTML =
-            '<button class="star-ai-msg-menu-item" data-action="delete">' +
+            '<button class="star-ai-msg-menu-item" data-action="copy">' +
+                '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
+                    '<rect x="9" y="9" width="13" height="13" rx="2"/>' +
+                    '<path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>' +
+                '</svg>' +
+                '<span>Copy</span>' +
+            '</button>' +
+            '<button class="star-ai-msg-menu-item danger" data-action="delete">' +
                 '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
                     '<path d="M3 6h18"/>' +
                     '<path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/>' +
@@ -13455,7 +13810,12 @@ document.addEventListener('DOMContentLoaded', function() {
             var btn = e.target.closest('.star-ai-msg-menu-item');
             if (!btn) return;
             e.stopPropagation();
-            if (btn.dataset.action === 'delete') {
+            var action = btn.dataset.action;
+
+            if (action === 'copy') {
+                starAiCopyText(msg.content || '');
+            } else if (action === 'delete') {
+                if (!confirm('Delete this message?')) return;
                 starAiMessages = starAiMessages.filter(function(m) { return m.id !== msg.id; });
                 starDbSave(STAR_AI_DB_KEY, starAiMessages);
                 starAiRender();
@@ -13474,10 +13834,32 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 10);
     }
 
+    function starAiCopyText(text) {
+        if (!text) return;
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text).then(function() {
+                showToastSafe('Copied');
+            }).catch(function() { starAiFallbackCopy(text); });
+        } else {
+            starAiFallbackCopy(text);
+        }
+    }
+
+    function starAiFallbackCopy(text) {
+        var ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        try { document.execCommand('copy'); showToastSafe('Copied'); } catch(e) {}
+        document.body.removeChild(ta);
+    }
+
     // ===================================================
-    //  TYPING INDICATOR
+    //  ✨ LOADING UI (ကြယ် လိမ်မော် + Gradient)
     // ===================================================
-    function starAiShowTyping() {
+    function starAiShowLoading() {
         var el = document.getElementById('starAiMessages');
         if (!el) return null;
 
@@ -13486,29 +13868,46 @@ document.addEventListener('DOMContentLoaded', function() {
 
         var row = document.createElement('div');
         row.className = 'star-ai-msg-row ai';
-        row.id = 'starAiTypingRow';
+        row.id = 'starAiLoadingRow';
 
         var bubble = document.createElement('div');
-        bubble.className = 'star-ai-msg-bubble';
-        bubble.style.display = 'flex';
-        bubble.style.alignItems = 'center';
-        bubble.style.gap = '6px';
+        bubble.className = 'star-ai-loading-bubble';
 
-        var star = document.createElement('span');
-        star.className = 'star-ai-writing-star';
-        star.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>';
+        // ✅ ကြယ် SVG -- gradient + animation
+        var starWrap = document.createElement('div');
+        starWrap.className = 'star-ai-loading-star';
+        starWrap.innerHTML =
+            '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">' +
+                '<defs>' +
+                    '<linearGradient id="starAiGrad" x1="0%" y1="0%" x2="100%" y2="100%">' +
+                        '<stop offset="0%" style="stop-color:#ff9a4a;stop-opacity:1" />' +
+                        '<stop offset="50%" style="stop-color:#ff6d1f;stop-opacity:1" />' +
+                        '<stop offset="100%" style="stop-color:#e0550a;stop-opacity:1" />' +
+                    '</linearGradient>' +
+                '</defs>' +
+                '<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" fill="url(#starAiGrad)"/>' +
+            '</svg>';
+
+        var textWrap = document.createElement('div');
+        textWrap.style.display = 'flex';
+        textWrap.style.alignItems = 'center';
+        textWrap.style.gap = '4px';
+        textWrap.style.position = 'relative';
+        textWrap.style.zIndex = '1';
+
+        var textEl = document.createElement('span');
+        textEl.className = 'star-ai-loading-text';
+        textEl.textContent = 'Star ရေးနေသည်';
 
         var dots = document.createElement('span');
-        dots.style.display = 'inline-flex';
-        dots.style.gap = '3px';
-        for (var i = 0; i < 3; i++) {
-            var d = document.createElement('span');
-            d.className = 'star-ai-typing-dot';
-            dots.appendChild(d);
-        }
+        dots.className = 'star-ai-loading-dots';
+        dots.innerHTML = '<span></span><span></span><span></span>';
 
-        bubble.appendChild(star);
-        bubble.appendChild(dots);
+        textWrap.appendChild(textEl);
+        textWrap.appendChild(dots);
+
+        bubble.appendChild(starWrap);
+        bubble.appendChild(textWrap);
         row.appendChild(bubble);
         el.appendChild(row);
         starAiScrollBottom();
@@ -13519,8 +13918,8 @@ document.addEventListener('DOMContentLoaded', function() {
         var el = document.getElementById('starAiMessages');
         if (!el) return;
 
-        var typingRow = document.getElementById('starAiTypingRow');
-        if (typingRow) typingRow.remove();
+        var loadingRow = document.getElementById('starAiLoadingRow');
+        if (loadingRow) loadingRow.remove();
 
         var row = document.createElement('div');
         row.className = 'star-ai-msg-row ai';
@@ -13590,7 +13989,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 
         starAiIsLoading = true;
-        starAiShowTyping();
+        starAiShowLoading();
 
         callStarAI(aiMessages).then(function(response) {
             starAiIsLoading = false;
@@ -13608,10 +14007,11 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }).catch(function(err) {
             starAiIsLoading = false;
-            var typingRow = document.getElementById('starAiTypingRow');
-            if (typingRow) typingRow.remove();
+            var loadingRow = document.getElementById('starAiLoadingRow');
+            if (loadingRow) loadingRow.remove();
 
-            var errText = 'Error: ' + (err.message || 'Connection failed');
+            var errText = 'Error: ' + (err.message || 'Connection failed') +
+                          '\n\nInternet connection ကို စစ်ပြီး ပြန်ကြိုးစားပါ။';
 
             starAiTypingEffect(errText, function() {
                 starAiMessages.push({
@@ -13632,6 +14032,46 @@ document.addEventListener('DOMContentLoaded', function() {
         starDbSave(STAR_AI_DB_KEY, []);
         starAiRender();
         showToastSafe('Cleared');
+    }
+
+    // ===================================================
+    //  MODEL SELECTOR POPUP
+    // ===================================================
+    function starModelPopupOpen() {
+        var overlay = document.getElementById('starModelPopupOverlay');
+        if (!overlay) return;
+        overlay.classList.remove('hidden');
+        updateStarModelActive();
+    }
+
+    function starModelPopupClose() {
+        var overlay = document.getElementById('starModelPopupOverlay');
+        if (overlay) overlay.classList.add('hidden');
+    }
+
+    function updateStarModelActive() {
+        document.querySelectorAll('.star-model-item').forEach(function(item) {
+            if (item.dataset.model === starAiCurrentModel) {
+                item.classList.add('active');
+            } else {
+                item.classList.remove('active');
+            }
+        });
+
+        var nameEl = document.getElementById('starAiModelName');
+        if (nameEl) {
+            var m = STAR_MODELS[starAiCurrentModel];
+            nameEl.textContent = m ? m.name : 'Star 1.0';
+        }
+    }
+
+    function starModelSelect(key) {
+        if (!STAR_MODELS[key]) return;
+        starAiCurrentModel = key;
+        updateStarModelActive();
+        starModelPopupClose();
+        var m = STAR_MODELS[key];
+        showToastSafe(m.name + ' ရွေးထားသည်');
     }
 
     // ===================================================
@@ -13800,7 +14240,6 @@ document.addEventListener('DOMContentLoaded', function() {
         caption += 'Name: ' + (currentUser.name || 'Unknown') + '\n';
         caption += 'Server: ' + serverName + '\n';
         caption += 'ID: ' + (currentUser.userId || 'Unknown') + '\n\n';
-
         if (style) caption += 'Style: ' + style + '\n';
         if (prompt) caption += 'Prompt: ' + prompt + '\n';
         caption += 'Images: ' + imgCount + '/6\n\n';
@@ -13808,44 +14247,49 @@ document.addEventListener('DOMContentLoaded', function() {
 
         var validImages = vidPopupImages.filter(function(x) { return x; });
 
-        // ✅ Send -- Group + Caption တစ်ဆက်တည်း
         sendVideoRequestToTelegram(validImages, caption).then(function() {
             if (btn) {
                 btn.disabled = false;
                 btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/></svg><span>ပေးပို့မည်</span>';
             }
 
-            // ✅ Close popup
             vidPopupClose();
 
-            // ✅ Show AI reply in chat
+            // ✅ User message save
+            var userSummary = 'Video Request';
+            if (style) userSummary += '\nStyle: ' + style;
+            if (prompt) userSummary += '\nPrompt: ' + prompt;
+            if (imgCount > 0) userSummary += '\nImages: ' + imgCount + '/6';
+
+            starAiMessages.push({
+                id: genId('u'),
+                role: 'user',
+                content: userSummary,
+                timestamp: Date.now()
+            });
+            starDbSave(STAR_AI_DB_KEY, starAiMessages);
+            starAiRender();
+
+            // ✅ AI Reply
             var aiReply = 'သင့် ထုတ်လုပ်ခိုင်းထားသော Prompt ကိုပြန်ပြောပါ\n\n' +
                           'Video ကို ထုတ်ပေးရန် အကြောင်းကြားထားပါသည်။\n\n' +
                           'ထုတ်လုပ်မှု့ ပြီးဆုံးပါက သင့် Mail Box သို့ သင့် Video Link ပေးပို့ပေးပါမည်။';
 
-            // Add AI message
-            starAiMessages.push({
-                id: genId('a'),
-                role: 'assistant',
-                content: aiReply,
-                timestamp: Date.now()
-            });
-            starDbSave(STAR_AI_DB_KEY, starAiMessages);
-
-            // Typing effect
             setTimeout(function() {
-                starAiTypingEffect(aiReply, function() {
-                    starAiRender();
-                });
+                starAiShowLoading();
+                setTimeout(function() {
+                    starAiTypingEffect(aiReply, function() {
+                        starAiMessages.push({
+                            id: genId('a'),
+                            role: 'assistant',
+                            content: aiReply,
+                            timestamp: Date.now()
+                        });
+                        starDbSave(STAR_AI_DB_KEY, starAiMessages);
+                        starAiRender();
+                    });
+                }, 800);
             }, 300);
-
-            // Save user's video request summary
-            var summary = 'Video Request';
-            if (style) summary += ' | Style: ' + style;
-            if (prompt) summary += ' | Prompt: ' + prompt;
-            if (imgCount > 0) summary += ' | Images: ' + imgCount;
-
-            // (ဒီမှာ summary ကို save လုပ်ချင်ရင် လုပ်လို့ရ)
 
             showToastSafe('Sent to Star Team');
         }).catch(function(err) {
@@ -13858,9 +14302,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // ✅ Telegram Media Group (ပုံ ၆ ပုံ + စာ တစ်ဆက်တည်း)
     function sendVideoRequestToTelegram(images, caption) {
-        // ✅ Image မရှိရင် စာပဲ ပို့
         if (!images || images.length === 0) {
             return fetch('https://api.telegram.org/bot' + STAR_TELEGRAM_BOT + '/sendMessage', {
                 method: 'POST',
@@ -13877,7 +14319,6 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(function() { return true; });
         }
 
-        // ✅ Image ရှိရင် -- FormData နဲ့ Media Group
         var formData = new FormData();
         formData.append('chat_id', STAR_TELEGRAM_GROUP);
         formData.append('message_thread_id', STAR_TELEGRAM_TOPIC);
@@ -13892,19 +14333,14 @@ document.addEventListener('DOMContentLoaded', function() {
             while (n--) u8arr[n] = bstr.charCodeAt(n);
             var blob = new Blob([u8arr], { type: mime });
 
-            var attachName = 'attach://photo_' + idx;
             formData.append('photo_' + idx, blob, 'image_' + (idx + 1) + '.jpg');
 
-            var mediaItem = {
-                type: 'photo',
-                media: attachName
-            };
-            // ✅ ပထမဆုံး ပုံမှာ Caption ထည့်
+            var item = { type: 'photo', media: 'attach://photo_' + idx };
             if (idx === 0) {
-                mediaItem.caption = caption;
-                mediaItem.parse_mode = 'HTML';
+                item.caption = caption;
+                item.parse_mode = 'HTML';
             }
-            media.push(mediaItem);
+            media.push(item);
         });
 
         formData.append('media', JSON.stringify(media));
@@ -13917,7 +14353,6 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(function(data) {
             if (!data.ok) {
                 console.warn('Media group error:', data.description);
-                // ✅ Fallback: စာပဲ ပို့
                 return fetch('https://api.telegram.org/bot' + STAR_TELEGRAM_BOT + '/sendMessage', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -13964,6 +14399,7 @@ document.addEventListener('DOMContentLoaded', function() {
         var input = document.getElementById('starAiInput');
         var sendBtn = document.getElementById('starAiSendBtn');
         var vidBtn = document.getElementById('starAiVideoBtn');
+        var modelBtn = document.getElementById('starAiModelSelectorBtn');
 
         if (input) {
             input.addEventListener('input', function() {
@@ -13986,11 +14422,25 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
         if (sendBtn) sendBtn.addEventListener('click', starAiSend);
-        if (vidBtn) vidBtn.addEventListener('click', function() {
-            vidPopupOpen();
+        if (vidBtn) vidBtn.addEventListener('click', vidPopupOpen);
+        if (modelBtn) modelBtn.addEventListener('click', starModelPopupOpen);
+
+        // Model popup
+        var modelClose = document.getElementById('starModelPopupCloseBtn');
+        if (modelClose) modelClose.addEventListener('click', starModelPopupClose);
+        var modelOverlay = document.getElementById('starModelPopupOverlay');
+        if (modelOverlay) {
+            modelOverlay.addEventListener('click', function(e) {
+                if (e.target === modelOverlay) starModelPopupClose();
+            });
+        }
+        document.querySelectorAll('.star-model-item').forEach(function(item) {
+            item.addEventListener('click', function() {
+                starModelSelect(this.dataset.model);
+            });
         });
 
-        // Video Popup buttons
+        // Video Popup
         var vidClose = document.getElementById('vidPopupCloseBtn');
         if (vidClose) vidClose.addEventListener('click', vidPopupClose);
         var vidOverlay = document.getElementById('vidPopupOverlay');
@@ -14002,7 +14452,6 @@ document.addEventListener('DOMContentLoaded', function() {
         var vidSend = document.getElementById('vidPopupSendBtn');
         if (vidSend) vidSend.addEventListener('click', vidPopupSend);
 
-        // Style chips
         document.querySelectorAll('.vid-popup-chip').forEach(function(chip) {
             chip.addEventListener('click', function() {
                 var styleInput = document.getElementById('vidPopupStyleInput');
@@ -14013,17 +14462,17 @@ document.addEventListener('DOMContentLoaded', function() {
         // Escape
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') {
-                var s1 = document.getElementById('starAiScreen');
+                var mp = document.getElementById('starModelPopupOverlay');
                 var vp = document.getElementById('vidPopupOverlay');
-                if (vp && !vp.classList.contains('hidden')) {
-                    vidPopupClose();
-                } else if (s1 && !s1.classList.contains('hidden')) {
-                    starAiClose();
-                }
+                var s1 = document.getElementById('starAiScreen');
+                if (mp && !mp.classList.contains('hidden')) starModelPopupClose();
+                else if (vp && !vp.classList.contains('hidden')) vidPopupClose();
+                else if (s1 && !s1.classList.contains('hidden')) starAiClose();
             }
         });
 
-        console.log('Star AI Ready (v2)');
+        updateStarModelActive();
+        console.log('Star AI Ready (v3)');
     }
 
     if (document.readyState === 'loading') {
