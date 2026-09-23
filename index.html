@@ -1620,7 +1620,7 @@ body {
 .fs-screen.hidden { display: none !important; }
 
 /* ============================================================
-   ✅ PROFILE FULLSCREEN -- CENTER + INFO LOWERED
+   ✅ PROFILE FULLSCREEN
    ============================================================ */
 
 .profile-fullscreen {
@@ -1660,7 +1660,7 @@ body {
 }
 
 /* ============================================================
-   ✅ PROFILE INFO -- အောက်ကို ချ (!important နဲ့)
+   ✅ PROFILE INFO -- အပေါ် နည်းနည်း တင်
    ============================================================ */
 
 .profile-info-container {
@@ -1671,7 +1671,7 @@ body {
     gap: 14px !important;
     padding: 0 24px !important;
     position: relative !important;
-    margin-top: 60px !important;    /* ✅ JS မထိအောင် !important */
+    margin-top: -30px !important;   /* ✅ -50 → -30 (အပေါ် နည်းနည်း တင်) */
     z-index: 2 !important;
 }
 
@@ -1812,7 +1812,7 @@ body {
 }
 
 /* ============================================================
-   ✅ BACKGROUND SECTION -- CENTER LAYOUT
+   ✅ BACKGROUND SECTION
    ============================================================ */
 
 .profile-background-section {
@@ -1836,7 +1836,7 @@ body {
 }
 
 /* ============================================================
-   ✅ BIO CARD -- LEFT ALIGN (စာကို ဘယ်မှာ စ)
+   ✅ BIO CARD -- LEFT ALIGN
    ============================================================ */
 
 .profile-bio-wrapper {
@@ -1854,7 +1854,7 @@ body {
     box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
     flex-shrink: 0;
     transition: all 0.3s ease;
-    text-align: left !important;    /* ✅ ဘယ်မှာ စ */
+    text-align: left !important;
 }
 
 .profile-bio-wrapper:hover {
@@ -1868,7 +1868,7 @@ body {
     line-height: 1.7;
     white-space: pre-wrap;
     word-break: break-word;
-    text-align: left !important;    /* ✅ ဘယ်မှာ စ */
+    text-align: left !important;
 }
 
 .profile-bio .bio-placeholder {
@@ -1975,7 +1975,7 @@ body {
 }
 
 /* ============================================================
-   EDIT PROFILE BUTTON -- CENTER
+   EDIT PROFILE BUTTON
    ============================================================ */
 
 .profile-edit-btn-wrapper {
@@ -2107,7 +2107,6 @@ body {
 .edit-textarea:focus { border-color: var(--accent); }
 
 .edit-owned-section { flex: 1; min-height: 0; display: flex; flex-direction: column; }
-
 .edit-owned-tabs { display: flex; gap: 6px; margin-bottom: 12px; flex-shrink: 0; }
 
 .edit-tab-btn {
@@ -2192,7 +2191,7 @@ body {
     }
 
     .profile-info-container {
-        margin-top: 50px !important;
+        margin-top: -25px !important;   /* ✅ Mobile အတွက် */
         padding: 0 16px !important;
         gap: 10px !important;
     }
