@@ -8900,7 +8900,7 @@ body {
     }
 }</style><script>// ============================================================
 //  STAR ARCADE -- FULL script.js
-//  M Server + Auto Online + Play ID (Chat List + Chat Full)
+//  M Server + Auto Online + Play ID + Unread Badge
 //  Version: 2026-09-21
 // ============================================================
 
@@ -8943,7 +8943,6 @@ var M_SERVER_TARGET_COUNT = 10;
 
 // ===================================================
 //  PLAY CONFIG -- G1/G2/G3
-//  နောက်မှ ပြင်လို့ရ
 // ===================================================
 var PLAY_CONFIG = {
     games: {
@@ -8960,7 +8959,6 @@ var PLAY_CONFIG = {
             image: 'https://i.ibb.co/placeholder-g3.png'
         }
     },
-    // play code (G1/G2/G3) ကို game info ပြန်ပေး
     getGameInfo: function(playCode) {
         if (!playCode) return null;
         var code = String(playCode).trim().toUpperCase();
@@ -10876,7 +10874,7 @@ function getFriendPassword(sid, uid) {
 }
 
 // ===================================================
-//  MESSAGES STORAGE -- Memory first, IDB background
+//  MESSAGES STORAGE
 // ===================================================
 var memoryMessages = {};
 var pendingSaveKeys = {};
@@ -11021,7 +11019,7 @@ function extractUseOnlyData(data, sid, serverNo, uid) {
         name: data.name || 'Player',
         avatar: data.avatar || '',
         bio: data.bio || '',
-        play: data.play || '',  // ✅ Play ID
+        play: data.play || '',
         online: data.online === true,
         frameUse: data.frameUse || '',
         markUse: data.markUse || '',
@@ -11247,7 +11245,7 @@ function doRenderChatList() {
     }).catch(function() { isRenderingChatList = false; });
 }
 
-// ✅ Play ID ကို Chat List မှာ ပြ
+// ✅ Play ID + Unread Badge ကို Chat List မှာ ပြ
 function renderChatListRow(listEl, item) {
     var friend = item.friend, cached = item.cached;
     var rowId = 'chatRow_' + friend.serverId + '_' + friend.userId;
@@ -11279,7 +11277,12 @@ function renderChatListRow(listEl, item) {
 
     var lockHtml = item.locked ? '<span class="chat-list-lock-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>' : '';
 
-    var unreadHtml = item.unreadCount > 0 ? '<span class="chat-list-unread-badge">' + (item.unreadCount > 99 ? '99+' : item.unreadCount) + '</span>' : '';
+    // ✅ Unread Badge (အနီရောင် အစက်လေး)
+    var unreadHtml = '';
+    if (item.unreadCount > 0) {
+        var countText = item.unreadCount > 99 ? '99+' : String(item.unreadCount);
+        unreadHtml = '<span class="chat-list-unread-badge">' + countText + '</span>';
+    }
 
     var previewText = item.lastMessageText || 'Tap to open chat';
 
@@ -11310,10 +11313,11 @@ function renderChatListRow(listEl, item) {
                 '<span class="chat-list-mark">' + markHtml + '</span>' + onlineHtml +
             '</div></div>' +
             '<div class="chat-list-bottom">' +
-                '<span class="chat-list-msg">' + escapeHtml(previewText) + '</span>' + unreadHtml +
+                '<span class="chat-list-msg">' + escapeHtml(previewText) + '</span>' +
             '</div>' +
-            playHtml +  // ✅ Play ID ထည့်
-        '</div>';
+            playHtml +
+        '</div>' +
+        unreadHtml;  // ✅ Unread Badge -- ညာဘက်အပေါ်မှာ
 
     row.addEventListener('click', function() {
         openChatRoom({ serverId: friend.serverId, userId: friend.userId, serverNo: friend.serverNo });
@@ -11502,6 +11506,9 @@ function openChatRoomNow(target) {
                 markAsSeenAndDelete(msg.messageId, msg.serverId, target.serverId, target.userId);
             }
         });
+
+        // ✅ Chat Room ထဲ ဝင်တာနဲ့ Chat List မှာ Unread Count ပြန်တွက်
+        renderChatList();
     });
 
     startChatRoomMessageListeners(target);
@@ -13758,7 +13765,7 @@ document.addEventListener('DOMContentLoaded', function() {
             authOverlay.classList.remove('hidden');
         }
         setTimeout(attachChatRoomAvatarClick, 1000);
-        console.log('STAR ARCADE Ready (M Server + Auto Online + Play ID)');
+        console.log('STAR ARCADE Ready (M Server + Auto Online + Play ID + Unread Badge)');
     });
 });
 
