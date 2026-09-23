@@ -1646,7 +1646,7 @@ body {
 .fs-screen.hidden { display: none !important; }
 
 /* ============================================================
-   ✅ PROFILE FULLSCREEN -- CENTER LAYOUT (အလယ်ညှိ)
+   ✅ PROFILE FULLSCREEN -- CENTER + INFO LOWERED
    ============================================================ */
 
 .profile-fullscreen {
@@ -1686,31 +1686,31 @@ body {
 }
 
 /* ============================================================
-   ✅ PROFILE INFO -- CENTER + အောက်ဆုံးထိ ချ
+   ✅ PROFILE INFO -- အောက်ကို ချ (!important နဲ့)
    ============================================================ */
 
 .profile-info-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 14px;
-    padding: 0 24px;
-    position: relative;
-    margin-top: 60px;           /* ✅ အောက်ဆုံးထိ ချ */
-    z-index: 2;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 14px !important;
+    padding: 0 24px !important;
+    position: relative !important;
+    margin-top: 60px !important;    /* ✅ JS မထိအောင် !important */
+    z-index: 2 !important;
 }
 
 .profile-avatar-wrapper {
-    width: 100px;
-    height: 100px;
-    border-radius: 50%;
-    border: 4px solid var(--bg-body);
-    background: var(--bg-card);
-    flex-shrink: 0;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.7);
-    position: relative;
-    overflow: visible;
+    width: 110px !important;
+    height: 110px !important;
+    border-radius: 50% !important;
+    border: 4px solid var(--bg-body) !important;
+    background: var(--bg-card) !important;
+    flex-shrink: 0 !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.7) !important;
+    position: relative !important;
+    overflow: visible !important;
 }
 
 .profile-avatar-wrapper img {
@@ -1736,10 +1736,10 @@ body {
 
 .profile-name-section {
     width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    text-align: center !important;
     padding-top: 4px;
 }
 
@@ -1842,14 +1842,14 @@ body {
    ============================================================ */
 
 .profile-background-section {
-    flex: 1;
-    padding: 20px 24px 24px;
-    position: relative;
-    min-height: 0;
+    flex: 1 !important;
+    padding: 20px 24px 24px !important;
+    position: relative !important;
+    min-height: 0 !important;
     background: var(--bg-body);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
     background-size: cover;
     background-position: center;
 }
@@ -1862,7 +1862,7 @@ body {
 }
 
 /* ============================================================
-   ✅ BIO CARD -- LEFT ALIGN
+   ✅ BIO CARD -- LEFT ALIGN (စာကို ဘယ်မှာ စ)
    ============================================================ */
 
 .profile-bio-wrapper {
@@ -1880,7 +1880,7 @@ body {
     box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
     flex-shrink: 0;
     transition: all 0.3s ease;
-    text-align: left;
+    text-align: left !important;    /* ✅ ဘယ်မှာ စ */
 }
 
 .profile-bio-wrapper:hover {
@@ -1894,7 +1894,7 @@ body {
     line-height: 1.7;
     white-space: pre-wrap;
     word-break: break-word;
-    text-align: left;
+    text-align: left !important;    /* ✅ ဘယ်မှာ စ */
 }
 
 .profile-bio .bio-placeholder {
@@ -2009,8 +2009,8 @@ body {
     flex-shrink: 0;
     position: relative;
     z-index: 2;
-    display: flex;
-    justify-content: center;
+    display: flex !important;
+    justify-content: center !important;
     width: 100%;
 }
 
@@ -2207,6 +2207,68 @@ body {
 
 .edit-save-btn:active { transform: scale(0.98); opacity: 0.9; }
 
+/* ============================================================
+   RESPONSIVE (Mobile)
+   ============================================================ */
+
+@media (max-width: 480px) {
+    .profile-banner {
+        min-height: 140px;
+        max-height: 200px;
+    }
+
+    .profile-info-container {
+        margin-top: 50px !important;
+        padding: 0 16px !important;
+        gap: 10px !important;
+    }
+
+    .profile-avatar-wrapper {
+        width: 94px !important;
+        height: 94px !important;
+        border-width: 3px !important;
+    }
+
+    .profile-name-row h2 { font-size: 20px; }
+    .profile-mark { width: 26px; height: 26px; }
+    .profile-mark img { width: 18px; height: 18px; }
+    .profile-details { gap: 8px; margin-top: 3px; }
+    .profile-id { font-size: 13px; }
+    .profile-server { font-size: 12px; }
+    .profile-friends { margin-top: 6px; }
+    .friends-count { font-size: 12px; padding: 3px 14px; }
+
+    .profile-background-section { padding: 16px 16px 20px !important; }
+
+    .profile-bio-wrapper {
+        padding: 14px 18px;
+        min-height: 60px;
+    }
+
+    .profile-bio { font-size: 14px; }
+    .profile-edit-btn-wrapper { padding: 16px 0 4px; }
+
+    .profile-edit-btn {
+        padding: 8px 24px;
+        font-size: 13px;
+    }
+
+    .profile-edit-btn svg { width: 16px; height: 16px; }
+
+    .profile-role-grid { gap: 6px; }
+    .profile-role-slot { min-height: 50px; border-radius: 8px; }
+    .profile-role-slot .role-name-tag { font-size: 7px; padding: 0 4px; }
+    .profile-role-header span { font-size: 12px; }
+
+    .profile-role-header span::before,
+    .profile-role-header span::after { width: 20px; }
+
+    .edit-profile-container { padding: 16px; }
+    .edit-avatar-circle { width: 60px; height: 60px; }
+    .edit-avatar-section h3 { font-size: 17px; }
+    .edit-owned-items { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+}
+  
     
 /* ============================================================
    SHOP FULLSCREEN
