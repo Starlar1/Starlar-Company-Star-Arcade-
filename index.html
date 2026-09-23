@@ -326,14 +326,14 @@
 
                 <div class="fs-screen hidden" id="fs-coin"><div class="screen-center"><p>Diamond balance and transactions</p></div></div>
 
-                <!-- ✅ PROFILE -- Info ကို Banner ပေါ်မှာ တင် -->
+                <!-- ✅ PROFILE (Info ကို Banner အတွင်းမှာ ထည့်ပြီး) -->
                 <div class="fs-screen hidden" id="fs-profile">
                     <div class="profile-fullscreen">
-                        <!-- BANNER (Avatar + Name + ID + Server + Friends တွေ ပေါ်မှာ တင်) -->
+                        <!-- BANNER (Info တွေ အတွင်းမှာ) -->
                         <div class="profile-banner" id="profileBanner">
                             <div class="profile-banner-overlay"></div>
 
-                            <!-- ✅ PROFILE INFO (Banner အပေါ်မှာ တင်) -->
+                            <!-- ✅ PROFILE INFO (Banner အတွင်းမှာ) -->
                             <div class="profile-info-container">
                                 <div class="profile-avatar-wrapper" id="profileAvatarWrapper">
                                     <img id="fsProfileAvatar" src="" alt="avatar" />
@@ -1635,7 +1635,7 @@ body {
 }
 
 /* ============================================================
-   BANNER (Info က အတွင်းမှာ တင်)
+   BANNER
    ============================================================ */
 
 .profile-banner {
@@ -1648,7 +1648,7 @@ body {
     background-position: center;
     min-height: 200px;
     max-height: 320px;
-    overflow: visible !important;    /* ✅ Info ကို အပြင်ထွက်ခွင့်ပြု */
+    overflow: visible !important;
 }
 
 .profile-banner-overlay {
@@ -1662,7 +1662,7 @@ body {
 }
 
 /* ============================================================
-   ✅ PROFILE INFO -- Banner ပေါ်မှာ တင်
+   ✅ PROFILE INFO -- သေးသေး + အပေါ် နည်းနည်း တင်
    ============================================================ */
 
 .profile-info-container {
@@ -1670,23 +1670,23 @@ body {
     flex-direction: column !important;
     align-items: center !important;
     justify-content: center !important;
-    gap: 14px !important;
+    gap: 10px !important;              /* ✅ 14 → 10 (ပိုသေး) */
     padding: 0 24px !important;
-    position: absolute !important;     /* ✅ Banner ပေါ် တင်ဖို့ */
-    bottom: -80px !important;          /* ✅ Banner အောက်ကို တစ်ဝက် ထွက် */
+    position: absolute !important;
+    bottom: -50px !important;          /* ✅ -80 → -50 (အပေါ် နည်းနည်း တင်) */
     left: 0 !important;
     right: 0 !important;
     z-index: 5 !important;
 }
 
 .profile-avatar-wrapper {
-    width: 110px !important;
-    height: 110px !important;
+    width: 90px !important;             /* ✅ 110 → 90 (ပိုသေး) */
+    height: 90px !important;
     border-radius: 50% !important;
-    border: 4px solid var(--bg-body) !important;
+    border: 3px solid var(--bg-body) !important;   /* ✅ 4 → 3 */
     background: var(--bg-card) !important;
     flex-shrink: 0 !important;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8) !important;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.8) !important;
     position: relative !important;
     overflow: visible !important;
 }
@@ -1701,10 +1701,10 @@ body {
 
 .profile-frame-overlay {
     position: absolute;
-    top: -10px;
-    left: -10px;
-    width: calc(100% + 20px);
-    height: calc(100% + 20px);
+    top: -8px;
+    left: -8px;
+    width: calc(100% + 16px);
+    height: calc(100% + 16px);
     border-radius: 50%;
     pointer-events: none;
     background-size: contain;
@@ -1718,20 +1718,20 @@ body {
     flex-direction: column !important;
     align-items: center !important;
     text-align: center !important;
-    padding-top: 4px;
+    padding-top: 2px;
 }
 
 .profile-name-row {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
+    gap: 6px;
     flex-wrap: wrap;
-    margin-bottom: 6px;
+    margin-bottom: 4px;
 }
 
 .profile-name-row h2 {
-    font-size: 24px;
+    font-size: 20px;                    /* ✅ 24 → 20 (ပိုသေး) */
     font-weight: 700;
     color: var(--text-main);
     margin: 0;
@@ -1742,8 +1742,8 @@ body {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 30px;
-    height: 30px;
+    width: 24px;                        /* ✅ 30 → 24 (ပိုသေး) */
+    height: 24px;
     border-radius: 50%;
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.08);
@@ -1771,17 +1771,17 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 10px;
-    margin-top: 4px;
+    gap: 8px;
+    margin-top: 2px;
     flex-wrap: wrap;
 }
 
 .profile-id {
-    font-size: 14px;
+    font-size: 12px;                    /* ✅ 14 → 12 (ပိုသေး) */
     color: rgba(255, 255, 255, 0.8);
     font-family: monospace;
     cursor: pointer;
-    padding: 2px 8px;
+    padding: 2px 6px;
     border-radius: 6px;
     transition: background 0.2s ease;
 }
@@ -1790,38 +1790,38 @@ body {
 .profile-id.copied { color: var(--success); }
 
 .profile-server {
-    font-size: 13px;
+    font-size: 11px;                    /* ✅ 13 → 11 (ပိုသေး) */
     color: var(--accent);
     font-weight: 600;
     background: var(--accent-bg);
-    padding: 2px 12px;
-    border-radius: 12px;
+    padding: 2px 10px;
+    border-radius: 10px;
 }
 
 .profile-friends {
-    margin-top: 8px;
+    margin-top: 5px;                    /* ✅ 8 → 5 (ပိုသေး) */
     display: flex;
     justify-content: center;
 }
 
 .friends-count {
-    font-size: 13px;
+    font-size: 11px;                    /* ✅ 13 → 11 (ပိုသေး) */
     color: rgba(255, 255, 255, 0.85);
     background: rgba(255, 109, 31, 0.15);
-    padding: 4px 16px;
-    border-radius: 12px;
+    padding: 3px 12px;
+    border-radius: 10px;
     border: 1px solid rgba(255, 109, 31, 0.25);
     display: inline-block;
     font-weight: 600;
 }
 
 /* ============================================================
-   ✅ BACKGROUND SECTION (Info နေရာ ဖန်တီး)
+   ✅ BACKGROUND SECTION (Info နေရာ လိုက်ပြင်ပြီး)
    ============================================================ */
 
 .profile-background-section {
     flex: 1 !important;
-    padding: 100px 24px 24px !important;   /* ✅ Info ရဲ့ အောက်ပိုင်း နေရာ */
+    padding: 70px 24px 24px !important;   /* ✅ 100 → 70 (Info သေးလို့ လျှော့) */
     position: relative !important;
     min-height: 0 !important;
     background: var(--bg-body);
@@ -1852,8 +1852,8 @@ body {
     -webkit-backdrop-filter: blur(8px);
     border: 1px solid rgba(255, 255, 255, 0.06);
     border-radius: 14px;
-    padding: 18px 22px;
-    min-height: 80px;
+    padding: 16px 20px;                 /* ✅ 18→16, 22→20 (ပိုသေး) */
+    min-height: 70px;                   /* ✅ 80 → 70 */
     width: 100%;
     max-width: 500px;
     box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
@@ -1868,9 +1868,9 @@ body {
 }
 
 .profile-bio {
-    font-size: 15px;
+    font-size: 14px;                    /* ✅ 15 → 14 (ပိုသေး) */
     color: rgba(255, 255, 255, 0.92);
-    line-height: 1.7;
+    line-height: 1.6;
     white-space: pre-wrap;
     word-break: break-word;
     text-align: left !important;
@@ -1887,7 +1887,7 @@ body {
    ============================================================ */
 
 .profile-role-section {
-    padding: 18px 0 12px;
+    padding: 14px 0 10px;               /* ✅ 18→14, 12→10 (ပိုသေး) */
     flex-shrink: 0;
     position: relative;
     z-index: 2;
@@ -1897,12 +1897,12 @@ body {
 
 .profile-role-header {
     text-align: center;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
     padding: 0 4px;
 }
 
 .profile-role-header span {
-    font-size: 14px;
+    font-size: 13px;                    /* ✅ 14 → 13 (ပိုသေး) */
     font-weight: 600;
     color: rgba(255, 255, 255, 0.8);
     display: inline-block;
@@ -1915,7 +1915,7 @@ body {
     content: '';
     position: absolute;
     top: 50%;
-    width: 30px;
+    width: 24px;
     height: 1px;
     background: rgba(255, 255, 255, 0.12);
 }
@@ -1926,7 +1926,7 @@ body {
 .profile-role-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
+    gap: 6px;
     padding: 2px 0;
 }
 
@@ -1940,7 +1940,7 @@ body {
     justify-content: center;
     position: relative;
     transition: all 0.2s ease;
-    min-height: 60px;
+    min-height: 55px;                   /* ✅ 60 → 55 (ပိုသေး) */
     overflow: hidden;
     cursor: pointer;
 }
@@ -1949,7 +1949,7 @@ body {
 .profile-role-slot.empty { border-style: dashed; border-color: rgba(255, 255, 255, 0.08); }
 
 .profile-role-slot .empty-slot-icon {
-    font-size: 20px;
+    font-size: 18px;
     color: rgba(255, 255, 255, 0.15);
     font-weight: 300;
 }
@@ -1984,7 +1984,7 @@ body {
    ============================================================ */
 
 .profile-edit-btn-wrapper {
-    padding: 18px 0 8px;
+    padding: 14px 0 6px;                /* ✅ 18→14, 8→6 (ပိုသေး) */
     flex-shrink: 0;
     position: relative;
     z-index: 2;
@@ -1995,14 +1995,14 @@ body {
 
 .profile-edit-btn {
     width: auto;
-    padding: 10px 32px;
+    padding: 9px 28px;                  /* ✅ 10→9, 32→28 (ပိုသေး) */
     border: 1.5px solid rgba(255, 255, 255, 0.1);
-    border-radius: 24px;
+    border-radius: 22px;
     background: rgba(26, 26, 36, 0.5);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
     color: var(--text-main);
-    font-size: 14px;
+    font-size: 13px;                    /* ✅ 14 → 13 (ပိုသေး) */
     font-weight: 600;
     cursor: pointer;
     display: inline-flex;
@@ -2022,7 +2022,7 @@ body {
 }
 
 .profile-edit-btn:active { transform: scale(0.95); }
-.profile-edit-btn svg { width: 18px; height: 18px; }
+.profile-edit-btn svg { width: 16px; height: 16px; }
 
 /* ============================================================
    EDIT PROFILE FULLSCREEN
@@ -2196,52 +2196,52 @@ body {
     }
 
     .profile-info-container {
-        bottom: -70px !important;      /* ✅ Mobile အတွက် */
+        bottom: -45px !important;       /* ✅ Mobile အတွက် အပေါ်တင် */
         padding: 0 16px !important;
-        gap: 10px !important;
+        gap: 8px !important;
     }
 
     .profile-avatar-wrapper {
-        width: 94px !important;
-        height: 94px !important;
+        width: 80px !important;         /* ✅ 94 → 80 (ပိုသေး) */
+        height: 80px !important;
         border-width: 3px !important;
     }
 
-    .profile-name-row h2 { font-size: 20px; }
-    .profile-mark { width: 26px; height: 26px; }
-    .profile-mark img { width: 18px; height: 18px; }
-    .profile-details { gap: 8px; margin-top: 3px; }
-    .profile-id { font-size: 13px; }
-    .profile-server { font-size: 12px; }
-    .profile-friends { margin-top: 6px; }
-    .friends-count { font-size: 12px; padding: 3px 14px; }
+    .profile-name-row h2 { font-size: 18px; }   /* ✅ 20 → 18 */
+    .profile-mark { width: 22px; height: 22px; }
+    .profile-mark img { width: 16px; height: 16px; }
+    .profile-details { gap: 6px; margin-top: 2px; }
+    .profile-id { font-size: 11px; }
+    .profile-server { font-size: 10px; padding: 2px 8px; }
+    .profile-friends { margin-top: 4px; }
+    .friends-count { font-size: 10px; padding: 2px 10px; }
 
     .profile-background-section {
-        padding: 85px 16px 20px !important;   /* ✅ Mobile အတွက် */
+        padding: 60px 16px 20px !important;   /* ✅ လိုက်ပြင်ပြီး */
     }
 
     .profile-bio-wrapper {
-        padding: 14px 18px;
-        min-height: 60px;
+        padding: 12px 16px;
+        min-height: 55px;
     }
 
-    .profile-bio { font-size: 14px; }
-    .profile-edit-btn-wrapper { padding: 16px 0 4px; }
+    .profile-bio { font-size: 13px; }
+    .profile-edit-btn-wrapper { padding: 12px 0 4px; }
 
     .profile-edit-btn {
-        padding: 8px 24px;
-        font-size: 13px;
+        padding: 8px 22px;
+        font-size: 12px;
     }
 
-    .profile-edit-btn svg { width: 16px; height: 16px; }
+    .profile-edit-btn svg { width: 14px; height: 14px; }
 
-    .profile-role-grid { gap: 6px; }
-    .profile-role-slot { min-height: 50px; border-radius: 8px; }
+    .profile-role-grid { gap: 5px; }
+    .profile-role-slot { min-height: 45px; border-radius: 8px; }
     .profile-role-slot .role-name-tag { font-size: 7px; padding: 0 4px; }
-    .profile-role-header span { font-size: 12px; }
+    .profile-role-header span { font-size: 11px; }
 
     .profile-role-header span::before,
-    .profile-role-header span::after { width: 20px; }
+    .profile-role-header span::after { width: 18px; }
 
     .edit-profile-container { padding: 16px; }
     .edit-avatar-circle { width: 60px; height: 60px; }
