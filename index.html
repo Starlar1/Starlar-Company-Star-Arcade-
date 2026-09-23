@@ -8899,7 +8899,8 @@ body {
         padding: 12px 14px 100px;
     }
 }</style><script>// ============================================================
-//  STAR ARCADE -- FULL script.js (M Server + Auto Online)
+//  STAR ARCADE -- FULL script.js
+//  M Server + Auto Online + Play ID (Chat List + Chat Full)
 //  Version: 2026-09-21
 // ============================================================
 
@@ -8939,6 +8940,33 @@ var FIREBASE_SERVERS = [
 //  M SERVER CONFIG
 // ===================================================
 var M_SERVER_TARGET_COUNT = 10;
+
+// ===================================================
+//  PLAY CONFIG -- G1/G2/G3
+//  နောက်မှ ပြင်လို့ရ
+// ===================================================
+var PLAY_CONFIG = {
+    games: {
+        'G1': {
+            name: 'Mobile Legends',
+            image: 'https://i.ibb.co/placeholder-g1.png'
+        },
+        'G2': {
+            name: 'PUBG Mobile',
+            image: 'https://i.ibb.co/placeholder-g2.png'
+        },
+        'G3': {
+            name: 'Free Fire',
+            image: 'https://i.ibb.co/placeholder-g3.png'
+        }
+    },
+    // play code (G1/G2/G3) ကို game info ပြန်ပေး
+    getGameInfo: function(playCode) {
+        if (!playCode) return null;
+        var code = String(playCode).trim().toUpperCase();
+        return PLAY_CONFIG.games[code] || null;
+    }
+};
 
 // ===================================================
 //  TELEGRAM
@@ -10768,7 +10796,6 @@ function removeFriendFromCache(sid, uid) {
     });
 }
 
-// ✅ Sender ကို Cache မှာ Online လုပ်ပြ
 function markFriendOnline(sid, uid) {
     return new Promise(function(resolve) {
         getFriendsCache().then(function(cache) {
@@ -10994,7 +11021,7 @@ function extractUseOnlyData(data, sid, serverNo, uid) {
         name: data.name || 'Player',
         avatar: data.avatar || '',
         bio: data.bio || '',
-        play: data.play || '',
+        play: data.play || '',  // ✅ Play ID
         online: data.online === true,
         frameUse: data.frameUse || '',
         markUse: data.markUse || '',
@@ -11220,6 +11247,7 @@ function doRenderChatList() {
     }).catch(function() { isRenderingChatList = false; });
 }
 
+// ✅ Play ID ကို Chat List မှာ ပြ
 function renderChatListRow(listEl, item) {
     var friend = item.friend, cached = item.cached;
     var rowId = 'chatRow_' + friend.serverId + '_' + friend.userId;
@@ -11255,6 +11283,25 @@ function renderChatListRow(listEl, item) {
 
     var previewText = item.lastMessageText || 'Tap to open chat';
 
+    // ✅ Play ID ကို Chat List မှာ ပြ (G1/G2/G3)
+    var playHtml = '';
+    if (cached.play && cached.play.trim() !== '') {
+        var gameInfo = PLAY_CONFIG.getGameInfo(cached.play);
+        var gameName = gameInfo ? gameInfo.name : cached.play;
+        var gameImage = gameInfo ? gameInfo.image : '';
+        
+        if (gameImage) {
+            playHtml = '<div class="chat-list-play">' +
+                           '<img class="chat-list-play-img" src="' + gameImage + '" />' +
+                           '<span class="chat-list-play-name">' + escapeHtml(gameName) + '</span>' +
+                       '</div>';
+        } else {
+            playHtml = '<div class="chat-list-play">' +
+                           '<span class="chat-list-play-name">' + escapeHtml(gameName) + '</span>' +
+                       '</div>';
+        }
+    }
+
     row.innerHTML =
         '<div class="chat-list-avatar-wrap"><img class="chat-list-avatar" src="' + avatar + '" />' + frameHtml + '</div>' +
         '<div class="chat-list-info">' +
@@ -11265,6 +11312,7 @@ function renderChatListRow(listEl, item) {
             '<div class="chat-list-bottom">' +
                 '<span class="chat-list-msg">' + escapeHtml(previewText) + '</span>' + unreadHtml +
             '</div>' +
+            playHtml +  // ✅ Play ID ထည့်
         '</div>';
 
     row.addEventListener('click', function() {
@@ -11419,7 +11467,6 @@ function openChatRoomNow(target) {
             var data = snap.val();
             if (!data) return;
             var full = extractUseOnlyData(data, target.serverId, serverNo, target.userId);
-            // ✅ Real Online Status ကို Cache ကို Update
             saveFriendToCache(full).then(renderChatList);
             applyChatRoomData(full);
         });
@@ -11481,7 +11528,7 @@ function updateChatBlockUI() {
 }
 
 // ===================================================
-//  ✅ CHAT ROOM MESSAGE LISTENERS -- M Server + Auto Online
+//  CHAT ROOM MESSAGE LISTENERS
 // ===================================================
 function startChatRoomMessageListeners(target) {
     stopChatRoomMessageListeners();
@@ -11507,13 +11554,8 @@ function startChatRoomMessageListeners(target) {
                         msg.type = 'received';
                         msg.seen = false;
                         
-                        // ✅ ၁။ IDB ထဲ သိမ်း
                         saveMessageToLocalDB(msg).then(function() {
-                            
-                            // ✅ ၂။ Sender ကို Cache မှာ Online လုပ်ပြ
                             markFriendOnline(msg.senderServer, msg.senderId).then(function() {
-                                
-                                // ✅ ၃။ Chat List UI update
                                 renderChatList();
                                 
                                 if (currentChatTarget && 
@@ -11546,6 +11588,7 @@ function stopChatRoomBlockListener() {
     if (ex) ex.remove();
 }
 
+// ✅ Play ID ကို Chat Full Header မှာ ပြ
 function applyChatRoomData(data) {
     var avatarEl = document.getElementById('chatRoomAvatar');
     var frameEl = document.getElementById('chatRoomFrame');
@@ -11568,12 +11611,31 @@ function applyChatRoomData(data) {
         else frameEl.style.backgroundImage = 'none';
     } else frameEl.style.backgroundImage = 'none';
 
-    // ✅ Real Online Status ကို Chat Full မှာ ပြ
     if (data.online) { statusEl.textContent = 'Online'; statusEl.classList.add('online'); }
     else { statusEl.textContent = 'Offline'; statusEl.classList.remove('online'); }
 
+    // ✅ Play ID ကို Chat Full Header မှာ ပြ (G1/G2/G3)
     var playEl = document.getElementById('chatRoomPlay');
-    if (playEl) { playEl.innerHTML = ''; playEl.style.display = 'none'; }
+    if (playEl) {
+        playEl.innerHTML = '';
+        playEl.style.display = 'none';
+        
+        if (data.play && data.play.trim() !== '') {
+            var gameInfo = PLAY_CONFIG.getGameInfo(data.play);
+            var gameName = gameInfo ? gameInfo.name : data.play;
+            var gameImage = gameInfo ? gameInfo.image : '';
+            
+            if (gameImage) {
+                playEl.innerHTML = 
+                    '<img class="chat-room-play-img" src="' + gameImage + '" />' +
+                    '<span class="chat-room-play-name">' + escapeHtml(gameName) + '</span>';
+            } else {
+                playEl.innerHTML = 
+                    '<span class="chat-room-play-name">' + escapeHtml(gameName) + '</span>';
+            }
+            playEl.style.display = 'inline-flex';
+        }
+    }
 }
 
 // ===================================================
@@ -11896,7 +11958,7 @@ function sendMessage() {
 }
 
 // ===================================================
-//  FIRESTORE SEND -- Receiver ရဲ့ M Server ထဲ ပို့
+//  FIRESTORE SEND -- Auto-Switch Server on Error
 // ===================================================
 var MAX_FIRESTORE_RETRY = 20;
 
@@ -11906,6 +11968,7 @@ function trySendToFirestore(messageId, messageData, localMsg, attempt) {
     if (attempt >= MAX_FIRESTORE_RETRY) {
         console.log('Max retry → queue');
         savePendingMessage({ messageId: messageId, messageData: messageData, localMsg: localMsg });
+        showToast('Saved. Will send when connection back.');
         return;
     }
 
@@ -11915,48 +11978,90 @@ function trySendToFirestore(messageId, messageData, localMsg, attempt) {
         var targetServers = [];
         
         if (cached && Array.isArray(cached.mServer) && cached.mServer.length > 0) {
-            targetServers = cached.mServer;
+            targetServers = cached.mServer.slice();
         } else {
             targetServers = [messageData.receiverServer];
         }
         
-        var chosenServerId = targetServers[Math.floor(Math.random() * targetServers.length)];
-        var fsdb = getFirestoreForServer(chosenServerId);
+        if (!localMsg._triedServers) localMsg._triedServers = [];
+        var availableServers = targetServers.filter(function(s) {
+            return localMsg._triedServers.indexOf(s) === -1;
+        });
         
+        if (availableServers.length === 0) {
+            localMsg._triedServers = [];
+            availableServers = targetServers.slice();
+        }
+        
+        var chosenServerId = availableServers[Math.floor(Math.random() * availableServers.length)];
+        localMsg._triedServers.push(chosenServerId);
+        
+        var fsdb = getFirestoreForServer(chosenServerId);
         if (!fsdb) {
-            setTimeout(function() { trySendToFirestore(messageId, messageData, localMsg, attempt + 1); }, backoff);
+            setTimeout(function() { 
+                trySendToFirestore(messageId, messageData, localMsg, attempt + 1); 
+            }, backoff);
             return;
         }
 
         setWithTimeout(fsdb, messageId, messageData, 10000)
         .then(function() {
-            console.log('Sent to M Server (' + chosenServerId + '):', messageId);
+            console.log('Sent to ' + chosenServerId + ':', messageId);
             localMsg.serverId = chosenServerId;
+            delete localMsg._triedServers;
             saveMessageToLocalDB(localMsg);
             removePendingMessage(messageId);
             renderChatList();
         })
         .catch(function(err) {
-            console.warn('Send error (' + chosenServerId + '):', err.code, '→ retry', attempt + 1);
-            setTimeout(function() { trySendToFirestore(messageId, messageData, localMsg, attempt + 1); }, backoff);
+            console.warn('Send error (' + chosenServerId + '):', err.code, '→ trying another server');
+            
+            if (err.code === 'resource-exhausted') {
+                backoff = 300;
+            } else if (err.code === 'permission-denied') {
+                backoff = 300;
+            } else if (err.code === 'unavailable') {
+                backoff = 1000;
+            } else if (err.code === 'deadline-exceeded') {
+                backoff = 1500;
+            } else if (err.code === 'unauthenticated') {
+                backoff = 2000;
+            } else if (err.code === 'internal') {
+                backoff = 1000;
+            } else if (err.code === 'cancelled') {
+                return;
+            }
+            
+            if (attempt === 0) {
+                showToast('Server busy. Trying another...');
+            }
+            
+            setTimeout(function() { 
+                trySendToFirestore(messageId, messageData, localMsg, attempt + 1); 
+            }, backoff);
         });
     }).catch(function(err) {
         console.warn('Cache read failed:', err);
         var chosenServerId = messageData.receiverServer;
         var fsdb = getFirestoreForServer(chosenServerId);
         if (!fsdb) {
-            setTimeout(function() { trySendToFirestore(messageId, messageData, localMsg, attempt + 1); }, backoff);
+            setTimeout(function() { 
+                trySendToFirestore(messageId, messageData, localMsg, attempt + 1); 
+            }, backoff);
             return;
         }
         setWithTimeout(fsdb, messageId, messageData, 10000)
         .then(function() {
             localMsg.serverId = chosenServerId;
+            delete localMsg._triedServers;
             saveMessageToLocalDB(localMsg);
             removePendingMessage(messageId);
             renderChatList();
         })
         .catch(function() {
-            setTimeout(function() { trySendToFirestore(messageId, messageData, localMsg, attempt + 1); }, backoff);
+            setTimeout(function() { 
+                trySendToFirestore(messageId, messageData, localMsg, attempt + 1); 
+            }, backoff);
         });
     });
 }
@@ -12319,7 +12424,7 @@ function applyChatBackground(imageData) {
 }
 
 // ===================================================
-//  ✅ APP MESSAGE LISTENERS -- M Server + Auto Online
+//  APP MESSAGE LISTENERS -- M Server + Auto Online
 // ===================================================
 function startAppMessageListeners() {
     stopAppMessageListeners();
@@ -12347,16 +12452,10 @@ function startAppMessageListeners() {
                         msg.type = 'received';
                         msg.seen = false;
                         
-                        // ✅ ၁။ IDB ထဲ ချက်ချင်းသိမ်း
                         saveMessageToLocalDB(msg).then(function() {
-                            
-                            // ✅ ၂။ Sender ကို Cache မှာ Online လုပ်ပြ
                             markFriendOnline(msg.senderServer, msg.senderId).then(function() {
-                                
-                                // ✅ ၃။ Chat List UI ချက်ချင်း update
                                 renderChatList();
                                 
-                                // ✅ ၄။ Chat Room ထဲရောက်နေရင် စာပြ
                                 if (currentChatTarget && 
                                     currentChatTarget.userId === msg.senderId && 
                                     currentChatTarget.serverId === msg.senderServer) {
@@ -12814,7 +12913,10 @@ function goBackFullscreen() {
         closeBubblePicker();
         clearReplyState();
         document.getElementById('fullscreenOverlay').classList.remove('chat-room-active');
-        setTimeout(renderChatList, 100);
+        setTimeout(function() {
+            startAppMessageListeners();
+            renderChatList();
+        }, 100);
     }
 
     if (fullscreenStack.length <= 1) { closeFullscreen(); return; }
@@ -13656,7 +13758,7 @@ document.addEventListener('DOMContentLoaded', function() {
             authOverlay.classList.remove('hidden');
         }
         setTimeout(attachChatRoomAvatarClick, 1000);
-        console.log('STAR ARCADE Ready (M Server + Auto Online)');
+        console.log('STAR ARCADE Ready (M Server + Auto Online + Play ID)');
     });
 });
 
