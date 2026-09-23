@@ -928,7 +928,6 @@
     <script src="script.js"></script>
 </body>
 </html>
-
 <style>/* ============================================================
    FILE: style.css (FULL WITH MARK SUPPORT + GOOGLE BUTTON)
    ============================================================ */
@@ -8900,7 +8899,7 @@ body {
         padding: 12px 14px 100px;
     }
 }</style><script>// ============================================================
-//  STAR ARCADE -- FULL script.js (FINAL, CLEAN)
+//  STAR ARCADE -- FULL script.js (M Server Version)
 //  Version: 2026-09-21
 // ============================================================
 
@@ -8935,6 +8934,11 @@ var FIREBASE_SERVERS = [
         }
     }
 ];
+
+// ===================================================
+//  M SERVER CONFIG
+// ===================================================
+var M_SERVER_TARGET_COUNT = 10;  // ✅ အနာဂတ်မှာ 10 ခုရွေးမယ်
 
 // ===================================================
 //  TELEGRAM
@@ -9066,7 +9070,7 @@ var friendsListListener = null;
 var appMessageListeners = [];
 var onDisconnectRef = null;
 var searchResultUser = null;
-var selfDataListener = null;  // ✅ ကိုယ့် data ကို နားထောင်
+var selfDataListener = null;
 
 function initDomRefs() {
     authOverlay = $('authOverlay');
@@ -9224,6 +9228,20 @@ function pickRandomFirestoreServer() {
     return FIREBASE_SERVERS[Math.floor(Math.random() * FIREBASE_SERVERS.length)].id;
 }
 
+// ✅ M Server ရွေး -- လက်ရှိ Server အားလုံး ဒါမှမဟုတ် 10 ခု
+function pickMServerForUser() {
+    var allServerIds = FIREBASE_SERVERS.map(function(s) { return s.id; });
+    
+    // ✅ Server 10 အောက်ဆိုရင် အားလုံးရွေး
+    if (allServerIds.length <= M_SERVER_TARGET_COUNT) {
+        return allServerIds.slice();
+    }
+    
+    // ✅ Server 10 ကျော်ရင် 10 ခုပဲ ကျပန်းရွေး
+    var shuffled = allServerIds.slice().sort(function() { return Math.random() - 0.5; });
+    return shuffled.slice(0, M_SERVER_TARGET_COUNT);
+}
+
 // ===================================================
 //  NEXT ACC NO
 // ===================================================
@@ -9282,6 +9300,7 @@ function saveUserToDB(user) {
                 bubbleOwned: user.bubbleOwned || [],
                 roleUse: user.roleUse || '',
                 roleOwned: user.roleOwned || [],
+                mServer: user.mServer || [],  // ✅ M Server
                 online: user.online || false,
                 isFirstLogin: user.isFirstLogin !== undefined ? user.isFirstLogin : true
             };
@@ -9352,6 +9371,7 @@ function saveUserToFirebase(userData, serverId) {
             bubbleOwned: userData.bubbleOwned || [],
             roleUse: userData.roleUse || '',
             roleOwned: userData.roleOwned || [],
+            mServer: userData.mServer || [],  // ✅ M Server
             online: true,
             avatar: userData.avatar || '',
             isFirstLogin: userData.isFirstLogin !== undefined ? userData.isFirstLogin : true
@@ -9374,8 +9394,38 @@ function updateUserOnlineStatus(userId, serverId, online) {
 }
 
 // ===================================================
+//  ✅ SETUP M SERVER -- User အတွက် M Server သတ်မှတ်
+//  Server 10 အောက်ဆိုရင် အားလုံးရွေး
+//  Server 10 ကျော်ရင် 10 ခုပဲ ကျပန်းရွေး
+// ===================================================
+function setupMServer() {
+    if (!currentUser || !currentServerId) return Promise.resolve();
+    
+    // ✅ M Server ရှိပြီးသားဆိုရင် ဘာမှ မလုပ် (အမြဲမပြောင်း)
+    if (Array.isArray(currentUser.mServer) && currentUser.mServer.length > 0) {
+        console.log('M Server already set:', currentUser.mServer);
+        return Promise.resolve();
+    }
+    
+    var mServer = pickMServerForUser();
+    console.log('Setting up M Server:', mServer);
+    
+    var db = getDbForServer(currentServerId);
+    if (!db) return Promise.resolve();
+    
+    return db.ref('users/' + currentUser.userId).update({ mServer: mServer })
+        .then(function() {
+            currentUser.mServer = mServer;
+            saveUserToDB(currentUser);
+            console.log('M Server saved:', mServer);
+        })
+        .catch(function(err) {
+            console.error('M Server setup failed:', err);
+        });
+}
+
+// ===================================================
 //  ✅ SELF DATA LISTENER -- ကိုယ့် data ကို Realtime နားထောင်
-//  ပြောင်းလဲမှုရှိရင် IndexedDB ကို update
 // ===================================================
 function startSelfDataListener(userId, serverId) {
     stopSelfDataListener();
@@ -9387,10 +9437,9 @@ function startSelfDataListener(userId, serverId) {
         var data = snap.val();
         if (!data || !currentUser) return;
 
-        // ✅ Firebase data ကို currentUser ထဲ update
         var updated = {
             accNo: data.accNo !== undefined ? data.accNo : currentUser.accNo,
-            authId: data.authId || currentUser.authId,  // ✅ authId ကို မဖျက်
+            authId: data.authId || currentUser.authId,
             name: data.name || currentUser.name,
             email: currentUser.email,
             userId: currentUser.userId,
@@ -9413,16 +9462,15 @@ function startSelfDataListener(userId, serverId) {
             bubbleOwned: data.bubbleOwned || currentUser.bubbleOwned,
             roleUse: data.roleUse || currentUser.roleUse,
             roleOwned: data.roleOwned || currentUser.roleOwned,
+            mServer: data.mServer || currentUser.mServer,  // ✅ M Server
             online: data.online !== undefined ? data.online : currentUser.online,
             isFirstLogin: data.isFirstLogin !== undefined ? data.isFirstLogin : currentUser.isFirstLogin
         };
 
         currentUser = updated;
 
-        // ✅ IndexedDB ထဲ update
         saveUserToDB(currentUser);
 
-        // ✅ UI update
         if (userNameEl) userNameEl.textContent = currentUser.name || 'Player';
         if (coinDisplay) coinDisplay.textContent = currentUser.diamond || 0;
         if (currentUser.avatar && profileAvatar) profileAvatar.src = currentUser.avatar;
@@ -9459,7 +9507,7 @@ function listenDiamondUpdates(userId, serverId) {
 }
 
 // ===================================================
-//  ✅ FULL SYNC FROM FIREBASE -- Firebase ကနေ data အကုန်ဆွဲပြီး IndexedDB သိမ်း
+//  ✅ FULL SYNC FROM FIREBASE
 // ===================================================
 function fullSyncFromFirebase(email, serverId) {
     return new Promise(function(resolve, reject) {
@@ -9475,7 +9523,6 @@ function fullSyncFromFirebase(email, serverId) {
             var data = users[userId];
             data.userId = userId;
 
-            // ✅ userData ကို ပြင်ဆင်
             var userData = {
                 accNo: data.accNo || 0,
                 authId: data.authId || '',
@@ -9501,6 +9548,7 @@ function fullSyncFromFirebase(email, serverId) {
                 bubbleOwned: data.bubbleOwned || [],
                 roleUse: data.roleUse || '',
                 roleOwned: data.roleOwned || [],
+                mServer: data.mServer || [],  // ✅ M Server
                 online: data.online === true,
                 isFirstLogin: data.isFirstLogin !== undefined ? data.isFirstLogin : true
             };
@@ -9552,37 +9600,39 @@ function enterApp(user) {
 
     if (user.avatar && user.avatar !== '') profileAvatar.src = user.avatar;
 
-    if (currentDb && currentUser) {
-        listenDiamondUpdates(currentUser.userId, currentServerId);
-        // ✅ ကိုယ့် data ကို Realtime နားထောင်
-        startSelfDataListener(currentUser.userId, currentServerId);
-    }
+    // ✅ M Server သတ်မှတ် (မရှိသေးရင်)
+    setupMServer().then(function() {
+        if (currentDb && currentUser) {
+            listenDiamondUpdates(currentUser.userId, currentServerId);
+            startSelfDataListener(currentUser.userId, currentServerId);
+        }
 
-    applyFrameToSidebar();
+        applyFrameToSidebar();
 
-    var defaultBtn = document.querySelector('.nav-btn[data-tab="chat"]');
-    if (defaultBtn) {
-        activeNavBtn = defaultBtn;
-        defaultBtn.classList.add('active');
-    }
-    switchTab('chat');
-    history.pushState(null, '', location.href);
+        var defaultBtn = document.querySelector('.nav-btn[data-tab="chat"]');
+        if (defaultBtn) {
+            activeNavBtn = defaultBtn;
+            defaultBtn.classList.add('active');
+        }
+        switchTab('chat');
+        history.pushState(null, '', location.href);
 
-    clearMemoryMessages();
-    isRenderingChatList = false;
-    if (renderChatListTimer) {
-        clearTimeout(renderChatListTimer);
-        renderChatListTimer = null;
-    }
+        clearMemoryMessages();
+        isRenderingChatList = false;
+        if (renderChatListTimer) {
+            clearTimeout(renderChatListTimer);
+            renderChatListTimer = null;
+        }
 
-    setTimeout(function() { renderChatList(); }, 100);
-    setTimeout(function() { startFriendsListListener(); }, 500);
-    setTimeout(function() { startAppMessageListeners(); }, 700);
-    setTimeout(function() {
-        goOnline();
-        attachOnlineEventListeners();
-    }, 900);
-    setTimeout(function() { retryPendingMessages(); }, 1500);
+        setTimeout(function() { renderChatList(); }, 100);
+        setTimeout(function() { startFriendsListListener(); }, 500);
+        setTimeout(function() { startAppMessageListeners(); }, 700);
+        setTimeout(function() {
+            goOnline();
+            attachOnlineEventListeners();
+        }, 900);
+        setTimeout(function() { retryPendingMessages(); }, 1500);
+    });
 
     window.addEventListener('beforeunload', function() {
         if (currentUser && currentServerId) {
@@ -9653,7 +9703,6 @@ function handleNewAccount() {
 
             return getUserFromFirebase(email, serverId).then(function(existingUser) {
                 if (existingUser) {
-                    // ✅ existing user -- authId အသစ်ကို update
                     existingUser.authId = authId;
                     return { userData: existingUser, serverId: serverId, isNew: false };
                 } else {
@@ -9661,6 +9710,9 @@ function handleNewAccount() {
                     var inviteCode = generateInviteCode();
                     var avatar = user.photoURL || '';
                     var name = user.displayName || 'Player';
+
+                    // ✅ M Server ရွေး
+                    var mServer = pickMServerForUser();
 
                     return getNextAccNo(getDbForServer(serverId)).then(function(accNo) {
                         var userData = {
@@ -9671,6 +9723,7 @@ function handleNewAccount() {
                             frameUse: '', bannerUse: '', backgroundUse: '', bubbleUse: '', markUse: '',
                             frameOwned: [], bannerOwned: [], backgroundOwned: [], bubbleOwned: [],
                             roleUse: '', roleOwned: [], avatar: avatar,
+                            mServer: mServer,  // ✅ M Server
                             serverId: serverId, isFirstLogin: true
                         };
                         return saveUserToFirebase(userData, serverId).then(function(saved) {
@@ -9683,7 +9736,6 @@ function handleNewAccount() {
         });
     }).then(function(result) {
         if (!result) return;
-        // ✅ authId ကို Firebase DB ထဲ update (existing user ဖြစ်ရင်)
         if (result.userData.authId) {
             var db = getDbForServer(result.serverId);
             if (db) {
@@ -9727,7 +9779,7 @@ function handleNewAccount() {
 }
 
 // ===================================================
-//  ✅ LOGIN -- Firebase ကနေ data အကုန်ဆွဲပြီး IndexedDB သိမ်း
+//  ✅ LOGIN
 // ===================================================
 function handleLogin() {
     if (isProcessing) return;
@@ -9760,7 +9812,6 @@ function handleLogin() {
             return null;
         }
 
-        // ✅ Firebase ကနေ data အကုန်ဆွဲပြီး IndexedDB သိမ်း
         showLoading('Loading your data...');
         return fullSyncFromFirebase(email, serverId).then(function(userData) {
             if (!userData) {
@@ -9768,13 +9819,11 @@ function handleLogin() {
                 showLoginPopupError('No account on Server ' + serverNo + '. Create new.');
                 return null;
             }
-            // ✅ authId အသစ်ကို ထည့်
             userData.authId = newAuthId;
             return { userData: userData, serverId: serverId, email: email };
         });
     }).then(function(result) {
         if (!result) return;
-        // ✅ Firebase DB ထဲ authId update
         var db = getDbForServer(result.serverId);
         if (db) {
             return db.ref('users/' + result.userData.userId).update({ authId: newAuthId })
@@ -9793,7 +9842,6 @@ function handleLogin() {
         var userData = result.userData;
         var serverId = result.serverId;
 
-        // ✅ IndexedDB ထဲ အကုန်သိမ်း (authId အပါအဝင်)
         saveUserToDB(userData).then(function() {
             currentUser = userData;
             currentServerId = serverId;
@@ -9872,7 +9920,7 @@ function showLoginPopupError(msg) {
 }
 
 // ===================================================
-//  ✅ CHECK SESSION -- Firebase ကနေ data အကုန်ဆွဲပြီး IndexedDB update
+//  ✅ CHECK SESSION
 // ===================================================
 function checkSession() {
     return new Promise(function(resolve) {
@@ -9881,7 +9929,6 @@ function checkSession() {
             var serverId = session.serverId;
             var email = session.email;
 
-            // ✅ Firebase ကနေ data အကုန်ဆွဲ
             fullSyncFromFirebase(email, serverId).then(function(userData) {
                 if (!userData) {
                     clearSessionFromDB();
@@ -9893,12 +9940,10 @@ function checkSession() {
                 currentDb = getDbForServer(serverId);
                 currentAuth = getAuthForServer(serverId);
 
-                // ✅ IndexedDB ထဲ အကုန်သိမ်း (authId အပါအဝင်)
                 saveUserToDB(userData);
 
-                // ✅ Firebase Auth ကို ပြန် sign-in (Session ပြန်ဝင်ရင်)
                 ensureFirebaseAuth(serverId, email).then(function(ok) {
-                    if (!ok) console.warn('Auth not ready -- DB write တွေ fail ဖြစ်နိုင်တယ်');
+                    if (!ok) console.warn('Auth not ready');
 
                     if (userData.isFirstLogin === undefined || userData.isFirstLogin === true) {
                         setTimeout(function() { showFirstLoginPopup(); }, 300);
@@ -10932,6 +10977,7 @@ function isFriend(sid, uid) {
     return currentUser.friendsList.some(function(f) { return f.serverId === sid && f.userId === uid; });
 }
 
+// ✅ M Server ပါ ထည့်
 function extractUseOnlyData(data, sid, serverNo, uid) {
     return {
         serverId: sid, serverNo: serverNo, userId: uid,
@@ -10947,7 +10993,8 @@ function extractUseOnlyData(data, sid, serverNo, uid) {
         bubbleUse: data.bubbleUse || '',
         blockList: Array.isArray(data.blockList) ? data.blockList : [],
         roleUse: Array.isArray(data.roleUse) ? data.roleUse : [],
-        friendsList: Array.isArray(data.friendsList) ? data.friendsList : []
+        friendsList: Array.isArray(data.friendsList) ? data.friendsList : [],
+        mServer: Array.isArray(data.mServer) ? data.mServer : []  // ✅ M Server
     };
 }
 
@@ -11422,10 +11469,18 @@ function updateChatBlockUI() {
     }
 }
 
+// ===================================================
+//  ✅ CHAT ROOM MESSAGE LISTENERS -- M Server နားထောင်
+// ===================================================
 function startChatRoomMessageListeners(target) {
     stopChatRoomMessageListeners();
-    FIREBASE_SERVERS.forEach(function(server) {
-        var sid = server.id;
+    
+    // ✅ Chat Room မှာ ကိုယ့် M Server ကိုပဲ နားထောင်
+    var mServer = Array.isArray(currentUser.mServer) && currentUser.mServer.length > 0
+        ? currentUser.mServer
+        : [currentServerId];
+    
+    mServer.forEach(function(sid) {
         var fsdb = getFirestoreForServer(sid);
         if (!fsdb) return;
         var unsub = fsdb.collection('messages')
@@ -11817,7 +11872,7 @@ function sendMessage() {
 }
 
 // ===================================================
-//  FIRESTORE SEND -- Auto-Switch + Backoff + Pending
+//  ✅ FIRESTORE SEND -- Receiver ရဲ့ M Server ထဲ ပို့
 // ===================================================
 var MAX_FIRESTORE_RETRY = 20;
 
@@ -11831,29 +11886,58 @@ function trySendToFirestore(messageId, messageData, localMsg, attempt) {
     }
 
     var backoff = Math.min(100 * Math.pow(2, attempt), 3000);
-    var chosenServerId = pickRandomFirestoreServer();
-    if (!chosenServerId) {
-        setTimeout(function() { trySendToFirestore(messageId, messageData, localMsg, attempt + 1); }, backoff);
-        return;
-    }
 
-    var fsdb = getFirestoreForServer(chosenServerId);
-    if (!fsdb) {
-        setTimeout(function() { trySendToFirestore(messageId, messageData, localMsg, attempt + 1); }, backoff);
-        return;
-    }
+    // ✅ Receiver ရဲ့ M Server ကို cache ကနေ ရှာ
+    getFriendFromCache(messageData.receiverServer, messageData.receiverId).then(function(cached) {
+        var targetServers = [];
+        
+        if (cached && Array.isArray(cached.mServer) && cached.mServer.length > 0) {
+            // ✅ Receiver ရဲ့ M Server ထဲက random တစ်ခု
+            targetServers = cached.mServer;
+        } else {
+            // M Server မရှိရင် receiver ရဲ့ server ကိုပဲ သုံး
+            targetServers = [messageData.receiverServer];
+        }
+        
+        var chosenServerId = targetServers[Math.floor(Math.random() * targetServers.length)];
+        var fsdb = getFirestoreForServer(chosenServerId);
+        
+        if (!fsdb) {
+            setTimeout(function() { trySendToFirestore(messageId, messageData, localMsg, attempt + 1); }, backoff);
+            return;
+        }
 
-    setWithTimeout(fsdb, messageId, messageData, 10000)
-    .then(function() {
-        console.log('Sent (' + chosenServerId + '):', messageId);
-        localMsg.serverId = chosenServerId;
-        saveMessageToLocalDB(localMsg);
-        removePendingMessage(messageId);
-        renderChatList();
-    })
-    .catch(function(err) {
-        console.warn('Send error (' + chosenServerId + '):', err.code, '→ retry', attempt + 1);
-        setTimeout(function() { trySendToFirestore(messageId, messageData, localMsg, attempt + 1); }, backoff);
+        setWithTimeout(fsdb, messageId, messageData, 10000)
+        .then(function() {
+            console.log('Sent to M Server (' + chosenServerId + '):', messageId);
+            localMsg.serverId = chosenServerId;
+            saveMessageToLocalDB(localMsg);
+            removePendingMessage(messageId);
+            renderChatList();
+        })
+        .catch(function(err) {
+            console.warn('Send error (' + chosenServerId + '):', err.code, '→ retry', attempt + 1);
+            setTimeout(function() { trySendToFirestore(messageId, messageData, localMsg, attempt + 1); }, backoff);
+        });
+    }).catch(function(err) {
+        console.warn('Cache read failed:', err);
+        // Cache မရရင် receiver ရဲ့ server ကိုပဲ သုံး
+        var chosenServerId = messageData.receiverServer;
+        var fsdb = getFirestoreForServer(chosenServerId);
+        if (!fsdb) {
+            setTimeout(function() { trySendToFirestore(messageId, messageData, localMsg, attempt + 1); }, backoff);
+            return;
+        }
+        setWithTimeout(fsdb, messageId, messageData, 10000)
+        .then(function() {
+            localMsg.serverId = chosenServerId;
+            saveMessageToLocalDB(localMsg);
+            removePendingMessage(messageId);
+            renderChatList();
+        })
+        .catch(function() {
+            setTimeout(function() { trySendToFirestore(messageId, messageData, localMsg, attempt + 1); }, backoff);
+        });
     });
 }
 
@@ -12215,17 +12299,24 @@ function applyChatBackground(imageData) {
 }
 
 // ===================================================
-//  APP MESSAGE LISTENERS
+//  ✅ APP MESSAGE LISTENERS -- M Server နားထောင်
 // ===================================================
 function startAppMessageListeners() {
     stopAppMessageListeners();
     if (!currentUser || !currentServerId) return;
-    FIREBASE_SERVERS.forEach(function(server) {
-        var sid = server.id;
+    
+    // ✅ M Server ရှိရင် အဲ့ဒါပဲ နားထောင်
+    var mServer = Array.isArray(currentUser.mServer) && currentUser.mServer.length > 0
+        ? currentUser.mServer
+        : [currentServerId];  // M Server မရှိသေးရင် ကိုယ့် server ပဲ
+    
+    console.log('Listening to M Servers:', mServer);
+    
+    mServer.forEach(function(sid) {
         var fsdb = getFirestoreForServer(sid);
         if (!fsdb) return;
-
-        var unsub1 = fsdb.collection('messages')
+        
+        var unsub = fsdb.collection('messages')
             .where('receiverId', '==', currentUser.userId)
             .where('receiverServer', '==', currentServerId)
             .onSnapshot(function(snapshot) {
@@ -12245,14 +12336,8 @@ function startAppMessageListeners() {
                         });
                     }
                 });
-            }, function(err) { console.warn('App listener:', err.code); });
-        appMessageListeners.push(unsub1);
-
-        var unsub2 = fsdb.collection('messages')
-            .where('senderId', '==', currentUser.userId)
-            .where('senderServer', '==', currentServerId)
-            .onSnapshot(function() {}, function(err) { console.warn('App listener 2:', err.code); });
-        appMessageListeners.push(unsub2);
+            }, function(err) { console.warn('App listener (' + sid + '):', err.code); });
+        appMessageListeners.push(unsub);
     });
 }
 
@@ -12626,7 +12711,7 @@ function detachOnlineEventListeners() {
 }
 
 // ===================================================
-//  FULLSCREEN -- with profile-active fix
+//  FULLSCREEN
 // ===================================================
 function openFullscreen(title, screenId) {
     if (fullscreenStack.length > 0) {
@@ -12725,7 +12810,7 @@ function openSidebar() { sidebar.classList.add('open'); sidebarOverlay.classList
 function closeSidebar() { sidebar.classList.remove('open'); sidebarOverlay.classList.remove('active'); document.body.style.overflow = ''; }
 
 // ===================================================
-//  STORAGE MONITOR (Message + Image + AI Chat)
+//  STORAGE MONITOR
 // ===================================================
 var STORAGE_QUOTA_KEY = 'deviceStorageQuota';
 
@@ -12748,7 +12833,6 @@ function getStoredQuota() {
     });
 }
 
-// ✅ Message + Image + AI Chat အတူတူ တွက်
 function calculateAppStorage() {
     return new Promise(function(resolve) {
         openDB().then(function(db) {
@@ -12758,11 +12842,9 @@ function calculateAppStorage() {
             var req = store.getAllKeys();
             req.onsuccess = function() {
                 var allKeys = req.result || [];
-                // ✅ messages_ key အားလုံး (Text + Image အတူတူ)
                 var msgKeys = allKeys.filter(function(k) {
                     return typeof k === 'string' && k.indexOf('messages_') === 0;
                 });
-                // ✅ AI Chat key
                 var aiChatKey = 'starAiSessions';
                 var hasAiChat = allKeys.indexOf(aiChatKey) !== -1;
                 var otherKeys = allKeys.filter(function(k) {
@@ -12811,7 +12893,6 @@ function calculateAppStorage() {
                     }
                 }
 
-                // Friends keys
                 friendsKeys.forEach(function(k) {
                     var r = store.get(k);
                     r.onsuccess = function() {
@@ -12825,7 +12906,6 @@ function calculateAppStorage() {
                     r.onerror = finish;
                 });
 
-                // ✅ Messages keys -- Text + Image အတူတူ
                 msgKeys.forEach(function(k) {
                     var r = store.get(k);
                     r.onsuccess = function() {
@@ -12837,7 +12917,6 @@ function calculateAppStorage() {
                                     msgSize += size;
                                     msgCount++;
 
-                                    // ✅ Image ခွဲ
                                     if (msg && (msg.messageType === 'image' || msg.messageType === 'gif') && msg.imageData) {
                                         imageCount++;
                                         imageSize += size;
@@ -12853,26 +12932,23 @@ function calculateAppStorage() {
                     r.onerror = finish;
                 });
 
-                // ✅ AI Chat (starAiSessions)
                 if (hasAiChat) {
                     var rAi = store.get(aiChatKey);
                     rAi.onsuccess = function() {
                         if (rAi.result && rAi.result.value !== undefined) {
                             var v = rAi.result.value;
                             if (Array.isArray(v)) {
-                                // ✅ Session တစ်ခုချင်း size
                                 v.forEach(function(session) {
                                     if (session && Array.isArray(session.messages)) {
                                         session.messages.forEach(function(msg) {
                                             var size = JSON.stringify(msg).length;
                                             aiChatSize += size;
-                                            msgSize += size;   // ✅ msgSize ထဲ ထည့် (Total မှာ ပါဖို့)
+                                            msgSize += size;
                                             msgCount++;
                                             textCount++;
                                             textSize += size;
                                         });
                                     }
-                                    // Session metadata (title, id)
                                     aiChatSize += JSON.stringify({
                                         id: session.id,
                                         title: session.title,
@@ -12887,7 +12963,6 @@ function calculateAppStorage() {
                     rAi.onerror = finish;
                 }
 
-                // Other keys
                 otherKeys.forEach(function(k) {
                     var r = store.get(k);
                     r.onsuccess = function() {
@@ -12947,7 +13022,6 @@ function loadStorageMonitor() {
             friendsCountEl.textContent = data.friendsCount;
             friendsSizeEl.textContent = formatSize(data.friendsSize);
 
-            // ✅ Message count -- Text + Image + AI Chat
             if (msgCountEl) msgCountEl.textContent = data.msgCount;
             if (msgSizeEl) msgSizeEl.textContent = formatSize(data.msgSize);
 
@@ -12987,7 +13061,6 @@ function clearAllFriendsData() {
     });
 }
 
-// ✅ Message + Image + AI Chat အတူတူ ဖျက်
 function clearAllMessagesData() {
     if (isProcessing) return;
     if (!confirm('Clear all messages data?\n(Text + Image + AI Chat အားလုံး ဖျက်မယ်)')) return;
@@ -12999,11 +13072,9 @@ function clearAllMessagesData() {
         var req = store.getAllKeys();
         req.onsuccess = function() {
             var keys = req.result || [];
-            // ✅ messages_ key အားလုံး (Text + Image)
             var msgKeys = keys.filter(function(k) {
                 return typeof k === 'string' && k.indexOf('messages_') === 0;
             });
-            // ✅ AI Chat key
             var aiChatKey = 'starAiSessions';
             var hasAiChat = keys.indexOf(aiChatKey) !== -1;
 
@@ -13016,7 +13087,6 @@ function clearAllMessagesData() {
                 return;
             }
 
-            // ✅ Memory ထဲက messages အားလုံး ဖျက်
             if (typeof memoryMessages !== 'undefined') {
                 memoryMessages = {};
             }
@@ -13024,7 +13094,6 @@ function clearAllMessagesData() {
                 pendingSaveKeys = {};
             }
 
-            // ✅ AI Chat memory ဖျက်
             if (typeof starSessions !== 'undefined' && Array.isArray(starSessions)) {
                 starSessions = [];
                 if (typeof currentSessionId !== 'undefined') {
@@ -13043,7 +13112,6 @@ function clearAllMessagesData() {
                 loadStorageMonitor();
                 setTimeout(renderChatList, 300);
 
-                // ✅ AI Chat Screen ဖွင့်ထားရင် refresh
                 if (typeof starAiRender === 'function') {
                     try { starAiRender(); } catch(e) {}
                 }
@@ -13557,7 +13625,7 @@ document.addEventListener('DOMContentLoaded', function() {
             authOverlay.classList.remove('hidden');
         }
         setTimeout(attachChatRoomAvatarClick, 1000);
-        console.log('STAR ARCADE Ready');
+        console.log('STAR ARCADE Ready (M Server Version)');
     });
 });
 
@@ -15616,6 +15684,7 @@ document.addEventListener('DOMContentLoaded', function() {
         var modelOverlay = document.getElementById('starModelPopupOverlay');
         if (modelOverlay) {
             modelOverlay.addEventListener('click', function(e) {
+
                 if (e.target === modelOverlay) starModelPopupClose();
             });
         }
