@@ -275,7 +275,6 @@
                                         <span class="chat-room-name" id="chatRoomName">Name</span>
                                         <span class="chat-room-mark" id="chatRoomMark"></span>
                                     </div>
-                                    <!-- ✅ Chat Room Status + Play -->
                                     <div class="chat-room-status-row">
                                         <span class="chat-room-status" id="chatRoomStatus">offline</span>
                                         <div class="chat-room-play" id="chatRoomPlay"></div>
@@ -300,7 +299,6 @@
                             </div>
                         </div>
 
-                        <!-- Bubble Picker Panel -->
                         <div class="bubble-picker" id="bubblePicker"></div>
 
                         <div class="chat-room-input-bar">
@@ -328,31 +326,36 @@
 
                 <div class="fs-screen hidden" id="fs-coin"><div class="screen-center"><p>Diamond balance and transactions</p></div></div>
 
-                <!-- PROFILE -->
+                <!-- ✅ PROFILE (ပြင်ပြီး -- Info ကို Banner အပြင်ဘက်) -->
                 <div class="fs-screen hidden" id="fs-profile">
                     <div class="profile-fullscreen">
+                        <!-- BANNER (အတွင်းမှာ Info မရှိ) -->
                         <div class="profile-banner" id="profileBanner">
                             <div class="profile-banner-overlay"></div>
-                            <div class="profile-info-container">
-                                <div class="profile-avatar-wrapper" id="profileAvatarWrapper">
-                                    <img id="fsProfileAvatar" src="" alt="avatar" />
-                                    <div class="profile-frame-overlay" id="profileFrameOverlay"></div>
+                        </div>
+
+                        <!-- ✅ PROFILE INFO (Banner အပြင်ဘက်) -->
+                        <div class="profile-info-container">
+                            <div class="profile-avatar-wrapper" id="profileAvatarWrapper">
+                                <img id="fsProfileAvatar" src="" alt="avatar" />
+                                <div class="profile-frame-overlay" id="profileFrameOverlay"></div>
+                            </div>
+                            <div class="profile-name-section">
+                                <div class="profile-name-row">
+                                    <h2 id="fsProfileName">Player</h2>
+                                    <span class="profile-mark" id="fsProfileMark"></span>
                                 </div>
-                                <div class="profile-name-section">
-                                    <div class="profile-name-row">
-                                        <h2 id="fsProfileName">Player</h2>
-                                        <span class="profile-mark" id="fsProfileMark"></span>
-                                    </div>
-                                    <div class="profile-details">
-                                        <span class="profile-id" id="fsProfileId" style="cursor:pointer;">ID 0000000000</span>
-                                        <span class="profile-server" id="fsProfileServer">Server 1</span>
-                                    </div>
-                                    <div class="profile-friends">
-                                        <span class="friends-count" id="fsProfileFriends">Friends 0</span>
-                                    </div>
+                                <div class="profile-details">
+                                    <span class="profile-id" id="fsProfileId" style="cursor:pointer;">ID 0000000000</span>
+                                    <span class="profile-server" id="fsProfileServer">Server 1</span>
+                                </div>
+                                <div class="profile-friends">
+                                    <span class="friends-count" id="fsProfileFriends">Friends 0</span>
                                 </div>
                             </div>
                         </div>
+
+                        <!-- BACKGROUND SECTION -->
                         <div class="profile-background-section" id="profileBackgroundSection">
                             <div class="profile-background-overlay"></div>
                             <div class="profile-bio-wrapper">
@@ -444,14 +447,12 @@
 
                 <div class="fs-screen hidden" id="fs-mail"><div class="screen-center"><p>No new messages</p></div></div>
 
-                <!-- ✅ TASKS SCREEN (EMPTY) -->
                 <div class="fs-screen hidden" id="fs-tasks">
                     <div class="tasks-container">
                         <div class="tasks-list" id="tasksList"></div>
                     </div>
                 </div>
 
-                <!-- ✅ FRIENDS LIST SCREEN -->
                 <div class="fs-screen hidden" id="fs-friends-list">
                     <div class="friends-list-container" id="friendsListContainer"></div>
                 </div>
@@ -459,21 +460,17 @@
                 <div class="fs-screen hidden" id="fs-settings">
                     <div class="settings-container">
 
-                        <!-- ✅ STORAGE MONITOR -->
                         <div class="settings-section">
                             <h3 class="settings-section-title">Storage Monitor</h3>
                             <div class="storage-monitor-card">
 
-                                <!-- Total -->
                                 <div class="storage-total">
                                     <div class="storage-total-label">Total Used</div>
                                     <div class="storage-total-value" id="storageTotalValue">0 KB</div>
                                 </div>
 
-                                <!-- 3 Circles -->
                                 <div class="storage-circles">
 
-                                    <!-- 1. Friends Data (Blue) -->
                                     <div class="storage-circle-wrapper">
                                         <div class="storage-circle">
                                             <svg viewBox="0 0 100 100">
@@ -492,7 +489,6 @@
                                         <div class="storage-circle-size" id="storageFriendsSize">0 KB</div>
                                     </div>
 
-                                    <!-- 2. Message Data (Red) -->
                                     <div class="storage-circle-wrapper">
                                         <div class="storage-circle">
                                             <svg viewBox="0 0 100 100">
@@ -511,7 +507,6 @@
                                         <div class="storage-circle-size" id="storageMsgSize">0 KB</div>
                                     </div>
 
-                                    <!-- 3. Available Space (Green) -->
                                     <div class="storage-circle-wrapper">
                                         <div class="storage-circle">
                                             <svg viewBox="0 0 100 100">
@@ -535,7 +530,6 @@
                             </div>
                         </div>
 
-                        <!-- ✅ CLEAR DATA -->
                         <div class="settings-section">
                             <h3 class="settings-section-title">Clear Data</h3>
                             <div class="settings-card">
@@ -570,7 +564,6 @@
                             </div>
                         </div>
 
-                        <!-- App အကြောင်း -->
                         <div class="settings-section">
                             <h3 class="settings-section-title">App အကြောင်း</h3>
                             <div class="settings-card">
@@ -578,7 +571,6 @@
                             </div>
                         </div>
 
-                        <!-- အကောင့် -->
                         <div class="settings-section">
                             <h3 class="settings-section-title">အကောင့်</h3>
                             <div class="settings-card">
@@ -676,9 +668,7 @@
         </div>
     </div>
 
-<!-- ============================================================ -->
-<!-- ✅ IMAGE SEND SYSTEM (GIF မပါ) -->
-<!-- ============================================================ -->
+<!-- IMAGE SEND SYSTEM -->
 <div class="img-send-popup-overlay hidden" id="imgSendPopup">
     <div class="img-send-popup">
         <div class="img-send-preview-wrap">
@@ -721,11 +711,8 @@
     </div>
 </div>
 
-<!-- ============================================================ -->
-<!-- ✅ STAR AI SCREEN -->
-<!-- ============================================================ -->
+<!-- STAR AI SCREEN -->
 <div class="star-ai-screen hidden" id="starAiScreen">
-    <!-- Header -->
     <div class="star-ai-header">
         <button class="star-ai-back-btn" id="starAiBackBtn">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
@@ -765,7 +752,6 @@
         </div>
     </div>
 
-    <!-- Messages -->
     <div class="star-ai-messages" id="starAiMessages">
         <div class="star-ai-empty-state" id="starAiEmptyState">
             <div class="star-ai-empty-img-wrap">
@@ -776,7 +762,6 @@
         </div>
     </div>
 
-    <!-- Floating Input Bar -->
     <div class="star-ai-input-bar-wrap">
         <div class="star-ai-input-bar">
             <button class="star-ai-model-selector-btn" id="starAiModelSelectorBtn" title="Model">
@@ -808,9 +793,7 @@
     </div>
 </div>
 
-<!-- ============================================================ -->
-<!-- ✅ MODEL SELECTOR POPUP (Star 1.0 Only) -->
-<!-- ============================================================ -->
+<!-- MODEL SELECTOR POPUP -->
 <div class="star-model-popup-overlay hidden" id="starModelPopupOverlay">
     <div class="star-model-popup">
         <div class="star-model-popup-header">
@@ -839,9 +822,7 @@
     </div>
 </div>
 
-<!-- ============================================================ -->
-<!-- ✅ CHAT LIST PANEL -->
-<!-- ============================================================ -->
+<!-- CHAT LIST PANEL -->
 <div class="star-ai-chatlist-panel hidden" id="starAiChatListPanel">
     <div class="star-ai-chatlist-overlay" id="starAiChatListOverlay"></div>
     <div class="star-ai-chatlist">
@@ -858,9 +839,7 @@
     </div>
 </div>
 
-<!-- ============================================================ -->
-<!-- ✅ VIDEO REQUEST POPUP -->
-<!-- ============================================================ -->
+<!-- VIDEO REQUEST POPUP -->
 <div class="vid-popup-overlay hidden" id="vidPopupOverlay">
     <div class="vid-popup" id="vidPopup">
         <div class="vid-popup-header">
@@ -874,7 +853,6 @@
         </div>
 
         <div class="vid-popup-body">
-            <!-- Model Selector -->
             <div class="vid-popup-section">
                 <div class="vid-popup-section-label">
                     Model <span class="vid-popup-required">*</span>
@@ -882,7 +860,6 @@
                 <div class="vid-popup-models-grid" id="vidPopupModelsGrid"></div>
             </div>
 
-            <!-- Images -->
             <div class="vid-popup-section">
                 <div class="vid-popup-section-label">
                     Images <span class="vid-popup-optional">(Optional)</span>
@@ -891,7 +868,6 @@
                 <div class="vid-popup-hint">ပုံ ၅ ပုံ = ဇာတ်ကောင် / ပုံ ၆ ခုမြောက် = Background</div>
             </div>
 
-            <!-- Style -->
             <div class="vid-popup-section">
                 <div class="vid-popup-section-label">
                     Style <span class="vid-popup-required">*</span>
@@ -905,7 +881,6 @@
                 </div>
             </div>
 
-            <!-- Prompt -->
             <div class="vid-popup-section">
                 <div class="vid-popup-section-label">
                     Prompt <span class="vid-popup-required">*</span>
@@ -927,8 +902,7 @@
 
     <script src="script.js"></script>
 </body>
-</html>
-<style>/* ============================================================
+</html><style>/* ============================================================
    FILE: style.css (FULL + PROFILE CENTER LAYOUT)
    ============================================================ */
 
