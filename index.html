@@ -1646,7 +1646,7 @@ body {
 .fs-screen.hidden { display: none !important; }
 
 /* ============================================================
-   ✅ PROFILE FULLSCREEN -- CENTER LAYOUT (အလယ်ညှိ)
+   ✅ PROFILE FULLSCREEN -- CENTER + INFO LOWER + BIO LEFT
    ============================================================ */
 
 .profile-fullscreen {
@@ -1686,7 +1686,7 @@ body {
 }
 
 /* ============================================================
-   ✅ PROFILE INFO -- CENTER LAYOUT
+   ✅ PROFILE INFO -- CENTER + LOWER (အောက်ကို ပိုချ)
    ============================================================ */
 
 .profile-info-container {
@@ -1697,7 +1697,8 @@ body {
     gap: 12px;
     padding: 0 24px;
     position: relative;
-    margin-top: -50px;
+    margin-top: 0;              /* ✅ Banner နဲ့ ကပ် (အထက် မတက်) */
+    padding-top: 70px;          /* ✅ Avatar အတွက် spacer (အောက်ချ) */
     z-index: 2;
 }
 
@@ -1709,8 +1710,12 @@ body {
     background: var(--bg-card);
     flex-shrink: 0;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.7);
-    position: relative;
+    position: absolute;         /* ✅ Banner ပေါ် တင်ဖို့ */
+    top: -50px;                 /* ✅ Banner အထက် တစ်ဝက် */
+    left: 50%;
+    transform: translateX(-50%);
     overflow: visible;
+    z-index: 3;
 }
 
 .profile-avatar-wrapper img {
@@ -1740,6 +1745,7 @@ body {
     flex-direction: column;
     align-items: center;
     text-align: center;
+    padding-top: 4px;
 }
 
 .profile-name-row {
@@ -1861,7 +1867,7 @@ body {
 }
 
 /* ============================================================
-   BIO CARD -- CENTER
+   ✅ BIO CARD -- LEFT ALIGN (စာကို ဘယ်မှာ စ)
    ============================================================ */
 
 .profile-bio-wrapper {
@@ -1879,7 +1885,7 @@ body {
     box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
     flex-shrink: 0;
     transition: all 0.3s ease;
-    text-align: center;
+    text-align: left;           /* ✅ ဘယ်မှာ စ (Center မဟုတ်) */
 }
 
 .profile-bio-wrapper:hover {
@@ -1893,6 +1899,7 @@ body {
     line-height: 1.7;
     white-space: pre-wrap;
     word-break: break-word;
+    text-align: left;           /* ✅ ဘယ်မှာ စ */
 }
 
 .profile-bio .bio-placeholder {
@@ -2205,6 +2212,7 @@ body {
 
 .edit-save-btn:active { transform: scale(0.98); opacity: 0.9; }
 
+    
 /* ============================================================
    SHOP FULLSCREEN
    ============================================================ */
