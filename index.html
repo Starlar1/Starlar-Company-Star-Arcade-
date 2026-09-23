@@ -8899,7 +8899,7 @@ body {
         padding: 12px 14px 100px;
     }
 }</style><script>// ============================================================
-//  STAR ARCADE -- FULL script.js (M Server Version)
+//  STAR ARCADE -- FULL script.js (M Server + Auto Online)
 //  Version: 2026-09-21
 // ============================================================
 
@@ -10768,6 +10768,29 @@ function removeFriendFromCache(sid, uid) {
     });
 }
 
+// ✅ Sender ကို Cache မှာ Online လုပ်ပြ
+function markFriendOnline(sid, uid) {
+    return new Promise(function(resolve) {
+        getFriendsCache().then(function(cache) {
+            var key = getFriendCacheKey(sid, uid);
+            var friend = cache[key];
+            
+            if (friend) {
+                friend.online = true;
+                cache[key] = friend;
+                saveFriendsCache(cache).then(function() {
+                    console.log('✅ Marked online:', friend.name);
+                    resolve();
+                });
+            } else {
+                resolve();
+            }
+        }).catch(function() {
+            resolve();
+        });
+    });
+}
+
 function getPinnedFriends() { return getFromDB(PINNED_FRIENDS_KEY).then(function(p) { return p || {}; }).catch(function() { return {}; }); }
 function savePinnedFriends(p) { return setToDB(PINNED_FRIENDS_KEY, p); }
 
@@ -10826,7 +10849,7 @@ function getFriendPassword(sid, uid) {
 }
 
 // ===================================================
-//  MESSAGES STORAGE -- Fixed (Memory first, IDB background)
+//  MESSAGES STORAGE -- Memory first, IDB background
 // ===================================================
 var memoryMessages = {};
 var pendingSaveKeys = {};
@@ -10850,23 +10873,19 @@ function getMessagesWith(sid, uid) {
     });
 }
 
-// ✅ FIXED: Memory ထဲ ချက်ချင်းထည့်, IDB ကို background
 function saveMessageToLocalDB(msg) {
     var friendId = msg.type === 'sent' ? msg.receiverId : msg.senderId;
     var friendServer = msg.type === 'sent' ? msg.receiverServer : msg.senderServer;
     var key = getMessagesKey(friendServer, friendId);
     
-    // ✅ Memory ထဲ ချက်ချင်း ထည့်
     var messages = memoryMessages[key] || [];
     var idx = messages.findIndex(function(m) { return m.messageId === msg.messageId; });
     if (idx >= 0) messages[idx] = Object.assign({}, messages[idx], msg);
     else messages.push(msg);
     
-    // ✅ ချက်ချင်း sort
     messages.sort(function(a, b) { return a.timestamp - b.timestamp; });
     memoryMessages[key] = messages;
     
-    // ✅ IDB ကို background မှာ သိမ်း
     pendingSaveKeys[key] = true;
     if (!flushTimer) flushTimer = setTimeout(flushPendingSaves, FLUSH_INTERVAL);
     
@@ -11400,6 +11419,7 @@ function openChatRoomNow(target) {
             var data = snap.val();
             if (!data) return;
             var full = extractUseOnlyData(data, target.serverId, serverNo, target.userId);
+            // ✅ Real Online Status ကို Cache ကို Update
             saveFriendToCache(full).then(renderChatList);
             applyChatRoomData(full);
         });
@@ -11461,7 +11481,7 @@ function updateChatBlockUI() {
 }
 
 // ===================================================
-//  CHAT ROOM MESSAGE LISTENERS
+//  ✅ CHAT ROOM MESSAGE LISTENERS -- M Server + Auto Online
 // ===================================================
 function startChatRoomMessageListeners(target) {
     stopChatRoomMessageListeners();
@@ -11487,12 +11507,23 @@ function startChatRoomMessageListeners(target) {
                         msg.type = 'received';
                         msg.seen = false;
                         
+                        // ✅ ၁။ IDB ထဲ သိမ်း
                         saveMessageToLocalDB(msg).then(function() {
-                            if (currentChatTarget && currentChatTarget.userId === target.userId && currentChatTarget.serverId === target.serverId) {
-                                requestAnimationFrame(function() { displayMessage(msg); });
-                                scrollToBottomDebounced();
-                                markAsSeenAndDelete(msg.messageId, sid, target.serverId, target.userId);
-                            }
+                            
+                            // ✅ ၂။ Sender ကို Cache မှာ Online လုပ်ပြ
+                            markFriendOnline(msg.senderServer, msg.senderId).then(function() {
+                                
+                                // ✅ ၃။ Chat List UI update
+                                renderChatList();
+                                
+                                if (currentChatTarget && 
+                                    currentChatTarget.userId === target.userId && 
+                                    currentChatTarget.serverId === target.serverId) {
+                                    requestAnimationFrame(function() { displayMessage(msg); });
+                                    scrollToBottomDebounced();
+                                    markAsSeenAndDelete(msg.messageId, sid, target.serverId, target.userId);
+                                }
+                            });
                         });
                     }
                 });
@@ -11537,6 +11568,7 @@ function applyChatRoomData(data) {
         else frameEl.style.backgroundImage = 'none';
     } else frameEl.style.backgroundImage = 'none';
 
+    // ✅ Real Online Status ကို Chat Full မှာ ပြ
     if (data.online) { statusEl.textContent = 'Online'; statusEl.classList.add('online'); }
     else { statusEl.textContent = 'Offline'; statusEl.classList.remove('online'); }
 
@@ -11864,7 +11896,7 @@ function sendMessage() {
 }
 
 // ===================================================
-//  ✅ FIRESTORE SEND -- Auto-Switch Server on Error
+//  FIRESTORE SEND -- Receiver ရဲ့ M Server ထဲ ပို့
 // ===================================================
 var MAX_FIRESTORE_RETRY = 20;
 
@@ -11874,116 +11906,57 @@ function trySendToFirestore(messageId, messageData, localMsg, attempt) {
     if (attempt >= MAX_FIRESTORE_RETRY) {
         console.log('Max retry → queue');
         savePendingMessage({ messageId: messageId, messageData: messageData, localMsg: localMsg });
-        showToast('Saved. Will send when connection back.');
         return;
     }
 
     var backoff = Math.min(100 * Math.pow(2, attempt), 3000);
 
-    // ✅ Receiver ရဲ့ M Server ကို cache ကနေ ရှာ
     getFriendFromCache(messageData.receiverServer, messageData.receiverId).then(function(cached) {
         var targetServers = [];
         
         if (cached && Array.isArray(cached.mServer) && cached.mServer.length > 0) {
-            targetServers = cached.mServer.slice();
+            targetServers = cached.mServer;
         } else {
             targetServers = [messageData.receiverServer];
         }
         
-        // ✅ စမ်းပြီးသား (error ဖြစ်ပြီးသား) server တွေကို ဖယ်
-        if (!localMsg._triedServers) localMsg._triedServers = [];
-        var availableServers = targetServers.filter(function(s) {
-            return localMsg._triedServers.indexOf(s) === -1;
-        });
-        
-        // ✅ အားလုံး စမ်းပြီးရင် reset (တစ်ခေါက် ပြန်စမ်း)
-        if (availableServers.length === 0) {
-            localMsg._triedServers = [];
-            availableServers = targetServers.slice();
-        }
-        
-        // ✅ ကျပန်း server တစ်ခု ရွေး
-        var chosenServerId = availableServers[Math.floor(Math.random() * availableServers.length)];
-        localMsg._triedServers.push(chosenServerId);
-        
+        var chosenServerId = targetServers[Math.floor(Math.random() * targetServers.length)];
         var fsdb = getFirestoreForServer(chosenServerId);
+        
         if (!fsdb) {
-            setTimeout(function() { 
-                trySendToFirestore(messageId, messageData, localMsg, attempt + 1); 
-            }, backoff);
+            setTimeout(function() { trySendToFirestore(messageId, messageData, localMsg, attempt + 1); }, backoff);
             return;
         }
 
         setWithTimeout(fsdb, messageId, messageData, 10000)
         .then(function() {
-            // ✅ အောင်မြင်ရင်
-            console.log('Sent to ' + chosenServerId + ':', messageId);
+            console.log('Sent to M Server (' + chosenServerId + '):', messageId);
             localMsg.serverId = chosenServerId;
-            delete localMsg._triedServers;  // Clean up
             saveMessageToLocalDB(localMsg);
             removePendingMessage(messageId);
             renderChatList();
         })
         .catch(function(err) {
-            // ❌ Error ဖြစ်ရင်
-            console.warn('Send error (' + chosenServerId + '):', err.code, '→ trying another server');
-            
-            // ✅ Error အလိုက် backoff ချိန်
-            if (err.code === 'resource-exhausted') {
-                // Quota ကုန် → နောက် server ကို ချက်ချင်းပြောင်း
-                backoff = 300;
-            } else if (err.code === 'permission-denied') {
-                // Permission → နောက် server ကို ချက်ချင်းပြောင်း
-                backoff = 300;
-            } else if (err.code === 'unavailable') {
-                // Network → ခဏစောင့်
-                backoff = 1000;
-            } else if (err.code === 'deadline-exceeded') {
-                // Timeout → ခဏစောင့်
-                backoff = 1500;
-            } else if (err.code === 'unauthenticated') {
-                // Auth မရှိ → ခဏစောင့်
-                backoff = 2000;
-            } else if (err.code === 'internal') {
-                // Server ပြဿနာ → ခဏစောင့်
-                backoff = 1000;
-            } else if (err.code === 'cancelled') {
-                // User က ဖျက် → ဘာမှ မလုပ်
-                return;
-            }
-            
-            // ✅ User ကို အသိပေး (ပထမဆုံး error မှာ)
-            if (attempt === 0) {
-                showToast('Server busy. Trying another...');
-            }
-            
-            setTimeout(function() { 
-                trySendToFirestore(messageId, messageData, localMsg, attempt + 1); 
-            }, backoff);
+            console.warn('Send error (' + chosenServerId + '):', err.code, '→ retry', attempt + 1);
+            setTimeout(function() { trySendToFirestore(messageId, messageData, localMsg, attempt + 1); }, backoff);
         });
     }).catch(function(err) {
-        // Cache ဖတ်လို့ မရရင် receiver ရဲ့ server ကိုပဲ သုံး
         console.warn('Cache read failed:', err);
         var chosenServerId = messageData.receiverServer;
         var fsdb = getFirestoreForServer(chosenServerId);
         if (!fsdb) {
-            setTimeout(function() { 
-                trySendToFirestore(messageId, messageData, localMsg, attempt + 1); 
-            }, backoff);
+            setTimeout(function() { trySendToFirestore(messageId, messageData, localMsg, attempt + 1); }, backoff);
             return;
         }
         setWithTimeout(fsdb, messageId, messageData, 10000)
         .then(function() {
             localMsg.serverId = chosenServerId;
-            delete localMsg._triedServers;
             saveMessageToLocalDB(localMsg);
             removePendingMessage(messageId);
             renderChatList();
         })
         .catch(function() {
-            setTimeout(function() { 
-                trySendToFirestore(messageId, messageData, localMsg, attempt + 1); 
-            }, backoff);
+            setTimeout(function() { trySendToFirestore(messageId, messageData, localMsg, attempt + 1); }, backoff);
         });
     });
 }
@@ -12346,7 +12319,7 @@ function applyChatBackground(imageData) {
 }
 
 // ===================================================
-//  APP MESSAGE LISTENERS -- Fixed (Chat List update)
+//  ✅ APP MESSAGE LISTENERS -- M Server + Auto Online
 // ===================================================
 function startAppMessageListeners() {
     stopAppMessageListeners();
@@ -12374,14 +12347,24 @@ function startAppMessageListeners() {
                         msg.type = 'received';
                         msg.seen = false;
                         
+                        // ✅ ၁။ IDB ထဲ ချက်ချင်းသိမ်း
                         saveMessageToLocalDB(msg).then(function() {
-                            if (currentChatTarget && currentChatTarget.userId === msg.senderId && currentChatTarget.serverId === msg.senderServer) {
-                                requestAnimationFrame(function() { displayMessage(msg); });
-                                scrollToBottomDebounced();
-                                markAsSeenAndDelete(msg.messageId, sid, msg.senderServer, msg.senderId);
-                            } else {
+                            
+                            // ✅ ၂။ Sender ကို Cache မှာ Online လုပ်ပြ
+                            markFriendOnline(msg.senderServer, msg.senderId).then(function() {
+                                
+                                // ✅ ၃။ Chat List UI ချက်ချင်း update
                                 renderChatList();
-                            }
+                                
+                                // ✅ ၄။ Chat Room ထဲရောက်နေရင် စာပြ
+                                if (currentChatTarget && 
+                                    currentChatTarget.userId === msg.senderId && 
+                                    currentChatTarget.serverId === msg.senderServer) {
+                                    requestAnimationFrame(function() { displayMessage(msg); });
+                                    scrollToBottomDebounced();
+                                    markAsSeenAndDelete(msg.messageId, sid, msg.senderServer, msg.senderId);
+                                }
+                            });
                         });
                     }
                 });
@@ -13673,7 +13656,7 @@ document.addEventListener('DOMContentLoaded', function() {
             authOverlay.classList.remove('hidden');
         }
         setTimeout(attachChatRoomAvatarClick, 1000);
-        console.log('STAR ARCADE Ready (M Server Version)');
+        console.log('STAR ARCADE Ready (M Server + Auto Online)');
     });
 });
 
