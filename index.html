@@ -10650,8 +10650,13 @@ function loadFriendProfileIntoFsProfile(d) {
         }
     }
 
+    // ✅ ပြင်ထားတဲ့ နေရာ ၁ -- visibility + pointerEvents ပါ ဖျောက်
     var editWrap = document.querySelector('.profile-edit-btn-wrapper');
-    if (editWrap) editWrap.style.display = 'none';
+    if (editWrap) {
+        editWrap.style.display = 'none';
+        editWrap.style.visibility = 'hidden';
+        editWrap.style.pointerEvents = 'none';
+    }
 }
 
 function attachChatRoomAvatarClick() {
@@ -10967,8 +10972,13 @@ function goBackFullscreen() {
         openedProfileFromChatList = false;
         currentViewingProfile = 'self';
         currentFriendProfileData = null;
+        // ✅ ပြင်ထားတဲ့ နေရာ ၂ -- visibility + pointerEvents ပါ reset
         var editWrap = document.querySelector('.profile-edit-btn-wrapper');
-        if (editWrap) editWrap.style.display = '';
+        if (editWrap) {
+            editWrap.style.display = '';
+            editWrap.style.visibility = '';
+            editWrap.style.pointerEvents = '';
+        }
         var fsFriends = document.getElementById('fsProfileFriends');
         if (fsFriends) { fsFriends.style.cursor = ''; fsFriends.onclick = null; }
         var fsId = document.getElementById('fsProfileId');
