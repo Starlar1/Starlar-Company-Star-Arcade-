@@ -1631,10 +1631,11 @@ body {
     background: var(--bg-body);
     position: relative;
     overflow-y: auto;
+    overflow-x: hidden;
 }
 
 /* ============================================================
-   BANNER
+   BANNER (Info က အတွင်းမှာ တင်)
    ============================================================ */
 
 .profile-banner {
@@ -1645,8 +1646,9 @@ body {
     flex-shrink: 0;
     background-size: cover;
     background-position: center;
-    min-height: 160px;
-    max-height: 280px;
+    min-height: 200px;
+    max-height: 320px;
+    overflow: visible !important;    /* ✅ Info ကို အပြင်ထွက်ခွင့်ပြု */
 }
 
 .profile-banner-overlay {
@@ -1660,7 +1662,7 @@ body {
 }
 
 /* ============================================================
-   ✅ PROFILE INFO -- Avatar ကို Banner ပေါ် တင် (အောက် မချ)
+   ✅ PROFILE INFO -- Banner ပေါ်မှာ တင်
    ============================================================ */
 
 .profile-info-container {
@@ -1670,9 +1672,11 @@ body {
     justify-content: center !important;
     gap: 14px !important;
     padding: 0 24px !important;
-    position: relative !important;
-    margin-top: -55px !important;    /* ✅ Avatar ကို Banner ပေါ် တင် */
-    z-index: 2 !important;
+    position: absolute !important;     /* ✅ Banner ပေါ် တင်ဖို့ */
+    bottom: -80px !important;          /* ✅ Banner အောက်ကို တစ်ဝက် ထွက် */
+    left: 0 !important;
+    right: 0 !important;
+    z-index: 5 !important;
 }
 
 .profile-avatar-wrapper {
@@ -1682,7 +1686,7 @@ body {
     border: 4px solid var(--bg-body) !important;
     background: var(--bg-card) !important;
     flex-shrink: 0 !important;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.7) !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8) !important;
     position: relative !important;
     overflow: visible !important;
 }
@@ -1812,12 +1816,12 @@ body {
 }
 
 /* ============================================================
-   ✅ BACKGROUND SECTION
+   ✅ BACKGROUND SECTION (Info နေရာ ဖန်တီး)
    ============================================================ */
 
 .profile-background-section {
     flex: 1 !important;
-    padding: 20px 24px 24px !important;
+    padding: 100px 24px 24px !important;   /* ✅ Info ရဲ့ အောက်ပိုင်း နေရာ */
     position: relative !important;
     min-height: 0 !important;
     background: var(--bg-body);
@@ -1826,6 +1830,7 @@ body {
     align-items: center !important;
     background-size: cover;
     background-position: center;
+    z-index: 3 !important;
 }
 
 .profile-background-overlay {
@@ -2186,12 +2191,12 @@ body {
 
 @media (max-width: 480px) {
     .profile-banner {
-        min-height: 140px;
-        max-height: 200px;
+        min-height: 170px;
+        max-height: 230px;
     }
 
     .profile-info-container {
-        margin-top: -45px !important;   /* ✅ Mobile အတွက် Avatar ပေါ်တင် */
+        bottom: -70px !important;      /* ✅ Mobile အတွက် */
         padding: 0 16px !important;
         gap: 10px !important;
     }
@@ -2211,7 +2216,9 @@ body {
     .profile-friends { margin-top: 6px; }
     .friends-count { font-size: 12px; padding: 3px 14px; }
 
-    .profile-background-section { padding: 16px 16px 20px !important; }
+    .profile-background-section {
+        padding: 85px 16px 20px !important;   /* ✅ Mobile အတွက် */
+    }
 
     .profile-bio-wrapper {
         padding: 14px 18px;
