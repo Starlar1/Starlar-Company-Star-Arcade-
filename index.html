@@ -1646,7 +1646,7 @@ body {
 .fs-screen.hidden { display: none !important; }
 
 /* ============================================================
-   ✅ PROFILE FULLSCREEN -- CENTER + INFO LOWER + BIO LEFT
+   ✅ PROFILE FULLSCREEN -- CENTER LAYOUT (အလယ်ညှိ)
    ============================================================ */
 
 .profile-fullscreen {
@@ -1686,7 +1686,7 @@ body {
 }
 
 /* ============================================================
-   ✅ PROFILE INFO -- CENTER + LOWER (အောက်ကို ပိုချ)
+   ✅ PROFILE INFO -- CENTER + LOWER (အောက်ကို ချ)
    ============================================================ */
 
 .profile-info-container {
@@ -1697,8 +1697,7 @@ body {
     gap: 12px;
     padding: 0 24px;
     position: relative;
-    margin-top: 0;              /* ✅ Banner နဲ့ ကပ် (အထက် မတက်) */
-    padding-top: 70px;          /* ✅ Avatar အတွက် spacer (အောက်ချ) */
+    margin-top: -40px;          /* ✅ Avatar ကို Banner အောက်နား တင်ဖို့ */
     z-index: 2;
 }
 
@@ -1710,12 +1709,8 @@ body {
     background: var(--bg-card);
     flex-shrink: 0;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.7);
-    position: absolute;         /* ✅ Banner ပေါ် တင်ဖို့ */
-    top: -50px;                 /* ✅ Banner အထက် တစ်ဝက် */
-    left: 50%;
-    transform: translateX(-50%);
+    position: relative;         /* ✅ Parent က ရေတွက်မယ် */
     overflow: visible;
-    z-index: 3;
 }
 
 .profile-avatar-wrapper img {
@@ -1885,7 +1880,7 @@ body {
     box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
     flex-shrink: 0;
     transition: all 0.3s ease;
-    text-align: left;           /* ✅ ဘယ်မှာ စ (Center မဟုတ်) */
+    text-align: left;           /* ✅ ဘယ်မှာ စ */
 }
 
 .profile-bio-wrapper:hover {
