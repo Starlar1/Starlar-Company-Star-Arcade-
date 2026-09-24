@@ -13360,16 +13360,24 @@ document.addEventListener('DOMContentLoaded', function() {
     if (fullscreenBackBtn) fullscreenBackBtn.addEventListener('click', goBackFullscreen);
     if (fullscreenOverlay) fullscreenOverlay.addEventListener('click', function(e) { if (e.target === fullscreenOverlay) closeFullscreen(); });
 
-    document.querySelectorAll('.sidebar-btn[data-action]').forEach(function(btn) {
-        btn.addEventListener('click', function() {
-            var action = btn.dataset.action;
-            var map = { shop: { title: 'Shop', fsId: 'fs-shop' }, tasks: { title: 'Tasks', fsId: 'fs-tasks' }, settings: { title: 'Settings', fsId: 'fs-settings' } };
-            var d = map[action] || { title: action, fsId: 'fs-search' };
-            openFullscreen(d.title, d.fsId);
-            closeSidebar();
-        });
+document.querySelectorAll('.sidebar-btn[data-action]').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+        var action = btn.dataset.action;
+        var map = {
+            shop: { title: 'Shop', fsId: 'fs-shop' },
+            tasks: { title: 'Tasks', fsId: 'fs-tasks' },
+            rank: { title: 'Rank', fsId: 'fs-rank' },
+            faq: { title: 'FAQ', fsId: 'fs-faq' },
+            invite: { title: 'Invite', fsId: 'fs-invite' },
+            settings: { title: 'Settings', fsId: 'fs-settings' }
+        };
+        var d = map[action] || { title: action, fsId: 'fs-search' };
+        openFullscreen(d.title, d.fsId);
+        closeSidebar();
     });
+});
 
+    
     if (profileBtn) profileBtn.addEventListener('click', function() { loadProfileData(); openFullscreen('Profile', 'fs-profile'); });
 
     var openEditBtn = document.getElementById('openEditProfileBtn');
