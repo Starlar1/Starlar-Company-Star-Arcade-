@@ -6057,7 +6057,7 @@ body {
 }
 
 /* ============================================================
-   PLUS MENU POPUP (Grid Layout — အဝိုင်း ၅ ခု)
+   PLUS MENU POPUP (Grid Layout — အဝိုင်း ၅ ခု သေး)
    ============================================================ */
 
 /* ✅ ဘေးနားမှိန်ချက် */
@@ -6088,7 +6088,7 @@ body {
     pointer-events: none;
     display: flex;
     flex-direction: column;
-    gap: 14px;
+    gap: 12px;
     opacity: 0;
     transition: opacity 0.25s ease;
     padding: 4px;
@@ -6103,7 +6103,7 @@ body {
 .plus-menu-row {
     display: flex;
     justify-content: center;
-    gap: 18px;
+    gap: 14px;
     align-items: flex-start;
 }
 
@@ -6112,7 +6112,7 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 6px;
+    gap: 5px;
     background: transparent;
     border: none;
     cursor: pointer;
@@ -6138,16 +6138,16 @@ body {
 
 /* ✅ အဝိုင်း ကိုယ်ထည် */
 .plus-menu-btn-circle {
-    width: 62px;
-    height: 62px;
+    width: 52px;
+    height: 52px;
     border-radius: 50%;
     background: linear-gradient(135deg, var(--accent), var(--accent-dark));
     color: #fff;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 6px 20px rgba(255, 109, 31, 0.5),
-                0 3px 10px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 4px 16px rgba(255, 109, 31, 0.5),
+                0 2px 8px rgba(0, 0, 0, 0.4);
     transition: transform 0.15s ease, box-shadow 0.2s ease;
 }
 
@@ -6157,13 +6157,13 @@ body {
 }
 
 .plus-menu-btn-circle svg {
-    width: 26px;
-    height: 26px;
+    width: 22px;
+    height: 22px;
 }
 
 /* ✅ ခလုတ်အောက် စာသား */
 .plus-menu-btn span {
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 700;
     color: #fff;
     white-space: nowrap;
@@ -6186,27 +6186,6 @@ body {
 /* ✅ Mobile responsive */
 @media (max-width: 480px) {
     .plus-menu-row {
-        gap: 14px;
-    }
-    .plus-menu-btn-circle {
-        width: 56px;
-        height: 56px;
-    }
-    .plus-menu-btn-circle svg {
-        width: 22px;
-        height: 22px;
-    }
-    .plus-menu-btn span {
-        font-size: 10px;
-    }
-}
-
-/* ✅ Landscape mode */
-@media (max-height: 600px) and (orientation: landscape) {
-    .plus-menu {
-        gap: 10px;
-    }
-    .plus-menu-row {
         gap: 12px;
     }
     .plus-menu-btn-circle {
@@ -6219,6 +6198,27 @@ body {
     }
     .plus-menu-btn span {
         font-size: 9px;
+    }
+}
+
+/* ✅ Landscape mode */
+@media (max-height: 600px) and (orientation: landscape) {
+    .plus-menu {
+        gap: 8px;
+    }
+    .plus-menu-row {
+        gap: 10px;
+    }
+    .plus-menu-btn-circle {
+        width: 42px;
+        height: 42px;
+    }
+    .plus-menu-btn-circle svg {
+        width: 18px;
+        height: 18px;
+    }
+    .plus-menu-btn span {
+        font-size: 8px;
     }
 }
 </style>
