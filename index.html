@@ -7057,6 +7057,142 @@ body {
     .event-success-title { font-size: 18px; }
     .event-success-text { font-size: 12.5px; }
 }
+
+/* ============================================================
+   ✅ FAQ SCREEN
+   ============================================================ */
+.faq-container {
+    width: 100%;
+    height: 100%;
+    padding: 16px;
+    background: var(--bg-body);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.faq-item {
+    background: var(--bg-card);
+    border: 1.5px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    transition: all 0.25s ease;
+}
+
+.faq-item.open {
+    border-color: var(--accent);
+    box-shadow: 0 4px 20px rgba(255, 109, 31, 0.15);
+}
+
+.faq-question {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    background: transparent;
+    border: none;
+    color: var(--text-main);
+    font-size: 14px;
+    font-family: inherit;
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.15s ease;
+}
+
+.faq-question:active { background: var(--bg-hover); }
+
+.faq-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: #fff;
+}
+
+.faq-icon svg { width: 20px; height: 20px; }
+
+.faq-icon-info    { background: linear-gradient(135deg, #ff6d1f, #e0550a); }
+.faq-icon-msg     { background: linear-gradient(135deg, #44ff88, #00cc55); }
+.faq-icon-ai      { background: linear-gradient(135deg, #9b4dff, #6a1b9a); }
+.faq-icon-report  { background: linear-gradient(135deg, #ffaa44, #ff6d1f); }
+.faq-icon-warning { background: linear-gradient(135deg, #ff4444, #cc0000); }
+.faq-icon-contact { background: linear-gradient(135deg, #29b6f6, #0288d1); }
+
+.faq-question-text {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.faq-question-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-main);
+    line-height: 1.3;
+}
+
+.faq-question-sub {
+    font-size: 11px;
+    color: var(--text-muted);
+    line-height: 1.3;
+}
+
+.faq-arrow {
+    flex-shrink: 0;
+    transition: transform 0.3s ease;
+    color: var(--text-muted);
+}
+
+.faq-item.open .faq-arrow {
+    transform: rotate(180deg);
+    color: var(--accent);
+}
+
+.faq-answer {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.35s ease, padding 0.35s ease;
+    padding: 0 16px 0 68px;
+}
+
+.faq-item.open .faq-answer {
+    max-height: 600px;
+    padding: 0 16px 16px 68px;
+}
+
+.faq-answer p {
+    font-size: 13.5px;
+    color: var(--text-sub);
+    line-height: 1.7;
+    margin: 0 0 8px;
+}
+
+.faq-answer p:last-child { margin-bottom: 0; }
+
+.faq-answer b {
+    color: var(--accent);
+    font-weight: 800;
+}
+
+/* ✅ Mobile */
+@media (max-width: 480px) {
+    .faq-container { padding: 12px; gap: 8px; }
+    .faq-question { padding: 12px 14px; gap: 10px; }
+    .faq-icon { width: 36px; height: 36px; border-radius: 9px; }
+    .faq-icon svg { width: 18px; height: 18px; }
+    .faq-question-title { font-size: 13px; }
+    .faq-question-sub { font-size: 10px; }
+    .faq-answer { padding-left: 60px; padding-right: 14px; }
+    .faq-item.open .faq-answer { padding: 0 14px 14px 60px; }
+    .faq-answer p { font-size: 12.5px; }
+}
 </style>
 </head>
 <body>
@@ -7203,6 +7339,7 @@ body {
                             <span id="userServer">Server 1</span>
                         </div>
                         <nav class="sidebar-nav">
+                            <!-- ✅ Shop -->
                             <button class="sidebar-btn" data-action="shop">
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                     <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/>
@@ -7211,6 +7348,8 @@ body {
                                 </svg>
                                 <span>Shop</span>
                             </button>
+
+                            <!-- ✅ Tasks -->
                             <button class="sidebar-btn" data-action="tasks">
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                     <rect x="3" y="3" width="18" height="18" rx="3"/>
@@ -7220,6 +7359,40 @@ body {
                                 </svg>
                                 <span>Tasks</span>
                             </button>
+
+                            <!-- ✅ Rank (အသစ်) -->
+                            <button class="sidebar-btn" data-action="rank">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M2 4l3 12h14l3-12-6 4-4-8-4 8-6-4z"/>
+                                    <path d="M4 20h16"/>
+                                    <path d="M10 16v4"/>
+                                    <path d="M14 16v4"/>
+                                </svg>
+                                <span>Rank</span>
+                            </button>
+
+                            <!-- ✅ FAQ (အသစ်) -->
+                            <button class="sidebar-btn" data-action="faq">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"/>
+                                    <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+                                    <line x1="12" y1="17" x2="12.01" y2="17"/>
+                                </svg>
+                                <span>FAQ</span>
+                            </button>
+
+                            <!-- ✅ Invite (အသစ်) -->
+                            <button class="sidebar-btn" data-action="invite">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                                    <circle cx="9" cy="7" r="4"/>
+                                    <line x1="19" y1="8" x2="19" y2="14"/>
+                                    <line x1="22" y1="11" x2="16" y2="11"/>
+                                </svg>
+                                <span>Invite</span>
+                            </button>
+
+                            <!-- ✅ Settings -->
                             <button class="sidebar-btn" data-action="settings">
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                     <circle cx="12" cy="12" r="3"/>
@@ -7353,80 +7526,78 @@ body {
             </div>
         </main>
 
-       <!-- ✅ PLUS MENU POPUP (အဝိုင်း ၅ ခု) -->
-<div class="plus-menu-overlay hidden" id="plusMenuOverlay"></div>
+        <!-- ✅ PLUS MENU POPUP (အဝိုင်း ၅ ခု) -->
+        <div class="plus-menu-overlay hidden" id="plusMenuOverlay"></div>
 
-<div class="plus-menu" id="plusMenu">
-    <!-- အပေါ် တန်း ၁ — ၃ ခု -->
-    <div class="plus-menu-row">
-        <button class="plus-menu-btn" data-action="partychat">
-            <div class="plus-menu-btn-circle">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                    <circle cx="9" cy="7" r="4"/>
-                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-                    <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-                </svg>
+        <div class="plus-menu" id="plusMenu">
+            <!-- အပေါ် တန်း ၁ — ၃ ခု -->
+            <div class="plus-menu-row">
+                <button class="plus-menu-btn" data-action="partychat">
+                    <div class="plus-menu-btn-circle">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                            <circle cx="9" cy="7" r="4"/>
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                        </svg>
+                    </div>
+                    <span>PartyChat</span>
+                </button>
+
+                <button class="plus-menu-btn" data-action="gamecard">
+                    <div class="plus-menu-btn-circle">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="2" y="5" width="20" height="14" rx="2"/>
+                            <line x1="2" y1="10" x2="22" y2="10"/>
+                            <line x1="7" y1="15" x2="10" y2="15"/>
+                            <circle cx="16" cy="15" r="1.5" fill="currentColor"/>
+                        </svg>
+                    </div>
+                    <span>Game Card</span>
+                </button>
+
+                <button class="plus-menu-btn" data-action="info">
+                    <div class="plus-menu-btn-circle">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                            <polyline points="14 2 14 8 20 8"/>
+                            <line x1="9" y1="13" x2="15" y2="13"/>
+                            <line x1="9" y1="17" x2="15" y2="17"/>
+                            <line x1="9" y1="9" x2="10" y2="9"/>
+                        </svg>
+                    </div>
+                    <span>Info</span>
+                </button>
             </div>
-            <span>PartyChat</span>
-        </button>
 
-        <button class="plus-menu-btn" data-action="gamecard">
-            <div class="plus-menu-btn-circle">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <rect x="2" y="5" width="20" height="14" rx="2"/>
-                    <line x1="2" y1="10" x2="22" y2="10"/>
-                    <line x1="7" y1="15" x2="10" y2="15"/>
-                    <circle cx="16" cy="15" r="1.5" fill="currentColor"/>
-                </svg>
+            <!-- အောက် တန်း ၂ — ၂ ခု -->
+            <div class="plus-menu-row">
+                <button class="plus-menu-btn" data-action="post">
+                    <div class="plus-menu-btn-circle">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 20h9"/>
+                            <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+                        </svg>
+                    </div>
+                    <span>Post</span>
+                </button>
+
+                <button class="plus-menu-btn" data-action="play">
+                    <div class="plus-menu-btn-circle">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="2" y="5" width="20" height="12" rx="6"/>
+                            <circle cx="8" cy="11" r="1.5" fill="currentColor"/>
+                            <circle cx="16" cy="11" r="1.5" fill="currentColor"/>
+                            <path d="M12 5V7"/>
+                            <path d="M10 7H14"/>
+                            <line x1="6" y1="6" x2="6" y2="8"/>
+                            <line x1="18" y1="6" x2="18" y2="8"/>
+                        </svg>
+                    </div>
+                    <span>Play</span>
+                </button>
             </div>
-            <span>Game Card</span>
-        </button>
-
-        <button class="plus-menu-btn" data-action="info">
-            <div class="plus-menu-btn-circle">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                    <polyline points="14 2 14 8 20 8"/>
-                    <line x1="9" y1="13" x2="15" y2="13"/>
-                    <line x1="9" y1="17" x2="15" y2="17"/>
-                    <line x1="9" y1="9" x2="10" y2="9"/>
-                </svg>
-            </div>
-            <span>Info</span>
-        </button>
-    </div>
-
-    <!-- အောက် တန်း ၂ — ၂ ခု -->
-    <div class="plus-menu-row">
-        <button class="plus-menu-btn" data-action="post">
-            <div class="plus-menu-btn-circle">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M12 20h9"/>
-                    <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
-                </svg>
-            </div>
-            <span>Post</span>
-        </button>
-
-        <button class="plus-menu-btn" data-action="play">
-            <div class="plus-menu-btn-circle">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <rect x="2" y="5" width="20" height="12" rx="6"/>
-                    <circle cx="8" cy="11" r="1.5" fill="currentColor"/>
-                    <circle cx="16" cy="11" r="1.5" fill="currentColor"/>
-                    <path d="M12 5V7"/>
-                    <path d="M10 7H14"/>
-                    <line x1="6" y1="6" x2="6" y2="8"/>
-                    <line x1="18" y1="6" x2="18" y2="8"/>
-                </svg>
-            </div>
-            <span>Play</span>
-        </button>
-    </div>
-</div>
-
-        
+        </div>
 
         <!-- FULLSCREEN OVERLAY -->
         <div class="fullscreen-overlay" id="fullscreenOverlay">
@@ -7521,7 +7692,6 @@ body {
 
                     </div>
                 </div>
-
 
                 <div class="fs-screen hidden" id="fs-coin"><div class="screen-center"><p>Diamond balance and transactions</p></div></div>
 
@@ -7641,6 +7811,177 @@ body {
                             <div class="shop-grid hidden" id="shopBackgroundsGrid"></div>
                             <div class="shop-grid hidden" id="shopBubblesGrid"></div>
                         </div>
+                    </div>
+                </div>
+
+                <!-- ✅ RANK SCREEN (အလွတ်) -->
+                <div class="fs-screen hidden" id="fs-rank">
+                    <div class="screen-center">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#ff6d1f" stroke-width="1.5">
+                            <path d="M2 4l3 12h14l3-12-6 4-4-8-4 8-6-4z"/>
+                            <path d="M4 20h16"/>
+                            <path d="M10 16v4"/>
+                            <path d="M14 16v4"/>
+                        </svg>
+                        <h3>Rank</h3>
+                        <p>Leaderboard rankings here</p>
+                    </div>
+                </div>
+
+                <!-- ✅ FAQ SCREEN -->
+                <div class="fs-screen hidden" id="fs-faq">
+                    <div class="faq-container">
+
+                        <!-- ✅ FAQ Item 1 -->
+                        <div class="faq-item">
+                            <button class="faq-question">
+                                <div class="faq-icon faq-icon-info">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <circle cx="12" cy="12" r="10"/>
+                                        <line x1="12" y1="16" x2="12" y2="12"/>
+                                        <line x1="12" y1="8" x2="12.01" y2="8"/>
+                                    </svg>
+                                </div>
+                                <div class="faq-question-text">
+                                    <span class="faq-question-title">STAR ARCADE ဆိုသည်မှာ</span>
+                                    <span class="faq-question-sub">Gaming App အကြောင်း</span>
+                                </div>
+                                <svg class="faq-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                    <polyline points="6 9 12 15 18 9"/>
+                                </svg>
+                            </button>
+                            <div class="faq-answer">
+                                <p>STAR ARCADE ဆိုသည်မှာ Gaming App တစ်ခုဖြစ်ပြီး ဂိမ်းကစားသူအဖွဲ့အစည်း နှင့် သူငယ်ချင်းဖွဲ့ချင်းကို အကူညီဖြစ်စေမည်။</p>
+                            </div>
+                        </div>
+
+                        <!-- ✅ FAQ Item 2 -->
+                        <div class="faq-item">
+                            <button class="faq-question">
+                                <div class="faq-icon faq-icon-msg">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                                    </svg>
+                                </div>
+                                <div class="faq-question-text">
+                                    <span class="faq-question-title">STAR Arcade Message သိမ်းနည်း</span>
+                                    <span class="faq-question-sub">Message Storage အကြောင်း</span>
+                                </div>
+                                <svg class="faq-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                    <polyline points="6 9 12 15 18 9"/>
+                                </svg>
+                            </button>
+                            <div class="faq-answer">
+                                <p>သင်တို့ရဲ့ Message များကိုကျုပ်တို့ရဲ့ Server ပေါတွင်မသိမ်းပေးထားပါ။</p>
+                                <p>သင်တို့ရဲ့ဖုန်းတွင်သင်တို့ကိုယ်တိုင် သိမ်းစည်းတဲ့စနစ်ကိုအသုံးပြုထားသည်။</p>
+                                <p>ထိုကြောင့်ဖုန်းပြောင်းရင်သင့်အရင် Message များပြန်ရမည်မဟုတ်ပါ။</p>
+                                <p>ထိုသို့လုပ်ရခြင်းမှာ Message များရဲ့ လုံခြုံရေးကြောင့်ဖြစ်သည်။</p>
+                            </div>
+                        </div>
+
+                        <!-- ✅ FAQ Item 3 -->
+                        <div class="faq-item">
+                            <button class="faq-question">
+                                <div class="faq-icon faq-icon-ai">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polygon points="23 7 16 12 23 17 23 7"/>
+                                        <rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
+                                    </svg>
+                                </div>
+                                <div class="faq-question-text">
+                                    <span class="faq-question-title">STAR Arcade Ai Video</span>
+                                    <span class="faq-question-sub">AI Video အကြောင်း</span>
+                                </div>
+                                <svg class="faq-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                    <polyline points="6 9 12 15 18 9"/>
+                                </svg>
+                            </button>
+                            <div class="faq-answer">
+                                <p>STAR Arcade Ai တွင် Video ထုတ်လုပ်ထားပါက သင့် Video ကိုရရှိချိန်တွင် သင့်ရဲ့ Mail Box သို့ပေးပို့ပေးပါသည်။</p>
+                            </div>
+                        </div>
+
+                        <!-- ✅ FAQ Item 4 -->
+                        <div class="faq-item">
+                            <button class="faq-question">
+                                <div class="faq-icon faq-icon-report">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                                        <line x1="12" y1="9" x2="12" y2="13"/>
+                                        <line x1="12" y1="17" x2="12.01" y2="17"/>
+                                    </svg>
+                                </div>
+                                <div class="faq-question-text">
+                                    <span class="faq-question-title">Report ပြုလုပ်ခြင်း</span>
+                                    <span class="faq-question-sub">ရိုင်းစိုင်းသူများကို Report</span>
+                                </div>
+                                <svg class="faq-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                    <polyline points="6 9 12 15 18 9"/>
+                                </svg>
+                            </button>
+                            <div class="faq-answer">
+                                <p>အသုံးပြုသူများထဲတွင် ရိုင်းစိုင်းသော Messages ပို့သူများကို Report ပြုလုပ်ပါက Admin Team မှထိုသူအကောင့်ကို Ban တဲ့အထိလုပ်နိုင်ပါသည်။</p>
+                            </div>
+                        </div>
+
+                        <!-- ✅ FAQ Item 5 -->
+                        <div class="faq-item">
+                            <button class="faq-question">
+                                <div class="faq-icon faq-icon-warning">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <circle cx="12" cy="12" r="10"/>
+                                        <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
+                                    </svg>
+                                </div>
+                                <div class="faq-question-text">
+                                    <span class="faq-question-title">Hack နှင့် မသမာမှု</span>
+                                    <span class="faq-question-sub">Account ပိတ်ပင်ခြင်း အကြောင်း</span>
+                                </div>
+                                <svg class="faq-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                    <polyline points="6 9 12 15 18 9"/>
+                                </svg>
+                            </button>
+                            <div class="faq-answer">
+                                <p>မသမာသောနည်းလမ်းများသုံးချင်း / Hack လုပ်ချင်းများရှိပါက သင့်အကောင့်ကိုပိတ်ပင်ခံရနိုင်ပါသည်။</p>
+                            </div>
+                        </div>
+
+                        <!-- ✅ FAQ Item 6 -->
+                        <div class="faq-item">
+                            <button class="faq-question">
+                                <div class="faq-icon faq-icon-contact">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+                                    </svg>
+                                </div>
+                                <div class="faq-question-text">
+                                    <span class="faq-question-title">ဆက်သွယ်ရန်</span>
+                                    <span class="faq-question-sub">ပြဿနာရှိရင် ဆက်သွယ်ပါ</span>
+                                </div>
+                                <svg class="faq-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                    <polyline points="6 9 12 15 18 9"/>
+                                </svg>
+                            </button>
+                            <div class="faq-answer">
+                                <p>STAR Arcade တွင်ပြသနာများရှိပါက သို့မဟုတ်အကောင့်ပြန်ယူမရချင်းများဖြစ်ပါက</p>
+                                <p>Telegram <b>@Starlar1</b> / TikTok <b>@novastarlar</b> စီလာပြောနိုင်သည်။</p>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- ✅ INVITE SCREEN (အလွတ်) -->
+                <div class="fs-screen hidden" id="fs-invite">
+                    <div class="screen-center">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#ff6d1f" stroke-width="1.5">
+                            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                            <circle cx="9" cy="7" r="4"/>
+                            <line x1="19" y1="8" x2="19" y2="14"/>
+                            <line x1="22" y1="11" x2="16" y2="11"/>
+                        </svg>
+                        <h3>Invite</h3>
+                        <p>Invite friends and earn rewards</p>
                     </div>
                 </div>
 
@@ -7867,382 +8208,381 @@ body {
         </div>
     </div>
 
-<!-- IMAGE SEND SYSTEM -->
-<div class="img-send-popup-overlay hidden" id="imgSendPopup">
-    <div class="img-send-popup">
-        <div class="img-send-preview-wrap">
-            <img id="imgSendPreview" src="" alt="preview" />
-        </div>
-        <p class="img-send-instruction">Slide the circle to send</p>
-        <div class="img-send-slider-container">
-            <div class="img-send-slider-track" id="imgSendSliderTrack">
-                <div class="img-send-slider-filled" id="imgSendSliderFilled"></div>
-                <div class="img-send-slider-circle" id="imgSendSliderCircle">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                        <polyline points="9,18 15,12 9,6"/>
-                    </svg>
+    <!-- IMAGE SEND SYSTEM -->
+    <div class="img-send-popup-overlay hidden" id="imgSendPopup">
+        <div class="img-send-popup">
+            <div class="img-send-preview-wrap">
+                <img id="imgSendPreview" src="" alt="preview" />
+            </div>
+            <p class="img-send-instruction">Slide the circle to send</p>
+            <div class="img-send-slider-container">
+                <div class="img-send-slider-track" id="imgSendSliderTrack">
+                    <div class="img-send-slider-filled" id="imgSendSliderFilled"></div>
+                    <div class="img-send-slider-circle" id="imgSendSliderCircle">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <polyline points="9,18 15,12 9,6"/>
+                        </svg>
+                    </div>
                 </div>
             </div>
+            <button class="img-send-cancel-btn" id="imgSendCancelBtn">Cancel</button>
         </div>
-        <button class="img-send-cancel-btn" id="imgSendCancelBtn">Cancel</button>
     </div>
-</div>
 
-<div class="img-viewer-overlay hidden" id="imgViewerOverlay">
-    <button class="img-viewer-close" id="imgViewerClose">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <line x1="18" y1="6" x2="6" y2="18"/>
-            <line x1="6" y1="6" x2="18" y2="18"/>
-        </svg>
+    <div class="img-viewer-overlay hidden" id="imgViewerOverlay">
+        <button class="img-viewer-close" id="imgViewerClose">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <line x1="18" y1="6" x2="6" y2="18"/>
+                <line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+        </button>
+        <div class="img-viewer-body">
+            <img id="imgViewerImg" src="" alt="full" />
+        </div>
+        <div class="img-viewer-footer">
+            <button class="img-viewer-download-btn" id="imgViewerDownloadBtn">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="7,10 12,15 17,10"/>
+                    <line x1="12" y1="15" x2="12" y2="3"/>
+                </svg>
+                <span>Download</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- STAR AI SCREEN -->
+    <div class="star-ai-screen hidden" id="starAiScreen">
+        <div class="star-ai-header">
+            <button class="star-ai-back-btn" id="starAiBackBtn">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <polyline points="15,18 9,12 15,6"/>
+                </svg>
+            </button>
+            <div class="star-ai-title-wrap">
+                <span class="star-ai-title">Star AI</span>
+                <span class="star-ai-model-name" id="starAiModelName">Star 1.0</span>
+            </div>
+            <div class="star-ai-header-actions">
+                <button class="star-ai-header-btn" id="starAiNewChatBtn" title="New Chat">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="12" y1="5" x2="12" y2="19"/>
+                        <line x1="5" y1="12" x2="19" y2="12"/>
+                    </svg>
+                </button>
+                <button class="star-ai-header-btn" id="starAiChatListBtn" title="Chat History">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="8" y1="6" x2="21" y2="6"/>
+                        <line x1="8" y1="12" x2="21" y2="12"/>
+                        <line x1="8" y1="18" x2="21" y2="18"/>
+                        <line x1="3" y1="6" x2="3.01" y2="6"/>
+                        <line x1="3" y1="12" x2="3.01" y2="12"/>
+                        <line x1="3" y1="18" x2="3.01" y2="18"/>
+                    </svg>
+                </button>
+                <button class="star-ai-header-btn danger" id="starAiClearBtn" title="Delete">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 6h18"/>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/>
+                        <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                        <line x1="10" y1="11" x2="10" y2="17"/>
+                        <line x1="14" y1="11" x2="14" y2="17"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <div class="star-ai-messages" id="starAiMessages">
+            <div class="star-ai-empty-state" id="starAiEmptyState">
+                <div class="star-ai-empty-img-wrap">
+                    <img src="https://i.ibb.co/QF8b56Gj/file-00000000e6fc8211ad946f92b60b511c.png" alt="Star AI" />
+                </div>
+                <h3>Star AI မှ ကြိုဆိုပါတယ်</h3>
+                <p>မေးခွန်း ရေးပြီး စတင်လိုက်ပါ</p>
+            </div>
+        </div>
+
+        <div class="star-ai-input-bar-wrap">
+            <div class="star-ai-input-bar">
+                <button class="star-ai-model-selector-btn" id="starAiModelSelectorBtn" title="Model">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="3"/>
+                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                    </svg>
+                </button>
+                <textarea id="starAiInput" class="star-ai-input" placeholder="Star AI ကို မေးပါ..." rows="1"></textarea>
+                <button class="star-ai-icon-btn" id="starAiShopBtn" title="Shop">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/>
+                        <path d="M3 6h18"/>
+                        <path d="M16 10a4 4 0 0 1-8 0"/>
+                    </svg>
+                </button>
+                <button class="star-ai-icon-btn" id="starAiVideoBtn" title="Video Request">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="23 7 16 12 23 17 23 7"/>
+                        <rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
+                    </svg>
+                </button>
+                <button class="star-ai-send-btn hidden" id="starAiSendBtn" title="Send">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODEL SELECTOR POPUP -->
+    <div class="star-model-popup-overlay hidden" id="starModelPopupOverlay">
+        <div class="star-model-popup">
+            <div class="star-model-popup-header">
+                <span class="star-model-popup-title">Model ရွေးပါ</span>
+                <button class="star-model-popup-close" id="starModelPopupCloseBtn">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <line x1="18" y1="6" x2="6" y2="18"/>
+                        <line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="star-model-popup-body">
+                <button class="star-model-item active" data-model="star1">
+                    <div class="star-model-icon">1</div>
+                    <div class="star-model-info">
+                        <div class="star-model-item-name">Star 1.0</div>
+                        <div class="star-model-item-desc">Pollinations AI</div>
+                    </div>
+                    <div class="star-model-check">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                            <polyline points="20 6 9 17 4 12"/>
+                        </svg>
+                    </div>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- CHAT LIST PANEL -->
+    <div class="star-ai-chatlist-panel hidden" id="starAiChatListPanel">
+        <div class="star-ai-chatlist-overlay" id="starAiChatListOverlay"></div>
+        <div class="star-ai-chatlist">
+            <div class="star-ai-chatlist-header">
+                <span class="star-ai-chatlist-title">Chat History</span>
+                <button class="star-ai-chatlist-close" id="starAiChatListCloseBtn">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <line x1="18" y1="6" x2="6" y2="18"/>
+                        <line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="star-ai-chatlist-body" id="starAiChatListBody"></div>
+        </div>
+    </div>
+
+    <!-- VIDEO REQUEST POPUP -->
+    <div class="vid-popup-overlay hidden" id="vidPopupOverlay">
+        <div class="vid-popup" id="vidPopup">
+            <div class="vid-popup-header">
+                <span class="vid-popup-title">Video Request</span>
+                <button class="vid-popup-close" id="vidPopupCloseBtn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <line x1="18" y1="6" x2="6" y2="18"/>
+                        <line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="vid-popup-body">
+                <div class="vid-popup-section">
+                    <div class="vid-popup-section-label">
+                        Model <span class="vid-popup-required">*</span>
+                    </div>
+                    <div class="vid-popup-models-grid" id="vidPopupModelsGrid"></div>
+                </div>
+
+                <div class="vid-popup-section">
+                    <div class="vid-popup-section-label">
+                        Images <span class="vid-popup-optional">(Optional)</span>
+                    </div>
+                    <div class="vid-popup-images-grid" id="vidPopupImagesGrid"></div>
+                    <div class="vid-popup-hint">ပုံ ၅ ပုံ = ဇာတ်ကောင် / ပုံ ၆ ခုမြောက် = Background</div>
+                </div>
+
+                <div class="vid-popup-section">
+                    <div class="vid-popup-section-label">
+                        Style <span class="vid-popup-required">*</span>
+                    </div>
+                    <input type="text" class="vid-popup-input" id="vidPopupStyleInput" placeholder="ဥပမာ -- 2D Anime, 3D Realistic..." />
+                    <div class="vid-popup-style-chips">
+                        <span class="vid-popup-chip" data-style="2D Anime">2D Anime</span>
+                        <span class="vid-popup-chip" data-style="3D Realistic">3D Realistic</span>
+                        <span class="vid-popup-chip" data-style="Cartoon">Cartoon</span>
+                        <span class="vid-popup-chip" data-style="Cinematic">Cinematic</span>
+                    </div>
+                </div>
+
+                <div class="vid-popup-section">
+                    <div class="vid-popup-section-label">
+                        Prompt <span class="vid-popup-required">*</span>
+                    </div>
+                    <textarea class="vid-popup-textarea" id="vidPopupPromptInput" rows="3" placeholder="ခိုင်းမဲ့ စာ ရေးပါ..."></textarea>
+                </div>
+            </div>
+
+            <div class="vid-popup-footer">
+                <button class="vid-popup-send-btn" id="vidPopupSendBtn" disabled>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/>
+                    </svg>
+                    <span>ပေးပို့မည်</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================
+         ✅ EVENT SYSTEM v11
+         ============================================================ -->
+
+    <!-- ✅ EVENT FAB -->
+    <button class="event-fab hidden" id="eventFab" title="Event">
+        <img id="eventFabImg" src="https://i.ibb.co/placeholder-event.png" alt="Event" />
+        <span class="event-fab-badge" id="eventFabBadge">!</span>
     </button>
-    <div class="img-viewer-body">
-        <img id="imgViewerImg" src="" alt="full" />
-    </div>
-    <div class="img-viewer-footer">
-        <button class="img-viewer-download-btn" id="imgViewerDownloadBtn">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                <polyline points="7,10 12,15 17,10"/>
-                <line x1="12" y1="15" x2="12" y2="3"/>
-            </svg>
-            <span>Download</span>
-        </button>
-    </div>
-</div>
 
-<!-- STAR AI SCREEN -->
-<div class="star-ai-screen hidden" id="starAiScreen">
-    <div class="star-ai-header">
-        <button class="star-ai-back-btn" id="starAiBackBtn">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                <polyline points="15,18 9,12 15,6"/>
-            </svg>
-        </button>
-        <div class="star-ai-title-wrap">
-            <span class="star-ai-title">Star AI</span>
-            <span class="star-ai-model-name" id="starAiModelName">Star 1.0</span>
-        </div>
-        <div class="star-ai-header-actions">
-            <button class="star-ai-header-btn" id="starAiNewChatBtn" title="New Chat">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <line x1="12" y1="5" x2="12" y2="19"/>
-                    <line x1="5" y1="12" x2="19" y2="12"/>
-                </svg>
-            </button>
-            <button class="star-ai-header-btn" id="starAiChatListBtn" title="Chat History">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <line x1="8" y1="6" x2="21" y2="6"/>
-                    <line x1="8" y1="12" x2="21" y2="12"/>
-                    <line x1="8" y1="18" x2="21" y2="18"/>
-                    <line x1="3" y1="6" x2="3.01" y2="6"/>
-                    <line x1="3" y1="12" x2="3.01" y2="12"/>
-                    <line x1="3" y1="18" x2="3.01" y2="18"/>
-                </svg>
-            </button>
-            <button class="star-ai-header-btn danger" id="starAiClearBtn" title="Delete">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M3 6h18"/>
-                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/>
-                    <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-                    <line x1="10" y1="11" x2="10" y2="17"/>
-                    <line x1="14" y1="11" x2="14" y2="17"/>
-                </svg>
-            </button>
-        </div>
-    </div>
+    <!-- ✅ EVENT FULLSCREEN -->
+    <div class="event-screen hidden" id="eventScreen">
+        <div class="event-overlay"></div>
 
-    <div class="star-ai-messages" id="starAiMessages">
-        <div class="star-ai-empty-state" id="starAiEmptyState">
-            <div class="star-ai-empty-img-wrap">
-                <img src="https://i.ibb.co/QF8b56Gj/file-00000000e6fc8211ad946f92b60b511c.png" alt="Star AI" />
+        <div class="event-header">
+            <button class="event-back-btn" id="eventBackBtn">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <polyline points="15,18 9,12 15,6"/>
+                </svg>
+            </button>
+            <div class="event-title-wrap">
+                <span class="event-title">Lucky Draw Event</span>
             </div>
-            <h3>Star AI မှ ကြိုဆိုပါတယ်</h3>
-            <p>မေးခွန်း ရေးပြီး စတင်လိုက်ပါ</p>
-        </div>
-    </div>
-
-    <div class="star-ai-input-bar-wrap">
-        <div class="star-ai-input-bar">
-            <button class="star-ai-model-selector-btn" id="starAiModelSelectorBtn" title="Model">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="12" cy="12" r="3"/>
-                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
-                </svg>
-            </button>
-            <textarea id="starAiInput" class="star-ai-input" placeholder="Star AI ကို မေးပါ..." rows="1"></textarea>
-            <button class="star-ai-icon-btn" id="starAiShopBtn" title="Shop">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/>
-                    <path d="M3 6h18"/>
-                    <path d="M16 10a4 4 0 0 1-8 0"/>
-                </svg>
-            </button>
-            <button class="star-ai-icon-btn" id="starAiVideoBtn" title="Video Request">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <polygon points="23 7 16 12 23 17 23 7"/>
-                    <rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
-                </svg>
-            </button>
-            <button class="star-ai-send-btn hidden" id="starAiSendBtn" title="Send">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/>
-                </svg>
-            </button>
-        </div>
-    </div>
-</div>
-
-<!-- MODEL SELECTOR POPUP -->
-<div class="star-model-popup-overlay hidden" id="starModelPopupOverlay">
-    <div class="star-model-popup">
-        <div class="star-model-popup-header">
-            <span class="star-model-popup-title">Model ရွေးပါ</span>
-            <button class="star-model-popup-close" id="starModelPopupCloseBtn">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                    <line x1="18" y1="6" x2="6" y2="18"/>
-                    <line x1="6" y1="6" x2="18" y2="18"/>
-                </svg>
-            </button>
-        </div>
-        <div class="star-model-popup-body">
-            <button class="star-model-item active" data-model="star1">
-                <div class="star-model-icon">1</div>
-                <div class="star-model-info">
-                    <div class="star-model-item-name">Star 1.0</div>
-                    <div class="star-model-item-desc">Pollinations AI</div>
+            <div class="event-header-stats">
+                <div class="event-stat-box">
+                    <img src="https://i.ibb.co/39SYGr6M/Grid-Art-20260805-102408042.png" alt="token" />
+                    <span id="eventTokenCount">0</span>
                 </div>
-                <div class="star-model-check">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
-                        <polyline points="20 6 9 17 4 12"/>
+                <div class="event-stat-box coin">
+                    <img src="https://i.ibb.co/39SYGr6M/Grid-Art-20260805-102408042.png" alt="coin" />
+                    <span id="eventCoinCount">0</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="event-body">
+            <div class="event-lucky-grid" id="eventLuckyGrid">
+                <div class="event-cell" data-cell="0"></div>
+                <div class="event-cell" data-cell="1"></div>
+                <div class="event-cell" data-cell="2"></div>
+                <div class="event-cell" data-cell="3"></div>
+
+                <button class="event-cell-spin-btn" id="eventSpinBtn">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
                     </svg>
-                </div>
+                    <span>ကံစမ်းမည်</span>
+                    <span class="event-cell-spin-cost">1 Token</span>
+                </button>
+
+                <div class="event-cell" data-cell="4"></div>
+                <div class="event-cell" data-cell="5"></div>
+                <div class="event-cell" data-cell="6"></div>
+                <div class="event-cell" data-cell="7"></div>
+            </div>
+        </div>
+
+        <div class="event-footer">
+            <button class="event-footer-btn" id="eventFreeTokenBtn">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="12" y1="8" x2="12" y2="16"/>
+                    <line x1="8" y1="12" x2="16" y2="12"/>
+                </svg>
+                <span>Free Token</span>
+            </button>
+            <button class="event-footer-btn primary" id="eventExchangeBtn">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="17 1 21 5 17 9"/>
+                    <path d="M3 11V9a4 4 0 0 1 4-4h14"/>
+                    <polyline points="7 23 3 19 7 15"/>
+                    <path d="M21 13v2a4 4 0 0 1-4 4H3"/>
+                </svg>
+                <span>လဲလှယ်မည်</span>
             </button>
         </div>
     </div>
-</div>
 
-<!-- CHAT LIST PANEL -->
-<div class="star-ai-chatlist-panel hidden" id="starAiChatListPanel">
-    <div class="star-ai-chatlist-overlay" id="starAiChatListOverlay"></div>
-    <div class="star-ai-chatlist">
-        <div class="star-ai-chatlist-header">
-            <span class="star-ai-chatlist-title">Chat History</span>
-            <button class="star-ai-chatlist-close" id="starAiChatListCloseBtn">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                    <line x1="18" y1="6" x2="6" y2="18"/>
-                    <line x1="6" y1="6" x2="18" y2="18"/>
+    <!-- ✅ FREE TOKEN SCREEN -->
+    <div class="event-sub-screen hidden" id="freeTokenScreen">
+        <div class="event-overlay"></div>
+
+        <div class="event-header">
+            <button class="event-back-btn" id="freeTokenBackBtn">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <polyline points="15,18 9,12 15,6"/>
                 </svg>
             </button>
+            <div class="event-title-wrap">
+                <span class="event-title">Free Token</span>
+            </div>
+            <div class="event-header-stats">
+                <div class="event-stat-box">
+                    <img src="https://i.ibb.co/39SYGr6M/Grid-Art-20260805-102408042.png" alt="token" />
+                    <span id="freeTokenCount">0</span>
+                </div>
+            </div>
         </div>
-        <div class="star-ai-chatlist-body" id="starAiChatListBody"></div>
-    </div>
-</div>
 
-<!-- VIDEO REQUEST POPUP -->
-<div class="vid-popup-overlay hidden" id="vidPopupOverlay">
-    <div class="vid-popup" id="vidPopup">
-        <div class="vid-popup-header">
-            <span class="vid-popup-title">Video Request</span>
-            <button class="vid-popup-close" id="vidPopupCloseBtn">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                    <line x1="18" y1="6" x2="6" y2="18"/>
-                    <line x1="6" y1="6" x2="18" y2="18"/>
+        <div class="event-sub-body" id="freeTokenTasksList"></div>
+    </div>
+
+    <!-- ✅ EXCHANGE SCREEN -->
+    <div class="event-sub-screen hidden" id="exchangeScreen">
+        <div class="event-overlay"></div>
+
+        <div class="event-header">
+            <button class="event-back-btn" id="exchangeBackBtn">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <polyline points="15,18 9,12 15,6"/>
                 </svg>
             </button>
-        </div>
-
-        <div class="vid-popup-body">
-            <div class="vid-popup-section">
-                <div class="vid-popup-section-label">
-                    Model <span class="vid-popup-required">*</span>
-                </div>
-                <div class="vid-popup-models-grid" id="vidPopupModelsGrid"></div>
+            <div class="event-title-wrap">
+                <span class="event-title">လဲလှယ်မည်</span>
             </div>
-
-            <div class="vid-popup-section">
-                <div class="vid-popup-section-label">
-                    Images <span class="vid-popup-optional">(Optional)</span>
-                </div>
-                <div class="vid-popup-images-grid" id="vidPopupImagesGrid"></div>
-                <div class="vid-popup-hint">ပုံ ၅ ပုံ = ဇာတ်ကောင် / ပုံ ၆ ခုမြောက် = Background</div>
-            </div>
-
-            <div class="vid-popup-section">
-                <div class="vid-popup-section-label">
-                    Style <span class="vid-popup-required">*</span>
-                </div>
-                <input type="text" class="vid-popup-input" id="vidPopupStyleInput" placeholder="ဥပမာ -- 2D Anime, 3D Realistic..." />
-                <div class="vid-popup-style-chips">
-                    <span class="vid-popup-chip" data-style="2D Anime">2D Anime</span>
-                    <span class="vid-popup-chip" data-style="3D Realistic">3D Realistic</span>
-                    <span class="vid-popup-chip" data-style="Cartoon">Cartoon</span>
-                    <span class="vid-popup-chip" data-style="Cinematic">Cinematic</span>
+            <div class="event-header-stats">
+                <div class="event-stat-box coin">
+                    <img src="https://i.ibb.co/39SYGr6M/Grid-Art-20260805-102408042.png" alt="coin" />
+                    <span id="exchangeCoinCount">0</span>
                 </div>
             </div>
+        </div>
 
-            <div class="vid-popup-section">
-                <div class="vid-popup-section-label">
-                    Prompt <span class="vid-popup-required">*</span>
-                </div>
-                <textarea class="vid-popup-textarea" id="vidPopupPromptInput" rows="3" placeholder="ခိုင်းမဲ့ စာ ရေးပါ..."></textarea>
+        <div class="event-sub-body">
+            <div class="exchange-grid" id="exchangeGrid"></div>
+        </div>
+    </div>
+
+    <!-- ✅ EXCHANGE INFO POPUP -->
+    <div class="event-popup-overlay hidden" id="exchangeInfoPopup">
+        <div class="event-popup">
+            <div class="event-popup-header">
+                <h3 id="exchangePopupTitle">Enter Info</h3>
+                <button class="event-popup-close" id="exchangePopupClose">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <line x1="18" y1="6" x2="6" y2="18"/>
+                        <line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                </button>
             </div>
-        </div>
-
-        <div class="vid-popup-footer">
-            <button class="vid-popup-send-btn" id="vidPopupSendBtn" disabled>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/>
-                </svg>
-                <span>ပေးပို့မည်</span>
-            </button>
+            <div class="event-popup-body" id="exchangePopupBody"></div>
         </div>
     </div>
-</div>
-
-<!-- ============================================================
-     ✅ EVENT SYSTEM v11
-     ============================================================ -->
-
-<!-- ✅ EVENT FAB -->
-<button class="event-fab hidden" id="eventFab" title="Event">
-    <img id="eventFabImg" src="https://i.ibb.co/placeholder-event.png" alt="Event" />
-    <span class="event-fab-badge" id="eventFabBadge">!</span>
-</button>
-
-<!-- ✅ EVENT FULLSCREEN -->
-<div class="event-screen hidden" id="eventScreen">
-    <div class="event-overlay"></div>
-
-    <div class="event-header">
-        <button class="event-back-btn" id="eventBackBtn">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                <polyline points="15,18 9,12 15,6"/>
-            </svg>
-        </button>
-        <div class="event-title-wrap">
-            <span class="event-title">Lucky Draw Event</span>
-        </div>
-        <div class="event-header-stats">
-            <div class="event-stat-box">
-                <img src="https://i.ibb.co/39SYGr6M/Grid-Art-20260805-102408042.png" alt="token" />
-                <span id="eventTokenCount">0</span>
-            </div>
-            <div class="event-stat-box coin">
-                <img src="https://i.ibb.co/39SYGr6M/Grid-Art-20260805-102408042.png" alt="coin" />
-                <span id="eventCoinCount">0</span>
-            </div>
-        </div>
-    </div>
-
-    <div class="event-body">
-        <div class="event-lucky-grid" id="eventLuckyGrid">
-            <div class="event-cell" data-cell="0"></div>
-            <div class="event-cell" data-cell="1"></div>
-            <div class="event-cell" data-cell="2"></div>
-            <div class="event-cell" data-cell="3"></div>
-
-            <button class="event-cell-spin-btn" id="eventSpinBtn">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
-                </svg>
-                <span>ကံစမ်းမည်</span>
-                <span class="event-cell-spin-cost">1 Token</span>
-            </button>
-
-            <div class="event-cell" data-cell="4"></div>
-            <div class="event-cell" data-cell="5"></div>
-            <div class="event-cell" data-cell="6"></div>
-            <div class="event-cell" data-cell="7"></div>
-        </div>
-    </div>
-
-    <div class="event-footer">
-        <button class="event-footer-btn" id="eventFreeTokenBtn">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="12" cy="12" r="10"/>
-                <line x1="12" y1="8" x2="12" y2="16"/>
-                <line x1="8" y1="12" x2="16" y2="12"/>
-            </svg>
-            <span>Free Token</span>
-        </button>
-        <button class="event-footer-btn primary" id="eventExchangeBtn">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="17 1 21 5 17 9"/>
-                <path d="M3 11V9a4 4 0 0 1 4-4h14"/>
-                <polyline points="7 23 3 19 7 15"/>
-                <path d="M21 13v2a4 4 0 0 1-4 4H3"/>
-            </svg>
-            <span>လဲလှယ်မည်</span>
-        </button>
-    </div>
-</div>
-
-<!-- ✅ FREE TOKEN SCREEN -->
-<div class="event-sub-screen hidden" id="freeTokenScreen">
-    <div class="event-overlay"></div>
-
-    <div class="event-header">
-        <button class="event-back-btn" id="freeTokenBackBtn">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                <polyline points="15,18 9,12 15,6"/>
-            </svg>
-        </button>
-        <div class="event-title-wrap">
-            <span class="event-title">Free Token</span>
-        </div>
-        <div class="event-header-stats">
-            <div class="event-stat-box">
-                <img src="https://i.ibb.co/39SYGr6M/Grid-Art-20260805-102408042.png" alt="token" />
-                <span id="freeTokenCount">0</span>
-            </div>
-        </div>
-    </div>
-
-    <div class="event-sub-body" id="freeTokenTasksList"></div>
-</div>
-
-<!-- ✅ EXCHANGE SCREEN -->
-<div class="event-sub-screen hidden" id="exchangeScreen">
-    <div class="event-overlay"></div>
-
-    <div class="event-header">
-        <button class="event-back-btn" id="exchangeBackBtn">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                <polyline points="15,18 9,12 15,6"/>
-            </svg>
-        </button>
-        <div class="event-title-wrap">
-            <span class="event-title">လဲလှယ်မည်</span>
-        </div>
-        <div class="event-header-stats">
-            <div class="event-stat-box coin">
-                <img src="https://i.ibb.co/39SYGr6M/Grid-Art-20260805-102408042.png" alt="coin" />
-                <span id="exchangeCoinCount">0</span>
-            </div>
-        </div>
-    </div>
-
-    <div class="event-sub-body">
-        <div class="exchange-grid" id="exchangeGrid"></div>
-    </div>
-</div>
-
-<!-- ✅ EXCHANGE INFO POPUP -->
-<div class="event-popup-overlay hidden" id="exchangeInfoPopup">
-    <div class="event-popup">
-        <div class="event-popup-header">
-            <h3 id="exchangePopupTitle">Enter Info</h3>
-            <button class="event-popup-close" id="exchangePopupClose">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                    <line x1="18" y1="6" x2="6" y2="18"/>
-                    <line x1="6" y1="6" x2="18" y2="18"/>
-                </svg>
-            </button>
-        </div>
-        <div class="event-popup-body" id="exchangePopupBody"></div>
-    </div>
-</div>
-
 
     <script src="script.js"></script>
 
@@ -16489,7 +16829,54 @@ document.addEventListener('keydown', function(e) {
     }
 
 })();
-             
+
+             // ============================================================
+// ✅ FAQ ACCORDION (အသစ်)
+// ============================================================
+(function() {
+    'use strict';
+
+    function initFaqAccordion() {
+        var items = document.querySelectorAll('.faq-item');
+        if (items.length === 0) {
+            setTimeout(initFaqAccordion, 500);
+            return;
+        }
+
+        items.forEach(function(item) {
+            var btn = item.querySelector('.faq-question');
+            if (!btn || btn._faqBound) return;
+            btn._faqBound = true;
+
+            btn.addEventListener('click', function() {
+                var isOpen = item.classList.contains('open');
+
+                // ✅ ကျန်တဲ့ Item တွေ ပိတ်
+                items.forEach(function(other) {
+                    if (other !== item) other.classList.remove('open');
+                });
+
+                // ✅ ဒီ Item ကို Toggle
+                if (isOpen) {
+                    item.classList.remove('open');
+                } else {
+                    item.classList.add('open');
+                }
+            });
+        });
+
+        console.log('FAQ Accordion Ready');
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(initFaqAccordion, 1200);
+        });
+    } else {
+        setTimeout(initFaqAccordion, 1200);
+    }
+
+})();
 </script>
 </body>
 </html>
