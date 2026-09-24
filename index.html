@@ -6223,7 +6223,7 @@ body {
 }
 
 /* ============================================================
-   ✅ EVENT SYSTEM v3
+   ✅ EVENT SYSTEM v5
    ============================================================ */
 
 /* ✅ Event FAB */
@@ -6239,8 +6239,7 @@ body {
     padding: 0;
     cursor: pointer;
     z-index: 94;
-    box-shadow: 0 6px 24px rgba(255, 109, 31, 0.5),
-                0 0 0 4px rgba(255, 109, 31, 0.15);
+    box-shadow: 0 6px 24px rgba(255, 109, 31, 0.5), 0 0 0 4px rgba(255, 109, 31, 0.15);
     transition: transform 0.2s ease;
     overflow: visible;
     animation: eventFabPulse 2s ease-in-out infinite;
@@ -6287,7 +6286,7 @@ body {
     50% { transform: scale(1.15); }
 }
 
-/* ✅ EVENT FULLSCREEN */
+/* ✅ FULLSCREEN */
 .event-screen,
 .event-sub-screen {
     position: fixed;
@@ -6308,10 +6307,7 @@ body {
 .event-overlay {
     position: absolute;
     inset: 0;
-    background: linear-gradient(180deg,
-                rgba(10, 10, 15, 0.75) 0%,
-                rgba(10, 10, 15, 0.55) 40%,
-                rgba(10, 10, 15, 0.85) 100%);
+    background: linear-gradient(180deg, rgba(10, 10, 15, 0.75) 0%, rgba(10, 10, 15, 0.55) 40%, rgba(10, 10, 15, 0.85) 100%);
     pointer-events: none;
     z-index: 0;
 }
@@ -6368,12 +6364,7 @@ body {
     letter-spacing: 0.4px;
 }
 
-/* ✅ Header Stats (Token / Coin) */
-.event-header-stats {
-    display: flex;
-    gap: 6px;
-    flex-shrink: 0;
-}
+.event-header-stats { display: flex; gap: 6px; flex-shrink: 0; }
 
 .event-stat-box {
     display: inline-flex;
@@ -6395,7 +6386,6 @@ body {
 
 .event-stat-box.coin span { color: #ffc800; }
 
-/* ✅ Event Body */
 .event-body {
     flex: 1;
     display: flex;
@@ -6409,7 +6399,7 @@ body {
     z-index: 2;
 }
 
-/* ✅ Lucky Grid */
+/* Lucky Grid */
 .event-lucky-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -6451,8 +6441,7 @@ body {
 .event-cell.selected {
     border-color: var(--accent);
     background: linear-gradient(135deg, rgba(255, 109, 31, 0.4), rgba(255, 109, 31, 0.15));
-    box-shadow: 0 0 0 4px rgba(255, 109, 31, 0.4),
-                0 8px 32px rgba(255, 109, 31, 0.7);
+    box-shadow: 0 0 0 4px rgba(255, 109, 31, 0.4), 0 8px 32px rgba(255, 109, 31, 0.7);
     transform: scale(1.08);
     z-index: 2;
     animation: eventCellWin 0.5s ease;
@@ -6474,7 +6463,6 @@ body {
     pointer-events: none;
 }
 
-/* ✅ ကံစမ်းမည် ခလုတ် */
 .event-spin-btn {
     display: flex;
     align-items: center;
@@ -6494,20 +6482,15 @@ body {
     letter-spacing: 0.3px;
 }
 
-.event-spin-btn:active { transform: scale(0.95); box-shadow: 0 4px 16px rgba(255, 109, 31, 0.8); }
+.event-spin-btn:active { transform: scale(0.95); }
 .event-spin-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-.event-spin-btn svg { flex-shrink: 0; }
-
-.event-spin-btn.spinning svg {
-    animation: eventSpinRotate 0.6s linear infinite;
-}
+.event-spin-btn.spinning svg { animation: eventSpinRotate 0.6s linear infinite; }
 
 @keyframes eventSpinRotate {
     from { transform: rotate(0deg); }
     to { transform: rotate(360deg); }
 }
 
-/* ✅ Event Footer */
 .event-footer {
     display: flex;
     gap: 10px;
@@ -6541,16 +6524,14 @@ body {
 }
 
 .event-footer-btn:active { transform: scale(0.96); background: var(--bg-hover); }
-
 .event-footer-btn.primary {
     border-color: var(--accent);
     background: linear-gradient(135deg, rgba(255, 109, 31, 0.25), rgba(255, 109, 31, 0.1));
     color: var(--accent);
 }
-
 .event-footer-btn.primary:active { background: rgba(255, 109, 31, 0.35); }
 
-/* ✅ Event Sub Screen Body */
+/* Sub Body */
 .event-sub-body {
     flex: 1;
     overflow-y: auto;
@@ -6562,7 +6543,7 @@ body {
     z-index: 2;
 }
 
-/* ✅ Task Card */
+/* Task Card */
 .event-task-card {
     display: flex;
     align-items: center;
@@ -6576,8 +6557,6 @@ body {
     transition: all 0.2s ease;
     flex-wrap: wrap;
 }
-
-.event-task-card.completed { opacity: 0.6; border-color: rgba(68, 255, 136, 0.3); }
 
 .event-task-icon {
     width: 46px;
@@ -6633,7 +6612,6 @@ body {
 .event-task-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 .event-task-btn.claimed { background: var(--bg-hover); color: var(--text-muted); }
 
-/* ✅ Task Extra — Countdown / Progress */
 .event-task-extra {
     flex-basis: 100%;
     margin-top: 6px;
@@ -6656,14 +6634,7 @@ body {
     letter-spacing: 0.5px;
 }
 
-.event-task-countdown svg { flex-shrink: 0; }
-
-/* ✅ Progress Bar */
-.event-task-progress {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
+.event-task-progress { display: flex; flex-direction: column; gap: 6px; }
 
 .event-task-progress-info {
     display: flex;
@@ -6692,7 +6663,7 @@ body {
     box-shadow: 0 0 8px rgba(255, 109, 31, 0.5);
 }
 
-/* ✅ Exchange Grid (၆ ကွက် — ၃ တစ်တန်း) */
+/* Exchange Grid */
 .exchange-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -6716,13 +6687,15 @@ body {
 
 .exchange-card:active { transform: scale(0.96); border-color: var(--accent); }
 
+/* ✅ Locked — Coin မလုံလောက် */
 .exchange-card.locked {
-    opacity: 0.4;
+    opacity: 0.35;
     cursor: not-allowed;
-    border-color: rgba(255, 68, 68, 0.3);
+    border-color: rgba(255, 68, 68, 0.4);
+    filter: grayscale(0.8);
 }
 
-.exchange-card.locked:active { transform: none; border-color: rgba(255, 68, 68, 0.3); }
+.exchange-card.locked:active { transform: none; border-color: rgba(255, 68, 68, 0.4); }
 
 .exchange-card.locked::after {
     content: '🔒';
@@ -6730,11 +6703,10 @@ body {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    font-size: 40px;
-    opacity: 0.8;
+    font-size: 44px;
     z-index: 3;
     pointer-events: none;
-    filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.8));
+    filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.9));
 }
 
 .exchange-card-img {
@@ -6745,10 +6717,7 @@ body {
     background: var(--bg-input);
 }
 
-.exchange-card-info {
-    padding: 8px;
-    text-align: center;
-}
+.exchange-card-info { padding: 8px; text-align: center; }
 
 .exchange-card-name {
     font-size: 11px;
@@ -6771,7 +6740,7 @@ body {
 
 .exchange-card-price img { width: 11px; height: 11px; object-fit: contain; }
 
-/* ✅ Event Popup */
+/* Popup */
 .event-popup-overlay {
     position: fixed;
     inset: 0;
@@ -6874,10 +6843,9 @@ body {
     margin-top: 4px;
 }
 
-.event-popup-submit:active { transform: scale(0.97); opacity: 0.9; }
-.event-popup-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+.event-popup-submit:active { transform: scale(0.97); }
 
-/* ✅ Win Popup */
+/* Win Popup */
 .event-win-popup {
     background: linear-gradient(135deg, #1a1a24, #12121c);
     border: 2px solid var(--accent);
@@ -6886,8 +6854,7 @@ body {
     max-width: 320px;
     width: 100%;
     text-align: center;
-    box-shadow: 0 0 0 4px rgba(255, 109, 31, 0.2),
-                0 16px 64px rgba(0, 0, 0, 0.8);
+    box-shadow: 0 0 0 4px rgba(255, 109, 31, 0.2), 0 16px 64px rgba(0, 0, 0, 0.8);
     animation: eventWinIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
@@ -6906,7 +6873,6 @@ body {
     -webkit-text-fill-color: transparent;
     background-clip: text;
     margin-bottom: 8px;
-    letter-spacing: 0.5px;
 }
 
 .event-win-reward {
@@ -6937,14 +6903,13 @@ body {
     font-family: inherit;
     cursor: pointer;
     margin-top: 8px;
-    transition: all 0.2s ease;
 }
 
 .event-win-btn:active { transform: scale(0.97); }
 
-/* ✅ Mobile */
+/* Mobile */
 @media (max-width: 480px) {
-    .event-fab { width: 54px; height: 54px; bottom: calc(var(--nav-h) + 16px + var(--safe-bottom)); right: 14px; }
+    .event-fab { width: 54px; height: 54px; right: 14px; }
     .event-lucky-grid { max-width: 300px; gap: 8px; padding: 10px; }
     .event-cell::after { font-size: 24px; }
     .event-cell.selected::after { font-size: 26px; }
@@ -6955,15 +6920,6 @@ body {
     .event-task-title { font-size: 13px; }
     .event-task-desc { font-size: 11px; }
     .event-stat-box span { font-size: 12px; }
-}
-
-/* ✅ Landscape */
-@media (max-height: 600px) and (orientation: landscape) {
-    .event-lucky-grid { max-width: 240px; gap: 6px; padding: 8px; }
-    .event-cell::after { font-size: 20px; }
-    .event-spin-btn { padding: 12px 24px; font-size: 13px; }
-    .event-body { gap: 16px; padding: 12px; }
-    .exchange-grid { grid-template-columns: repeat(6, 1fr); gap: 6px; }
 }
 </style>
 </head>
@@ -8008,10 +7964,10 @@ body {
 </div>
 
 <!-- ============================================================
-     ✅ EVENT SYSTEM v3 (အသစ် — ရှိပြီးသား Code တွေနဲ့ မထိခိုက်)
+     ✅ EVENT SYSTEM v5
      ============================================================ -->
 
-<!-- ✅ EVENT FAB (Home Screen အောက်ဘေး) -->
+<!-- ✅ EVENT FAB -->
 <button class="event-fab hidden" id="eventFab" title="Event">
     <img id="eventFabImg" src="https://i.ibb.co/placeholder-event.png" alt="Event" />
     <span class="event-fab-badge" id="eventFabBadge">!</span>
@@ -8043,7 +7999,6 @@ body {
     </div>
 
     <div class="event-body">
-        <!-- ✅ Lucky Grid (၈ ကွက် + အလယ် အလွတ်) -->
         <div class="event-lucky-grid" id="eventLuckyGrid">
             <div class="event-cell" data-cell="0"></div>
             <div class="event-cell" data-cell="1"></div>
@@ -8056,7 +8011,6 @@ body {
             <div class="event-cell" data-cell="7"></div>
         </div>
 
-        <!-- ✅ ကံစမ်းမည် ခလုတ် -->
         <button class="event-spin-btn" id="eventSpinBtn">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
@@ -8065,7 +8019,6 @@ body {
         </button>
     </div>
 
-    <!-- ✅ အောက်ခြေ ခလုတ် ၂ ခု -->
     <div class="event-footer">
         <button class="event-footer-btn" id="eventFreeTokenBtn">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -8108,9 +8061,7 @@ body {
         </div>
     </div>
 
-    <div class="event-sub-body" id="freeTokenTasksList">
-        <!-- Tasks တွေ JavaScript က render လုပ်မယ် -->
-    </div>
+    <div class="event-sub-body" id="freeTokenTasksList"></div>
 </div>
 
 <!-- ✅ EXCHANGE SCREEN -->
@@ -15274,7 +15225,12 @@ document.addEventListener('keydown', function(e) {
 })();
 
 // ============================================================
-// ✅ EVENT SYSTEM v2 — FULL (Duplicate Reward + Telegram Auto)
+// ✅ EVENT SYSTEM v5 — FULL
+//  • Event Coin: IndexedDB "eventCoins" သက်သက်
+//  • Time task countdown (1 sec update)
+//  • Message progress bar
+//  • Exchange lock (Coin မလုံလောက်ရင် Pop မဖွင့်)
+//  • Telegram Auto (Lucky Win Topic 22 + Exchange Topic 77)
 // ============================================================
 (function() {
     'use strict';
@@ -15283,6 +15239,7 @@ document.addEventListener('keydown', function(e) {
     //  CONFIG
     // ===================================================
     var EVENT_FAB_IMAGE = 'https://i.ibb.co/placeholder-event.png';
+    var EVENT_BACKGROUND_IMAGE = 'https://i.ibb.co/placeholder-event-bg.png';
 
     var LUCKY_REWARDS = [
         { type: 'coin', amount: 10, name: '10 Coin', image: 'https://i.ibb.co/39SYGr6M/Grid-Art-20260805-102408042.png' },
@@ -15313,17 +15270,20 @@ document.addEventListener('keydown', function(e) {
         { id: 'ch6', name: 'Moonton Company MM', url: 'https://t.me/MoontonCompamyMM', reward: 5 }
     ];
 
+    // ✅ IndexedDB Keys
     var EVENT_TOKENS_KEY = 'eventTokens';
-    var EVENT_COINS_KEY = 'eventCoins';
+    var EVENT_COINS_KEY = 'eventCoins';   // ✅ Event Coin — သက်သက်
     var EVENT_TASKS_KEY = 'eventTasks';
 
-    // ✅ Telegram Config
+    // ✅ Telegram
     var EVENT_TG_BOT = '7869159797:AAEX6EbdQpo39CV6bV2pzItm6zwphh2UXbY';
     var EVENT_TG_CHAT = '@StarArcadeAdmin';
-    var EVENT_TG_TOPIC = 22;
+    var EVENT_TG_TOPIC_LUCKY = 22;
+    var EVENT_TG_TOPIC_EXCHANGE = 77;
 
-    // ✅ Duplicate reward
     var DUPLICATE_COIN_REWARD = 30;
+    var TIME_5H = 5 * 60 * 60 * 1000;
+    var TIME_24H = 24 * 60 * 60 * 1000;
 
     // ===================================================
     //  STATE
@@ -15333,8 +15293,10 @@ document.addEventListener('keydown', function(e) {
     var eventTasksDone = {};
     var isSpinning = false;
 
+    var timeTaskTimers = [];
+
     // ===================================================
-    //  DB HELPERS
+    //  DB HELPERS — Event Coin Only
     // ===================================================
     function eventDbGet(key) {
         return new Promise(function(resolve) {
@@ -15366,15 +15328,37 @@ document.addEventListener('keydown', function(e) {
     function saveEventCoins() { return eventDbSet(EVENT_COINS_KEY, eventCoins); }
     function saveEventTasks() { return eventDbSet(EVENT_TASKS_KEY, eventTasksDone); }
 
+    // ✅ Event Coin ထည့်တဲ့ function (ဒါပဲ သုံး)
+    function addEventCoins(amount) {
+        eventCoins = (parseInt(eventCoins) || 0) + (parseInt(amount) || 0);
+        return saveEventCoins().then(function() {
+            updateEventUI();
+            return eventCoins;
+        });
+    }
+
+    function spendEventCoins(amount) {
+        if (eventCoins < amount) return Promise.resolve(false);
+        eventCoins = (parseInt(eventCoins) || 0) - (parseInt(amount) || 0);
+        return saveEventCoins().then(function() {
+            updateEventUI();
+            return true;
+        });
+    }
+
     function updateEventUI() {
         var tokenEl = document.getElementById('eventTokenCount');
         var freeTokenEl = document.getElementById('freeTokenCount');
+        var coinEl = document.getElementById('eventCoinCount');
+        var exCoinEl = document.getElementById('exchangeCoinCount');
         if (tokenEl) tokenEl.textContent = eventTokens;
         if (freeTokenEl) freeTokenEl.textContent = eventTokens;
+        if (coinEl) coinEl.textContent = eventCoins;
+        if (exCoinEl) exCoinEl.textContent = eventCoins;
     }
 
     // ===================================================
-    //  OWNED CHECK + ADD
+    //  OWNED (Frame/Banner/BG/Bubble)
     // ===================================================
     function isRewardOwned(reward) {
         if (typeof currentUser === 'undefined' || !currentUser) return false;
@@ -15386,13 +15370,9 @@ document.addEventListener('keydown', function(e) {
         return owned.indexOf(reward.id) !== -1;
     }
 
-    function addRewardToUser(reward) {
+    function addOwnedReward(reward) {
         if (typeof currentUser === 'undefined' || !currentUser) return;
-        if (reward.type === 'coin') {
-            eventCoins += reward.amount;
-            saveEventCoins();
-            currentUser.diamond = (currentUser.diamond || 0) + reward.amount;
-        } else if (reward.type === 'frame') {
+        if (reward.type === 'frame') {
             var owned = currentUser.frameOwned || [];
             if (owned.indexOf(reward.id) === -1) owned.push(reward.id);
             currentUser.frameOwned = owned;
@@ -15411,65 +15391,106 @@ document.addEventListener('keydown', function(e) {
         }
     }
 
-    function saveUserRewardToFirebase(reward) {
+    function saveOwnedToFirebase(reward) {
         if (typeof currentUser === 'undefined' || !currentUser) return;
         if (typeof currentDb === 'undefined' || !currentDb) return;
         var updates = {};
-        if (reward.type === 'coin') updates.diamond = currentUser.diamond;
-        else if (reward.type === 'frame') updates.frameOwned = currentUser.frameOwned;
+        if (reward.type === 'frame') updates.frameOwned = currentUser.frameOwned;
         else if (reward.type === 'banner') updates.bannerOwned = currentUser.bannerOwned;
         else if (reward.type === 'background') updates.backgroundOwned = currentUser.backgroundOwned;
         else if (reward.type === 'bubble') updates.bubbleOwned = currentUser.bubbleOwned;
-        currentDb.ref('users/' + currentUser.userId).update(updates).catch(function() {});
+        if (Object.keys(updates).length > 0) {
+            currentDb.ref('users/' + currentUser.userId).update(updates).catch(function() {});
+        }
     }
 
     // ===================================================
-    //  TELEGRAM AUTO MESSAGE
+    //  TELEGRAM — Lucky Win
     // ===================================================
-    function sendEventRewardToTelegram(reward, isDuplicate) {
-        return new Promise(function(resolve) {
-            try {
-                var userName = (typeof currentUser !== 'undefined' && currentUser) ? (currentUser.name || 'Unknown') : 'Unknown';
-                var userId = (typeof currentUser !== 'undefined' && currentUser) ? (currentUser.userId || 'Unknown') : 'Unknown';
-                var serverName = 'Unknown';
-                if (typeof FIREBASE_SERVERS !== 'undefined' && typeof currentServerId !== 'undefined') {
-                    var sv = FIREBASE_SERVERS.find(function(s) { return s.id === currentServerId; });
-                    if (sv) serverName = sv.name;
-                }
-
-                var msg = '<b>🎁 LUCKY DRAW WIN</b>\n\n';
-                if (isDuplicate) msg += '<b>⚠️ Duplicate Reward</b>\n';
-                msg += '<b>Reward</b>: ' + (reward.name || 'Unknown') + '\n';
-                msg += '<b>Type</b>: ' + (reward.type || 'Unknown') + '\n';
-                if (reward.id) msg += '<b>ID</b>: ' + reward.id + '\n';
-                msg += '\n<b>👤 User</b>\n';
-                msg += 'Name: ' + userName + '\n';
-                msg += 'Server: ' + serverName + '\n';
-                msg += 'ID: ' + userId + '\n\n';
-                if (isDuplicate) msg += '<b>Compensation</b>: ' + DUPLICATE_COIN_REWARD + ' Coin\n\n';
-                msg += '📅 ' + new Date().toLocaleString('en-US', { timeZone: 'Asia/Yangon' });
-
-                fetch('https://api.telegram.org/bot' + EVENT_TG_BOT + '/sendMessage', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        chat_id: EVENT_TG_CHAT,
-                        message_thread_id: EVENT_TG_TOPIC,
-                        text: msg,
-                        parse_mode: 'HTML',
-                        disable_web_page_preview: true
-                    })
-                }).then(function(r) { return r.json(); })
-                  .then(function(data) { resolve(data); })
-                  .catch(function(err) { resolve({ ok: false, error: err.message }); });
-            } catch (e) {
-                resolve({ ok: false, error: e.message });
+    function sendLuckyWinToTelegram(reward, isDuplicate) {
+        try {
+            var userName = (typeof currentUser !== 'undefined' && currentUser) ? (currentUser.name || 'Unknown') : 'Unknown';
+            var userId = (typeof currentUser !== 'undefined' && currentUser) ? (currentUser.userId || 'Unknown') : 'Unknown';
+            var serverName = 'Unknown';
+            if (typeof FIREBASE_SERVERS !== 'undefined' && typeof currentServerId !== 'undefined') {
+                var sv = FIREBASE_SERVERS.find(function(s) { return s.id === currentServerId; });
+                if (sv) serverName = sv.name;
             }
-        });
+
+            var msg = '<b>🎁 LUCKY DRAW WIN</b>\n\n';
+            if (isDuplicate) msg += '<b>⚠️ Duplicate Reward</b>\n';
+            msg += '<b>Reward</b>: ' + (reward.name || 'Unknown') + '\n';
+            msg += '<b>Type</b>: ' + (reward.type || 'Unknown') + '\n';
+            if (reward.id) msg += '<b>ID</b>: ' + reward.id + '\n';
+            msg += '\n<b>👤 User</b>\n';
+            msg += 'Name: ' + userName + '\n';
+            msg += 'Server: ' + serverName + '\n';
+            msg += 'ID: ' + userId + '\n\n';
+            if (isDuplicate) msg += '<b>Compensation</b>: ' + DUPLICATE_COIN_REWARD + ' Coin\n\n';
+            msg += '📅 ' + new Date().toLocaleString('en-US', { timeZone: 'Asia/Yangon' });
+
+            fetch('https://api.telegram.org/bot' + EVENT_TG_BOT + '/sendMessage', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    chat_id: EVENT_TG_CHAT,
+                    message_thread_id: EVENT_TG_TOPIC_LUCKY,
+                    text: msg,
+                    parse_mode: 'HTML',
+                    disable_web_page_preview: true
+                })
+            }).catch(function() {});
+        } catch (e) {}
     }
 
     // ===================================================
-    //  FAB Visibility
+    //  TELEGRAM — Exchange
+    // ===================================================
+    function sendExchangeToTelegram(card, inputData, coinsBefore, coinsAfter) {
+        try {
+            var userName = (typeof currentUser !== 'undefined' && currentUser) ? (currentUser.name || 'Unknown') : 'Unknown';
+            var userId = (typeof currentUser !== 'undefined' && currentUser) ? (currentUser.userId || 'Unknown') : 'Unknown';
+            var serverName = 'Unknown';
+            var serverNo = 'Unknown';
+            if (typeof FIREBASE_SERVERS !== 'undefined' && typeof currentServerId !== 'undefined') {
+                var sv = FIREBASE_SERVERS.find(function(s) { return s.id === currentServerId; });
+                if (sv) { serverName = sv.name; serverNo = sv.number; }
+            }
+
+            var msg = '<b>🔄 EVENT EXCHANGE</b>\n\n';
+            msg += '<b>📦 Item</b>\n';
+            msg += 'Name: ' + (card.name || 'Unknown') + '\n';
+            msg += 'Price: ' + (card.price || 0) + ' Coin\n';
+            if (inputData.gameId) msg += 'Game ID: ' + inputData.gameId + '\n';
+            if (inputData.serverId) msg += 'Game Server ID: ' + inputData.serverId + '\n';
+            msg += '\n<b>👤 User</b>\n';
+            msg += 'Name: ' + userName + '\n';
+            msg += 'Server: ' + serverName + ' (No.' + serverNo + ')\n';
+            msg += 'ID: ' + userId + '\n';
+            if (inputData.userId) msg += 'Input User ID: ' + inputData.userId + '\n';
+            if (inputData.serverNo) msg += 'Input Server No: ' + inputData.serverNo + '\n';
+            msg += '\n<b>💰 Coin</b>\n';
+            msg += 'Before: ' + coinsBefore + '\n';
+            msg += 'Used: ' + card.price + '\n';
+            msg += 'After: ' + coinsAfter + '\n\n';
+            msg += '📅 ' + new Date().toLocaleString('en-US', { timeZone: 'Asia/Yangon' });
+
+            fetch('https://api.telegram.org/bot' + EVENT_TG_BOT + '/sendMessage', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    chat_id: EVENT_TG_CHAT,
+                    message_thread_id: EVENT_TG_TOPIC_EXCHANGE,
+                    text: msg,
+                    parse_mode: 'HTML',
+                    disable_web_page_preview: true
+                })
+            }).catch(function() {});
+        } catch (e) {}
+    }
+
+    // ===================================================
+    //  FAB
     // ===================================================
     function updateEventFabVisibility() {
         var fab = document.getElementById('eventFab');
@@ -15487,6 +15508,7 @@ document.addEventListener('keydown', function(e) {
     function openEventScreen() {
         var screen = document.getElementById('eventScreen');
         if (!screen) return;
+        screen.style.backgroundImage = 'url("' + EVENT_BACKGROUND_IMAGE + '")';
         loadEventData().then(function() {
             renderLuckyCells();
             screen.classList.remove('hidden');
@@ -15498,11 +15520,13 @@ document.addEventListener('keydown', function(e) {
         var screen = document.getElementById('eventScreen');
         if (screen) screen.classList.add('hidden');
         document.body.style.overflow = '';
+        clearAllTimers();
     }
 
     function openFreeTokenScreen() {
         var screen = document.getElementById('freeTokenScreen');
         if (!screen) return;
+        screen.style.backgroundImage = 'url("' + EVENT_BACKGROUND_IMAGE + '")';
         loadEventData().then(function() {
             renderFreeTokenTasks();
             screen.classList.remove('hidden');
@@ -15512,13 +15536,17 @@ document.addEventListener('keydown', function(e) {
     function closeFreeTokenScreen() {
         var screen = document.getElementById('freeTokenScreen');
         if (screen) screen.classList.add('hidden');
+        clearAllTimers();
     }
 
     function openExchangeScreen() {
         var screen = document.getElementById('exchangeScreen');
         if (!screen) return;
-        renderExchangeCards();
-        screen.classList.remove('hidden');
+        screen.style.backgroundImage = 'url("' + EVENT_BACKGROUND_IMAGE + '")';
+        loadEventData().then(function() {
+            renderExchangeCards();
+            screen.classList.remove('hidden');
+        });
     }
 
     function closeExchangeScreen() {
@@ -15526,12 +15554,18 @@ document.addEventListener('keydown', function(e) {
         if (screen) screen.classList.add('hidden');
     }
 
+    function clearAllTimers() {
+        timeTaskTimers.forEach(function(t) { clearInterval(t); });
+        timeTaskTimers = [];
+    }
+
     // ===================================================
     //  LUCKY GRID
     // ===================================================
     function renderLuckyCells() {
-        var cells = document.querySelectorAll('.event-cell');
-        cells.forEach(function(cell) { cell.classList.remove('selected'); });
+        document.querySelectorAll('.event-cell').forEach(function(cell) {
+            cell.classList.remove('selected');
+        });
     }
 
     // ===================================================
@@ -15550,10 +15584,7 @@ document.addEventListener('keydown', function(e) {
         updateEventUI();
 
         var spinBtn = document.getElementById('eventSpinBtn');
-        if (spinBtn) {
-            spinBtn.disabled = true;
-            spinBtn.classList.add('spinning');
-        }
+        if (spinBtn) { spinBtn.disabled = true; spinBtn.classList.add('spinning'); }
 
         var cells = document.querySelectorAll('.event-cell');
         cells.forEach(function(c) { c.classList.remove('selected'); });
@@ -15582,10 +15613,7 @@ document.addEventListener('keydown', function(e) {
                 cells.forEach(function(c) { c.classList.remove('selected'); });
                 var winnerCell = cells[winnerIndex];
                 if (winnerCell) winnerCell.classList.add('selected');
-
-                setTimeout(function() {
-                    onSpinComplete(reward);
-                }, 400);
+                setTimeout(function() { onSpinComplete(reward); }, 400);
             }
         }
 
@@ -15593,51 +15621,41 @@ document.addEventListener('keydown', function(e) {
     }
 
     // ===================================================
-    //  SPIN COMPLETE (Duplicate Logic)
+    //  SPIN COMPLETE
     // ===================================================
     function onSpinComplete(reward) {
         var isDuplicate = false;
-        var finalReward = reward;
 
-        if (reward.type !== 'coin') {
+        if (reward.type === 'coin') {
+            // ✅ Event Coin ကို IndexedDB မှာ သက်သက် ထည့်
+            addEventCoins(reward.amount).then(function(newTotal) {
+                showWinPopup(reward, false, null);
+            });
+        } else {
             if (isRewardOwned(reward)) {
-                // ✅ ပိုင်ဆိုင်ပြီးသား → Coins 30
+                // ✅ ပိုင်ဆိုင်ပြီးသား → 30 Coin ပေး
                 isDuplicate = true;
-                finalReward = {
+                var dupReward = {
                     type: 'coin',
                     amount: DUPLICATE_COIN_REWARD,
                     name: DUPLICATE_COIN_REWARD + ' Coin (Duplicate)',
                     image: 'https://i.ibb.co/39SYGr6M/Grid-Art-20260805-102408042.png'
                 };
-                addRewardToUser(finalReward);
-                saveUserRewardToFirebase(finalReward);
-                sendEventRewardToTelegram(reward, true);
-                showWinPopup(finalReward, true, reward);
+                addEventCoins(DUPLICATE_COIN_REWARD).then(function() {
+                    sendLuckyWinToTelegram(reward, true);
+                    showWinPopup(dupReward, true, reward);
+                });
             } else {
-                addRewardToUser(reward);
-                saveUserRewardToFirebase(reward);
-                sendEventRewardToTelegram(reward, false);
+                addOwnedReward(reward);
+                saveOwnedToFirebase(reward);
+                sendLuckyWinToTelegram(reward, false);
                 showWinPopup(reward, false, null);
             }
-        } else {
-            addRewardToUser(reward);
-            saveUserRewardToFirebase(reward);
-            showWinPopup(reward, false, null);
-        }
-
-        if (typeof coinDisplay !== 'undefined' && coinDisplay && typeof currentUser !== 'undefined' && currentUser) {
-            coinDisplay.textContent = currentUser.diamond || 0;
-        }
-        if (typeof saveUserToDB === 'function' && typeof currentUser !== 'undefined' && currentUser) {
-            saveUserToDB(currentUser);
         }
 
         isSpinning = false;
         var spinBtn = document.getElementById('eventSpinBtn');
-        if (spinBtn) {
-            spinBtn.disabled = false;
-            spinBtn.classList.remove('spinning');
-        }
+        if (spinBtn) { spinBtn.disabled = false; spinBtn.classList.remove('spinning'); }
     }
 
     // ===================================================
@@ -15656,7 +15674,7 @@ document.addEventListener('keydown', function(e) {
 
         var titleText = isDuplicate ? 'ပိုင်ဆိုင်ပြီးသားပါ' : 'ဂုဏ်ယူပါတယ်!';
         var subText = isDuplicate
-            ? 'ဒီ Reward ကို ပိုင်ဆိုင်ပြီးသားဖြစ်လို့<br>' + DUPLICATE_COIN_REWARD + ' Coin ပေးလိုက်ပါတယ်'
+            ? 'ပိုင်ဆိုင်ပြီးသားဖြစ်လို့<br>' + DUPLICATE_COIN_REWARD + ' Coin ပေးလိုက်ပါတယ်'
             : 'သင်ရရှိလိုက်တာ';
         var emoji = isDuplicate ? '😅' : '🎉';
 
@@ -15671,12 +15689,20 @@ document.addEventListener('keydown', function(e) {
 
         document.body.appendChild(overlay);
 
-        document.getElementById('eventWinCloseBtn').addEventListener('click', function() {
-            overlay.remove();
-        });
-        overlay.addEventListener('click', function(e) {
-            if (e.target === overlay) overlay.remove();
-        });
+        document.getElementById('eventWinCloseBtn').addEventListener('click', function() { overlay.remove(); });
+        overlay.addEventListener('click', function(e) { if (e.target === overlay) overlay.remove(); });
+    }
+
+    // ===================================================
+    //  FORMAT TIME
+    // ===================================================
+    function formatCountdown(ms) {
+        if (ms < 0) ms = 0;
+        var totalSec = Math.floor(ms / 1000);
+        var h = Math.floor(totalSec / 3600);
+        var m = Math.floor((totalSec % 3600) / 60);
+        var s = totalSec % 60;
+        return String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
     }
 
     // ===================================================
@@ -15686,64 +15712,41 @@ document.addEventListener('keydown', function(e) {
         var list = document.getElementById('freeTokenTasksList');
         if (!list) return;
         list.innerHTML = '';
+        clearAllTimers();
 
         var tasks = [
             {
-                id: 'time_5h', icon: 'time',
+                id: 'time_5h', icon: 'time', kind: 'time',
                 title: '5 နာရီတစ်ခါ ရယူပါ',
-                desc: '5 နာရီပြည့်တိုင်း 1 Token ရယူနိုင်ပါတယ်',
-                reward: 1,
-                check: function() {
-                    var last = eventTasksDone['time_5h_last'] || 0;
-                    return (Date.now() - last) >= 5 * 60 * 60 * 1000;
-                },
-                onClaim: function() { eventTasksDone['time_5h_last'] = Date.now(); }
+                desc: '5 နာရီပြည့်တိုင်း 1 Token',
+                reward: 1, duration: TIME_5H, lastKey: 'time_5h_last'
             },
             {
-                id: 'time_24h', icon: 'time',
+                id: 'time_24h', icon: 'time', kind: 'time',
                 title: '24 နာရီတစ်ခါ ရယူပါ',
-                desc: '24 နာရီပြည့်တိုင်း 3 Token ရယူနိုင်ပါတယ်',
-                reward: 3,
-                check: function() {
-                    var last = eventTasksDone['time_24h_last'] || 0;
-                    return (Date.now() - last) >= 24 * 60 * 60 * 1000;
-                },
-                onClaim: function() { eventTasksDone['time_24h_last'] = Date.now(); }
+                desc: '24 နာရီပြည့်တိုင်း 3 Token',
+                reward: 3, duration: TIME_24H, lastKey: 'time_24h_last'
             },
             {
-                id: 'msg_30', icon: 'msg',
+                id: 'msg_30', icon: 'msg', kind: 'msg',
                 title: 'သူငယ်ချင်းနှင့် Message 30 ပို့ပါ',
                 desc: 'နေ့စဉ် 30 ခု ပို့ပါ',
-                reward: 3,
-                check: function() {
-                    var today = new Date().toDateString();
-                    if (eventTasksDone['msg_30_day'] === today) return false;
-                    return getTodayMessageCount() >= 30;
-                },
-                onClaim: function() { eventTasksDone['msg_30_day'] = new Date().toDateString(); }
+                reward: 3, target: 30, dailyKey: 'msg_30_day'
             },
             {
-                id: 'msg_100', icon: 'msg',
+                id: 'msg_100', icon: 'msg', kind: 'msg',
                 title: 'သူငယ်ချင်းနှင့် Message 100 ပို့ပါ',
                 desc: 'တစ်ခါသာ ရယူနိုင်ပါတယ်',
-                reward: 5,
-                check: function() {
-                    if (eventTasksDone['msg_100_done']) return false;
-                    return getTotalMessageCount() >= 100;
-                },
-                onClaim: function() { eventTasksDone['msg_100_done'] = true; }
+                reward: 5, target: 100, onceKey: 'msg_100_done'
             }
         ];
 
         TELEGRAM_CHANNELS.forEach(function(ch) {
             tasks.push({
-                id: 'tg_' + ch.id, icon: 'tg',
+                id: 'tg_' + ch.id, icon: 'tg', kind: 'tg',
                 title: 'Join ' + ch.name,
                 desc: 'Telegram Channel Join လုပ်ပါ',
-                reward: ch.reward, url: ch.url,
-                check: function() { return !eventTasksDone['tg_' + ch.id]; },
-                onClaim: function() { eventTasksDone['tg_' + ch.id] = true; },
-                isTelegram: true
+                reward: ch.reward, url: ch.url
             });
         });
 
@@ -15756,8 +15759,6 @@ document.addEventListener('keydown', function(e) {
             else if (task.icon === 'msg') iconSvg = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>';
             else if (task.icon === 'tg') iconSvg = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 4L3 11l5 2 2 7 4-5 5 4 2-15z"/></svg>';
 
-            var canClaim = task.check();
-
             card.innerHTML =
                 '<div class="event-task-icon ' + task.icon + '">' + iconSvg + '</div>' +
                 '<div class="event-task-info">' +
@@ -15769,42 +15770,150 @@ document.addEventListener('keydown', function(e) {
                     '<span>' + task.reward + '</span>' +
                 '</div>';
 
-            var btn = document.createElement('button');
-            btn.className = 'event-task-btn';
-            if (!canClaim) {
-                btn.textContent = eventTasksDone[task.id] ? 'ပြီးပြီ' : 'မပြည့်မှီ';
-                btn.disabled = true;
-                btn.classList.add('claimed');
-            } else {
-                btn.textContent = 'ရယူမည်';
+            if (task.kind === 'time' || task.kind === 'msg') {
+                card.insertAdjacentHTML('beforeend', '<div class="event-task-extra" id="taskExtra_' + task.id + '"></div>');
             }
 
-            btn.addEventListener('click', function() {
-                if (task.isTelegram) {
-                    window.open(task.url, '_blank');
-                    setTimeout(function() { claimTask(task); }, 2000);
-                } else {
-                    claimTask(task);
-                }
-            });
-
+            var btn = document.createElement('button');
+            btn.className = 'event-task-btn';
             card.appendChild(btn);
             list.appendChild(card);
+
+            if (task.kind === 'time') startTimeTask(task, btn);
+            else if (task.kind === 'msg') startMsgTask(task, btn);
+            else if (task.kind === 'tg') startTgTask(task, btn);
         });
     }
 
-    function claimTask(task) {
-        if (!task.check()) {
-            showToast('Task မပြည့်မှီသေးပါ');
-            return;
+    // ===================================================
+    //  TIME TASK — Countdown (1 sec update)
+    // ===================================================
+    function startTimeTask(task, btn) {
+        var extraEl = document.getElementById('taskExtra_' + task.id);
+
+        function update() {
+            var last = eventTasksDone[task.lastKey] || 0;
+            var remaining = task.duration - (Date.now() - last);
+
+            if (last === 0 || remaining <= 0) {
+                btn.textContent = 'ရယူမည်';
+                btn.disabled = false;
+                btn.classList.remove('claimed');
+                if (extraEl) extraEl.innerHTML = '<span style="color:#44ff88;font-weight:700;font-size:12px;">✓ ရယူနိုင်ပြီ</span>';
+            } else {
+                btn.textContent = 'စောင့်ပါ';
+                btn.disabled = true;
+                btn.classList.add('claimed');
+                if (extraEl) {
+                    extraEl.innerHTML =
+                        '<div class="event-task-countdown">' +
+                            '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>' +
+                            '<span>' + formatCountdown(remaining) + '</span>' +
+                        '</div>';
+                }
+            }
         }
-        task.onClaim();
-        eventTokens += task.reward;
-        saveEventTokens();
-        saveEventTasks();
-        updateEventUI();
-        showToast('+' + task.reward + ' Token ရရှိပါပြီ');
-        setTimeout(function() { renderFreeTokenTasks(); }, 500);
+
+        update();
+        timeTaskTimers.push(setInterval(update, 1000));
+
+        btn.addEventListener('click', function() {
+            var last = eventTasksDone[task.lastKey] || 0;
+            var remaining = task.duration - (Date.now() - last);
+            if (last !== 0 && remaining > 0) { showToast('မရနိုင်သေးပါ'); return; }
+            eventTasksDone[task.lastKey] = Date.now();
+            saveEventTasks();
+            eventTokens += task.reward;
+            saveEventTokens();
+            updateEventUI();
+            showToast('+' + task.reward + ' Token ရရှိပါပြီ');
+            renderFreeTokenTasks();
+        });
+    }
+
+    // ===================================================
+    //  MSG TASK — Progress Bar
+    // ===================================================
+    function startMsgTask(task, btn) {
+        var extraEl = document.getElementById('taskExtra_' + task.id);
+
+        function update() {
+            var count = 0;
+            var alreadyDone = false;
+
+            if (task.dailyKey) {
+                alreadyDone = (eventTasksDone[task.dailyKey] === new Date().toDateString());
+                count = getTodayMessageCount();
+            } else if (task.onceKey) {
+                alreadyDone = !!eventTasksDone[task.onceKey];
+                count = getTotalMessageCount();
+            }
+
+            var pct = Math.min(100, Math.floor((count / task.target) * 100));
+
+            if (extraEl) {
+                extraEl.innerHTML =
+                    '<div class="event-task-progress">' +
+                        '<div class="event-task-progress-info">' +
+                            '<span>' + count + ' / ' + task.target + '</span>' +
+                            '<span>' + pct + '%</span>' +
+                        '</div>' +
+                        '<div class="event-task-progress-bar">' +
+                            '<div class="event-task-progress-fill" style="width:' + pct + '%"></div>' +
+                        '</div>' +
+                    '</div>';
+            }
+
+            var canClaim = !alreadyDone && count >= task.target;
+            if (alreadyDone) { btn.textContent = 'ပြီးပြီ'; btn.disabled = true; btn.classList.add('claimed'); }
+            else if (canClaim) { btn.textContent = 'ရယူမည်'; btn.disabled = false; btn.classList.remove('claimed'); }
+            else { btn.textContent = 'မပြည့်မှီ'; btn.disabled = true; btn.classList.add('claimed'); }
+        }
+
+        update();
+        timeTaskTimers.push(setInterval(update, 3000));
+
+        btn.addEventListener('click', function() {
+            var count = 0, alreadyDone = false;
+            if (task.dailyKey) {
+                alreadyDone = (eventTasksDone[task.dailyKey] === new Date().toDateString());
+                count = getTodayMessageCount();
+            } else if (task.onceKey) {
+                alreadyDone = !!eventTasksDone[task.onceKey];
+                count = getTotalMessageCount();
+            }
+            if (alreadyDone || count < task.target) { showToast('Task မပြည့်မှီသေးပါ'); return; }
+            if (task.dailyKey) eventTasksDone[task.dailyKey] = new Date().toDateString();
+            else if (task.onceKey) eventTasksDone[task.onceKey] = true;
+            saveEventTasks();
+            eventTokens += task.reward;
+            saveEventTokens();
+            updateEventUI();
+            showToast('+' + task.reward + ' Token ရရှိပါပြီ');
+            renderFreeTokenTasks();
+        });
+    }
+
+    // ===================================================
+    //  TG TASK
+    // ===================================================
+    function startTgTask(task, btn) {
+        var done = !!eventTasksDone[task.id];
+        if (done) { btn.textContent = 'ပြီးပြီ'; btn.disabled = true; btn.classList.add('claimed'); }
+        else { btn.textContent = 'သွားရောက်'; }
+
+        btn.addEventListener('click', function() {
+            window.open(task.url, '_blank');
+            setTimeout(function() {
+                eventTasksDone[task.id] = true;
+                saveEventTasks();
+                eventTokens += task.reward;
+                saveEventTokens();
+                updateEventUI();
+                showToast('+' + task.reward + ' Token');
+                renderFreeTokenTasks();
+            }, 2000);
+        });
     }
 
     // ===================================================
@@ -15846,8 +15955,10 @@ document.addEventListener('keydown', function(e) {
         grid.innerHTML = '';
 
         EXCHANGE_CARDS.forEach(function(card) {
+            var locked = eventCoins < card.price;
+
             var div = document.createElement('div');
-            div.className = 'exchange-card';
+            div.className = 'exchange-card' + (locked ? ' locked' : '');
             div.innerHTML =
                 '<img class="exchange-card-img" src="' + card.image + '" />' +
                 '<div class="exchange-card-info">' +
@@ -15857,12 +15968,30 @@ document.addEventListener('keydown', function(e) {
                         '<span>' + card.price + '</span>' +
                     '</div>' +
                 '</div>';
-            div.addEventListener('click', function() { openExchangeInfoPopup(card); });
+
+            // ✅ Lock ဖြစ်ရင် Popup မဖွင့်
+            if (!locked) {
+                div.addEventListener('click', function() {
+                    openExchangeInfoPopup(card);
+                });
+            } else {
+                // ✅ သတိပေးစာ ပဲ ပြ
+                div.addEventListener('click', function() {
+                    showToast('Coin မလုံလောက်ပါ (လိုအပ်: ' + card.price + ')');
+                });
+            }
+
             grid.appendChild(div);
         });
     }
 
     function openExchangeInfoPopup(card) {
+        // ✅ ထပ်မံ စစ်ဆေး (double check)
+        if (eventCoins < card.price) {
+            showToast('Coin မလုံလောက်ပါ');
+            return;
+        }
+
         var popup = document.getElementById('exchangeInfoPopup');
         var title = document.getElementById('exchangePopupTitle');
         var body = document.getElementById('exchangePopupBody');
@@ -15873,14 +16002,10 @@ document.addEventListener('keydown', function(e) {
 
         if (card.type === 'mlbb') {
             html +=
-                '<div class="event-input-group">' +
-                    '<label>Game ID</label>' +
-                    '<input type="text" class="event-input" id="exchangeGameId" placeholder="Enter Game ID" />' +
-                '</div>' +
-                '<div class="event-input-group">' +
-                    '<label>Server ID</label>' +
-                    '<input type="text" class="event-input" id="exchangeServerId" placeholder="Enter Server ID" />' +
-                '</div>';
+                '<div class="event-input-group"><label>Game ID</label>' +
+                '<input type="text" class="event-input" id="exchangeGameId" placeholder="Enter Game ID" /></div>' +
+                '<div class="event-input-group"><label>Server ID</label>' +
+                '<input type="text" class="event-input" id="exchangeServerId" placeholder="Enter Server ID" /></div>';
         } else {
             var defaultUserId = (typeof currentUser !== 'undefined' && currentUser) ? (currentUser.userId || '') : '';
             var defaultServerNo = '1';
@@ -15889,17 +16014,13 @@ document.addEventListener('keydown', function(e) {
                 if (sv) defaultServerNo = sv.number;
             }
             html +=
-                '<div class="event-input-group">' +
-                    '<label>Star Arcade User ID</label>' +
-                    '<input type="text" class="event-input" id="exchangeUserId" placeholder="Enter User ID" value="' + defaultUserId + '" />' +
-                '</div>' +
-                '<div class="event-input-group">' +
-                    '<label>Server No</label>' +
-                    '<input type="text" class="event-input" id="exchangeServerNo" placeholder="Enter Server No" value="' + defaultServerNo + '" />' +
-                '</div>';
+                '<div class="event-input-group"><label>Star Arcade User ID</label>' +
+                '<input type="text" class="event-input" id="exchangeUserId" placeholder="Enter User ID" value="' + defaultUserId + '" /></div>' +
+                '<div class="event-input-group"><label>Server No</label>' +
+                '<input type="text" class="event-input" id="exchangeServerNo" placeholder="Enter Server No" value="' + defaultServerNo + '" /></div>';
         }
 
-        html += '<button class="event-popup-submit" id="exchangeSubmitBtn">လဲလှယ်မည်</button>';
+        html += '<button class="event-popup-submit" id="exchangeSubmitBtn">လဲလှယ်မည် (' + card.price + ' Coin)</button>';
         body.innerHTML = html;
         popup.classList.remove('hidden');
 
@@ -15909,8 +16030,9 @@ document.addEventListener('keydown', function(e) {
     }
 
     function submitExchange(card) {
-        if (eventTokens < card.price) {
-            showToast('Token မလုံလောက်ပါ');
+        // ✅ ထပ်မံ စစ်ဆေး (double check)
+        if (eventCoins < card.price) {
+            showToast('Coin မလုံလောက်ပါ');
             return;
         }
 
@@ -15924,26 +16046,31 @@ document.addEventListener('keydown', function(e) {
         if (userId && !userId.value.trim()) { showToast('User ID ဖြည့်ပါ'); return; }
         if (serverNo && !serverNo.value.trim()) { showToast('Server No ဖြည့်ပါ'); return; }
 
-        eventTokens -= card.price;
-        saveEventTokens();
-        updateEventUI();
+        var coinsBefore = eventCoins;
+        var inputData = {
+            gameId: gameId ? gameId.value.trim() : '',
+            serverId: serverId ? serverId.value.trim() : '',
+            userId: userId ? userId.value.trim() : '',
+            serverNo: serverNo ? serverNo.value.trim() : ''
+        };
 
-        if (typeof sendTelegramPurchaseMessage === 'function') {
-            sendTelegramPurchaseMessage({
-                name: (typeof currentUser !== 'undefined' && currentUser ? currentUser.name : 'Unknown'),
-                serverNo: serverNo ? serverNo.value : 'N/A',
-                userId: userId ? userId.value : (gameId ? gameId.value : 'Unknown'),
-                diamondBefore: eventTokens,
-                itemName: card.name,
-                itemId: card.id,
-                price: card.price,
-                itemType: 'event_exchange'
-            });
-        }
+        // ✅ Event Coin လျှော့ (IndexedDB)
+        spendEventCoins(card.price).then(function(ok) {
+            if (!ok) { showToast('Coin မလုံလောက်ပါ'); return; }
 
-        showToast('လဲလှယ်မှု အောင်မြင်ပါသည်');
-        var popup = document.getElementById('exchangeInfoPopup');
-        if (popup) popup.classList.add('hidden');
+            var coinsAfter = eventCoins;
+
+            // ✅ Telegram Auto
+            sendExchangeToTelegram(card, inputData, coinsBefore, coinsAfter);
+
+            showToast('လဲလှယ်မှု အောင်မြင်ပါသည်');
+
+            var popup = document.getElementById('exchangeInfoPopup');
+            if (popup) popup.classList.add('hidden');
+
+            // ✅ Exchange Card ပြန် render
+            renderExchangeCards();
+        });
     }
 
     // ===================================================
@@ -15991,7 +16118,7 @@ document.addEventListener('keydown', function(e) {
             updateEventFabVisibility();
         });
 
-        console.log('✅ Event System v2 Ready');
+        console.log('✅ Event System v5 Ready');
     }
 
     if (document.readyState === 'loading') {
