@@ -6223,10 +6223,10 @@ body {
 }
 
 /* ============================================================
-   ✅ EVENT SYSTEM (အသစ်)
+   ✅ EVENT SYSTEM v3
    ============================================================ */
 
-/* ✅ Event FAB (Home Screen အောက်ဘေး) */
+/* ✅ Event FAB */
 .event-fab {
     position: fixed;
     bottom: calc(var(--nav-h) + 20px + var(--safe-bottom));
@@ -6247,7 +6247,6 @@ body {
 }
 
 .event-fab.hidden { display: none !important; }
-
 .event-fab:active { transform: scale(0.92); }
 
 .event-fab img {
@@ -6294,6 +6293,9 @@ body {
     position: fixed;
     inset: 0;
     background: var(--bg-body);
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
     z-index: 10040;
     display: flex;
     flex-direction: column;
@@ -6302,6 +6304,17 @@ body {
 
 .event-screen.hidden,
 .event-sub-screen.hidden { display: none !important; }
+
+.event-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg,
+                rgba(10, 10, 15, 0.75) 0%,
+                rgba(10, 10, 15, 0.55) 40%,
+                rgba(10, 10, 15, 0.85) 100%);
+    pointer-events: none;
+    z-index: 0;
+}
 
 @keyframes eventFadeIn {
     from { opacity: 0; transform: translateY(10px); }
@@ -6313,11 +6326,12 @@ body {
     align-items: center;
     gap: 8px;
     padding: 14px 16px;
-    background: rgba(18, 18, 24, 0.95);
+    background: rgba(18, 18, 24, 0.85);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     border-bottom: 1px solid rgba(255, 255, 255, 0.06);
     flex-shrink: 0;
+    position: relative;
     z-index: 5;
 }
 
@@ -6342,25 +6356,44 @@ body {
     flex: 1;
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: flex-start;
     min-width: 0;
+    padding-left: 4px;
 }
 
-.event-title { font-size: 16px; font-weight: 700; color: var(--text-main); letter-spacing: 0.3px; }
+.event-title {
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--text-main);
+    letter-spacing: 0.4px;
+}
 
-.event-token-display {
+/* ✅ Header Stats (Token / Coin) */
+.event-header-stats {
+    display: flex;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+.event-stat-box {
     display: inline-flex;
     align-items: center;
     gap: 4px;
-    margin-top: 4px;
-    padding: 2px 10px;
-    border-radius: 10px;
+    padding: 5px 10px;
+    border-radius: 12px;
     background: rgba(255, 109, 31, 0.15);
-    border: 1px solid rgba(255, 109, 31, 0.25);
+    border: 1px solid rgba(255, 109, 31, 0.3);
 }
 
-.event-token-display img { width: 14px; height: 14px; object-fit: contain; }
-.event-token-display span { font-size: 12px; font-weight: 800; color: var(--accent); }
+.event-stat-box img { width: 14px; height: 14px; object-fit: contain; }
+.event-stat-box span { font-size: 13px; font-weight: 800; color: var(--accent); }
+
+.event-stat-box.coin {
+    background: rgba(255, 200, 0, 0.15);
+    border-color: rgba(255, 200, 0, 0.3);
+}
+
+.event-stat-box.coin span { color: #ffc800; }
 
 /* ✅ Event Body */
 .event-body {
@@ -6372,9 +6405,11 @@ body {
     padding: 20px;
     gap: 24px;
     overflow-y: auto;
+    position: relative;
+    z-index: 2;
 }
 
-/* ✅ Lucky Grid (၈ ကွက် + အလယ် အလွတ်) */
+/* ✅ Lucky Grid */
 .event-lucky-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -6383,18 +6418,25 @@ body {
     width: 100%;
     max-width: 340px;
     aspect-ratio: 1;
+    padding: 12px;
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: 20px;
+    border: 1px solid rgba(255, 109, 31, 0.2);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
 }
 
 .event-cell {
     background: linear-gradient(135deg, #1a1a24, #12121c);
-    border: 2px solid var(--border-light);
+    border: 2px solid rgba(255, 109, 31, 0.3);
     border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
     position: relative;
     overflow: hidden;
-    transition: all 0.3s ease;
+    transition: all 0.25s ease;
     cursor: pointer;
 }
 
@@ -6402,32 +6444,33 @@ body {
     content: '?';
     font-size: 28px;
     font-weight: 900;
-    color: rgba(255, 109, 31, 0.4);
+    color: rgba(255, 109, 31, 0.5);
     text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
 }
 
 .event-cell.selected {
     border-color: var(--accent);
-    background: linear-gradient(135deg, rgba(255, 109, 31, 0.3), rgba(255, 109, 31, 0.1));
-    box-shadow: 0 0 0 4px rgba(255, 109, 31, 0.3),
-                0 8px 32px rgba(255, 109, 31, 0.6);
-    transform: scale(1.05);
+    background: linear-gradient(135deg, rgba(255, 109, 31, 0.4), rgba(255, 109, 31, 0.15));
+    box-shadow: 0 0 0 4px rgba(255, 109, 31, 0.4),
+                0 8px 32px rgba(255, 109, 31, 0.7);
+    transform: scale(1.08);
     z-index: 2;
-    animation: eventCellWin 0.6s ease;
+    animation: eventCellWin 0.5s ease;
 }
 
-.event-cell.selected::after { content: '✓'; color: #fff; }
+.event-cell.selected::after { content: '✓'; color: #fff; font-size: 30px; }
 
 @keyframes eventCellWin {
     0% { transform: scale(1); }
-    30% { transform: scale(1.15); }
+    30% { transform: scale(1.18); }
     60% { transform: scale(0.98); }
-    100% { transform: scale(1.05); }
+    100% { transform: scale(1.08); }
 }
 
 .event-cell-center-space {
     background: transparent;
-    border: none;
+    border: 2px dashed rgba(255, 109, 31, 0.15);
+    border-radius: 12px;
     pointer-events: none;
 }
 
@@ -6446,14 +6489,13 @@ body {
     font-weight: 800;
     font-family: inherit;
     cursor: pointer;
-    box-shadow: 0 6px 24px rgba(255, 109, 31, 0.5);
+    box-shadow: 0 6px 24px rgba(255, 109, 31, 0.6);
     transition: all 0.2s ease;
     letter-spacing: 0.3px;
 }
 
-.event-spin-btn:active { transform: scale(0.95); box-shadow: 0 4px 16px rgba(255, 109, 31, 0.7); }
+.event-spin-btn:active { transform: scale(0.95); box-shadow: 0 4px 16px rgba(255, 109, 31, 0.8); }
 .event-spin-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-
 .event-spin-btn svg { flex-shrink: 0; }
 
 .event-spin-btn.spinning svg {
@@ -6471,9 +6513,13 @@ body {
     gap: 10px;
     padding: 14px 16px;
     padding-bottom: calc(14px + var(--safe-bottom));
-    background: var(--bg-header);
-    border-top: 1px solid var(--border);
+    background: rgba(18, 18, 24, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
     flex-shrink: 0;
+    position: relative;
+    z-index: 5;
 }
 
 .event-footer-btn {
@@ -6498,11 +6544,11 @@ body {
 
 .event-footer-btn.primary {
     border-color: var(--accent);
-    background: linear-gradient(135deg, rgba(255, 109, 31, 0.2), rgba(255, 109, 31, 0.08));
+    background: linear-gradient(135deg, rgba(255, 109, 31, 0.25), rgba(255, 109, 31, 0.1));
     color: var(--accent);
 }
 
-.event-footer-btn.primary:active { background: rgba(255, 109, 31, 0.3); }
+.event-footer-btn.primary:active { background: rgba(255, 109, 31, 0.35); }
 
 /* ✅ Event Sub Screen Body */
 .event-sub-body {
@@ -6512,18 +6558,23 @@ body {
     display: flex;
     flex-direction: column;
     gap: 12px;
+    position: relative;
+    z-index: 2;
 }
 
 /* ✅ Task Card */
 .event-task-card {
     display: flex;
     align-items: center;
-    gap: 14px;
+    gap: 12px;
     padding: 14px 16px;
-    background: var(--bg-card);
-    border: 1.5px solid var(--border);
+    background: rgba(26, 26, 36, 0.85);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1.5px solid rgba(255, 255, 255, 0.08);
     border-radius: 14px;
     transition: all 0.2s ease;
+    flex-wrap: wrap;
 }
 
 .event-task-card.completed { opacity: 0.6; border-color: rgba(68, 255, 136, 0.3); }
@@ -6582,6 +6633,65 @@ body {
 .event-task-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 .event-task-btn.claimed { background: var(--bg-hover); color: var(--text-muted); }
 
+/* ✅ Task Extra — Countdown / Progress */
+.event-task-extra {
+    flex-basis: 100%;
+    margin-top: 6px;
+    padding-top: 10px;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.event-task-countdown {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 12px;
+    border-radius: 12px;
+    background: rgba(255, 109, 31, 0.12);
+    border: 1px solid rgba(255, 109, 31, 0.25);
+    color: var(--accent);
+    font-size: 12px;
+    font-weight: 800;
+    font-family: monospace;
+    letter-spacing: 0.5px;
+}
+
+.event-task-countdown svg { flex-shrink: 0; }
+
+/* ✅ Progress Bar */
+.event-task-progress {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.event-task-progress-info {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-sub);
+    font-family: monospace;
+}
+
+.event-task-progress-info span:last-child { color: var(--accent); }
+
+.event-task-progress-bar {
+    width: 100%;
+    height: 8px;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.06);
+    overflow: hidden;
+}
+
+.event-task-progress-fill {
+    height: 100%;
+    border-radius: 4px;
+    background: linear-gradient(90deg, var(--accent), #ffaa44);
+    transition: width 0.4s ease;
+    box-shadow: 0 0 8px rgba(255, 109, 31, 0.5);
+}
+
 /* ✅ Exchange Grid (၆ ကွက် — ၃ တစ်တန်း) */
 .exchange-grid {
     display: grid;
@@ -6591,7 +6701,9 @@ body {
 }
 
 .exchange-card {
-    background: var(--bg-card);
+    background: rgba(26, 26, 36, 0.9);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     border: 2px solid var(--border);
     border-radius: 14px;
     overflow: hidden;
@@ -6599,9 +6711,31 @@ body {
     transition: all 0.2s ease;
     display: flex;
     flex-direction: column;
+    position: relative;
 }
 
 .exchange-card:active { transform: scale(0.96); border-color: var(--accent); }
+
+.exchange-card.locked {
+    opacity: 0.4;
+    cursor: not-allowed;
+    border-color: rgba(255, 68, 68, 0.3);
+}
+
+.exchange-card.locked:active { transform: none; border-color: rgba(255, 68, 68, 0.3); }
+
+.exchange-card.locked::after {
+    content: '🔒';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 40px;
+    opacity: 0.8;
+    z-index: 3;
+    pointer-events: none;
+    filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.8));
+}
 
 .exchange-card-img {
     width: 100%;
@@ -6632,7 +6766,7 @@ body {
     gap: 3px;
     font-size: 11px;
     font-weight: 800;
-    color: var(--accent);
+    color: #ffc800;
 }
 
 .exchange-card-price img { width: 11px; height: 11px; object-fit: contain; }
@@ -6641,9 +6775,9 @@ body {
 .event-popup-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.7);
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     z-index: 10050;
     display: flex;
     align-items: center;
@@ -6665,11 +6799,11 @@ body {
     display: flex;
     flex-direction: column;
     box-shadow: 0 16px 64px rgba(0, 0, 0, 0.8);
-    animation: eventPopupIn 0.25s ease;
+    animation: eventPopupIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 @keyframes eventPopupIn {
-    from { opacity: 0; transform: scale(0.9) translateY(20px); }
+    from { opacity: 0; transform: scale(0.85) translateY(30px); }
     to { opacity: 1; transform: scale(1) translateY(0); }
 }
 
@@ -6681,7 +6815,7 @@ body {
     border-bottom: 1px solid var(--border);
 }
 
-.event-popup-header h3 { font-size: 17px; font-weight: 700; color: var(--text-main); margin: 0; }
+.event-popup-header h3 { font-size: 17px; font-weight: 800; color: var(--text-main); margin: 0; }
 
 .event-popup-close {
     width: 32px;
@@ -6708,7 +6842,7 @@ body {
 }
 
 .event-input-group { display: flex; flex-direction: column; gap: 6px; }
-.event-input-group label { font-size: 13px; font-weight: 600; color: var(--text-sub); }
+.event-input-group label { font-size: 13px; font-weight: 700; color: var(--text-sub); }
 
 .event-input {
     width: 100%;
@@ -6811,14 +6945,25 @@ body {
 /* ✅ Mobile */
 @media (max-width: 480px) {
     .event-fab { width: 54px; height: 54px; bottom: calc(var(--nav-h) + 16px + var(--safe-bottom)); right: 14px; }
-    .event-lucky-grid { max-width: 300px; gap: 8px; }
+    .event-lucky-grid { max-width: 300px; gap: 8px; padding: 10px; }
     .event-cell::after { font-size: 24px; }
+    .event-cell.selected::after { font-size: 26px; }
     .event-spin-btn { padding: 14px 28px; font-size: 14px; }
     .exchange-grid { gap: 8px; }
     .exchange-card-name { font-size: 10px; }
     .event-task-icon { width: 40px; height: 40px; }
     .event-task-title { font-size: 13px; }
     .event-task-desc { font-size: 11px; }
+    .event-stat-box span { font-size: 12px; }
+}
+
+/* ✅ Landscape */
+@media (max-height: 600px) and (orientation: landscape) {
+    .event-lucky-grid { max-width: 240px; gap: 6px; padding: 8px; }
+    .event-cell::after { font-size: 20px; }
+    .event-spin-btn { padding: 12px 24px; font-size: 13px; }
+    .event-body { gap: 16px; padding: 12px; }
+    .exchange-grid { grid-template-columns: repeat(6, 1fr); gap: 6px; }
 }
 </style>
 </head>
@@ -7863,10 +8008,10 @@ body {
 </div>
 
 <!-- ============================================================
-     ✅ EVENT SYSTEM (အသစ် — ရှိပြီးသား Code တွေနဲ့ မထိခိုက်)
+     ✅ EVENT SYSTEM v3 (အသစ် — ရှိပြီးသား Code တွေနဲ့ မထိခိုက်)
      ============================================================ -->
 
-<!-- ✅ EVENT ခလုတ် (Home Screen အောက်ဘေး) -->
+<!-- ✅ EVENT FAB (Home Screen အောက်ဘေး) -->
 <button class="event-fab hidden" id="eventFab" title="Event">
     <img id="eventFabImg" src="https://i.ibb.co/placeholder-event.png" alt="Event" />
     <span class="event-fab-badge" id="eventFabBadge">!</span>
@@ -7874,6 +8019,8 @@ body {
 
 <!-- ✅ EVENT FULLSCREEN -->
 <div class="event-screen hidden" id="eventScreen">
+    <div class="event-overlay"></div>
+
     <div class="event-header">
         <button class="event-back-btn" id="eventBackBtn">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
@@ -7882,28 +8029,28 @@ body {
         </button>
         <div class="event-title-wrap">
             <span class="event-title">Lucky Draw Event</span>
-            <span class="event-token-display">
+        </div>
+        <div class="event-header-stats">
+            <div class="event-stat-box">
                 <img src="https://i.ibb.co/39SYGr6M/Grid-Art-20260805-102408042.png" alt="token" />
                 <span id="eventTokenCount">0</span>
-            </span>
+            </div>
+            <div class="event-stat-box coin">
+                <img src="https://i.ibb.co/39SYGr6M/Grid-Art-20260805-102408042.png" alt="coin" />
+                <span id="eventCoinCount">0</span>
+            </div>
         </div>
-        <div style="width:40px;"></div>
     </div>
 
     <div class="event-body">
         <!-- ✅ Lucky Grid (၈ ကွက် + အလယ် အလွတ်) -->
         <div class="event-lucky-grid" id="eventLuckyGrid">
-            <!-- Row 1: ၃ ကွက် -->
             <div class="event-cell" data-cell="0"></div>
             <div class="event-cell" data-cell="1"></div>
             <div class="event-cell" data-cell="2"></div>
-
-            <!-- Row 2: ဘေး ၂ ကွက် + အလယ် အလွတ် -->
             <div class="event-cell" data-cell="3"></div>
             <div class="event-cell-center-space"></div>
             <div class="event-cell" data-cell="4"></div>
-
-            <!-- Row 3: ၃ ကွက် -->
             <div class="event-cell" data-cell="5"></div>
             <div class="event-cell" data-cell="6"></div>
             <div class="event-cell" data-cell="7"></div>
@@ -7942,6 +8089,8 @@ body {
 
 <!-- ✅ FREE TOKEN SCREEN -->
 <div class="event-sub-screen hidden" id="freeTokenScreen">
+    <div class="event-overlay"></div>
+
     <div class="event-header">
         <button class="event-back-btn" id="freeTokenBackBtn">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
@@ -7950,12 +8099,13 @@ body {
         </button>
         <div class="event-title-wrap">
             <span class="event-title">Free Token</span>
-            <span class="event-token-display">
+        </div>
+        <div class="event-header-stats">
+            <div class="event-stat-box">
                 <img src="https://i.ibb.co/39SYGr6M/Grid-Art-20260805-102408042.png" alt="token" />
                 <span id="freeTokenCount">0</span>
-            </span>
+            </div>
         </div>
-        <div style="width:40px;"></div>
     </div>
 
     <div class="event-sub-body" id="freeTokenTasksList">
@@ -7965,6 +8115,8 @@ body {
 
 <!-- ✅ EXCHANGE SCREEN -->
 <div class="event-sub-screen hidden" id="exchangeScreen">
+    <div class="event-overlay"></div>
+
     <div class="event-header">
         <button class="event-back-btn" id="exchangeBackBtn">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
@@ -7974,13 +8126,16 @@ body {
         <div class="event-title-wrap">
             <span class="event-title">လဲလှယ်မည်</span>
         </div>
-        <div style="width:40px;"></div>
+        <div class="event-header-stats">
+            <div class="event-stat-box coin">
+                <img src="https://i.ibb.co/39SYGr6M/Grid-Art-20260805-102408042.png" alt="coin" />
+                <span id="exchangeCoinCount">0</span>
+            </div>
+        </div>
     </div>
 
     <div class="event-sub-body">
-        <div class="exchange-grid" id="exchangeGrid">
-            <!-- Cards တွေ JavaScript က render လုပ်မယ် -->
-        </div>
+        <div class="exchange-grid" id="exchangeGrid"></div>
     </div>
 </div>
 
@@ -7996,9 +8151,7 @@ body {
                 </svg>
             </button>
         </div>
-        <div class="event-popup-body" id="exchangePopupBody">
-            <!-- Form fields dynamic ဖြစ်မယ် -->
-        </div>
+        <div class="event-popup-body" id="exchangePopupBody"></div>
     </div>
 </div>
 
