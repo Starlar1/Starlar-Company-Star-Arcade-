@@ -6057,14 +6057,14 @@ body {
 }
 
 /* ============================================================
-   PLUS MENU POPUP (အဝိုင်း ၅ ခု)
+   PLUS MENU POPUP (Grid Layout — အဝိုင်း ၅ ခု)
    ============================================================ */
 
 /* ✅ ဘေးနားမှိန်ချက် */
 .plus-menu-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.55);
+    background: rgba(0, 0, 0, 0.6);
     backdrop-filter: blur(6px);
     -webkit-backdrop-filter: blur(6px);
     z-index: 90;
@@ -6081,70 +6081,93 @@ body {
 /* ✅ Popup Container */
 .plus-menu {
     position: fixed;
-    bottom: calc(var(--nav-h) + 10px + var(--safe-bottom));
+    bottom: calc(var(--nav-h) + 16px + var(--safe-bottom));
     left: 50%;
     transform: translateX(-50%);
     z-index: 96;
     pointer-events: none;
-    width: 0;
-    height: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    opacity: 0;
+    transition: opacity 0.25s ease;
+    padding: 4px;
 }
 
 .plus-menu.active {
     pointer-events: auto;
-}
-
-/* ✅ အဝိုင်း ခလုတ်များ */
-.plus-menu-btn {
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    width: 62px;
-    height: 62px;
-    border-radius: 50%;
-    border: none;
-    background: linear-gradient(135deg, var(--accent), var(--accent-dark));
-    color: #fff;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 8px 24px rgba(255, 109, 31, 0.5), 0 4px 12px rgba(0, 0, 0, 0.4);
-    transform: translate(-50%, -50%) scale(0);
-    opacity: 0;
-    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
-                opacity 0.25s ease,
-                box-shadow 0.2s ease;
-    font-family: inherit;
-}
-
-.plus-menu.active .plus-menu-btn {
-    transform: translate(calc(-50% + var(--x)), calc(-50% + var(--y))) scale(1);
     opacity: 1;
 }
 
-.plus-menu-btn:active {
-    transform: translate(calc(-50% + var(--x)), calc(-50% + var(--y))) scale(0.9);
-    box-shadow: 0 4px 16px rgba(255, 109, 31, 0.7);
+/* ✅ တန်းတစ်ခုချင်း */
+.plus-menu-row {
+    display: flex;
+    justify-content: center;
+    gap: 18px;
+    align-items: flex-start;
 }
 
-.plus-menu-btn svg {
-    width: 24px;
-    height: 24px;
+/* ✅ အဝိုင်း ခလုတ် */
+.plus-menu-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    padding: 0;
+    transform: translateY(20px) scale(0);
+    opacity: 0;
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
+                opacity 0.3s ease;
+}
+
+.plus-menu.active .plus-menu-btn {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+}
+
+/* ✅ Animation အတွက် delay တွေ */
+.plus-menu.active .plus-menu-row:nth-child(1) .plus-menu-btn:nth-child(1) { transition-delay: 0s; }
+.plus-menu.active .plus-menu-row:nth-child(1) .plus-menu-btn:nth-child(2) { transition-delay: 0.05s; }
+.plus-menu.active .plus-menu-row:nth-child(1) .plus-menu-btn:nth-child(3) { transition-delay: 0.1s; }
+.plus-menu.active .plus-menu-row:nth-child(2) .plus-menu-btn:nth-child(1) { transition-delay: 0.15s; }
+.plus-menu.active .plus-menu-row:nth-child(2) .plus-menu-btn:nth-child(2) { transition-delay: 0.2s; }
+
+/* ✅ အဝိုင်း ကိုယ်ထည် */
+.plus-menu-btn-circle {
+    width: 62px;
+    height: 62px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 6px 20px rgba(255, 109, 31, 0.5),
+                0 3px 10px rgba(0, 0, 0, 0.4);
+    transition: transform 0.15s ease, box-shadow 0.2s ease;
+}
+
+.plus-menu-btn:active .plus-menu-btn-circle {
+    transform: scale(0.9);
+    box-shadow: 0 3px 12px rgba(255, 109, 31, 0.7);
+}
+
+.plus-menu-btn-circle svg {
+    width: 26px;
+    height: 26px;
 }
 
 /* ✅ ခလုတ်အောက် စာသား */
 .plus-menu-btn span {
-    position: absolute;
-    bottom: -22px;
-    left: 50%;
-    transform: translateX(-50%);
-    font-size: 10px;
+    font-size: 11px;
     font-weight: 700;
     color: #fff;
     white-space: nowrap;
-    text-shadow: 0 1px 6px rgba(0, 0, 0, 0.9), 0 0 10px rgba(0, 0, 0, 0.7);
-    pointer-events: none;
+    text-shadow: 0 1px 6px rgba(0, 0, 0, 0.9), 0 0 8px rgba(0, 0, 0, 0.6);
     letter-spacing: 0.2px;
 }
 
@@ -6162,33 +6185,40 @@ body {
 
 /* ✅ Mobile responsive */
 @media (max-width: 480px) {
-    .plus-menu-btn {
+    .plus-menu-row {
+        gap: 14px;
+    }
+    .plus-menu-btn-circle {
         width: 56px;
         height: 56px;
     }
-    .plus-menu-btn svg {
+    .plus-menu-btn-circle svg {
         width: 22px;
         height: 22px;
     }
     .plus-menu-btn span {
-        font-size: 9px;
-        bottom: -20px;
+        font-size: 10px;
     }
 }
 
 /* ✅ Landscape mode */
 @media (max-height: 600px) and (orientation: landscape) {
-    .plus-menu-btn {
+    .plus-menu {
+        gap: 10px;
+    }
+    .plus-menu-row {
+        gap: 12px;
+    }
+    .plus-menu-btn-circle {
         width: 48px;
         height: 48px;
     }
-    .plus-menu-btn svg {
+    .plus-menu-btn-circle svg {
         width: 20px;
         height: 20px;
     }
     .plus-menu-btn span {
-        font-size: 8px;
-        bottom: -16px;
+        font-size: 9px;
     }
 }
 </style>
@@ -6487,58 +6517,80 @@ body {
             </div>
         </main>
 
-        <!-- ✅ PLUS MENU POPUP (အဝိုင်း ၅ ခု) -->
-        <div class="plus-menu-overlay hidden" id="plusMenuOverlay"></div>
+       <!-- ✅ PLUS MENU POPUP (အဝိုင်း ၅ ခု) -->
+<div class="plus-menu-overlay hidden" id="plusMenuOverlay"></div>
 
-        <div class="plus-menu" id="plusMenu">
-            <!-- အပေါ် ၃ ခု -->
-            <button class="plus-menu-btn" data-action="party" style="--x:-90px; --y:-90px;">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <polyline points="14.5 17.5 3 6 3 3 6 3 17.5 14.5"/>
-                    <line x1="13" y1="19" x2="19" y2="13"/>
-                    <line x1="16" y1="16" x2="20" y2="20"/>
-                    <line x1="19" y1="21" x2="21" y2="19"/>
-                    <polyline points="14.5 6.5 18 3 21 3 21 6 17.5 9.5"/>
-                    <line x1="5" y1="14" x2="9" y2="18"/>
-                    <line x1="7" y1="17" x2="4" y2="20"/>
-                    <line x1="3" y1="19" x2="5" y2="21"/>
+<div class="plus-menu" id="plusMenu">
+    <!-- အပေါ် တန်း ၁ — ၃ ခု -->
+    <div class="plus-menu-row">
+        <button class="plus-menu-btn" data-action="partychat">
+            <div class="plus-menu-btn-circle">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                    <circle cx="9" cy="7" r="4"/>
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
                 </svg>
-                <span>Party</span>
-            </button>
+            </div>
+            <span>PartyChat</span>
+        </button>
 
-            <button class="plus-menu-btn" data-action="chat" style="--x:0px; --y:-130px;">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-                </svg>
-                <span>Chat</span>
-            </button>
-
-            <button class="plus-menu-btn" data-action="gamecard" style="--x:90px; --y:-90px;">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <button class="plus-menu-btn" data-action="gamecard">
+            <div class="plus-menu-btn-circle">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <rect x="2" y="5" width="20" height="14" rx="2"/>
                     <line x1="2" y1="10" x2="22" y2="10"/>
                     <line x1="7" y1="15" x2="10" y2="15"/>
+                    <circle cx="16" cy="15" r="1.5" fill="currentColor"/>
                 </svg>
-                <span>Game Card</span>
-            </button>
+            </div>
+            <span>Game Card</span>
+        </button>
 
-            <!-- အောက် ၂ ခု -->
-            <button class="plus-menu-btn" data-action="info" style="--x:-50px; --y:60px;">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="12" cy="12" r="10"/>
-                    <line x1="12" y1="16" x2="12" y2="12"/>
-                    <line x1="12" y1="8" x2="12.01" y2="8"/>
+        <button class="plus-menu-btn" data-action="info">
+            <div class="plus-menu-btn-circle">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                    <polyline points="14 2 14 8 20 8"/>
+                    <line x1="9" y1="13" x2="15" y2="13"/>
+                    <line x1="9" y1="17" x2="15" y2="17"/>
+                    <line x1="9" y1="9" x2="10" y2="9"/>
                 </svg>
-                <span>Info</span>
-            </button>
+            </div>
+            <span>Info</span>
+        </button>
+    </div>
 
-            <button class="plus-menu-btn" data-action="postplay" style="--x:50px; --y:60px;">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <polygon points="5 3 19 12 5 21 5 3"/>
+    <!-- အောက် တန်း ၂ — ၂ ခု -->
+    <div class="plus-menu-row">
+        <button class="plus-menu-btn" data-action="post">
+            <div class="plus-menu-btn-circle">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 20h9"/>
+                    <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
                 </svg>
-                <span>Post / Play</span>
-            </button>
-        </div>
+            </div>
+            <span>Post</span>
+        </button>
+
+        <button class="plus-menu-btn" data-action="play">
+            <div class="plus-menu-btn-circle">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="2" y="5" width="20" height="12" rx="6"/>
+                    <circle cx="8" cy="11" r="1.5" fill="currentColor"/>
+                    <circle cx="16" cy="11" r="1.5" fill="currentColor"/>
+                    <path d="M12 5V7"/>
+                    <path d="M10 7H14"/>
+                    <line x1="6" y1="6" x2="6" y2="8"/>
+                    <line x1="18" y1="6" x2="18" y2="8"/>
+                </svg>
+            </div>
+            <span>Play</span>
+        </button>
+    </div>
+</div>
+
+        
 
         <!-- FULLSCREEN OVERLAY -->
         <div class="fullscreen-overlay" id="fullscreenOverlay">
@@ -8002,27 +8054,9 @@ function handlePlusMenuAction(action) {
     closePlusMenu();
     setTimeout(function() {
         switch (action) {
-            case 'party':
-                // Party tab ကို ပြောင်း
-                var partyBtn = document.querySelector('.nav-btn[data-tab="party"]');
-                if (partyBtn && currentTab !== 'party') {
-                    if (activeNavBtn) activeNavBtn.classList.remove('active');
-                    partyBtn.classList.add('active');
-                    activeNavBtn = partyBtn;
-                    currentTab = 'party';
-                    switchTab('party');
-                }
-                break;
-            case 'chat':
-                // Chat tab ကို ပြောင်း
-                var chatBtn = document.querySelector('.nav-btn[data-tab="chat"]');
-                if (chatBtn && currentTab !== 'chat') {
-                    if (activeNavBtn) activeNavBtn.classList.remove('active');
-                    chatBtn.classList.add('active');
-                    activeNavBtn = chatBtn;
-                    currentTab = 'chat';
-                    switchTab('chat');
-                }
+            case 'partychat':
+                showToast('PartyChat');
+                // TODO: PartyChat screen ဖွင့်
                 break;
             case 'gamecard':
                 showToast('Game Card');
@@ -8032,9 +8066,13 @@ function handlePlusMenuAction(action) {
                 showToast('Info');
                 // TODO: Info screen ဖွင့်
                 break;
-            case 'postplay':
-                showToast('Post / Play');
-                // TODO: Post/Play screen ဖွင့်
+            case 'post':
+                showToast('Post');
+                // TODO: Post screen ဖွင့်
+                break;
+            case 'play':
+                showToast('Play');
+                // TODO: Play screen ဖွင့်
                 break;
         }
     }, 200);
