@@ -6223,7 +6223,7 @@ body {
 }
 
 /* ============================================================
-   ✅ EVENT SYSTEM v9
+   ✅ EVENT SYSTEM v10
    ============================================================ */
 
 /* ✅ Event FAB */
@@ -6449,27 +6449,30 @@ body {
     z-index: 1;
 }
 
+/* ✅ Highlighted — Animation လျောက်နေတဲ့ အကွက် (✓ မပါ) */
 .event-cell.selected {
     border-color: #ffc800;
     background: linear-gradient(135deg, rgba(255, 200, 0, 0.4), rgba(255, 109, 31, 0.2));
     box-shadow: 0 0 0 4px rgba(255, 200, 0, 0.5), 0 0 30px rgba(255, 200, 0, 0.8), inset 0 0 20px rgba(255, 200, 0, 0.3);
     transform: scale(1.08);
     z-index: 2;
-    animation: eventCellWin 0.5s ease;
 }
 
+/* ✅ အကွက် အတွင်းမှာ ? ပဲ ဆက်ပြ — ✓ မပြ */
 .event-cell.selected::after {
-    content: '✓';
+    content: '?';
     color: #fff;
     font-size: 34px;
     text-shadow: 0 0 12px rgba(255, 200, 0, 1);
 }
 
-@keyframes eventCellWin {
-    0% { transform: scale(1); }
-    30% { transform: scale(1.2); }
-    60% { transform: scale(0.98); }
-    100% { transform: scale(1.08); }
+/* ✅ Winner — Popup ပြပြီး ဖျက် */
+.event-cell.winner {
+    border-color: #ffc800;
+    background: linear-gradient(135deg, rgba(255, 200, 0, 0.5), rgba(255, 109, 31, 0.3));
+    box-shadow: 0 0 0 4px rgba(255, 200, 0, 0.6), 0 0 40px rgba(255, 200, 0, 0.9), inset 0 0 25px rgba(255, 200, 0, 0.4);
+    transform: scale(1.1);
+    z-index: 3;
 }
 
 /* ✅ အလယ်ကွက် — ကံစမ်းမည် ခလုတ် */
@@ -6763,7 +6766,6 @@ body {
 
 .exchange-card:active { transform: scale(0.96); border-color: var(--accent); }
 
-/* ✅ Unavailable (Java ထဲက false) */
 .exchange-card.unavailable {
     opacity: 0.45;
     cursor: not-allowed;
@@ -6772,7 +6774,6 @@ body {
     pointer-events: none;
 }
 
-/* ✅ Locked (Coin မလုံလောက်) */
 .exchange-card.locked {
     opacity: 0.4;
     cursor: not-allowed;
@@ -8096,7 +8097,7 @@ body {
 </div>
 
 <!-- ============================================================
-     ✅ EVENT SYSTEM v9
+     ✅ EVENT SYSTEM v10
      ============================================================ -->
 
 <!-- ✅ EVENT FAB -->
@@ -15358,14 +15359,9 @@ document.addEventListener('keydown', function(e) {
 })();
 
 // ============================================================
-// ✅ EVENT SYSTEM v9 — FULL
-//  • Event Coin: IndexedDB "eventCoins"
-//  • Time task countdown (1 sec update)
-//  • Message task progress bar
-//  • Exchange lock: available:false → Item ပိတ် (နှိပ်လို့မရ)
-//  • Exchange lock: Coin မလုံလောက် → နှိပ်လို့မရ
-//  • Telegram Auto (Lucky Win 22 + Exchange 77)
-//  • Success Popup (Exchange + Lucky Draw)
+// ✅ EVENT SYSTEM v10 — FULL
+//  • ✓ မပြ — selected အကွက်မှာ ? ပဲ ဆက်ပြ
+//  • Popup ပြီးရင် အကွက် highlight ဖျက်
 // ============================================================
 (function() {
     'use strict';
@@ -15387,9 +15383,6 @@ document.addEventListener('keydown', function(e) {
         { type: 'bubble', id: 4008, name: 'Bubble 4008', image: 'https://via.placeholder.com/60x40/9b4dff/ffffff?text=Bubble+8' }
     ];
 
-    // ✅ EXCHANGE CARDS — `available` field ပါ
-    //    available: true  → ရနိုင်
-    //    available: false → ပိတ် (Item ကို Lock, နှိပ်လို့မရ)
     var EXCHANGE_CARDS = [
         { id: 'mlbb_diamond_1', type: 'mlbb', name: 'MLBB 86 Diamond', price: 10, image: 'https://i.ibb.co/placeholder-mlbb1.png', available: true },
         { id: 'mlbb_diamond_2', type: 'mlbb', name: 'MLBB 172 Diamond', price: 20, image: 'https://i.ibb.co/placeholder-mlbb2.png', available: true },
@@ -15492,7 +15485,7 @@ document.addEventListener('keydown', function(e) {
     }
 
     // ===================================================
-    //  OWNED (Frame/Banner/BG/Bubble)
+    //  OWNED
     // ===================================================
     function isRewardOwned(reward) {
         if (typeof currentUser === 'undefined' || !currentUser) return false;
@@ -15578,7 +15571,7 @@ document.addEventListener('keydown', function(e) {
     }
 
     // ===================================================
-    //  TELEGRAM — Exchange (Status field မပါ)
+    //  TELEGRAM — Exchange
     // ===================================================
     function sendExchangeToTelegram(card, inputData, coinsBefore, coinsAfter) {
         try {
@@ -15597,21 +15590,16 @@ document.addEventListener('keydown', function(e) {
             msg += 'Price: ' + (card.price || 0) + ' Coin\n';
             if (inputData.gameId) msg += 'Game ID: ' + inputData.gameId + '\n';
             if (inputData.serverId) msg += 'Game Server ID: ' + inputData.serverId + '\n';
-            msg += '\n';
-
-            msg += '<b>User</b>\n';
+            msg += '\n<b>User</b>\n';
             msg += 'Name: ' + userName + '\n';
             msg += 'Server: ' + serverName + ' (No.' + serverNo + ')\n';
             msg += 'ID: ' + userId + '\n';
             if (inputData.userId) msg += 'Input User ID: ' + inputData.userId + '\n';
             if (inputData.serverNo) msg += 'Input Server No: ' + inputData.serverNo + '\n';
-            msg += '\n';
-
-            msg += '<b>Coin</b>\n';
+            msg += '\n<b>Coin</b>\n';
             msg += 'Before: ' + coinsBefore + '\n';
             msg += 'Used: ' + card.price + '\n';
             msg += 'After: ' + coinsAfter + '\n\n';
-
             msg += new Date().toLocaleString('en-US', { timeZone: 'Asia/Yangon' });
 
             fetch('https://api.telegram.org/bot' + EVENT_TG_BOT + '/sendMessage', {
@@ -15699,11 +15687,12 @@ document.addEventListener('keydown', function(e) {
     }
 
     // ===================================================
-    //  LUCKY GRID
+    //  LUCKY GRID — reset (selected + winner အားလုံး ဖျက်)
     // ===================================================
     function renderLuckyCells() {
         document.querySelectorAll('.event-cell').forEach(function(cell) {
             cell.classList.remove('selected');
+            cell.classList.remove('winner');
         });
     }
 
@@ -15725,8 +15714,12 @@ document.addEventListener('keydown', function(e) {
         var spinBtn = document.getElementById('eventSpinBtn');
         if (spinBtn) { spinBtn.disabled = true; spinBtn.classList.add('spinning'); }
 
+        // ✅ အရင် အကွက် အားလုံး ရှင်း
         var cells = document.querySelectorAll('.event-cell');
-        cells.forEach(function(c) { c.classList.remove('selected'); });
+        cells.forEach(function(c) {
+            c.classList.remove('selected');
+            c.classList.remove('winner');
+        });
 
         var winnerIndex = Math.floor(Math.random() * 8);
         var reward = LUCKY_REWARDS[winnerIndex];
@@ -15749,10 +15742,14 @@ document.addEventListener('keydown', function(e) {
             if (step < totalSteps) {
                 setTimeout(animateStep, stepDelay);
             } else {
+                // ✅ ရပ်တဲ့ အကွက်
                 cells.forEach(function(c) { c.classList.remove('selected'); });
                 var winnerCell = cells[winnerIndex];
-                if (winnerCell) winnerCell.classList.add('selected');
-                setTimeout(function() { onSpinComplete(reward); }, 400);
+                if (winnerCell) winnerCell.classList.add('winner');
+
+                setTimeout(function() {
+                    onSpinComplete(reward);
+                }, 400);
             }
         }
 
@@ -15797,6 +15794,7 @@ document.addEventListener('keydown', function(e) {
 
     // ===================================================
     //  LUCKY SUCCESS POPUP
+    //  Popup ပြီးရင် အကွက် highlight ဖျက်
     // ===================================================
     function showLuckySuccessPopup(reward, isDuplicate) {
         var overlay = document.createElement('div');
@@ -15834,11 +15832,15 @@ document.addEventListener('keydown', function(e) {
 
         document.body.appendChild(overlay);
 
-        document.getElementById('eventSuccessCloseBtn').addEventListener('click', function() {
+        function closePopup() {
             overlay.remove();
-        });
+            // ✅ Popup ပိတ်ရင် အကွက် highlight ဖျက်
+            renderLuckyCells();
+        }
+
+        document.getElementById('eventSuccessCloseBtn').addEventListener('click', closePopup);
         overlay.addEventListener('click', function(e) {
-            if (e.target === overlay) overlay.remove();
+            if (e.target === overlay) closePopup();
         });
     }
 
@@ -16084,7 +16086,7 @@ document.addEventListener('keydown', function(e) {
     }
 
     // ===================================================
-    //  EXCHANGE — Cards (available + coin lock)
+    //  EXCHANGE
     // ===================================================
     function renderExchangeCards() {
         var grid = document.getElementById('exchangeGrid');
@@ -16092,9 +16094,7 @@ document.addEventListener('keydown', function(e) {
         grid.innerHTML = '';
 
         EXCHANGE_CARDS.forEach(function(card) {
-            // ✅ available: false ဆိုရင် ပိတ်
             var isClosed = (card.available === false);
-            // ✅ Coin မလုံလောက်ရင် lock
             var isLocked = eventCoins < card.price;
 
             var div = document.createElement('div');
@@ -16124,7 +16124,6 @@ document.addEventListener('keydown', function(e) {
                     '</div>' +
                 '</div>';
 
-            // ✅ canClick: false ဆိုရင် Click listener မတွဲ
             if (canClick) {
                 div.addEventListener('click', function() {
                     openExchangeInfoPopup(card);
@@ -16136,12 +16135,10 @@ document.addEventListener('keydown', function(e) {
     }
 
     function openExchangeInfoPopup(card) {
-        // ✅ Double check — available
         if (card.available === false) {
             showToast('ပိတ်ထားသော Item ဖြစ်ပါသည်');
             return;
         }
-        // ✅ Double check — Coin
         if (eventCoins < card.price) {
             showToast('Coin မလုံလောက်ပါ');
             return;
@@ -16185,7 +16182,6 @@ document.addEventListener('keydown', function(e) {
     }
 
     function submitExchange(card) {
-        // ✅ Double check
         if (card.available === false) {
             showToast('ပိတ်ထားသော Item ဖြစ်ပါသည်');
             return;
@@ -16301,7 +16297,7 @@ document.addEventListener('keydown', function(e) {
             updateEventFabVisibility();
         });
 
-        console.log('Event System v9 Ready');
+        console.log('Event System v10 Ready');
     }
 
     if (document.readyState === 'loading') {
