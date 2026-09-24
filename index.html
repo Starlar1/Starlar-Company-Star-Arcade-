@@ -6223,7 +6223,7 @@ body {
 }
 
 /* ============================================================
-   ✅ EVENT SYSTEM v5
+   ✅ EVENT SYSTEM v9
    ============================================================ */
 
 /* ✅ Event FAB */
@@ -6399,28 +6399,28 @@ body {
     z-index: 2;
 }
 
-/* Lucky Grid */
+/* ✅ Lucky Grid */
 .event-lucky-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     grid-template-rows: repeat(3, 1fr);
     gap: 10px;
     width: 100%;
-    max-width: 340px;
+    max-width: 360px;
     aspect-ratio: 1;
-    padding: 12px;
-    background: rgba(0, 0, 0, 0.4);
-    border-radius: 20px;
-    border: 1px solid rgba(255, 109, 31, 0.2);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    padding: 14px;
+    background: rgba(0, 0, 0, 0.45);
+    border-radius: 22px;
+    border: 1px solid rgba(255, 109, 31, 0.25);
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.7), inset 0 0 60px rgba(255, 109, 31, 0.05);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
 }
 
 .event-cell {
-    background: linear-gradient(135deg, #1a1a24, #12121c);
-    border: 2px solid rgba(255, 109, 31, 0.3);
-    border-radius: 12px;
+    background: linear-gradient(135deg, #1e1e2a, #12121c);
+    border: 2px solid rgba(255, 109, 31, 0.35);
+    border-radius: 14px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -6428,69 +6428,145 @@ body {
     overflow: hidden;
     transition: all 0.25s ease;
     cursor: pointer;
+    box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+.event-cell::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 30% 30%, rgba(255, 109, 31, 0.15), transparent 60%);
+    pointer-events: none;
 }
 
 .event-cell::after {
     content: '?';
-    font-size: 28px;
+    font-size: 32px;
     font-weight: 900;
-    color: rgba(255, 109, 31, 0.5);
-    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+    color: rgba(255, 109, 31, 0.6);
+    text-shadow: 0 2px 12px rgba(255, 109, 31, 0.5), 0 0 20px rgba(255, 109, 31, 0.3);
+    position: relative;
+    z-index: 1;
 }
 
 .event-cell.selected {
-    border-color: var(--accent);
-    background: linear-gradient(135deg, rgba(255, 109, 31, 0.4), rgba(255, 109, 31, 0.15));
-    box-shadow: 0 0 0 4px rgba(255, 109, 31, 0.4), 0 8px 32px rgba(255, 109, 31, 0.7);
+    border-color: #ffc800;
+    background: linear-gradient(135deg, rgba(255, 200, 0, 0.4), rgba(255, 109, 31, 0.2));
+    box-shadow: 0 0 0 4px rgba(255, 200, 0, 0.5), 0 0 30px rgba(255, 200, 0, 0.8), inset 0 0 20px rgba(255, 200, 0, 0.3);
     transform: scale(1.08);
     z-index: 2;
     animation: eventCellWin 0.5s ease;
 }
 
-.event-cell.selected::after { content: '✓'; color: #fff; font-size: 30px; }
+.event-cell.selected::after {
+    content: '✓';
+    color: #fff;
+    font-size: 34px;
+    text-shadow: 0 0 12px rgba(255, 200, 0, 1);
+}
 
 @keyframes eventCellWin {
     0% { transform: scale(1); }
-    30% { transform: scale(1.18); }
+    30% { transform: scale(1.2); }
     60% { transform: scale(0.98); }
     100% { transform: scale(1.08); }
 }
 
-.event-cell-center-space {
-    background: transparent;
-    border: 2px dashed rgba(255, 109, 31, 0.15);
-    border-radius: 12px;
+/* ✅ အလယ်ကွက် — ကံစမ်းမည် ခလုတ် */
+.event-cell-spin-btn {
+    background: linear-gradient(135deg, #ff6d1f, #e0550a);
+    border: 2px solid #ffc800;
+    border-radius: 14px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    cursor: pointer;
+    font-family: inherit;
+    color: #fff;
+    padding: 4px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 0 20px rgba(255, 109, 31, 0.7), inset 0 0 20px rgba(255, 255, 255, 0.1);
+    transition: all 0.2s ease;
+    animation: eventSpinBtnPulse 2s ease-in-out infinite;
+}
+
+.event-cell-spin-btn::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.3) 50%, transparent 70%);
+    animation: eventSpinBtnShine 3s linear infinite;
     pointer-events: none;
 }
 
-.event-spin-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    padding: 16px 36px;
-    border: none;
-    border-radius: 28px;
-    background: linear-gradient(135deg, var(--accent), var(--accent-dark));
-    color: #fff;
-    font-size: 16px;
+.event-cell-spin-btn svg {
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 1;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.4));
+}
+
+.event-cell-spin-btn span {
+    font-size: 11px;
     font-weight: 800;
-    font-family: inherit;
-    cursor: pointer;
-    box-shadow: 0 6px 24px rgba(255, 109, 31, 0.6);
-    transition: all 0.2s ease;
+    line-height: 1.2;
+    text-align: center;
+    position: relative;
+    z-index: 1;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+    letter-spacing: 0.2px;
+}
+
+.event-cell-spin-cost {
+    font-size: 9px !important;
+    background: rgba(0, 0, 0, 0.4);
+    padding: 1px 6px;
+    border-radius: 6px;
+    font-weight: 700 !important;
+    color: #ffc800 !important;
+    margin-top: 1px;
     letter-spacing: 0.3px;
 }
 
-.event-spin-btn:active { transform: scale(0.95); }
-.event-spin-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-.event-spin-btn.spinning svg { animation: eventSpinRotate 0.6s linear infinite; }
+.event-cell-spin-btn:active {
+    transform: scale(0.92);
+    box-shadow: 0 0 30px rgba(255, 200, 0, 0.9);
+}
+
+.event-cell-spin-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    animation: none;
+}
+
+.event-cell-spin-btn.spinning svg {
+    animation: eventSpinRotate 0.5s linear infinite;
+}
+
+@keyframes eventSpinBtnPulse {
+    0%, 100% { box-shadow: 0 0 20px rgba(255, 109, 31, 0.7), inset 0 0 20px rgba(255, 255, 255, 0.1); }
+    50% { box-shadow: 0 0 35px rgba(255, 200, 0, 0.9), 0 0 60px rgba(255, 109, 31, 0.5), inset 0 0 25px rgba(255, 255, 255, 0.15); }
+}
+
+@keyframes eventSpinBtnShine {
+    0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+    100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+}
 
 @keyframes eventSpinRotate {
     from { transform: rotate(0deg); }
     to { transform: rotate(360deg); }
 }
 
+/* ✅ Footer */
 .event-footer {
     display: flex;
     gap: 10px;
@@ -6531,7 +6607,7 @@ body {
 }
 .event-footer-btn.primary:active { background: rgba(255, 109, 31, 0.35); }
 
-/* Sub Body */
+/* ✅ Sub Body */
 .event-sub-body {
     flex: 1;
     overflow-y: auto;
@@ -6543,7 +6619,7 @@ body {
     z-index: 2;
 }
 
-/* Task Card */
+/* ✅ Task Card */
 .event-task-card {
     display: flex;
     align-items: center;
@@ -6663,7 +6739,7 @@ body {
     box-shadow: 0 0 8px rgba(255, 109, 31, 0.5);
 }
 
-/* Exchange Grid */
+/* ✅ Exchange Grid */
 .exchange-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -6687,26 +6763,54 @@ body {
 
 .exchange-card:active { transform: scale(0.96); border-color: var(--accent); }
 
-/* ✅ Locked — Coin မလုံလောက် */
-.exchange-card.locked {
-    opacity: 0.35;
+/* ✅ Unavailable (Java ထဲက false) */
+.exchange-card.unavailable {
+    opacity: 0.45;
     cursor: not-allowed;
-    border-color: rgba(255, 68, 68, 0.4);
-    filter: grayscale(0.8);
+    border-color: rgba(150, 150, 150, 0.3);
+    filter: grayscale(0.9);
+    pointer-events: none;
 }
 
-.exchange-card.locked:active { transform: none; border-color: rgba(255, 68, 68, 0.4); }
-
-.exchange-card.locked::after {
-    content: '🔒';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 44px;
-    z-index: 3;
+/* ✅ Locked (Coin မလုံလောက်) */
+.exchange-card.locked {
+    opacity: 0.4;
+    cursor: not-allowed;
+    border-color: rgba(255, 68, 68, 0.4);
+    filter: grayscale(0.85);
     pointer-events: none;
-    filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.9));
+}
+
+.exchange-card.locked::after,
+.exchange-card.unavailable::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.3);
+    z-index: 2;
+    pointer-events: none;
+    border-radius: 12px;
+}
+
+.exchange-lock-badge {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    background: linear-gradient(135deg, #ff3b30, #cc0000);
+    color: #fff;
+    font-size: 9px;
+    font-weight: 800;
+    padding: 3px 8px;
+    border-radius: 8px;
+    z-index: 3;
+    letter-spacing: 0.3px;
+    box-shadow: 0 2px 8px rgba(255, 59, 48, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.exchange-lock-badge.closed {
+    background: linear-gradient(135deg, #666, #333);
+    box-shadow: 0 2px 8px rgba(100, 100, 100, 0.5);
 }
 
 .exchange-card-img {
@@ -6740,7 +6844,7 @@ body {
 
 .exchange-card-price img { width: 11px; height: 11px; object-fit: contain; }
 
-/* Popup */
+/* ✅ Popup */
 .event-popup-overlay {
     position: fixed;
     inset: 0;
@@ -6845,8 +6949,8 @@ body {
 
 .event-popup-submit:active { transform: scale(0.97); }
 
-/* Win Popup */
-.event-win-popup {
+/* ✅ Success Popup */
+.event-success-popup {
     background: linear-gradient(135deg, #1a1a24, #12121c);
     border: 2px solid var(--accent);
     border-radius: 20px;
@@ -6863,35 +6967,58 @@ body {
     to { opacity: 1; transform: scale(1); }
 }
 
-.event-win-emoji { font-size: 60px; margin-bottom: 8px; }
+.event-success-icon {
+    width: 70px;
+    height: 70px;
+    margin: 0 auto 14px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, rgba(255, 109, 31, 0.2), rgba(255, 109, 31, 0.05));
+    border: 2px solid var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: eventSuccessPulse 1.5s ease-in-out infinite;
+}
 
-.event-win-title {
-    font-size: 22px;
+.event-success-icon svg {
+    width: 36px;
+    height: 36px;
+    stroke: var(--accent);
+}
+
+@keyframes eventSuccessPulse {
+    0%, 100% { box-shadow: 0 0 20px rgba(255, 109, 31, 0.4); transform: scale(1); }
+    50% { box-shadow: 0 0 35px rgba(255, 109, 31, 0.7); transform: scale(1.05); }
+}
+
+.event-success-title {
+    font-size: 20px;
     font-weight: 900;
     background: linear-gradient(135deg, #ff6d1f, #ffaa44);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    margin-bottom: 8px;
+    margin-bottom: 10px;
+    letter-spacing: 0.3px;
 }
 
-.event-win-reward {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 12px 22px;
-    background: rgba(255, 109, 31, 0.15);
-    border: 1.5px solid var(--accent);
-    border-radius: 14px;
-    font-size: 18px;
-    font-weight: 800;
-    color: var(--accent);
-    margin: 14px 0;
+.event-success-text {
+    font-size: 13.5px;
+    color: var(--text-main);
+    line-height: 1.6;
+    margin-bottom: 6px;
+    padding: 0 4px;
 }
 
-.event-win-reward img { width: 22px; height: 22px; object-fit: contain; }
+.event-success-sub {
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.5;
+    margin-bottom: 18px;
+    padding: 0 4px;
+}
 
-.event-win-btn {
+.event-success-btn {
     width: 100%;
     padding: 14px;
     border: none;
@@ -6903,23 +7030,28 @@ body {
     font-family: inherit;
     cursor: pointer;
     margin-top: 8px;
+    transition: all 0.2s ease;
 }
 
-.event-win-btn:active { transform: scale(0.97); }
+.event-success-btn:active { transform: scale(0.97); }
 
-/* Mobile */
+/* ✅ Mobile */
 @media (max-width: 480px) {
     .event-fab { width: 54px; height: 54px; right: 14px; }
-    .event-lucky-grid { max-width: 300px; gap: 8px; padding: 10px; }
-    .event-cell::after { font-size: 24px; }
-    .event-cell.selected::after { font-size: 26px; }
-    .event-spin-btn { padding: 14px 28px; font-size: 14px; }
+    .event-lucky-grid { max-width: 320px; gap: 8px; padding: 12px; }
+    .event-cell::after { font-size: 28px; }
+    .event-cell.selected::after { font-size: 30px; }
+    .event-cell-spin-btn svg { width: 22px; height: 22px; }
+    .event-cell-spin-btn span { font-size: 10px; }
+    .event-cell-spin-cost { font-size: 8px !important; }
     .exchange-grid { gap: 8px; }
     .exchange-card-name { font-size: 10px; }
     .event-task-icon { width: 40px; height: 40px; }
     .event-task-title { font-size: 13px; }
     .event-task-desc { font-size: 11px; }
     .event-stat-box span { font-size: 12px; }
+    .event-success-title { font-size: 18px; }
+    .event-success-text { font-size: 12.5px; }
 }
 </style>
 </head>
@@ -7964,7 +8096,7 @@ body {
 </div>
 
 <!-- ============================================================
-     ✅ EVENT SYSTEM v5
+     ✅ EVENT SYSTEM v9
      ============================================================ -->
 
 <!-- ✅ EVENT FAB -->
@@ -8004,19 +8136,20 @@ body {
             <div class="event-cell" data-cell="1"></div>
             <div class="event-cell" data-cell="2"></div>
             <div class="event-cell" data-cell="3"></div>
-            <div class="event-cell-center-space"></div>
+
+            <button class="event-cell-spin-btn" id="eventSpinBtn">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+                </svg>
+                <span>ကံစမ်းမည်</span>
+                <span class="event-cell-spin-cost">1 Token</span>
+            </button>
+
             <div class="event-cell" data-cell="4"></div>
             <div class="event-cell" data-cell="5"></div>
             <div class="event-cell" data-cell="6"></div>
             <div class="event-cell" data-cell="7"></div>
         </div>
-
-        <button class="event-spin-btn" id="eventSpinBtn">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
-            </svg>
-            <span>ကံစမ်းမည် (1 Token)</span>
-        </button>
     </div>
 
     <div class="event-footer">
@@ -15225,12 +15358,14 @@ document.addEventListener('keydown', function(e) {
 })();
 
 // ============================================================
-// ✅ EVENT SYSTEM v5 — FULL
-//  • Event Coin: IndexedDB "eventCoins" သက်သက်
+// ✅ EVENT SYSTEM v9 — FULL
+//  • Event Coin: IndexedDB "eventCoins"
 //  • Time task countdown (1 sec update)
-//  • Message progress bar
-//  • Exchange lock (Coin မလုံလောက်ရင် Pop မဖွင့်)
-//  • Telegram Auto (Lucky Win Topic 22 + Exchange Topic 77)
+//  • Message task progress bar
+//  • Exchange lock: available:false → Item ပိတ် (နှိပ်လို့မရ)
+//  • Exchange lock: Coin မလုံလောက် → နှိပ်လို့မရ
+//  • Telegram Auto (Lucky Win 22 + Exchange 77)
+//  • Success Popup (Exchange + Lucky Draw)
 // ============================================================
 (function() {
     'use strict';
@@ -15252,13 +15387,16 @@ document.addEventListener('keydown', function(e) {
         { type: 'bubble', id: 4008, name: 'Bubble 4008', image: 'https://via.placeholder.com/60x40/9b4dff/ffffff?text=Bubble+8' }
     ];
 
+    // ✅ EXCHANGE CARDS — `available` field ပါ
+    //    available: true  → ရနိုင်
+    //    available: false → ပိတ် (Item ကို Lock, နှိပ်လို့မရ)
     var EXCHANGE_CARDS = [
-        { id: 'mlbb_diamond_1', type: 'mlbb', name: 'MLBB 86 Diamond', price: 10, image: 'https://i.ibb.co/placeholder-mlbb1.png' },
-        { id: 'mlbb_diamond_2', type: 'mlbb', name: 'MLBB 172 Diamond', price: 20, image: 'https://i.ibb.co/placeholder-mlbb2.png' },
-        { id: 'mlbb_diamond_3', type: 'mlbb', name: 'MLBB 257 Diamond', price: 30, image: 'https://i.ibb.co/placeholder-mlbb3.png' },
-        { id: 'star_coin_1', type: 'star', name: '100 Star Coin', price: 15, image: 'https://i.ibb.co/placeholder-star1.png' },
-        { id: 'star_coin_2', type: 'star', name: '200 Star Coin', price: 25, image: 'https://i.ibb.co/placeholder-star2.png' },
-        { id: 'star_coin_3', type: 'star', name: '300 Star Coin', price: 35, image: 'https://i.ibb.co/placeholder-star3.png' }
+        { id: 'mlbb_diamond_1', type: 'mlbb', name: 'MLBB 86 Diamond', price: 10, image: 'https://i.ibb.co/placeholder-mlbb1.png', available: true },
+        { id: 'mlbb_diamond_2', type: 'mlbb', name: 'MLBB 172 Diamond', price: 20, image: 'https://i.ibb.co/placeholder-mlbb2.png', available: true },
+        { id: 'mlbb_diamond_3', type: 'mlbb', name: 'MLBB 257 Diamond', price: 30, image: 'https://i.ibb.co/placeholder-mlbb3.png', available: false },
+        { id: 'star_coin_1', type: 'star', name: '100 Star Coin', price: 15, image: 'https://i.ibb.co/placeholder-star1.png', available: true },
+        { id: 'star_coin_2', type: 'star', name: '200 Star Coin', price: 25, image: 'https://i.ibb.co/placeholder-star2.png', available: false },
+        { id: 'star_coin_3', type: 'star', name: '300 Star Coin', price: 35, image: 'https://i.ibb.co/placeholder-star3.png', available: false }
     ];
 
     var TELEGRAM_CHANNELS = [
@@ -15270,12 +15408,10 @@ document.addEventListener('keydown', function(e) {
         { id: 'ch6', name: 'Moonton Company MM', url: 'https://t.me/MoontonCompamyMM', reward: 5 }
     ];
 
-    // ✅ IndexedDB Keys
     var EVENT_TOKENS_KEY = 'eventTokens';
-    var EVENT_COINS_KEY = 'eventCoins';   // ✅ Event Coin — သက်သက်
+    var EVENT_COINS_KEY = 'eventCoins';
     var EVENT_TASKS_KEY = 'eventTasks';
 
-    // ✅ Telegram
     var EVENT_TG_BOT = '7869159797:AAEX6EbdQpo39CV6bV2pzItm6zwphh2UXbY';
     var EVENT_TG_CHAT = '@StarArcadeAdmin';
     var EVENT_TG_TOPIC_LUCKY = 22;
@@ -15292,11 +15428,10 @@ document.addEventListener('keydown', function(e) {
     var eventCoins = 0;
     var eventTasksDone = {};
     var isSpinning = false;
-
     var timeTaskTimers = [];
 
     // ===================================================
-    //  DB HELPERS — Event Coin Only
+    //  DB HELPERS
     // ===================================================
     function eventDbGet(key) {
         return new Promise(function(resolve) {
@@ -15328,7 +15463,6 @@ document.addEventListener('keydown', function(e) {
     function saveEventCoins() { return eventDbSet(EVENT_COINS_KEY, eventCoins); }
     function saveEventTasks() { return eventDbSet(EVENT_TASKS_KEY, eventTasksDone); }
 
-    // ✅ Event Coin ထည့်တဲ့ function (ဒါပဲ သုံး)
     function addEventCoins(amount) {
         eventCoins = (parseInt(eventCoins) || 0) + (parseInt(amount) || 0);
         return saveEventCoins().then(function() {
@@ -15417,17 +15551,17 @@ document.addEventListener('keydown', function(e) {
                 if (sv) serverName = sv.name;
             }
 
-            var msg = '<b>🎁 LUCKY DRAW WIN</b>\n\n';
-            if (isDuplicate) msg += '<b>⚠️ Duplicate Reward</b>\n';
+            var msg = '<b>LUCKY DRAW WIN</b>\n\n';
+            if (isDuplicate) msg += '<b>Duplicate Reward</b>\n';
             msg += '<b>Reward</b>: ' + (reward.name || 'Unknown') + '\n';
             msg += '<b>Type</b>: ' + (reward.type || 'Unknown') + '\n';
             if (reward.id) msg += '<b>ID</b>: ' + reward.id + '\n';
-            msg += '\n<b>👤 User</b>\n';
+            msg += '\n<b>User</b>\n';
             msg += 'Name: ' + userName + '\n';
             msg += 'Server: ' + serverName + '\n';
             msg += 'ID: ' + userId + '\n\n';
             if (isDuplicate) msg += '<b>Compensation</b>: ' + DUPLICATE_COIN_REWARD + ' Coin\n\n';
-            msg += '📅 ' + new Date().toLocaleString('en-US', { timeZone: 'Asia/Yangon' });
+            msg += new Date().toLocaleString('en-US', { timeZone: 'Asia/Yangon' });
 
             fetch('https://api.telegram.org/bot' + EVENT_TG_BOT + '/sendMessage', {
                 method: 'POST',
@@ -15444,7 +15578,7 @@ document.addEventListener('keydown', function(e) {
     }
 
     // ===================================================
-    //  TELEGRAM — Exchange
+    //  TELEGRAM — Exchange (Status field မပါ)
     // ===================================================
     function sendExchangeToTelegram(card, inputData, coinsBefore, coinsAfter) {
         try {
@@ -15457,23 +15591,28 @@ document.addEventListener('keydown', function(e) {
                 if (sv) { serverName = sv.name; serverNo = sv.number; }
             }
 
-            var msg = '<b>🔄 EVENT EXCHANGE</b>\n\n';
-            msg += '<b>📦 Item</b>\n';
+            var msg = '<b>EVENT EXCHANGE</b>\n\n';
+            msg += '<b>Item</b>\n';
             msg += 'Name: ' + (card.name || 'Unknown') + '\n';
             msg += 'Price: ' + (card.price || 0) + ' Coin\n';
             if (inputData.gameId) msg += 'Game ID: ' + inputData.gameId + '\n';
             if (inputData.serverId) msg += 'Game Server ID: ' + inputData.serverId + '\n';
-            msg += '\n<b>👤 User</b>\n';
+            msg += '\n';
+
+            msg += '<b>User</b>\n';
             msg += 'Name: ' + userName + '\n';
             msg += 'Server: ' + serverName + ' (No.' + serverNo + ')\n';
             msg += 'ID: ' + userId + '\n';
             if (inputData.userId) msg += 'Input User ID: ' + inputData.userId + '\n';
             if (inputData.serverNo) msg += 'Input Server No: ' + inputData.serverNo + '\n';
-            msg += '\n<b>💰 Coin</b>\n';
+            msg += '\n';
+
+            msg += '<b>Coin</b>\n';
             msg += 'Before: ' + coinsBefore + '\n';
             msg += 'Used: ' + card.price + '\n';
             msg += 'After: ' + coinsAfter + '\n\n';
-            msg += '📅 ' + new Date().toLocaleString('en-US', { timeZone: 'Asia/Yangon' });
+
+            msg += new Date().toLocaleString('en-US', { timeZone: 'Asia/Yangon' });
 
             fetch('https://api.telegram.org/bot' + EVENT_TG_BOT + '/sendMessage', {
                 method: 'POST',
@@ -15627,29 +15766,27 @@ document.addEventListener('keydown', function(e) {
         var isDuplicate = false;
 
         if (reward.type === 'coin') {
-            // ✅ Event Coin ကို IndexedDB မှာ သက်သက် ထည့်
-            addEventCoins(reward.amount).then(function(newTotal) {
-                showWinPopup(reward, false, null);
+            addEventCoins(reward.amount).then(function() {
+                showLuckySuccessPopup(reward, false);
             });
         } else {
             if (isRewardOwned(reward)) {
-                // ✅ ပိုင်ဆိုင်ပြီးသား → 30 Coin ပေး
                 isDuplicate = true;
                 var dupReward = {
                     type: 'coin',
                     amount: DUPLICATE_COIN_REWARD,
-                    name: DUPLICATE_COIN_REWARD + ' Coin (Duplicate)',
+                    name: DUPLICATE_COIN_REWARD + ' Coin',
                     image: 'https://i.ibb.co/39SYGr6M/Grid-Art-20260805-102408042.png'
                 };
                 addEventCoins(DUPLICATE_COIN_REWARD).then(function() {
                     sendLuckyWinToTelegram(reward, true);
-                    showWinPopup(dupReward, true, reward);
+                    showLuckySuccessPopup(dupReward, true);
                 });
             } else {
                 addOwnedReward(reward);
                 saveOwnedToFirebase(reward);
                 sendLuckyWinToTelegram(reward, false);
-                showWinPopup(reward, false, null);
+                showLuckySuccessPopup(reward, false);
             }
         }
 
@@ -15659,38 +15796,50 @@ document.addEventListener('keydown', function(e) {
     }
 
     // ===================================================
-    //  WIN POPUP
+    //  LUCKY SUCCESS POPUP
     // ===================================================
-    function showWinPopup(reward, isDuplicate, originalReward) {
+    function showLuckySuccessPopup(reward, isDuplicate) {
         var overlay = document.createElement('div');
         overlay.className = 'event-popup-overlay';
 
         var rewardHtml = '';
         if (reward.type === 'coin') {
-            rewardHtml = '<img src="' + reward.image + '" /><span>+' + reward.amount + ' Coin</span>';
+            rewardHtml = '<img src="' + reward.image + '" style="width:20px;height:20px;object-fit:contain;" /><span>+' + reward.amount + ' Coin</span>';
         } else {
             rewardHtml = '<img src="' + reward.image + '" style="width:60px;height:60px;border-radius:12px;object-fit:cover;" /><span style="font-size:14px;">' + reward.name + '</span>';
         }
 
-        var titleText = isDuplicate ? 'ပိုင်ဆိုင်ပြီးသားပါ' : 'ဂုဏ်ယူပါတယ်!';
+        var titleText = isDuplicate ? 'ထပ်တူ ရရှိပါသည်' : 'ဂုဏ်ယူပါတယ်';
         var subText = isDuplicate
-            ? 'ပိုင်ဆိုင်ပြီးသားဖြစ်လို့<br>' + DUPLICATE_COIN_REWARD + ' Coin ပေးလိုက်ပါတယ်'
-            : 'သင်ရရှိလိုက်တာ';
-        var emoji = isDuplicate ? '😅' : '🎉';
+            ? 'သင်ရရှိထားသော အရာဖြစ်သည့်အတွက်<br>' + DUPLICATE_COIN_REWARD + ' Coin ပေးလိုက်ပါသည်'
+            : 'သင်ရရှိလိုက်သော အရာ';
+
+        var telegramMsg = isDuplicate
+            ? 'အကြောင်းကြားထားပါသည်။<br>ခန အကြာတွင် ရရှိနိုင်ပါသည်။'
+            : 'သင့်ရရှိထားသော အရာကို<br>မကြာမီ ထည့်ပေးပါမည်။<br><br>အကြောင်းကြားထားပါသည်။';
 
         overlay.innerHTML =
-            '<div class="event-win-popup">' +
-                '<div class="event-win-emoji">' + emoji + '</div>' +
-                '<div class="event-win-title">' + titleText + '</div>' +
-                '<div style="font-size:13px;color:#9a9aaa;margin-top:4px;line-height:1.5;">' + subText + '</div>' +
-                '<div class="event-win-reward">' + rewardHtml + '</div>' +
-                '<button class="event-win-btn" id="eventWinCloseBtn">အိုကေ</button>' +
+            '<div class="event-success-popup">' +
+                '<div class="event-success-icon">' +
+                    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">' +
+                        '<polyline points="20 6 9 17 4 12"/>' +
+                    '</svg>' +
+                '</div>' +
+                '<div class="event-success-title">' + titleText + '</div>' +
+                '<div class="event-success-text">' + subText + '</div>' +
+                '<div style="display:flex;align-items:center;justify-content:center;gap:8px;padding:12px 20px;background:rgba(255,109,31,0.12);border:1.5px solid var(--accent);border-radius:14px;font-size:15px;font-weight:800;color:var(--accent);margin:14px 0;">' + rewardHtml + '</div>' +
+                '<div class="event-success-sub">' + telegramMsg + '</div>' +
+                '<button class="event-success-btn" id="eventSuccessCloseBtn">ရပါပြီ</button>' +
             '</div>';
 
         document.body.appendChild(overlay);
 
-        document.getElementById('eventWinCloseBtn').addEventListener('click', function() { overlay.remove(); });
-        overlay.addEventListener('click', function(e) { if (e.target === overlay) overlay.remove(); });
+        document.getElementById('eventSuccessCloseBtn').addEventListener('click', function() {
+            overlay.remove();
+        });
+        overlay.addEventListener('click', function(e) {
+            if (e.target === overlay) overlay.remove();
+        });
     }
 
     // ===================================================
@@ -15785,9 +15934,6 @@ document.addEventListener('keydown', function(e) {
         });
     }
 
-    // ===================================================
-    //  TIME TASK — Countdown (1 sec update)
-    // ===================================================
     function startTimeTask(task, btn) {
         var extraEl = document.getElementById('taskExtra_' + task.id);
 
@@ -15799,7 +15945,7 @@ document.addEventListener('keydown', function(e) {
                 btn.textContent = 'ရယူမည်';
                 btn.disabled = false;
                 btn.classList.remove('claimed');
-                if (extraEl) extraEl.innerHTML = '<span style="color:#44ff88;font-weight:700;font-size:12px;">✓ ရယူနိုင်ပြီ</span>';
+                if (extraEl) extraEl.innerHTML = '<span style="color:#44ff88;font-weight:700;font-size:12px;">ရယူနိုင်ပြီ</span>';
             } else {
                 btn.textContent = 'စောင့်ပါ';
                 btn.disabled = true;
@@ -15831,9 +15977,6 @@ document.addEventListener('keydown', function(e) {
         });
     }
 
-    // ===================================================
-    //  MSG TASK — Progress Bar
-    // ===================================================
     function startMsgTask(task, btn) {
         var extraEl = document.getElementById('taskExtra_' + task.id);
 
@@ -15894,9 +16037,6 @@ document.addEventListener('keydown', function(e) {
         });
     }
 
-    // ===================================================
-    //  TG TASK
-    // ===================================================
     function startTgTask(task, btn) {
         var done = !!eventTasksDone[task.id];
         if (done) { btn.textContent = 'ပြီးပြီ'; btn.disabled = true; btn.classList.add('claimed'); }
@@ -15916,9 +16056,6 @@ document.addEventListener('keydown', function(e) {
         });
     }
 
-    // ===================================================
-    //  MESSAGE COUNT
-    // ===================================================
     function getTodayMessageCount() {
         if (typeof memoryMessages === 'undefined') return 0;
         var count = 0;
@@ -15947,7 +16084,7 @@ document.addEventListener('keydown', function(e) {
     }
 
     // ===================================================
-    //  EXCHANGE
+    //  EXCHANGE — Cards (available + coin lock)
     // ===================================================
     function renderExchangeCards() {
         var grid = document.getElementById('exchangeGrid');
@@ -15955,11 +16092,29 @@ document.addEventListener('keydown', function(e) {
         grid.innerHTML = '';
 
         EXCHANGE_CARDS.forEach(function(card) {
-            var locked = eventCoins < card.price;
+            // ✅ available: false ဆိုရင် ပိတ်
+            var isClosed = (card.available === false);
+            // ✅ Coin မလုံလောက်ရင် lock
+            var isLocked = eventCoins < card.price;
 
             var div = document.createElement('div');
-            div.className = 'exchange-card' + (locked ? ' locked' : '');
+            div.className = 'exchange-card';
+
+            var lockBadge = '';
+            var canClick = true;
+
+            if (isClosed) {
+                div.classList.add('unavailable');
+                lockBadge = '<div class="exchange-lock-badge closed">ပိတ်ထားသည်</div>';
+                canClick = false;
+            } else if (isLocked) {
+                div.classList.add('locked');
+                lockBadge = '<div class="exchange-lock-badge">Coin မလုံလောက်</div>';
+                canClick = false;
+            }
+
             div.innerHTML =
+                lockBadge +
                 '<img class="exchange-card-img" src="' + card.image + '" />' +
                 '<div class="exchange-card-info">' +
                     '<div class="exchange-card-name">' + card.name + '</div>' +
@@ -15969,15 +16124,10 @@ document.addEventListener('keydown', function(e) {
                     '</div>' +
                 '</div>';
 
-            // ✅ Lock ဖြစ်ရင် Popup မဖွင့်
-            if (!locked) {
+            // ✅ canClick: false ဆိုရင် Click listener မတွဲ
+            if (canClick) {
                 div.addEventListener('click', function() {
                     openExchangeInfoPopup(card);
-                });
-            } else {
-                // ✅ သတိပေးစာ ပဲ ပြ
-                div.addEventListener('click', function() {
-                    showToast('Coin မလုံလောက်ပါ (လိုအပ်: ' + card.price + ')');
                 });
             }
 
@@ -15986,7 +16136,12 @@ document.addEventListener('keydown', function(e) {
     }
 
     function openExchangeInfoPopup(card) {
-        // ✅ ထပ်မံ စစ်ဆေး (double check)
+        // ✅ Double check — available
+        if (card.available === false) {
+            showToast('ပိတ်ထားသော Item ဖြစ်ပါသည်');
+            return;
+        }
+        // ✅ Double check — Coin
         if (eventCoins < card.price) {
             showToast('Coin မလုံလောက်ပါ');
             return;
@@ -16030,7 +16185,11 @@ document.addEventListener('keydown', function(e) {
     }
 
     function submitExchange(card) {
-        // ✅ ထပ်မံ စစ်ဆေး (double check)
+        // ✅ Double check
+        if (card.available === false) {
+            showToast('ပိတ်ထားသော Item ဖြစ်ပါသည်');
+            return;
+        }
         if (eventCoins < card.price) {
             showToast('Coin မလုံလောက်ပါ');
             return;
@@ -16054,22 +16213,46 @@ document.addEventListener('keydown', function(e) {
             serverNo: serverNo ? serverNo.value.trim() : ''
         };
 
-        // ✅ Event Coin လျှော့ (IndexedDB)
         spendEventCoins(card.price).then(function(ok) {
             if (!ok) { showToast('Coin မလုံလောက်ပါ'); return; }
 
             var coinsAfter = eventCoins;
 
-            // ✅ Telegram Auto
             sendExchangeToTelegram(card, inputData, coinsBefore, coinsAfter);
-
-            showToast('လဲလှယ်မှု အောင်မြင်ပါသည်');
 
             var popup = document.getElementById('exchangeInfoPopup');
             if (popup) popup.classList.add('hidden');
 
-            // ✅ Exchange Card ပြန် render
+            showExchangeSuccessPopup(card);
+
             renderExchangeCards();
+        });
+    }
+
+    function showExchangeSuccessPopup(card) {
+        var overlay = document.createElement('div');
+        overlay.className = 'event-popup-overlay';
+
+        overlay.innerHTML =
+            '<div class="event-success-popup">' +
+                '<div class="event-success-icon">' +
+                    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">' +
+                        '<polyline points="20 6 9 17 4 12"/>' +
+                    '</svg>' +
+                '</div>' +
+                '<div class="event-success-title">လဲလှယ်မှု အောင်မြင်ပါသည်</div>' +
+                '<div class="event-success-text">' + (card.name || '') + '<br>' + (card.price || 0) + ' Coin ဖြင့် လဲလှယ်လိုက်ပါသည်</div>' +
+                '<div class="event-success-sub">အကြောင်းကြားထားပါသည်။<br>ခန အကြာတွင် ရရှိနိုင်ပါသည်။</div>' +
+                '<button class="event-success-btn" id="eventSuccessCloseBtn">ရပါပြီ</button>' +
+            '</div>';
+
+        document.body.appendChild(overlay);
+
+        document.getElementById('eventSuccessCloseBtn').addEventListener('click', function() {
+            overlay.remove();
+        });
+        overlay.addEventListener('click', function(e) {
+            if (e.target === overlay) overlay.remove();
         });
     }
 
@@ -16118,7 +16301,7 @@ document.addEventListener('keydown', function(e) {
             updateEventFabVisibility();
         });
 
-        console.log('✅ Event System v5 Ready');
+        console.log('Event System v9 Ready');
     }
 
     if (document.readyState === 'loading') {
