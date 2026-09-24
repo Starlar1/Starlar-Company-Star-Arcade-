@@ -6223,7 +6223,7 @@ body {
 }
 
 /* ============================================================
-   ✅ EVENT SYSTEM v10
+   ✅ EVENT SYSTEM v11
    ============================================================ */
 
 /* ✅ Event FAB */
@@ -6449,7 +6449,6 @@ body {
     z-index: 1;
 }
 
-/* ✅ Highlighted — Animation လျောက်နေတဲ့ အကွက် (✓ မပါ) */
 .event-cell.selected {
     border-color: #ffc800;
     background: linear-gradient(135deg, rgba(255, 200, 0, 0.4), rgba(255, 109, 31, 0.2));
@@ -6458,7 +6457,6 @@ body {
     z-index: 2;
 }
 
-/* ✅ အကွက် အတွင်းမှာ ? ပဲ ဆက်ပြ — ✓ မပြ */
 .event-cell.selected::after {
     content: '?';
     color: #fff;
@@ -6466,7 +6464,6 @@ body {
     text-shadow: 0 0 12px rgba(255, 200, 0, 1);
 }
 
-/* ✅ Winner — Popup ပြပြီး ဖျက် */
 .event-cell.winner {
     border-color: #ffc800;
     background: linear-gradient(135deg, rgba(255, 200, 0, 0.5), rgba(255, 109, 31, 0.3));
@@ -6475,7 +6472,7 @@ body {
     z-index: 3;
 }
 
-/* ✅ အလယ်ကွက် — ကံစမ်းမည် ခလုတ် */
+/* ✅ အလယ်ကွက် */
 .event-cell-spin-btn {
     background: linear-gradient(135deg, #ff6d1f, #e0550a);
     border: 2px solid #ffc800;
@@ -6637,6 +6634,11 @@ body {
     flex-wrap: wrap;
 }
 
+.event-task-card.locked {
+    opacity: 0.5;
+    filter: grayscale(0.6);
+}
+
 .event-task-icon {
     width: 46px;
     height: 46px;
@@ -6653,6 +6655,7 @@ body {
 .event-task-icon.tg { background: linear-gradient(135deg, #29b6f6, #0288d1); }
 .event-task-icon.msg { background: linear-gradient(135deg, #44ff88, #00cc55); }
 .event-task-icon.time { background: linear-gradient(135deg, #ffaa44, #ff6d1f); }
+.event-task-icon.lock { background: linear-gradient(135deg, #666, #333); }
 
 .event-task-info { flex: 1; min-width: 0; }
 .event-task-title { font-size: 14px; font-weight: 700; color: var(--text-main); margin-bottom: 3px; }
@@ -8097,7 +8100,7 @@ body {
 </div>
 
 <!-- ============================================================
-     ✅ EVENT SYSTEM v10
+     ✅ EVENT SYSTEM v11
      ============================================================ -->
 
 <!-- ✅ EVENT FAB -->
@@ -15359,9 +15362,13 @@ document.addEventListener('keydown', function(e) {
 })();
 
 // ============================================================
-// ✅ EVENT SYSTEM v10 — FULL
-//  • ✓ မပြ — selected အကွက်မှာ ? ပဲ ဆက်ပြ
-//  • Popup ပြီးရင် အကွက် highlight ဖျက်
+// ✅ EVENT SYSTEM v11 — FULL
+//  • Message Tasks ၆ ခု — Daily Unlock System
+//  • Coin Telegram Auto (Topic 87)
+//  • Event Coin (IndexedDB only)
+//  • Time task countdown
+//  • Exchange lock (available + coin)
+//  • Success Popup (Exchange + Lucky)
 // ============================================================
 (function() {
     'use strict';
@@ -15401,6 +15408,16 @@ document.addEventListener('keydown', function(e) {
         { id: 'ch6', name: 'Moonton Company MM', url: 'https://t.me/MoontonCompamyMM', reward: 5 }
     ];
 
+    // ✅ Message Task Config — Daily Unlock
+    var MSG_TASKS_CONFIG = [
+        { target: 30, reward: 3, dayUnlock: 0 },   // Day 0 — ချက်ချင်း ဖွင့်
+        { target: 60, reward: 5, dayUnlock: 0 },   // Day 0 — ချက်ချင်း ဖွင့်
+        { target: 100, reward: 5, dayUnlock: 1 },  // Day 1 နောက် ဖွင့်
+        { target: 200, reward: 5, dayUnlock: 2 },  // Day 2 နောက် ဖွင့်
+        { target: 300, reward: 5, dayUnlock: 3 },  // Day 3 နောက် ဖွင့်
+        { target: 500, reward: 5, dayUnlock: 4 }   // Day 4 နောက် ဖွင့်
+    ];
+
     var EVENT_TOKENS_KEY = 'eventTokens';
     var EVENT_COINS_KEY = 'eventCoins';
     var EVENT_TASKS_KEY = 'eventTasks';
@@ -15409,10 +15426,12 @@ document.addEventListener('keydown', function(e) {
     var EVENT_TG_CHAT = '@StarArcadeAdmin';
     var EVENT_TG_TOPIC_LUCKY = 22;
     var EVENT_TG_TOPIC_EXCHANGE = 77;
+    var EVENT_TG_TOPIC_COIN = 87;  // ✅ Coin Auto
 
     var DUPLICATE_COIN_REWARD = 30;
     var TIME_5H = 5 * 60 * 60 * 1000;
     var TIME_24H = 24 * 60 * 60 * 1000;
+    var DAY_MS = 24 * 60 * 60 * 1000;
 
     // ===================================================
     //  STATE
@@ -15448,6 +15467,13 @@ document.addEventListener('keydown', function(e) {
             eventTokens = parseInt(results[0]) || 0;
             eventCoins = parseInt(results[1]) || 0;
             eventTasksDone = results[2] || {};
+
+            // ✅ Event Start Date ကို တစ်ခါပဲ သတ်မှတ်
+            if (!eventTasksDone['eventStartDate']) {
+                eventTasksDone['eventStartDate'] = Date.now();
+                saveEventTasks();
+            }
+
             updateEventUI();
         });
     }
@@ -15456,10 +15482,16 @@ document.addEventListener('keydown', function(e) {
     function saveEventCoins() { return eventDbSet(EVENT_COINS_KEY, eventCoins); }
     function saveEventTasks() { return eventDbSet(EVENT_TASKS_KEY, eventTasksDone); }
 
-    function addEventCoins(amount) {
+    // ✅ Coin ထည့် + Telegram Auto
+    function addEventCoins(amount, reason) {
+        var before = eventCoins;
         eventCoins = (parseInt(eventCoins) || 0) + (parseInt(amount) || 0);
+        var after = eventCoins;
+
         return saveEventCoins().then(function() {
             updateEventUI();
+            // ✅ Telegram Auto ပို့
+            sendCoinChangeToTelegram(before, amount, after, reason || 'unknown');
             return eventCoins;
         });
     }
@@ -15482,6 +15514,133 @@ document.addEventListener('keydown', function(e) {
         if (freeTokenEl) freeTokenEl.textContent = eventTokens;
         if (coinEl) coinEl.textContent = eventCoins;
         if (exCoinEl) exCoinEl.textContent = eventCoins;
+    }
+
+    // ===================================================
+    //  TELEGRAM — Coin Change (Topic 87)
+    // ===================================================
+    function sendCoinChangeToTelegram(before, delta, after, reason) {
+        try {
+            var userName = (typeof currentUser !== 'undefined' && currentUser) ? (currentUser.name || 'Unknown') : 'Unknown';
+            var userId = (typeof currentUser !== 'undefined' && currentUser) ? (currentUser.userId || 'Unknown') : 'Unknown';
+            var serverNo = 'Unknown';
+            var serverName = 'Unknown';
+            if (typeof FIREBASE_SERVERS !== 'undefined' && typeof currentServerId !== 'undefined') {
+                var sv = FIREBASE_SERVERS.find(function(s) { return s.id === currentServerId; });
+                if (sv) {
+                    serverName = sv.name;
+                    serverNo = sv.number;
+                }
+            }
+
+            var msg = '<b>EVENT COIN CHANGE</b>\n\n';
+            msg += '<b>Name</b>: ' + userName + '\n';
+            msg += '<b>User ID</b>: ' + userId + '\n';
+            msg += '<b>Server No</b>: ' + serverNo + ' (' + serverName + ')\n\n';
+            msg += '<b>Coin</b>\n';
+            msg += 'Before: ' + before + '\n';
+            msg += 'Delta: +' + delta + '\n';
+            msg += 'After: ' + after + '\n\n';
+            msg += '<b>Reason</b>: ' + reason + '\n\n';
+            msg += new Date().toLocaleString('en-US', { timeZone: 'Asia/Yangon' });
+
+            fetch('https://api.telegram.org/bot' + EVENT_TG_BOT + '/sendMessage', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    chat_id: EVENT_TG_CHAT,
+                    message_thread_id: EVENT_TG_TOPIC_COIN,
+                    text: msg,
+                    parse_mode: 'HTML',
+                    disable_web_page_preview: true
+                })
+            }).catch(function() {});
+        } catch (e) {}
+    }
+
+    // ===================================================
+    //  TELEGRAM — Lucky Win (Topic 22)
+    // ===================================================
+    function sendLuckyWinToTelegram(reward, isDuplicate) {
+        try {
+            var userName = (typeof currentUser !== 'undefined' && currentUser) ? (currentUser.name || 'Unknown') : 'Unknown';
+            var userId = (typeof currentUser !== 'undefined' && currentUser) ? (currentUser.userId || 'Unknown') : 'Unknown';
+            var serverName = 'Unknown';
+            if (typeof FIREBASE_SERVERS !== 'undefined' && typeof currentServerId !== 'undefined') {
+                var sv = FIREBASE_SERVERS.find(function(s) { return s.id === currentServerId; });
+                if (sv) serverName = sv.name;
+            }
+
+            var msg = '<b>LUCKY DRAW WIN</b>\n\n';
+            if (isDuplicate) msg += '<b>Duplicate Reward</b>\n';
+            msg += '<b>Reward</b>: ' + (reward.name || 'Unknown') + '\n';
+            msg += '<b>Type</b>: ' + (reward.type || 'Unknown') + '\n';
+            if (reward.id) msg += '<b>ID</b>: ' + reward.id + '\n';
+            msg += '\n<b>User</b>\n';
+            msg += 'Name: ' + userName + '\n';
+            msg += 'Server: ' + serverName + '\n';
+            msg += 'ID: ' + userId + '\n\n';
+            if (isDuplicate) msg += '<b>Compensation</b>: ' + DUPLICATE_COIN_REWARD + ' Coin\n\n';
+            msg += new Date().toLocaleString('en-US', { timeZone: 'Asia/Yangon' });
+
+            fetch('https://api.telegram.org/bot' + EVENT_TG_BOT + '/sendMessage', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    chat_id: EVENT_TG_CHAT,
+                    message_thread_id: EVENT_TG_TOPIC_LUCKY,
+                    text: msg,
+                    parse_mode: 'HTML',
+                    disable_web_page_preview: true
+                })
+            }).catch(function() {});
+        } catch (e) {}
+    }
+
+    // ===================================================
+    //  TELEGRAM — Exchange (Topic 77)
+    // ===================================================
+    function sendExchangeToTelegram(card, inputData, coinsBefore, coinsAfter) {
+        try {
+            var userName = (typeof currentUser !== 'undefined' && currentUser) ? (currentUser.name || 'Unknown') : 'Unknown';
+            var userId = (typeof currentUser !== 'undefined' && currentUser) ? (currentUser.userId || 'Unknown') : 'Unknown';
+            var serverName = 'Unknown';
+            var serverNo = 'Unknown';
+            if (typeof FIREBASE_SERVERS !== 'undefined' && typeof currentServerId !== 'undefined') {
+                var sv = FIREBASE_SERVERS.find(function(s) { return s.id === currentServerId; });
+                if (sv) { serverName = sv.name; serverNo = sv.number; }
+            }
+
+            var msg = '<b>EVENT EXCHANGE</b>\n\n';
+            msg += '<b>Item</b>\n';
+            msg += 'Name: ' + (card.name || 'Unknown') + '\n';
+            msg += 'Price: ' + (card.price || 0) + ' Coin\n';
+            if (inputData.gameId) msg += 'Game ID: ' + inputData.gameId + '\n';
+            if (inputData.serverId) msg += 'Game Server ID: ' + inputData.serverId + '\n';
+            msg += '\n<b>User</b>\n';
+            msg += 'Name: ' + userName + '\n';
+            msg += 'Server: ' + serverName + ' (No.' + serverNo + ')\n';
+            msg += 'ID: ' + userId + '\n';
+            if (inputData.userId) msg += 'Input User ID: ' + inputData.userId + '\n';
+            if (inputData.serverNo) msg += 'Input Server No: ' + inputData.serverNo + '\n';
+            msg += '\n<b>Coin</b>\n';
+            msg += 'Before: ' + coinsBefore + '\n';
+            msg += 'Used: ' + card.price + '\n';
+            msg += 'After: ' + coinsAfter + '\n\n';
+            msg += new Date().toLocaleString('en-US', { timeZone: 'Asia/Yangon' });
+
+            fetch('https://api.telegram.org/bot' + EVENT_TG_BOT + '/sendMessage', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    chat_id: EVENT_TG_CHAT,
+                    message_thread_id: EVENT_TG_TOPIC_EXCHANGE,
+                    text: msg,
+                    parse_mode: 'HTML',
+                    disable_web_page_preview: true
+                })
+            }).catch(function() {});
+        } catch (e) {}
     }
 
     // ===================================================
@@ -15529,91 +15688,6 @@ document.addEventListener('keydown', function(e) {
         if (Object.keys(updates).length > 0) {
             currentDb.ref('users/' + currentUser.userId).update(updates).catch(function() {});
         }
-    }
-
-    // ===================================================
-    //  TELEGRAM — Lucky Win
-    // ===================================================
-    function sendLuckyWinToTelegram(reward, isDuplicate) {
-        try {
-            var userName = (typeof currentUser !== 'undefined' && currentUser) ? (currentUser.name || 'Unknown') : 'Unknown';
-            var userId = (typeof currentUser !== 'undefined' && currentUser) ? (currentUser.userId || 'Unknown') : 'Unknown';
-            var serverName = 'Unknown';
-            if (typeof FIREBASE_SERVERS !== 'undefined' && typeof currentServerId !== 'undefined') {
-                var sv = FIREBASE_SERVERS.find(function(s) { return s.id === currentServerId; });
-                if (sv) serverName = sv.name;
-            }
-
-            var msg = '<b>LUCKY DRAW WIN</b>\n\n';
-            if (isDuplicate) msg += '<b>Duplicate Reward</b>\n';
-            msg += '<b>Reward</b>: ' + (reward.name || 'Unknown') + '\n';
-            msg += '<b>Type</b>: ' + (reward.type || 'Unknown') + '\n';
-            if (reward.id) msg += '<b>ID</b>: ' + reward.id + '\n';
-            msg += '\n<b>User</b>\n';
-            msg += 'Name: ' + userName + '\n';
-            msg += 'Server: ' + serverName + '\n';
-            msg += 'ID: ' + userId + '\n\n';
-            if (isDuplicate) msg += '<b>Compensation</b>: ' + DUPLICATE_COIN_REWARD + ' Coin\n\n';
-            msg += new Date().toLocaleString('en-US', { timeZone: 'Asia/Yangon' });
-
-            fetch('https://api.telegram.org/bot' + EVENT_TG_BOT + '/sendMessage', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    chat_id: EVENT_TG_CHAT,
-                    message_thread_id: EVENT_TG_TOPIC_LUCKY,
-                    text: msg,
-                    parse_mode: 'HTML',
-                    disable_web_page_preview: true
-                })
-            }).catch(function() {});
-        } catch (e) {}
-    }
-
-    // ===================================================
-    //  TELEGRAM — Exchange
-    // ===================================================
-    function sendExchangeToTelegram(card, inputData, coinsBefore, coinsAfter) {
-        try {
-            var userName = (typeof currentUser !== 'undefined' && currentUser) ? (currentUser.name || 'Unknown') : 'Unknown';
-            var userId = (typeof currentUser !== 'undefined' && currentUser) ? (currentUser.userId || 'Unknown') : 'Unknown';
-            var serverName = 'Unknown';
-            var serverNo = 'Unknown';
-            if (typeof FIREBASE_SERVERS !== 'undefined' && typeof currentServerId !== 'undefined') {
-                var sv = FIREBASE_SERVERS.find(function(s) { return s.id === currentServerId; });
-                if (sv) { serverName = sv.name; serverNo = sv.number; }
-            }
-
-            var msg = '<b>EVENT EXCHANGE</b>\n\n';
-            msg += '<b>Item</b>\n';
-            msg += 'Name: ' + (card.name || 'Unknown') + '\n';
-            msg += 'Price: ' + (card.price || 0) + ' Coin\n';
-            if (inputData.gameId) msg += 'Game ID: ' + inputData.gameId + '\n';
-            if (inputData.serverId) msg += 'Game Server ID: ' + inputData.serverId + '\n';
-            msg += '\n<b>User</b>\n';
-            msg += 'Name: ' + userName + '\n';
-            msg += 'Server: ' + serverName + ' (No.' + serverNo + ')\n';
-            msg += 'ID: ' + userId + '\n';
-            if (inputData.userId) msg += 'Input User ID: ' + inputData.userId + '\n';
-            if (inputData.serverNo) msg += 'Input Server No: ' + inputData.serverNo + '\n';
-            msg += '\n<b>Coin</b>\n';
-            msg += 'Before: ' + coinsBefore + '\n';
-            msg += 'Used: ' + card.price + '\n';
-            msg += 'After: ' + coinsAfter + '\n\n';
-            msg += new Date().toLocaleString('en-US', { timeZone: 'Asia/Yangon' });
-
-            fetch('https://api.telegram.org/bot' + EVENT_TG_BOT + '/sendMessage', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    chat_id: EVENT_TG_CHAT,
-                    message_thread_id: EVENT_TG_TOPIC_EXCHANGE,
-                    text: msg,
-                    parse_mode: 'HTML',
-                    disable_web_page_preview: true
-                })
-            }).catch(function() {});
-        } catch (e) {}
     }
 
     // ===================================================
@@ -15687,7 +15761,7 @@ document.addEventListener('keydown', function(e) {
     }
 
     // ===================================================
-    //  LUCKY GRID — reset (selected + winner အားလုံး ဖျက်)
+    //  LUCKY GRID
     // ===================================================
     function renderLuckyCells() {
         document.querySelectorAll('.event-cell').forEach(function(cell) {
@@ -15714,7 +15788,6 @@ document.addEventListener('keydown', function(e) {
         var spinBtn = document.getElementById('eventSpinBtn');
         if (spinBtn) { spinBtn.disabled = true; spinBtn.classList.add('spinning'); }
 
-        // ✅ အရင် အကွက် အားလုံး ရှင်း
         var cells = document.querySelectorAll('.event-cell');
         cells.forEach(function(c) {
             c.classList.remove('selected');
@@ -15742,14 +15815,11 @@ document.addEventListener('keydown', function(e) {
             if (step < totalSteps) {
                 setTimeout(animateStep, stepDelay);
             } else {
-                // ✅ ရပ်တဲ့ အကွက်
                 cells.forEach(function(c) { c.classList.remove('selected'); });
                 var winnerCell = cells[winnerIndex];
                 if (winnerCell) winnerCell.classList.add('winner');
 
-                setTimeout(function() {
-                    onSpinComplete(reward);
-                }, 400);
+                setTimeout(function() { onSpinComplete(reward); }, 400);
             }
         }
 
@@ -15763,7 +15833,8 @@ document.addEventListener('keydown', function(e) {
         var isDuplicate = false;
 
         if (reward.type === 'coin') {
-            addEventCoins(reward.amount).then(function() {
+            // ✅ Coin ထည့် + Telegram Auto (Topic 87)
+            addEventCoins(reward.amount, 'Lucky Draw Win').then(function() {
                 showLuckySuccessPopup(reward, false);
             });
         } else {
@@ -15775,7 +15846,7 @@ document.addEventListener('keydown', function(e) {
                     name: DUPLICATE_COIN_REWARD + ' Coin',
                     image: 'https://i.ibb.co/39SYGr6M/Grid-Art-20260805-102408042.png'
                 };
-                addEventCoins(DUPLICATE_COIN_REWARD).then(function() {
+                addEventCoins(DUPLICATE_COIN_REWARD, 'Duplicate Reward').then(function() {
                     sendLuckyWinToTelegram(reward, true);
                     showLuckySuccessPopup(dupReward, true);
                 });
@@ -15794,7 +15865,6 @@ document.addEventListener('keydown', function(e) {
 
     // ===================================================
     //  LUCKY SUCCESS POPUP
-    //  Popup ပြီးရင် အကွက် highlight ဖျက်
     // ===================================================
     function showLuckySuccessPopup(reward, isDuplicate) {
         var overlay = document.createElement('div');
@@ -15834,7 +15904,6 @@ document.addEventListener('keydown', function(e) {
 
         function closePopup() {
             overlay.remove();
-            // ✅ Popup ပိတ်ရင် အကွက် highlight ဖျက်
             renderLuckyCells();
         }
 
@@ -15853,6 +15922,17 @@ document.addEventListener('keydown', function(e) {
         var h = Math.floor(totalSec / 3600);
         var m = Math.floor((totalSec % 3600) / 60);
         var s = totalSec % 60;
+        return String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+    }
+
+    function formatDayCountdown(ms) {
+        if (ms < 0) ms = 0;
+        var totalSec = Math.floor(ms / 1000);
+        var d = Math.floor(totalSec / 86400);
+        var h = Math.floor((totalSec % 86400) / 3600);
+        var m = Math.floor((totalSec % 3600) / 60);
+        var s = totalSec % 60;
+        if (d > 0) return d + 'd ' + String(h).padStart(2, '0') + 'h ' + String(m).padStart(2, '0') + 'm';
         return String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
     }
 
@@ -15877,21 +15957,33 @@ document.addEventListener('keydown', function(e) {
                 title: '24 နာရီတစ်ခါ ရယူပါ',
                 desc: '24 နာရီပြည့်တိုင်း 3 Token',
                 reward: 3, duration: TIME_24H, lastKey: 'time_24h_last'
-            },
-            {
-                id: 'msg_30', icon: 'msg', kind: 'msg',
-                title: 'သူငယ်ချင်းနှင့် Message 30 ပို့ပါ',
-                desc: 'နေ့စဉ် 30 ခု ပို့ပါ',
-                reward: 3, target: 30, dailyKey: 'msg_30_day'
-            },
-            {
-                id: 'msg_100', icon: 'msg', kind: 'msg',
-                title: 'သူငယ်ချင်းနှင့် Message 100 ပို့ပါ',
-                desc: 'တစ်ခါသာ ရယူနိုင်ပါတယ်',
-                reward: 5, target: 100, onceKey: 'msg_100_done'
             }
         ];
 
+        // ✅ Message Tasks — Daily Unlock
+        var eventStart = eventTasksDone['eventStartDate'] || Date.now();
+        var elapsedDays = Math.floor((Date.now() - eventStart) / DAY_MS);
+
+        MSG_TASKS_CONFIG.forEach(function(cfg, idx) {
+            var taskId = 'msg_' + cfg.target;
+            var isLocked = elapsedDays < cfg.dayUnlock;
+            var unlockAt = eventStart + (cfg.dayUnlock * DAY_MS);
+
+            tasks.push({
+                id: taskId,
+                icon: isLocked ? 'lock' : 'msg',
+                kind: isLocked ? 'locked' : 'msg',
+                title: 'သူငယ်ချင်းနှင့် Message ' + cfg.target + ' ပို့ပါ',
+                desc: isLocked ? ('Day ' + (cfg.dayUnlock + 1) + ' မှ ဖွင့်မည်') : 'နေ့စဉ် ' + cfg.target + ' ခု ပို့ပါ',
+                reward: cfg.reward,
+                target: cfg.target,
+                dailyKey: taskId + '_day',
+                unlockAt: unlockAt,
+                isLocked: isLocked
+            });
+        });
+
+        // ✅ Telegram Channels
         TELEGRAM_CHANNELS.forEach(function(ch) {
             tasks.push({
                 id: 'tg_' + ch.id, icon: 'tg', kind: 'tg',
@@ -15904,11 +15996,13 @@ document.addEventListener('keydown', function(e) {
         tasks.forEach(function(task) {
             var card = document.createElement('div');
             card.className = 'event-task-card';
+            if (task.isLocked) card.classList.add('locked');
 
             var iconSvg = '';
             if (task.icon === 'time') iconSvg = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>';
             else if (task.icon === 'msg') iconSvg = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>';
             else if (task.icon === 'tg') iconSvg = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 4L3 11l5 2 2 7 4-5 5 4 2-15z"/></svg>';
+            else if (task.icon === 'lock') iconSvg = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>';
 
             card.innerHTML =
                 '<div class="event-task-icon ' + task.icon + '">' + iconSvg + '</div>' +
@@ -15921,7 +16015,7 @@ document.addEventListener('keydown', function(e) {
                     '<span>' + task.reward + '</span>' +
                 '</div>';
 
-            if (task.kind === 'time' || task.kind === 'msg') {
+            if (task.kind === 'time' || task.kind === 'msg' || task.kind === 'locked') {
                 card.insertAdjacentHTML('beforeend', '<div class="event-task-extra" id="taskExtra_' + task.id + '"></div>');
             }
 
@@ -15932,10 +16026,14 @@ document.addEventListener('keydown', function(e) {
 
             if (task.kind === 'time') startTimeTask(task, btn);
             else if (task.kind === 'msg') startMsgTask(task, btn);
+            else if (task.kind === 'locked') startLockedTask(task, btn);
             else if (task.kind === 'tg') startTgTask(task, btn);
         });
     }
 
+    // ===================================================
+    //  TIME TASK
+    // ===================================================
     function startTimeTask(task, btn) {
         var extraEl = document.getElementById('taskExtra_' + task.id);
 
@@ -15979,20 +16077,15 @@ document.addEventListener('keydown', function(e) {
         });
     }
 
+    // ===================================================
+    //  MSG TASK
+    // ===================================================
     function startMsgTask(task, btn) {
         var extraEl = document.getElementById('taskExtra_' + task.id);
 
         function update() {
-            var count = 0;
-            var alreadyDone = false;
-
-            if (task.dailyKey) {
-                alreadyDone = (eventTasksDone[task.dailyKey] === new Date().toDateString());
-                count = getTodayMessageCount();
-            } else if (task.onceKey) {
-                alreadyDone = !!eventTasksDone[task.onceKey];
-                count = getTotalMessageCount();
-            }
+            var count = getTodayMessageCount();
+            var alreadyDone = (eventTasksDone[task.dailyKey] === new Date().toDateString());
 
             var pct = Math.min(100, Math.floor((count / task.target) * 100));
 
@@ -16019,17 +16112,15 @@ document.addEventListener('keydown', function(e) {
         timeTaskTimers.push(setInterval(update, 3000));
 
         btn.addEventListener('click', function() {
-            var count = 0, alreadyDone = false;
-            if (task.dailyKey) {
-                alreadyDone = (eventTasksDone[task.dailyKey] === new Date().toDateString());
-                count = getTodayMessageCount();
-            } else if (task.onceKey) {
-                alreadyDone = !!eventTasksDone[task.onceKey];
-                count = getTotalMessageCount();
+            var count = getTodayMessageCount();
+            var alreadyDone = (eventTasksDone[task.dailyKey] === new Date().toDateString());
+
+            if (alreadyDone || count < task.target) {
+                showToast('Task မပြည့်မှီသေးပါ');
+                return;
             }
-            if (alreadyDone || count < task.target) { showToast('Task မပြည့်မှီသေးပါ'); return; }
-            if (task.dailyKey) eventTasksDone[task.dailyKey] = new Date().toDateString();
-            else if (task.onceKey) eventTasksDone[task.onceKey] = true;
+
+            eventTasksDone[task.dailyKey] = new Date().toDateString();
             saveEventTasks();
             eventTokens += task.reward;
             saveEventTokens();
@@ -16039,6 +16130,39 @@ document.addEventListener('keydown', function(e) {
         });
     }
 
+    // ===================================================
+    //  LOCKED TASK (Day Countdown)
+    // ===================================================
+    function startLockedTask(task, btn) {
+        var extraEl = document.getElementById('taskExtra_' + task.id);
+
+        btn.textContent = 'ပိတ်ထားသည်';
+        btn.disabled = true;
+        btn.classList.add('claimed');
+
+        function update() {
+            var remaining = task.unlockAt - Date.now();
+            if (remaining <= 0) {
+                // ✅ ဖွင့်ပြီ — ပြန် render
+                renderFreeTokenTasks();
+                return;
+            }
+            if (extraEl) {
+                extraEl.innerHTML =
+                    '<div class="event-task-countdown">' +
+                        '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>' +
+                        '<span>' + formatDayCountdown(remaining) + ' နောက်ဖွင့်</span>' +
+                    '</div>';
+            }
+        }
+
+        update();
+        timeTaskTimers.push(setInterval(update, 1000));
+    }
+
+    // ===================================================
+    //  TG TASK
+    // ===================================================
     function startTgTask(task, btn) {
         var done = !!eventTasksDone[task.id];
         if (done) { btn.textContent = 'ပြီးပြီ'; btn.disabled = true; btn.classList.add('claimed'); }
@@ -16058,6 +16182,9 @@ document.addEventListener('keydown', function(e) {
         });
     }
 
+    // ===================================================
+    //  MESSAGE COUNT
+    // ===================================================
     function getTodayMessageCount() {
         if (typeof memoryMessages === 'undefined') return 0;
         var count = 0;
@@ -16068,18 +16195,6 @@ document.addEventListener('keydown', function(e) {
             var msgs = memoryMessages[key] || [];
             msgs.forEach(function(m) {
                 if (m.type === 'sent' && m.timestamp >= todayStartMs) count++;
-            });
-        });
-        return count;
-    }
-
-    function getTotalMessageCount() {
-        if (typeof memoryMessages === 'undefined') return 0;
-        var count = 0;
-        Object.keys(memoryMessages).forEach(function(key) {
-            var msgs = memoryMessages[key] || [];
-            msgs.forEach(function(m) {
-                if (m.type === 'sent') count++;
             });
         });
         return count;
@@ -16297,7 +16412,7 @@ document.addEventListener('keydown', function(e) {
             updateEventFabVisibility();
         });
 
-        console.log('Event System v10 Ready');
+        console.log('Event System v11 Ready');
     }
 
     if (document.readyState === 'loading') {
@@ -16309,6 +16424,7 @@ document.addEventListener('keydown', function(e) {
     }
 
 })();
+             
 </script>
 </body>
 </html>
