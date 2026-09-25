@@ -6223,7 +6223,7 @@ body {
 }
 
 /* ============================================================
-   ✅ EVENT SYSTEM v14.2 — ပုံစီစဉ် + Block စာသား + အကြည်ရောင်
+   ✅ EVENT SYSTEM v14.4 — Header/Footer ဖြတ်
    ============================================================ */
 
 /* ✅ Event FAB */
@@ -6317,15 +6317,14 @@ body {
     to { opacity: 1; transform: translateY(0); }
 }
 
+/* ✅ Header — ဖြတ်လိုက် (Background မထည့်) */
 .event-header {
     display: flex;
     align-items: center;
     gap: 8px;
     padding: 14px 16px;
-    background: rgba(18, 18, 24, 0.75);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    background: transparent;
+    border-bottom: none;
     flex-shrink: 0;
     position: relative;
     z-index: 5;
@@ -6336,7 +6335,7 @@ body {
     height: 40px;
     border-radius: 12px;
     border: none;
-    background: transparent;
+    background: rgba(0, 0, 0, 0.4);
     color: var(--accent);
     cursor: pointer;
     display: flex;
@@ -6344,9 +6343,11 @@ body {
     justify-content: center;
     flex-shrink: 0;
     transition: all 0.2s ease;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
 }
 
-.event-back-btn:active { background: rgba(255, 109, 31, 0.1); transform: scale(0.92); }
+.event-back-btn:active { background: rgba(255, 109, 31, 0.2); transform: scale(0.92); }
 
 .event-title-wrap {
     flex: 1;
@@ -6362,6 +6363,7 @@ body {
     font-weight: 800;
     color: var(--text-main);
     letter-spacing: 0.4px;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
 }
 
 .event-header-stats { display: flex; gap: 6px; flex-shrink: 0; }
@@ -6372,17 +6374,17 @@ body {
     gap: 4px;
     padding: 5px 10px;
     border-radius: 12px;
-    background: rgba(255, 109, 31, 0.2);
+    background: rgba(0, 0, 0, 0.5);
     border: 1px solid rgba(255, 109, 31, 0.4);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
 }
 
 .event-stat-box img { width: 14px; height: 14px; object-fit: contain; }
-.event-stat-box span { font-size: 13px; font-weight: 800; color: var(--accent); }
+.event-stat-box span { font-size: 13px; font-weight: 800; color: var(--accent); text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8); }
 
 .event-stat-box.coin {
-    background: rgba(255, 200, 0, 0.2);
+    background: rgba(0, 0, 0, 0.5);
     border-color: rgba(255, 200, 0, 0.4);
 }
 
@@ -6469,26 +6471,26 @@ body {
     z-index: 1;
 }
 
-/* ✅ Coin ကွက်မှာ "Block" စာသား */
+/* ✅ Coin ပမာဏ စာသား */
 .event-cell-label {
     position: absolute;
     bottom: 4px;
     left: 50%;
     transform: translateX(-50%);
-    font-size: 9px;
+    font-size: 11px;
     font-weight: 900;
-    color: #fff;
-    background: rgba(0, 0, 0, 0.75);
+    color: #ffc800;
+    background: rgba(0, 0, 0, 0.8);
     padding: 2px 10px;
     border-radius: 8px;
     letter-spacing: 0.5px;
-    text-transform: uppercase;
     z-index: 2;
     pointer-events: none;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 200, 0, 0.4);
     white-space: nowrap;
     line-height: 1.2;
+    text-shadow: 0 0 8px rgba(255, 200, 0, 0.6);
 }
 
 /* ✅ Animation လျောက်နေတုန်း — ပုံဖျော့ */
@@ -6514,6 +6516,7 @@ body {
     color: #fff;
     box-shadow: 0 0 12px rgba(255, 109, 31, 0.8);
     border-color: #ffc800;
+    text-shadow: none;
 }
 
 @keyframes winnerImagePulse {
@@ -6642,16 +6645,14 @@ body {
     to { transform: rotate(360deg); }
 }
 
-/* ✅ Footer */
+/* ✅ Footer — ဖြတ်လိုက် (Background မထည့်) */
 .event-footer {
     display: flex;
     gap: 10px;
     padding: 14px 16px;
     padding-bottom: calc(14px + var(--safe-bottom));
-    background: rgba(18, 18, 24, 0.75);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    background: transparent;
+    border-top: none;
     flex-shrink: 0;
     position: relative;
     z-index: 5;
@@ -6665,25 +6666,27 @@ body {
     gap: 8px;
     padding: 14px;
     border-radius: 14px;
-    border: 1.5px solid rgba(255, 255, 255, 0.15);
-    background: rgba(255, 255, 255, 0.06);
+    border: 1.5px solid rgba(255, 255, 255, 0.2);
+    background: rgba(0, 0, 0, 0.5);
     color: var(--text-main);
     font-size: 14px;
     font-weight: 700;
     font-family: inherit;
     cursor: pointer;
     transition: all 0.2s ease;
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
 }
 
-.event-footer-btn:active { transform: scale(0.96); background: rgba(255, 255, 255, 0.12); }
+.event-footer-btn:active { transform: scale(0.96); background: rgba(0, 0, 0, 0.7); }
 .event-footer-btn.primary {
     border-color: var(--accent);
-    background: linear-gradient(135deg, rgba(255, 109, 31, 0.35), rgba(255, 109, 31, 0.15));
-    color: var(--accent);
+    background: linear-gradient(135deg, rgba(255, 109, 31, 0.5), rgba(255, 109, 31, 0.25));
+    color: #fff;
+    box-shadow: 0 4px 16px rgba(255, 109, 31, 0.4);
 }
-.event-footer-btn.primary:active { background: rgba(255, 109, 31, 0.45); }
+.event-footer-btn.primary:active { background: rgba(255, 109, 31, 0.6); }
 
 /* ✅ Sub Body */
 .event-sub-body {
@@ -6703,13 +6706,14 @@ body {
     align-items: center;
     gap: 12px;
     padding: 14px 16px;
-    background: rgba(255, 255, 255, 0.06);
+    background: rgba(0, 0, 0, 0.5);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
-    border: 1.5px solid rgba(255, 255, 255, 0.1);
+    border: 1.5px solid rgba(255, 255, 255, 0.12);
     border-radius: 14px;
     transition: all 0.2s ease;
     flex-wrap: wrap;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
 }
 
 .event-task-card.locked {
@@ -6737,8 +6741,8 @@ body {
 .event-task-icon.done { background: linear-gradient(135deg, #44ff88, #00cc55); }
 
 .event-task-info { flex: 1; min-width: 0; }
-.event-task-title { font-size: 14px; font-weight: 700; color: var(--text-main); margin-bottom: 3px; }
-.event-task-desc { font-size: 12px; color: rgba(255, 255, 255, 0.7); line-height: 1.4; }
+.event-task-title { font-size: 14px; font-weight: 700; color: var(--text-main); margin-bottom: 3px; text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5); }
+.event-task-desc { font-size: 12px; color: rgba(255, 255, 255, 0.75); line-height: 1.4; }
 
 .event-task-reward {
     display: inline-flex;
@@ -6747,11 +6751,11 @@ body {
     font-size: 12px;
     font-weight: 800;
     color: var(--accent);
-    background: rgba(255, 109, 31, 0.2);
+    background: rgba(0, 0, 0, 0.5);
     padding: 3px 10px;
     border-radius: 10px;
     flex-shrink: 0;
-    border: 1px solid rgba(255, 109, 31, 0.3);
+    border: 1px solid rgba(255, 109, 31, 0.4);
 }
 
 .event-task-reward img { width: 12px; height: 12px; object-fit: contain; }
@@ -6768,17 +6772,18 @@ body {
     cursor: pointer;
     transition: all 0.2s ease;
     flex-shrink: 0;
+    box-shadow: 0 3px 12px rgba(255, 109, 31, 0.4);
 }
 
 .event-task-btn:active { transform: scale(0.95); }
 .event-task-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-.event-task-btn.claimed { background: rgba(255, 255, 255, 0.1); color: rgba(255, 255, 255, 0.5); }
+.event-task-btn.claimed { background: rgba(255, 255, 255, 0.15); color: rgba(255, 255, 255, 0.5); box-shadow: none; }
 
 .event-task-extra {
     flex-basis: 100%;
     margin-top: 6px;
     padding-top: 10px;
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .event-task-countdown {
@@ -6787,8 +6792,8 @@ body {
     gap: 6px;
     padding: 5px 12px;
     border-radius: 12px;
-    background: rgba(255, 109, 31, 0.2);
-    border: 1px solid rgba(255, 109, 31, 0.3);
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(255, 109, 31, 0.4);
     color: var(--accent);
     font-size: 12px;
     font-weight: 800;
@@ -6803,7 +6808,7 @@ body {
     justify-content: space-between;
     font-size: 11px;
     font-weight: 700;
-    color: rgba(255, 255, 255, 0.7);
+    color: rgba(255, 255, 255, 0.75);
     font-family: monospace;
 }
 
@@ -6813,8 +6818,9 @@ body {
     width: 100%;
     height: 8px;
     border-radius: 4px;
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(0, 0, 0, 0.5);
     overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .event-task-progress-fill {
@@ -6833,12 +6839,12 @@ body {
     width: 100%;
 }
 
-/* ✅ Exchange Card — အကြည်ရောင် */
+/* ✅ Exchange Card — အကြည်ရောင် (အမဲကြီး မထား) */
 .exchange-card {
-    background: rgba(255, 255, 255, 0.06);
+    background: rgba(0, 0, 0, 0.4);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
-    border: 2px solid rgba(255, 255, 255, 0.12);
+    border: 2px solid rgba(255, 255, 255, 0.15);
     border-radius: 14px;
     overflow: hidden;
     cursor: pointer;
@@ -6846,6 +6852,7 @@ body {
     display: flex;
     flex-direction: column;
     position: relative;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
 }
 
 .exchange-card:active { transform: scale(0.96); border-color: var(--accent); }
@@ -6916,6 +6923,7 @@ body {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
 }
 
 .exchange-card-price {
@@ -7132,7 +7140,7 @@ body {
     .event-cell img { padding: 0; transform: scale(1.1); }
     .event-cell.coin-cell img { transform: scale(0.85); }
     .event-cell.winner img { transform: scale(1.25); }
-    .event-cell-label { font-size: 8px; padding: 1px 7px; bottom: 3px; }
+    .event-cell-label { font-size: 10px; padding: 2px 8px; bottom: 3px; }
     .exchange-grid { gap: 8px; }
     .exchange-card-name { font-size: 10px; }
     .event-task-icon { width: 40px; height: 40px; }
