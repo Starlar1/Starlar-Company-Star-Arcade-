@@ -15738,12 +15738,14 @@ function vidPopupSend() {
         return;
     }
 
+    // ✅ DIAMOND CHECK -- Model အလိုက်
     var requiredDiamond = (vidPopupModel === 'starv2') ? 300 : 100;
     var currentDiamond = parseInt(currentUser.diamond) || 0;
     var modelLabel = (vidPopupModel === 'starv2') ? 'STAR V 2.0' : 'STAR V 1.0';
 
     if (currentDiamond < requiredDiamond) {
-        showToastSafe(modelLabel + ' အတွက် Diamond ' + requiredDiamond + ' လိုအပ်ပါတယ် (သင့်မှာ ' + currentDiamond + ' ရှိပါတယ်)');
+        vidPopupClose();
+        showToastSafe('Diamond မလုံလောက်ပါ\n' + modelLabel + ' အတွက် ' + requiredDiamond + ' လိုအပ်ပါတယ်\n(သင့်မှာ ' + currentDiamond + ' ရှိပါတယ်)');
         return;
     }
 
