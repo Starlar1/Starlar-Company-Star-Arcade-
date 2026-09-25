@@ -7,5 +7,6 @@
   "scope": "/",
   "short_name": "Star Arcade",
   "start_url": "/",
-  "theme_color": "#0a0a0f"
+  "theme_color": "#0a0a0f",
+  "lang": "en"
 }
