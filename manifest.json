@@ -4,9 +4,9 @@
   "display": "standalone",
   "name": "Star Arcade",
   "orientation": "any",
-  "scope": "/",
+  "scope": "/Starlar-Company-Star-Arcade-/",
   "short_name": "Star Arcade",
-  "start_url": "/",
+  "start_url": "/Starlar-Company-Star-Arcade-/",
   "theme_color": "#0a0a0f",
   "lang": "en"
 }
