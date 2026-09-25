@@ -7638,7 +7638,7 @@ body {
     .vid-diamond-value { font-size: 13px; }
     .vid-diamond-row.missing .vid-diamond-value { font-size: 15px; }
     .vid-diamond-btn { font-size: 14px; padding: 13px; }
-}
+},
 </style>
 </head>
 <body>
@@ -10234,17 +10234,23 @@ var FRAME_CONFIG = {
 
 var BANNER_CONFIG = {
     banners: [
-        { id: 2001, name: 'Banner 1', image: 'https://i.ibb.co/BVvyQjNd/eae298ad21bf31979832b1dec9192491.gif', price: 150, limited: false },
+        { id: 2001, name: 'Banner 1', image: 'https://i.ibb.co/BVvyQjNd/eae298ad21bf31979832b1dec9192491.gif', price: 200, limited: false },
         { id: 2002, name: 'Banner 2', image: 'https://i.ibb.co/3yk1VcgM/2af6241637e72e30efbb3d99f70b4dec.gif', price: 200, limited: false },
-        { id: 2003, name: 'Banner 3', image: 'https://i.ibb.co/BKjNT681/d310d314fc99e1aedd20294e5cc6c5b1.gif', price: 300, limited: false }
+        { id: 2003, name: 'Banner 3', image: 'https://i.ibb.co/BKjNT681/d310d314fc99e1aedd20294e5cc6c5b1.gif', price: 200, limited: false },
+        { id: 2004, name: 'Banner 4', image: 'https://i.ibb.co/mVYY8Kcd/file-000000002d3c8211846fdd63b8c65917.png', price: 0, limited: ture }
+   
+    
     ]
 };
 
 var BACKGROUND_CONFIG = {
     backgrounds: [
-        { id: 3001, name: 'Background 1', image: 'https://i.ibb.co/xtwym1d3/87bcbcdb5ba4383691f95c455f07dfd4.jpg', price: 150, limited: false },
+        { id: 3001, name: 'Background 1', image: 'https://i.ibb.co/xtwym1d3/87bcbcdb5ba4383691f95c455f07dfd4.jpg', price: 200, limited: false },
         { id: 3002, name: 'Background 2', image: 'https://i.ibb.co/dJgs9L2P/cbfc1d22214fa4a188cb5a15bf26157b.jpg', price: 200, limited: false },
-        { id: 3003, name: 'Background 3', image: 'https://i.ibb.co/LdJQd4Fz/cce831fb5c1c045b8a35afbf361cacc3.jpg', price: 300, limited: false }
+        { id: 3003, name: 'Background 3', image: 'https://i.ibb.co/LdJQd4Fz/cce831fb5c1c045b8a35afbf361cacc3.jpg', price: 200, limited: false }
+        { id: 3004, name: 'Background 4', image: 'https://i.ibb.co/35qVk7Fj/file-00000000d72c81fd9f3b49e6730c9fd2.png', price: 0, limited: ture }
+    
+    
     ]
 };
 
@@ -16311,20 +16317,20 @@ function sendVideoRequestToTelegram(images, caption) {
     // Cell 3: BG         | Start             | Cell 4: Coins(30)
     // Cell 5: Coins(50)  | Cell 6: Bubble    | Cell 7: Frame
     var LUCKY_REWARDS = [
-        { type: 'coin', amount: 10, name: '10 Coin', image: 'https://i.ibb.co/1tfynTbC/file-00000000ebf881faaf18b5e5bb7f76d4.png' },
-        { type: 'banner', id: 2008, name: 'Banner 2008', image: 'https://i.ibb.co/mr1mSJxr/Grid-Art-20260925-181213567.jpg' },
-        { type: 'coin', amount: 20, name: '20 Coin', image: 'https://i.ibb.co/1tfynTbC/file-00000000ebf881faaf18b5e5bb7f76d4.png' },
-        { type: 'background', id: 3008, name: 'Background 3008', image: 'https://i.ibb.co/spL4RtJd/Grid-Art-20260925-181307794.jpg' },
-        { type: 'coin', amount: 30, name: '30 Coin', image: 'https://i.ibb.co/1tfynTbC/file-00000000ebf881faaf18b5e5bb7f76d4.png' },
-        { type: 'coin', amount: 50, name: '50 Coin', image: 'https://i.ibb.co/1tfynTbC/file-00000000ebf881faaf18b5e5bb7f76d4.png' },
-        { type: 'bubble', id: 4008, name: 'Bubble 4008', image: 'https://i.ibb.co/Df672q8R/Grid-Art-20260925-150236708.jpg' },
-        { type: 'frame', id: 1008, name: 'Frame 1008', image: 'https://i.ibb.co/9kbvb43r/Grid-Art-20260925-145856869.jpg' }
+        { type: 'coin', amount: 10, name: '10 Coin', image: 'https://i.ibb.co/spL4RtJd/Grid-Art-20260925-181307794.jpg' },
+        { type: 'banner', id: 2004, name: 'Banner 2004', image: 'https://i.ibb.co/mr1mSJxr/Grid-Art-20260925-181213567.jpg' },
+        { type: 'coin', amount: 20, name: '20 Coin', image: 'https://i.ibb.co/spL4RtJd/Grid-Art-20260925-181307794.jpg' },
+        { type: 'background', id: 3004, name: 'Background 3004', image: 'https://i.ibb.co/fYXc1gvc/Grid-Art-20260925-181245711.jpg' },
+        { type: 'coin', amount: 30, name: '30 Coin', image: 'https://i.ibb.co/spL4RtJd/Grid-Art-20260925-181307794.jpg' },
+        { type: 'coin', amount: 50, name: '50 Coin', image: 'https://i.ibb.co/spL4RtJd/Grid-Art-20260925-181307794.jpg' },
+        { type: 'bubble', id: 4006, name: 'Bubble 4006', image: 'https://i.ibb.co/Df672q8R/Grid-Art-20260925-150236708.jpg' },
+        { type: 'frame', id: 1011, name: 'Frame 1011', image: 'https://i.ibb.co/9kbvb43r/Grid-Art-20260925-145856869.jpg' }
     ];
 
     var EXCHANGE_CARDS = [
-        { id: 'mlbb_diamond_1', type: 'mlbb', name: 'Starlight', price: 8000, image: 'https://i.ibb.co/9mTvSWkR/Grid-Art-20260925-142249285.jpg', available: true },
-        { id: 'mlbb_diamond_2', type: 'mlbb', name: 'Wp Pass Diamond', price: 6500, image: 'https://i.ibb.co/4gXYFRBB/Grid-Art-20260925-142204451.jpg', available: true },
-        { id: 'mlbb_diamond_3', type: 'mlbb', name: '5 Diamonds', price: 4000, image: 'https://i.ibb.co/Hff5bdWY/Grid-Art-20260925-142227007.jpg', available: true },
+        { id: 'mlbb_diamond_1', type: 'mlbb', name: 'Starlight', price: 10000, image: 'https://i.ibb.co/9mTvSWkR/Grid-Art-20260925-142249285.jpg', available: true },
+        { id: 'mlbb_diamond_2', type: 'mlbb', name: 'Wp Pass Diamond', price: 8500, image: 'https://i.ibb.co/4gXYFRBB/Grid-Art-20260925-142204451.jpg', available: true },
+        { id: 'mlbb_diamond_3', type: 'mlbb', name: '5 Diamonds', price: 5000, image: 'https://i.ibb.co/Hff5bdWY/Grid-Art-20260925-142227007.jpg', available: true },
         { id: 'star_coin_1', type: 'star', name: 'Frame', price: 3000, image: 'https://i.ibb.co/TD90gFrw/Grid-Art-20260925-150159041.jpg', available: true },
         { id: 'star_coin_2', type: 'star', name: 'Bubble', price: 3500, image: 'https://i.ibb.co/placeholder-star2.png', available: true },
         { id: 'star_coin_3', type: 'star', name: 'Banner', price: 2500, image: 'https://i.ibb.co/placeholder-star3.png', available: true }
