@@ -15808,9 +15808,10 @@ document.addEventListener('keydown', function(e) {
 })();
 
 // ============================================================
-// ✅ EVENT SYSTEM v14.2 — FULL (ပုံစီစဉ် + Block စာသား)
-//  • အကွက် ၈ ကွက် — စီစဉ်ပြီး (Coins/Banner/Coins/BG/Coins/Coins/Bubble/Frame)
-//  • Coin ကွက်မှာ "Block" စာသား
+// ✅ EVENT SYSTEM v14.3 — FULL (Coin ပမာဏ ပြ)
+//  • အကွက် ၈ ကွက် — စီစဉ်ပြီး
+//  • Coin ကွက်မှာ Coin ပမာဏ ပြ (10/20/30/50)
+//  • Frame/Banner/BG/Bubble — ပုံပဲ
 //  • Token + Coin — Telegram Auto (Topic 87)
 //  • Message Tasks — One-Time only
 //  • Daily Unlock (Day 0/1/2/3/4)
@@ -15825,18 +15826,18 @@ document.addEventListener('keydown', function(e) {
     var EVENT_BACKGROUND_IMAGE = 'https://i.ibb.co/8ghK76dS/07bfd3216aa80dbba97a81498b92ee90.jpg';
 
     // ✅ ကွက်နေရာ စီစဉ်ပြီး
-    // Cell 0: Coins | Cell 1: Banner  | Cell 2: Coins
-    // Cell 3: BG    | Start           | Cell 4: Coins
-    // Cell 5: Coins | Cell 6: Bubble  | Cell 7: Frame
+    // Cell 0: Coins(10)  | Cell 1: Banner    | Cell 2: Coins(20)
+    // Cell 3: BG         | Start             | Cell 4: Coins(30)
+    // Cell 5: Coins(50)  | Cell 6: Bubble    | Cell 7: Frame
     var LUCKY_REWARDS = [
-        { type: 'coin', amount: 10, name: '10 Coin', image: 'https://i.ibb.co/xS3WX2Ws/file-000000007aa881f59369a8843142e06e.png' },              // Cell 0
-        { type: 'banner', id: 2008, name: 'Banner 2008', image: 'https://i.ibb.co/67GQLMYy/file-000000002d3c8211846fdd63b8c65917.png' },            // Cell 1
-        { type: 'coin', amount: 20, name: '20 Coin', image: 'https://i.ibb.co/xS3WX2Ws/file-000000007aa881f59369a8843142e06e.png' },              // Cell 2
-        { type: 'background', id: 3008, name: 'Background 3008', image: 'https://i.ibb.co/212xvtxK/file-00000000d72c81fd9f3b49e6730c9fd2.png' },   // Cell 3
-        { type: 'coin', amount: 30, name: '30 Coin', image: 'https://i.ibb.co/xS3WX2Ws/file-000000007aa881f59369a8843142e06e.png' },              // Cell 4
-        { type: 'coin', amount: 50, name: '50 Coin', image: 'https://i.ibb.co/xS3WX2Ws/file-000000007aa881f59369a8843142e06e.png' },              // Cell 5
-        { type: 'bubble', id: 4008, name: 'Bubble 4008', image: 'https://i.ibb.co/Df672q8R/Grid-Art-20260925-150236708.jpg' },                     // Cell 6
-        { type: 'frame', id: 1008, name: 'Frame 1008', image: 'https://i.ibb.co/9kbvb43r/Grid-Art-20260925-145856869.jpg' }                        // Cell 7
+        { type: 'coin', amount: 10, name: '10 Coin', image: 'https://i.ibb.co/xS3WX2Ws/file-000000007aa881f59369a8843142e06e.png' },
+        { type: 'banner', id: 2008, name: 'Banner 2008', image: 'https://i.ibb.co/67GQLMYy/file-000000002d3c8211846fdd63b8c65917.png' },
+        { type: 'coin', amount: 20, name: '20 Coin', image: 'https://i.ibb.co/xS3WX2Ws/file-000000007aa881f59369a8843142e06e.png' },
+        { type: 'background', id: 3008, name: 'Background 3008', image: 'https://i.ibb.co/212xvtxK/file-00000000d72c81fd9f3b49e6730c9fd2.png' },
+        { type: 'coin', amount: 30, name: '30 Coin', image: 'https://i.ibb.co/xS3WX2Ws/file-000000007aa881f59369a8843142e06e.png' },
+        { type: 'coin', amount: 50, name: '50 Coin', image: 'https://i.ibb.co/xS3WX2Ws/file-000000007aa881f59369a8843142e06e.png' },
+        { type: 'bubble', id: 4008, name: 'Bubble 4008', image: 'https://i.ibb.co/Df672q8R/Grid-Art-20260925-150236708.jpg' },
+        { type: 'frame', id: 1008, name: 'Frame 1008', image: 'https://i.ibb.co/9kbvb43r/Grid-Art-20260925-145856869.jpg' }
     ];
 
     var EXCHANGE_CARDS = [
@@ -16255,7 +16256,7 @@ document.addEventListener('keydown', function(e) {
     }
 
     // ===================================================
-    //  LUCKY GRID — ✅ ပုံ + Block စာသား
+    //  LUCKY GRID — ✅ Coin ပမာဏ ပြ
     // ===================================================
     function renderLuckyCells() {
         var cells = document.querySelectorAll('.event-cell');
@@ -16269,7 +16270,7 @@ document.addEventListener('keydown', function(e) {
 
             cell.innerHTML = '';
 
-            // ✅ Coin ဆိုရင် ပုံ + "Block" စာသား
+            // ✅ Coin ဆိုရင် ပုံ + Coin ပမာဏ
             if (reward.type === 'coin') {
                 cell.classList.add('coin-cell');
 
@@ -16279,10 +16280,10 @@ document.addEventListener('keydown', function(e) {
                 img.onerror = function() { this.style.display = 'none'; };
                 cell.appendChild(img);
 
-                // ✅ "Block" စာသား
+                // ✅ Coin ပမာဏ စာသား
                 var label = document.createElement('span');
                 label.className = 'event-cell-label';
-                label.textContent = 'Block';
+                label.textContent = reward.amount;   // ✅ 10 / 20 / 30 / 50
                 cell.appendChild(label);
 
             } else if (reward.image) {
@@ -16934,7 +16935,7 @@ document.addEventListener('keydown', function(e) {
             updateEventFabVisibility();
         });
 
-        console.log('Event System v14.2 Ready');
+        console.log('Event System v14.3 Ready');
     }
 
     if (document.readyState === 'loading') {
