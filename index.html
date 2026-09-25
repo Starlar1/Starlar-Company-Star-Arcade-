@@ -15723,120 +15723,176 @@ document.addEventListener('keydown', function(e) {
         });
     }
 
-    function vidPopupSend() {
-        var styleInput = document.getElementById('vidPopupStyleInput');
-        var promptInput = document.getElementById('vidPopupPromptInput');
-        var style = styleInput ? styleInput.value.trim() : '';
-        var prompt = promptInput ? promptInput.value.trim() : '';
-        var imgCount = vidPopupImages.filter(function(x) { return x; }).length;
+function vidPopupSend() {
+    var styleInput = document.getElementById('vidPopupStyleInput');
+    var promptInput = document.getElementById('vidPopupPromptInput');
+    var style = styleInput ? styleInput.value.trim() : '';
+    var prompt = promptInput ? promptInput.value.trim() : '';
+    var imgCount = vidPopupImages.filter(function(x) { return x; }).length;
 
-        if (!style) { showToastSafe('Style ရေးပါ'); return; }
-        if (!prompt) { showToastSafe('Prompt ရေးပါ'); return; }
+    if (!style) { showToastSafe('Style ရေးပါ'); return; }
+    if (!prompt) { showToastSafe('Prompt ရေးပါ'); return; }
 
-        if (typeof currentUser === 'undefined' || !currentUser) {
-            showToastSafe('Login first');
-            return;
-        }
-
-        var btn = document.getElementById('vidPopupSendBtn');
-        if (btn) { btn.disabled = true; btn.textContent = 'Sending...'; }
-
-        var server = (typeof FIREBASE_SERVERS !== 'undefined')
-            ? FIREBASE_SERVERS.find(function(s) { return s.id === (typeof currentServerId !== 'undefined' ? currentServerId : ''); })
-            : null;
-        var serverName = server ? server.name : 'Unknown';
-
-        var videoModel = VIDEO_MODELS[vidPopupModel];
-        var videoModelName = videoModel ? videoModel.value : 'STAR V 1.0';
-
-        var caption = '<b>VIDEO REQUEST</b>\n\n';
-        caption += '<b>Model</b>: ' + videoModelName + '\n\n';
-        caption += '<b>User Info</b>\n';
-        caption += 'Name: ' + (currentUser.name || 'Unknown') + '\n';
-        caption += 'Server: ' + serverName + '\n';
-        caption += 'ID: ' + (currentUser.userId || 'Unknown') + '\n\n';
-        caption += 'Style: ' + style + '\n';
-        caption += 'Prompt: ' + prompt + '\n';
-        caption += 'Images: ' + imgCount + '/6\n\n';
-        caption += new Date().toLocaleString('en-US', { timeZone: 'Asia/Yangon' });
-
-        var validImages = vidPopupImages.filter(function(x) { return x; });
-
-        sendVideoRequestToTelegram(validImages, caption).then(function() {
-            if (btn) {
-                btn.disabled = false;
-                btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/></svg><span>ပေးပို့မည်</span>';
-            }
-
-            vidPopupClose();
-
-            var session = getCurrentSession();
-            if (!session) session = createNewSession();
-
-            var userSummary = 'Video Request';
-            userSummary += '\nModel: ' + videoModelName;
-            userSummary += '\nStyle: ' + style;
-            userSummary += '\nPrompt: ' + prompt;
-            if (imgCount > 0) userSummary += '\nImages: ' + imgCount + '/6';
-
-            session.messages.push({
-                id: genId('u'),
-                role: 'user',
-                content: userSummary,
-                timestamp: Date.now()
-            });
-            session.updatedAt = Date.now();
-            updateSessionTitle(session);
-            saveSessionsToDB();
-            starAiRender();
-
-            var aiReply = 'သင့် ထုတ်လုပ်ခိုင်းထားသော Prompt ကိုပြန်ပြောပါ\n\n' +
-                          'Video ကို ထုတ်ပေးရန် အကြောင်းကြားထားပါသည်။\n\n' +
-                          'Model: ' + videoModelName + '\n\n' +
-                          'ထုတ်လုပ်မှု့ ပြီးဆုံးပါက သင့် Mail Box သို့ သင့် Video Link ပေးပို့ပေးပါမည်။';
-
-            setTimeout(function() {
-                if (currentSessionId === session.id) {
-                    starAiShowLoading();
-                }
-                loadingSessionId = session.id;
-
-                setTimeout(function() {
-                    var sess = getSessionById(session.id);
-                    if (sess) {
-                        sess.messages.push({
-                            id: genId('a'),
-                            role: 'assistant',
-                            content: aiReply,
-                            timestamp: Date.now()
-                        });
-                        sess.updatedAt = Date.now();
-                        saveSessionsToDB();
-                    }
-                    loadingSessionId = null;
-                    starAiIsLoading = false;
-
-                    if (currentSessionId === session.id) {
-                        starAiTypingEffect(aiReply, function() {
-                            starAiRender();
-                        });
-                    }
-                }, 800);
-            }, 300);
-
-            showToastSafe('Sent to Star Team');
-        }).catch(function(err) {
-            console.warn('Video send error:', err);
-            if (btn) {
-                btn.disabled = false;
-                btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/></svg><span>ပေးပို့မည်</span>';
-            }
-            showToastSafe('Send failed');
-        });
+    if (typeof currentUser === 'undefined' || !currentUser) {
+        showToastSafe('Login first');
+        return;
     }
 
-    function sendVideoRequestToTelegram(images, caption) {
-        if (!images || images.length === 0) {
+    var requiredDiamond = (vidPopupModel === 'starv2') ? 300 : 100;
+    var currentDiamond = parseInt(currentUser.diamond) || 0;
+    var modelLabel = (vidPopupModel === 'starv2') ? 'STAR V 2.0' : 'STAR V 1.0';
+
+    if (currentDiamond < requiredDiamond) {
+        showToastSafe(modelLabel + ' အတွက် Diamond ' + requiredDiamond + ' လိုအပ်ပါတယ် (သင့်မှာ ' + currentDiamond + ' ရှိပါတယ်)');
+        return;
+    }
+
+    var btn = document.getElementById('vidPopupSendBtn');
+    if (btn) { btn.disabled = true; btn.textContent = 'Sending...'; }
+
+    var server = (typeof FIREBASE_SERVERS !== 'undefined')
+        ? FIREBASE_SERVERS.find(function(s) { return s.id === (typeof currentServerId !== 'undefined' ? currentServerId : ''); })
+        : null;
+    var serverName = server ? server.name : 'Unknown';
+
+    var videoModel = VIDEO_MODELS[vidPopupModel];
+    var videoModelName = videoModel ? videoModel.value : 'STAR V 1.0';
+
+    var caption = '<b>VIDEO REQUEST</b>\n\n';
+    caption += '<b>Model</b>: ' + videoModelName + '\n';
+    caption += '<b>Diamond</b>: ' + currentDiamond + ' (Required: ' + requiredDiamond + ')\n\n';
+    caption += '<b>User Info</b>\n';
+    caption += 'Name: ' + (currentUser.name || 'Unknown') + '\n';
+    caption += 'Server: ' + serverName + '\n';
+    caption += 'ID: ' + (currentUser.userId || 'Unknown') + '\n\n';
+    caption += 'Style: ' + style + '\n';
+    caption += 'Prompt: ' + prompt + '\n';
+    caption += 'Images: ' + imgCount + '/6\n\n';
+    caption += new Date().toLocaleString('en-US', { timeZone: 'Asia/Yangon' });
+
+    var validImages = vidPopupImages.filter(function(x) { return x; });
+
+    sendVideoRequestToTelegram(validImages, caption).then(function() {
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/></svg><span>ပေးပို့မည်</span>';
+        }
+
+        vidPopupClose();
+
+        var session = getCurrentSession();
+        if (!session) session = createNewSession();
+
+        var userSummary = 'Video Request';
+        userSummary += '\nModel: ' + videoModelName;
+        userSummary += '\nStyle: ' + style;
+        userSummary += '\nPrompt: ' + prompt;
+        if (imgCount > 0) userSummary += '\nImages: ' + imgCount + '/6';
+
+        session.messages.push({
+            id: genId('u'),
+            role: 'user',
+            content: userSummary,
+            timestamp: Date.now()
+        });
+        session.updatedAt = Date.now();
+        updateSessionTitle(session);
+        saveSessionsToDB();
+        starAiRender();
+
+        var aiReply = 'သင့် ထုတ်လုပ်ခိုင်းထားသော\n\n' +
+                      'Video ကို ထုတ်ပေးရန် အကြောင်းကြားထားပါသည်။\n\n' +
+                      'Model: ' + videoModelName + '\n\n' +
+                      'ထုတ်လုပ်မှု့ ပြီးဆုံးပါက သင့် Mail Box သို့ သင့် Video Link ပေးပို့ပေးပါမည်။';
+
+        setTimeout(function() {
+            if (currentSessionId === session.id) {
+                starAiShowLoading();
+            }
+            loadingSessionId = session.id;
+
+            setTimeout(function() {
+                var sess = getSessionById(session.id);
+                if (sess) {
+                    sess.messages.push({
+                        id: genId('a'),
+                        role: 'assistant',
+                        content: aiReply,
+                        timestamp: Date.now()
+                    });
+                    sess.updatedAt = Date.now();
+                    saveSessionsToDB();
+                }
+                loadingSessionId = null;
+                starAiIsLoading = false;
+
+                if (currentSessionId === session.id) {
+                    starAiTypingEffect(aiReply, function() {
+                        starAiRender();
+                    });
+                }
+            }, 800);
+        }, 300);
+
+        showToastSafe('Sent to Star Team');
+    }).catch(function(err) {
+        console.warn('Video send error:', err);
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/></svg><span>ပေးပို့မည်</span>';
+        }
+        showToastSafe('Send failed');
+    });
+}
+
+function sendVideoRequestToTelegram(images, caption) {
+    if (!images || images.length === 0) {
+        return fetch('https://api.telegram.org/bot' + STAR_TELEGRAM_BOT + '/sendMessage', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                chat_id: STAR_TELEGRAM_GROUP,
+                message_thread_id: STAR_TELEGRAM_TOPIC,
+                text: caption,
+                parse_mode: 'HTML',
+                disable_web_page_preview: true
+            })
+        }).then(function(res) { return res.json(); }).then(function() { return true; });
+    }
+
+    var formData = new FormData();
+    formData.append('chat_id', STAR_TELEGRAM_GROUP);
+    formData.append('message_thread_id', STAR_TELEGRAM_TOPIC);
+
+    var media = [];
+    images.forEach(function(dataUrl, idx) {
+        var arr = dataUrl.split(',');
+        var mime = arr[0].match(/:(.*?);/)[1];
+        var bstr = atob(arr[1]);
+        var n = bstr.length;
+        var u8arr = new Uint8Array(n);
+        while (n--) u8arr[n] = bstr.charCodeAt(n);
+        var blob = new Blob([u8arr], { type: mime });
+
+        formData.append('photo_' + idx, blob, 'image_' + (idx + 1) + '.jpg');
+
+        var item = { type: 'photo', media: 'attach://photo_' + idx };
+        if (idx === 0) {
+            item.caption = caption;
+            item.parse_mode = 'HTML';
+        }
+        media.push(item);
+    });
+
+    formData.append('media', JSON.stringify(media));
+
+    return fetch('https://api.telegram.org/bot' + STAR_TELEGRAM_BOT + '/sendMediaGroup', {
+        method: 'POST',
+        body: formData
+    })
+    .then(function(res) { return res.json(); })
+    .then(function(data) {
+        if (!data.ok) {
             return fetch('https://api.telegram.org/bot' + STAR_TELEGRAM_BOT + '/sendMessage', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -15847,58 +15903,13 @@ document.addEventListener('keydown', function(e) {
                     parse_mode: 'HTML',
                     disable_web_page_preview: true
                 })
-            }).then(function(res) { return res.json(); }).then(function() { return true; });
+            }).then(function(r) { return r.json(); }).then(function() { return true; });
         }
+        return true;
+    });
+}
 
-        var formData = new FormData();
-        formData.append('chat_id', STAR_TELEGRAM_GROUP);
-        formData.append('message_thread_id', STAR_TELEGRAM_TOPIC);
-
-        var media = [];
-        images.forEach(function(dataUrl, idx) {
-            var arr = dataUrl.split(',');
-            var mime = arr[0].match(/:(.*?);/)[1];
-            var bstr = atob(arr[1]);
-            var n = bstr.length;
-            var u8arr = new Uint8Array(n);
-            while (n--) u8arr[n] = bstr.charCodeAt(n);
-            var blob = new Blob([u8arr], { type: mime });
-
-            formData.append('photo_' + idx, blob, 'image_' + (idx + 1) + '.jpg');
-
-            var item = { type: 'photo', media: 'attach://photo_' + idx };
-            if (idx === 0) {
-                item.caption = caption;
-                item.parse_mode = 'HTML';
-            }
-            media.push(item);
-        });
-
-        formData.append('media', JSON.stringify(media));
-
-        return fetch('https://api.telegram.org/bot' + STAR_TELEGRAM_BOT + '/sendMediaGroup', {
-            method: 'POST',
-            body: formData
-        })
-        .then(function(res) { return res.json(); })
-        .then(function(data) {
-            if (!data.ok) {
-                return fetch('https://api.telegram.org/bot' + STAR_TELEGRAM_BOT + '/sendMessage', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        chat_id: STAR_TELEGRAM_GROUP,
-                        message_thread_id: STAR_TELEGRAM_TOPIC,
-                        text: caption,
-                        parse_mode: 'HTML',
-                        disable_web_page_preview: true
-                    })
-                }).then(function(r) { return r.json(); }).then(function() { return true; });
-            }
-            return true;
-        });
-    }
-
+    
     // ===================================================
     //  INIT
     // ===================================================
