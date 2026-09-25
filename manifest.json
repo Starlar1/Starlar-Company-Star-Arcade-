@@ -1,0 +1,12 @@
+{
+  "background_color": "#ffffff",
+  "dir": "ltr",
+  "display": "standalone",
+  "name": "Star Arcade",
+  "orientation": "any",
+  "scope": "/",
+  "short_name": "Star Arcade",
+  "start_url": "/",
+  "theme_color": "#0a0a0f",
+  "description": "Star Arcade Gaming App"
+}
