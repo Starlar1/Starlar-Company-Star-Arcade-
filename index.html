@@ -6222,10 +6222,8 @@ body {
     }
 }
 
- 
-
 /* ============================================================
-   ✅ EVENT SYSTEM v14.1 — ပုံကြီး + အကြည်ရောင် + BG မြင်ရ
+   ✅ EVENT SYSTEM v14.2 — ပုံစီစဉ် + Block စာသား + အကြည်ရောင်
    ============================================================ */
 
 /* ✅ Event FAB */
@@ -6446,12 +6444,11 @@ body {
     pointer-events: none;
 }
 
-/* ✅ ? ဖျက် */
 .event-cell::after {
     content: '';
 }
 
-/* ✅ ✅ အကွက်ထဲက ပုံ — ပိုကြီး */
+/* ✅ အကွက်ထဲက ပုံ */
 .event-cell img {
     width: 100%;
     height: 100%;
@@ -6465,10 +6462,43 @@ body {
     transform: scale(1.15);
 }
 
+/* ✅ Coin ကွက် — ပုံကို နည်းနည်း သေး */
+.event-cell.coin-cell img {
+    transform: scale(0.9);
+    position: relative;
+    z-index: 1;
+}
+
+/* ✅ Coin ကွက်မှာ "Block" စာသား */
+.event-cell-label {
+    position: absolute;
+    bottom: 4px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 9px;
+    font-weight: 900;
+    color: #fff;
+    background: rgba(0, 0, 0, 0.75);
+    padding: 2px 10px;
+    border-radius: 8px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    z-index: 2;
+    pointer-events: none;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    white-space: nowrap;
+    line-height: 1.2;
+}
+
 /* ✅ Animation လျောက်နေတုန်း — ပုံဖျော့ */
 .event-cell.selected img {
     opacity: 0.3;
     filter: brightness(0.5) grayscale(0.5);
+}
+
+.event-cell.selected .event-cell-label {
+    opacity: 0.5;
 }
 
 /* ✅ Winner — ပုံတောက် + ပိုကြီး */
@@ -6477,6 +6507,13 @@ body {
     filter: brightness(1.2);
     transform: scale(1.3);
     animation: winnerImagePulse 0.8s ease infinite alternate;
+}
+
+.event-cell.winner .event-cell-label {
+    background: linear-gradient(135deg, #ff6d1f, #e0550a);
+    color: #fff;
+    box-shadow: 0 0 12px rgba(255, 109, 31, 0.8);
+    border-color: #ffc800;
 }
 
 @keyframes winnerImagePulse {
@@ -7093,7 +7130,9 @@ body {
     .event-cell-spin-btn span { font-size: 10px; }
     .event-cell-spin-cost { font-size: 8px !important; }
     .event-cell img { padding: 0; transform: scale(1.1); }
+    .event-cell.coin-cell img { transform: scale(0.85); }
     .event-cell.winner img { transform: scale(1.25); }
+    .event-cell-label { font-size: 8px; padding: 1px 7px; bottom: 3px; }
     .exchange-grid { gap: 8px; }
     .exchange-card-name { font-size: 10px; }
     .event-task-icon { width: 40px; height: 40px; }
@@ -15769,12 +15808,12 @@ document.addEventListener('keydown', function(e) {
 })();
 
 // ============================================================
-// ✅ EVENT SYSTEM v14 — FULL (ပုံပြသော Version)
-//  • အကွက် ၈ ကွက်မှာ ပုံပြ
+// ✅ EVENT SYSTEM v14.2 — FULL (ပုံစီစဉ် + Block စာသား)
+//  • အကွက် ၈ ကွက် — စီစဉ်ပြီး (Coins/Banner/Coins/BG/Coins/Coins/Bubble/Frame)
+//  • Coin ကွက်မှာ "Block" စာသား
 //  • Token + Coin — Telegram Auto (Topic 87)
 //  • Message Tasks — One-Time only
 //  • Daily Unlock (Day 0/1/2/3/4)
-//  • Event Coin (IndexedDB only)
 // ============================================================
 (function() {
     'use strict';
@@ -15785,15 +15824,19 @@ document.addEventListener('keydown', function(e) {
     var EVENT_FAB_IMAGE = 'https://i.ibb.co/1tfynTbC/file-00000000ebf881faaf18b5e5bb7f76d4.png';
     var EVENT_BACKGROUND_IMAGE = 'https://i.ibb.co/8ghK76dS/07bfd3216aa80dbba97a81498b92ee90.jpg';
 
+    // ✅ ကွက်နေရာ စီစဉ်ပြီး
+    // Cell 0: Coins | Cell 1: Banner  | Cell 2: Coins
+    // Cell 3: BG    | Start           | Cell 4: Coins
+    // Cell 5: Coins | Cell 6: Bubble  | Cell 7: Frame
     var LUCKY_REWARDS = [
-        { type: 'coin', amount: 10, name: '10 Coin', image: 'https://i.ibb.co/xS3WX2Ws/file-000000007aa881f59369a8843142e06e.png' },
-        { type: 'coin', amount: 20, name: '20 Coin', image: 'https://i.ibb.co/xS3WX2Ws/file-000000007aa881f59369a8843142e06e.png' },
-        { type: 'coin', amount: 30, name: '30 Coin', image: 'https://i.ibb.co/xS3WX2Ws/file-000000007aa881f59369a8843142e06e.png' },
-        { type: 'coin', amount: 50, name: '50 Coin', image: 'https://i.ibb.co/xS3WX2Ws/file-000000007aa881f59369a8843142e06e.png' },
-        { type: 'frame', id: 1008, name: 'Frame 1008', image: 'https://i.ibb.co/9kbvb43r/Grid-Art-20260925-145856869.jpg' },
-        { type: 'banner', id: 2008, name: 'Banner 2008', image: 'https://i.ibb.co/67GQLMYy/file-000000002d3c8211846fdd63b8c65917.png' },
-        { type: 'background', id: 3008, name: 'Background 3008', image: 'https://i.ibb.co/212xvtxK/file-00000000d72c81fd9f3b49e6730c9fd2.png' },
-        { type: 'bubble', id: 4008, name: 'Bubble 4008', image: 'https://i.ibb.co/Df672q8R/Grid-Art-20260925-150236708.jpg' }
+        { type: 'coin', amount: 10, name: '10 Coin', image: 'https://i.ibb.co/xS3WX2Ws/file-000000007aa881f59369a8843142e06e.png' },              // Cell 0
+        { type: 'banner', id: 2008, name: 'Banner 2008', image: 'https://i.ibb.co/67GQLMYy/file-000000002d3c8211846fdd63b8c65917.png' },            // Cell 1
+        { type: 'coin', amount: 20, name: '20 Coin', image: 'https://i.ibb.co/xS3WX2Ws/file-000000007aa881f59369a8843142e06e.png' },              // Cell 2
+        { type: 'background', id: 3008, name: 'Background 3008', image: 'https://i.ibb.co/212xvtxK/file-00000000d72c81fd9f3b49e6730c9fd2.png' },   // Cell 3
+        { type: 'coin', amount: 30, name: '30 Coin', image: 'https://i.ibb.co/xS3WX2Ws/file-000000007aa881f59369a8843142e06e.png' },              // Cell 4
+        { type: 'coin', amount: 50, name: '50 Coin', image: 'https://i.ibb.co/xS3WX2Ws/file-000000007aa881f59369a8843142e06e.png' },              // Cell 5
+        { type: 'bubble', id: 4008, name: 'Bubble 4008', image: 'https://i.ibb.co/Df672q8R/Grid-Art-20260925-150236708.jpg' },                     // Cell 6
+        { type: 'frame', id: 1008, name: 'Frame 1008', image: 'https://i.ibb.co/9kbvb43r/Grid-Art-20260925-145856869.jpg' }                        // Cell 7
     ];
 
     var EXCHANGE_CARDS = [
@@ -16212,23 +16255,43 @@ document.addEventListener('keydown', function(e) {
     }
 
     // ===================================================
-    //  LUCKY GRID — ✅ ပုံထည့်
+    //  LUCKY GRID — ✅ ပုံ + Block စာသား
     // ===================================================
     function renderLuckyCells() {
         var cells = document.querySelectorAll('.event-cell');
         cells.forEach(function(cell, idx) {
             cell.classList.remove('selected');
             cell.classList.remove('winner');
+            cell.classList.remove('coin-cell');
 
-            // ✅ ပုံ ထည့်
             var reward = LUCKY_REWARDS[idx];
-            if (reward && reward.image) {
-                cell.innerHTML = '';
+            if (!reward) return;
+
+            cell.innerHTML = '';
+
+            // ✅ Coin ဆိုရင် ပုံ + "Block" စာသား
+            if (reward.type === 'coin') {
+                cell.classList.add('coin-cell');
+
                 var img = document.createElement('img');
                 img.src = reward.image;
-                img.alt = reward.name || 'reward';
+                img.alt = reward.name || 'coin';
                 img.onerror = function() { this.style.display = 'none'; };
                 cell.appendChild(img);
+
+                // ✅ "Block" စာသား
+                var label = document.createElement('span');
+                label.className = 'event-cell-label';
+                label.textContent = 'Block';
+                cell.appendChild(label);
+
+            } else if (reward.image) {
+                // ✅ Frame/Banner/BG/Bubble — ပုံပဲ
+                var img2 = document.createElement('img');
+                img2.src = reward.image;
+                img2.alt = reward.name || 'reward';
+                img2.onerror = function() { this.style.display = 'none'; };
+                cell.appendChild(img2);
                 cell.classList.add('has-image');
             }
         });
@@ -16505,9 +16568,6 @@ document.addEventListener('keydown', function(e) {
         });
     }
 
-    // ===================================================
-    //  TIME TASK
-    // ===================================================
     function startTimeTask(task, btn) {
         var extraEl = document.getElementById('taskExtra_' + task.id);
 
@@ -16551,9 +16611,6 @@ document.addEventListener('keydown', function(e) {
         });
     }
 
-    // ===================================================
-    //  MSG TASK — ONE-TIME
-    // ===================================================
     function startMsgTask(task, btn) {
         var extraEl = document.getElementById('taskExtra_' + task.id);
 
@@ -16602,9 +16659,6 @@ document.addEventListener('keydown', function(e) {
         });
     }
 
-    // ===================================================
-    //  LOCKED TASK
-    // ===================================================
     function startLockedTask(task, btn) {
         var extraEl = document.getElementById('taskExtra_' + task.id);
 
@@ -16631,9 +16685,6 @@ document.addEventListener('keydown', function(e) {
         timeTaskTimers.push(setInterval(update, 1000));
     }
 
-    // ===================================================
-    //  DONE TASK
-    // ===================================================
     function startDoneTask(task, btn) {
         var extraEl = document.getElementById('taskExtra_' + task.id);
 
@@ -16646,9 +16697,6 @@ document.addEventListener('keydown', function(e) {
         }
     }
 
-    // ===================================================
-    //  TG TASK
-    // ===================================================
     function startTgTask(task, btn) {
         var done = !!eventTasksDone[task.id];
         if (done) { btn.textContent = 'ပြီးပြီ'; btn.disabled = true; btn.classList.add('claimed'); }
@@ -16668,9 +16716,6 @@ document.addEventListener('keydown', function(e) {
         });
     }
 
-    // ===================================================
-    //  TOTAL MESSAGE COUNT
-    // ===================================================
     function getTotalMessageCount() {
         if (typeof memoryMessages === 'undefined') return 0;
         var count = 0;
@@ -16889,7 +16934,7 @@ document.addEventListener('keydown', function(e) {
             updateEventFabVisibility();
         });
 
-        console.log('Event System v14 Ready');
+        console.log('Event System v14.2 Ready');
     }
 
     if (document.readyState === 'loading') {
