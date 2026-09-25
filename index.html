@@ -9613,10 +9613,11 @@ function enterApp(user) {
     if (user.avatar && user.avatar !== '') profileAvatar.src = user.avatar;
 
     setupMServer().then(function() {
-        if (currentDb && currentUser) {
-            listenDiamondUpdates(currentUser.userId, currentServerId);
-            startSelfDataListener(currentUser.userId, currentServerId);
-        }
+    if (currentDb && currentUser) {
+        // ✅ Diamond Listener ဖြတ်လိုက် (Self Data က ကိုင်တယ်)
+        // listenDiamondUpdates(currentUser.userId, currentServerId);
+        startSelfDataListener(currentUser.userId, currentServerId);
+    }
 
         applyFrameToSidebar();
 
