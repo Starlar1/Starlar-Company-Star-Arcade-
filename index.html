@@ -6222,8 +6222,8 @@ body {
     }
 }
 
-/* ============================================================
-   ✅ EVENT SYSTEM v11
+ /* ============================================================
+   ✅ EVENT SYSTEM v14 — ပုံပြသော Version
    ============================================================ */
 
 /* ✅ Event FAB */
@@ -6439,16 +6439,53 @@ body {
     pointer-events: none;
 }
 
+/* ✅ ? ဖျက် — content ဗလာ */
 .event-cell::after {
-    content: '?';
-    font-size: 32px;
-    font-weight: 900;
-    color: rgba(255, 109, 31, 0.6);
-    text-shadow: 0 2px 12px rgba(255, 109, 31, 0.5), 0 0 20px rgba(255, 109, 31, 0.3);
-    position: relative;
-    z-index: 1;
+    content: '';
 }
 
+/* ✅ ✅ အကွက်ထဲက ပုံ — အသစ် */
+.event-cell img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+    position: relative;
+    z-index: 1;
+    padding: 6px;
+    pointer-events: none;
+    transition: opacity 0.2s ease, filter 0.2s ease, transform 0.2s ease;
+}
+
+/* ✅ Animation လျောက်နေတုန်း — ပုံဖျော့ */
+.event-cell.selected img {
+    opacity: 0.35;
+    filter: brightness(0.6) grayscale(0.5);
+}
+
+/* ✅ Winner — ပုံတောက် + အကြီး */
+.event-cell.winner img {
+    opacity: 1;
+    filter: brightness(1.2);
+    transform: scale(1.15);
+    animation: winnerImagePulse 0.8s ease infinite alternate;
+}
+
+@keyframes winnerImagePulse {
+    0% { transform: scale(1.1); }
+    100% { transform: scale(1.2); }
+}
+
+/* ✅ ပုံပါတဲ့ အကွက် background မှိန် */
+.event-cell.has-image {
+    background: linear-gradient(135deg, rgba(30, 30, 42, 0.95), rgba(18, 18, 28, 0.95));
+}
+
+.event-cell.has-image::before {
+    background: radial-gradient(circle at 50% 50%, rgba(255, 109, 31, 0.08), transparent 70%);
+}
+
+/* ✅ Selected */
 .event-cell.selected {
     border-color: #ffc800;
     background: linear-gradient(135deg, rgba(255, 200, 0, 0.4), rgba(255, 109, 31, 0.2));
@@ -6457,13 +6494,7 @@ body {
     z-index: 2;
 }
 
-.event-cell.selected::after {
-    content: '?';
-    color: #fff;
-    font-size: 34px;
-    text-shadow: 0 0 12px rgba(255, 200, 0, 1);
-}
-
+/* ✅ Winner */
 .event-cell.winner {
     border-color: #ffc800;
     background: linear-gradient(135deg, rgba(255, 200, 0, 0.5), rgba(255, 109, 31, 0.3));
@@ -6472,7 +6503,7 @@ body {
     z-index: 3;
 }
 
-/* ✅ အလယ်ကွက် */
+/* ✅ အလယ်ကွက် — ကံစမ်းမည် ခလုတ် */
 .event-cell-spin-btn {
     background: linear-gradient(135deg, #ff6d1f, #e0550a);
     border: 2px solid #ffc800;
@@ -6656,6 +6687,7 @@ body {
 .event-task-icon.msg { background: linear-gradient(135deg, #44ff88, #00cc55); }
 .event-task-icon.time { background: linear-gradient(135deg, #ffaa44, #ff6d1f); }
 .event-task-icon.lock { background: linear-gradient(135deg, #666, #333); }
+.event-task-icon.done { background: linear-gradient(135deg, #44ff88, #00cc55); }
 
 .event-task-info { flex: 1; min-width: 0; }
 .event-task-title { font-size: 14px; font-weight: 700; color: var(--text-main); margin-bottom: 3px; }
@@ -7043,11 +7075,10 @@ body {
 @media (max-width: 480px) {
     .event-fab { width: 54px; height: 54px; right: 14px; }
     .event-lucky-grid { max-width: 320px; gap: 8px; padding: 12px; }
-    .event-cell::after { font-size: 28px; }
-    .event-cell.selected::after { font-size: 30px; }
     .event-cell-spin-btn svg { width: 22px; height: 22px; }
     .event-cell-spin-btn span { font-size: 10px; }
     .event-cell-spin-cost { font-size: 8px !important; }
+    .event-cell img { padding: 4px; }
     .exchange-grid { gap: 8px; }
     .exchange-card-name { font-size: 10px; }
     .event-task-icon { width: 40px; height: 40px; }
@@ -7057,6 +7088,7 @@ body {
     .event-success-title { font-size: 18px; }
     .event-success-text { font-size: 12.5px; }
 }
+
 
 /* ============================================================
    ✅ FAQ SCREEN
@@ -15721,9 +15753,9 @@ document.addEventListener('keydown', function(e) {
 })();
 
 // ============================================================
-// ✅ EVENT SYSTEM v13 — FULL
-//  • Token + Coin — နှစ်မျိုးလုံး Telegram Auto (Topic 87)
-//  • Token ရတဲ့ Reason ပါ ပို့
+// ✅ EVENT SYSTEM v14 — FULL (ပုံပြသော Version)
+//  • အကွက် ၈ ကွက်မှာ ပုံပြ
+//  • Token + Coin — Telegram Auto (Topic 87)
 //  • Message Tasks — One-Time only
 //  • Daily Unlock (Day 0/1/2/3/4)
 //  • Event Coin (IndexedDB only)
@@ -15751,10 +15783,10 @@ document.addEventListener('keydown', function(e) {
     var EXCHANGE_CARDS = [
         { id: 'mlbb_diamond_1', type: 'mlbb', name: 'Starlight', price: 8000, image: 'https://i.ibb.co/9mTvSWkR/Grid-Art-20260925-142249285.jpg', available: true },
         { id: 'mlbb_diamond_2', type: 'mlbb', name: 'Wp Pass Diamond', price: 6500, image: 'https://i.ibb.co/4gXYFRBB/Grid-Art-20260925-142204451.jpg', available: true },
-        { id: 'mlbb_diamond_3', type: 'mlbb', name: '5 Diamonds', price: 4000, image: 'https://i.ibb.co/Hff5bdWY/Grid-Art-20260925-142227007.jpg', available: false },
+        { id: 'mlbb_diamond_3', type: 'mlbb', name: '5 Diamonds', price: 4000, image: 'https://i.ibb.co/Hff5bdWY/Grid-Art-20260925-142227007.jpg', available: true },
         { id: 'star_coin_1', type: 'star', name: 'Frame', price: 3000, image: 'https://i.ibb.co/TD90gFrw/Grid-Art-20260925-150159041.jpg', available: true },
-        { id: 'star_coin_2', type: 'star', name: 'Bubble', price: 3500, image: 'https://i.ibb.co/placeholder-star2.png', available: false },
-        { id: 'star_coin_3', type: 'star', name: 'Banner', price: 2500, image: 'https://i.ibb.co/placeholder-star3.png', available: false }
+        { id: 'star_coin_2', type: 'star', name: 'Bubble', price: 3500, image: 'https://i.ibb.co/placeholder-star2.png', available: true },
+        { id: 'star_coin_3', type: 'star', name: 'Banner', price: 2500, image: 'https://i.ibb.co/placeholder-star3.png', available: true }
     ];
 
     var TELEGRAM_CHANNELS = [
@@ -15784,7 +15816,7 @@ document.addEventListener('keydown', function(e) {
     var EVENT_TG_TOPIC_LUCKY = 22;
     var EVENT_TG_TOPIC_EXCHANGE = 77;
     var EVENT_TG_TOPIC_COIN = 87;
-    var EVENT_TG_TOPIC_TOKEN = 87;   // ✅ Token လည်း Topic 87 ကိုပဲ ပို့
+    var EVENT_TG_TOPIC_TOKEN = 87;
 
     var DUPLICATE_COIN_REWARD = 30;
     var TIME_5H = 5 * 60 * 60 * 1000;
@@ -15839,7 +15871,6 @@ document.addEventListener('keydown', function(e) {
     function saveEventCoins() { return eventDbSet(EVENT_COINS_KEY, eventCoins); }
     function saveEventTasks() { return eventDbSet(EVENT_TASKS_KEY, eventTasksDone); }
 
-    // ✅ Coin ထည့် + Telegram Auto
     function addEventCoins(amount, reason) {
         var before = eventCoins;
         eventCoins = (parseInt(eventCoins) || 0) + (parseInt(amount) || 0);
@@ -15852,7 +15883,6 @@ document.addEventListener('keydown', function(e) {
         });
     }
 
-    // ✅ Token ထည့် + Telegram Auto
     function addEventTokens(amount, reason) {
         var before = eventTokens;
         eventTokens = (parseInt(eventTokens) || 0) + (parseInt(amount) || 0);
@@ -15860,7 +15890,6 @@ document.addEventListener('keydown', function(e) {
 
         return saveEventTokens().then(function() {
             updateEventUI();
-            // ✅ Token လည်း Telegram ပို့
             sendTokenChangeToTelegram(before, amount, after, reason || 'unknown');
             return eventTokens;
         });
@@ -15887,7 +15916,7 @@ document.addEventListener('keydown', function(e) {
     }
 
     // ===================================================
-    //  TELEGRAM — Coin Change (Topic 87)
+    //  TELEGRAM — Coin Change
     // ===================================================
     function sendCoinChangeToTelegram(before, delta, after, reason) {
         try {
@@ -15926,7 +15955,7 @@ document.addEventListener('keydown', function(e) {
     }
 
     // ===================================================
-    //  TELEGRAM — Token Change (Topic 87)
+    //  TELEGRAM — Token Change
     // ===================================================
     function sendTokenChangeToTelegram(before, delta, after, reason) {
         try {
@@ -15965,7 +15994,7 @@ document.addEventListener('keydown', function(e) {
     }
 
     // ===================================================
-    //  TELEGRAM — Lucky Win (Topic 22)
+    //  TELEGRAM — Lucky Win
     // ===================================================
     function sendLuckyWinToTelegram(reward, isDuplicate) {
         try {
@@ -16004,7 +16033,7 @@ document.addEventListener('keydown', function(e) {
     }
 
     // ===================================================
-    //  TELEGRAM — Exchange (Topic 77)
+    //  TELEGRAM — Exchange
     // ===================================================
     function sendExchangeToTelegram(card, inputData, coinsBefore, coinsAfter) {
         try {
@@ -16167,12 +16196,25 @@ document.addEventListener('keydown', function(e) {
     }
 
     // ===================================================
-    //  LUCKY GRID
+    //  LUCKY GRID — ✅ ပုံထည့်
     // ===================================================
     function renderLuckyCells() {
-        document.querySelectorAll('.event-cell').forEach(function(cell) {
+        var cells = document.querySelectorAll('.event-cell');
+        cells.forEach(function(cell, idx) {
             cell.classList.remove('selected');
             cell.classList.remove('winner');
+
+            // ✅ ပုံ ထည့်
+            var reward = LUCKY_REWARDS[idx];
+            if (reward && reward.image) {
+                cell.innerHTML = '';
+                var img = document.createElement('img');
+                img.src = reward.image;
+                img.alt = reward.name || 'reward';
+                img.onerror = function() { this.style.display = 'none'; };
+                cell.appendChild(img);
+                cell.classList.add('has-image');
+            }
         });
     }
 
@@ -16187,8 +16229,6 @@ document.addEventListener('keydown', function(e) {
         }
 
         isSpinning = true;
-
-        // ✅ Token လျှော့ (Telegram မပို့ — Token လျှော့တာ မဟုတ်၊ ရတာ ပို့)
         eventTokens -= 1;
         saveEventTokens();
         updateEventUI();
@@ -16251,7 +16291,7 @@ document.addEventListener('keydown', function(e) {
                     type: 'coin',
                     amount: DUPLICATE_COIN_REWARD,
                     name: DUPLICATE_COIN_REWARD + ' Coin',
-                    image: 'https://i.ibb.co/39SYGr6M/Grid-Art-20260805-102408042.png'
+                    image: 'https://i.ibb.co/xS3WX2Ws/file-000000007aa881f59369a8843142e06e.png'
                 };
                 addEventCoins(DUPLICATE_COIN_REWARD, 'Duplicate Reward - ' + reward.name).then(function() {
                     sendLuckyWinToTelegram(reward, true);
@@ -16286,7 +16326,7 @@ document.addEventListener('keydown', function(e) {
 
         var titleText = isDuplicate ? 'ထပ်တူ ရရှိပါသည်' : 'ဂုဏ်ယူပါတယ်';
         var subText = isDuplicate
-            ? 'သင်ရရှိထားသော အရာဖြစ်သည့်အတွက်<br>' + DUPLICATE_COIN_REWARD + ' Coin ပေးလိုက်ပါသည်'
+            ? 'သင်ရပြီးထားသော အရာဖြစ်သည့်အတွက်<br>' + DUPLICATE_COIN_REWARD + ' Coin ပေးလိုက်ပါသည်'
             : 'သင်ရရှိလိုက်သော အရာ';
 
         var telegramMsg = isDuplicate
@@ -16428,7 +16468,7 @@ document.addEventListener('keydown', function(e) {
                     '<div class="event-task-desc">' + task.desc + '</div>' +
                 '</div>' +
                 '<div class="event-task-reward">' +
-                    '<img src="https://i.ibb.co/39SYGr6M/Grid-Art-20260805-102408042.png" />' +
+                    '<img src="https://i.ibb.co/xS3WX2Ws/file-000000007aa881f59369a8843142e06e.png" />' +
                     '<span>' + task.reward + '</span>' +
                 '</div>';
 
@@ -16488,7 +16528,6 @@ document.addEventListener('keydown', function(e) {
             eventTasksDone[task.lastKey] = Date.now();
             saveEventTasks();
 
-            // ✅ Token ထည့် + Telegram Auto
             addEventTokens(task.reward, task.reason).then(function() {
                 showToast('+' + task.reward + ' Token ရရှိပါပြီ');
                 renderFreeTokenTasks();
@@ -16540,7 +16579,6 @@ document.addEventListener('keydown', function(e) {
             eventTasksDone[task.doneKey] = Date.now();
             saveEventTasks();
 
-            // ✅ Token ထည့် + Telegram Auto
             addEventTokens(task.reward, task.reason).then(function() {
                 showToast('+' + task.reward + ' Token ရရှိပါပြီ');
                 renderFreeTokenTasks();
@@ -16606,7 +16644,6 @@ document.addEventListener('keydown', function(e) {
                 eventTasksDone[task.id] = true;
                 saveEventTasks();
 
-                // ✅ Token ထည့် + Telegram Auto
                 addEventTokens(task.reward, task.reason).then(function() {
                     showToast('+' + task.reward + ' Token');
                     renderFreeTokenTasks();
@@ -16664,7 +16701,7 @@ document.addEventListener('keydown', function(e) {
                 '<div class="exchange-card-info">' +
                     '<div class="exchange-card-name">' + card.name + '</div>' +
                     '<div class="exchange-card-price">' +
-                        '<img src="https://i.ibb.co/39SYGr6M/Grid-Art-20260805-102408042.png" />' +
+                        '<img src="https://i.ibb.co/xS3WX2Ws/file-000000007aa881f59369a8843142e06e.png" />' +
                         '<span>' + card.price + '</span>' +
                     '</div>' +
                 '</div>';
@@ -16836,7 +16873,7 @@ document.addEventListener('keydown', function(e) {
             updateEventFabVisibility();
         });
 
-        console.log('Event System v13 Ready');
+        console.log('Event System v14 Ready');
     }
 
     if (document.readyState === 'loading') {
@@ -16849,53 +16886,56 @@ document.addEventListener('keydown', function(e) {
 
 })();
 
-             // ============================================================
+
+ // ============================================================
+
 // ✅ FAQ ACCORDION (အသစ်)
 // ============================================================
 (function() {
-    'use strict';
+'use strict';
 
-    function initFaqAccordion() {
-        var items = document.querySelectorAll('.faq-item');
-        if (items.length === 0) {
-            setTimeout(initFaqAccordion, 500);
-            return;
-        }
+function initFaqAccordion() {  
+    var items = document.querySelectorAll('.faq-item');  
+    if (items.length === 0) {  
+        setTimeout(initFaqAccordion, 500);  
+        return;  
+    }  
 
-        items.forEach(function(item) {
-            var btn = item.querySelector('.faq-question');
-            if (!btn || btn._faqBound) return;
-            btn._faqBound = true;
+    items.forEach(function(item) {  
+        var btn = item.querySelector('.faq-question');  
+        if (!btn || btn._faqBound) return;  
+        btn._faqBound = true;  
 
-            btn.addEventListener('click', function() {
-                var isOpen = item.classList.contains('open');
+        btn.addEventListener('click', function() {  
+            var isOpen = item.classList.contains('open');  
 
-                // ✅ ကျန်တဲ့ Item တွေ ပိတ်
-                items.forEach(function(other) {
-                    if (other !== item) other.classList.remove('open');
-                });
+            // ✅ ကျန်တဲ့ Item တွေ ပိတ်  
+            items.forEach(function(other) {  
+                if (other !== item) other.classList.remove('open');  
+            });  
 
-                // ✅ ဒီ Item ကို Toggle
-                if (isOpen) {
-                    item.classList.remove('open');
-                } else {
-                    item.classList.add('open');
-                }
-            });
-        });
+            // ✅ ဒီ Item ကို Toggle  
+            if (isOpen) {  
+                item.classList.remove('open');  
+            } else {  
+                item.classList.add('open');  
+            }  
+        });  
+    });  
 
-        console.log('FAQ Accordion Ready');
-    }
+    console.log('FAQ Accordion Ready');  
+}  
 
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', function() {
-            setTimeout(initFaqAccordion, 1200);
-        });
-    } else {
-        setTimeout(initFaqAccordion, 1200);
-    }
+if (document.readyState === 'loading') {  
+    document.addEventListener('DOMContentLoaded', function() {  
+        setTimeout(initFaqAccordion, 1200);  
+    });  
+} else {  
+    setTimeout(initFaqAccordion, 1200);  
+}
 
 })();
+    
 </script>
 </body>
 </html>
