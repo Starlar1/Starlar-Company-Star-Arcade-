@@ -7467,6 +7467,178 @@ body {
     .ban-popup-contact a { font-size: 11.5px; padding: 7px 11px; }
     .ban-popup-btn { font-size: 14px; padding: 13px; }
 }
+
+/* ============================================================
+   ✅ VIDEO DIAMOND POPUP
+   ============================================================ */
+.vid-diamond-popup-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 10055;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    animation: vidDiamondFadeIn 0.25s ease;
+}
+
+@keyframes vidDiamondFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.vid-diamond-popup {
+    background: linear-gradient(145deg, #1a1a24, #12121c);
+    border: 2px solid #ff4444;
+    border-radius: 22px;
+    padding: 30px 24px 24px;
+    max-width: 340px;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 0 0 4px rgba(255, 68, 68, 0.15),
+                0 20px 80px rgba(0, 0, 0, 0.9),
+                0 0 60px rgba(255, 68, 68, 0.3);
+    animation: vidDiamondPopIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+@keyframes vidDiamondPopIn {
+    from { opacity: 0; transform: scale(0.85) translateY(30px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.vid-diamond-icon {
+    width: 70px;
+    height: 70px;
+    margin: 0 auto 16px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, rgba(255, 68, 68, 0.25), rgba(255, 68, 68, 0.05));
+    border: 2px solid #ff4444;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ff4444;
+    animation: vidDiamondIconPulse 2s ease-in-out infinite;
+}
+
+.vid-diamond-icon svg { width: 34px; height: 34px; }
+
+@keyframes vidDiamondIconPulse {
+    0%, 100% { box-shadow: 0 0 20px rgba(255, 68, 68, 0.4); transform: scale(1); }
+    50% { box-shadow: 0 0 40px rgba(255, 68, 68, 0.7); transform: scale(1.05); }
+}
+
+.vid-diamond-title {
+    font-size: 17px;
+    font-weight: 800;
+    color: #ff4444;
+    margin: 0 0 18px;
+    line-height: 1.4;
+    letter-spacing: 0.2px;
+}
+
+.vid-diamond-body {
+    background: rgba(255, 68, 68, 0.06);
+    border: 1px solid rgba(255, 68, 68, 0.2);
+    border-radius: 14px;
+    padding: 14px 16px;
+    margin-bottom: 18px;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.vid-diamond-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.vid-diamond-row:last-child {
+    padding-bottom: 0;
+    border-bottom: none;
+}
+
+.vid-diamond-row.missing {
+    border-top: 1px solid rgba(255, 68, 68, 0.3);
+    padding-top: 10px;
+    margin-top: 4px;
+}
+
+.vid-diamond-label {
+    font-size: 12.5px;
+    color: var(--text-sub);
+    font-weight: 600;
+}
+
+.vid-diamond-value {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--text-main);
+    font-family: monospace;
+}
+
+.vid-diamond-value img {
+    width: 16px;
+    height: 16px;
+    object-fit: contain;
+}
+
+.vid-diamond-value.required {
+    color: #ffaa44;
+}
+
+.vid-diamond-value.current {
+    color: #44ff88;
+}
+
+.vid-diamond-row.missing .vid-diamond-value {
+    color: #ff4444;
+    font-size: 16px;
+}
+
+.vid-diamond-btn {
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #ff6d1f, #e0550a);
+    color: #fff;
+    font-size: 15px;
+    font-weight: 800;
+    font-family: inherit;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(255, 109, 31, 0.5);
+    transition: all 0.2s ease;
+}
+
+.vid-diamond-btn:active {
+    transform: scale(0.97);
+    box-shadow: 0 2px 12px rgba(255, 109, 31, 0.7);
+}
+
+@media (max-width: 480px) {
+    .vid-diamond-popup { padding: 24px 18px 18px; border-radius: 18px; }
+    .vid-diamond-icon { width: 60px; height: 60px; margin-bottom: 12px; }
+    .vid-diamond-icon svg { width: 28px; height: 28px; }
+    .vid-diamond-title { font-size: 15px; margin-bottom: 14px; }
+    .vid-diamond-body { padding: 12px 14px; }
+    .vid-diamond-label { font-size: 11.5px; }
+    .vid-diamond-value { font-size: 13px; }
+    .vid-diamond-row.missing .vid-diamond-value { font-size: 15px; }
+    .vid-diamond-btn { font-size: 14px; padding: 13px; }
+}
 </style>
 </head>
 <body>
@@ -15745,7 +15917,7 @@ function vidPopupSend() {
 
     if (currentDiamond < requiredDiamond) {
         vidPopupClose();
-        showToastSafe('Diamond မလုံလောက်ပါ\n' + modelLabel + ' အတွက် ' + requiredDiamond + ' လိုအပ်ပါတယ်\n(သင့်မှာ ' + currentDiamond + ' ရှိပါတယ်)');
+        showVidDiamondPopup(modelLabel, requiredDiamond, currentDiamond);
         return;
     }
 
@@ -15844,6 +16016,69 @@ function vidPopupSend() {
             btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/></svg><span>ပေးပို့မည်</span>';
         }
         showToastSafe('Send failed');
+    });
+}
+
+// ✅ ============================================
+// ✅ NEW -- Diamond မလုံလောက်ရင် Popup ပြ
+// ✅ ============================================
+function showVidDiamondPopup(modelLabel, required, current) {
+    var existing = document.getElementById('vidDiamondPopupOverlay');
+    if (existing) existing.remove();
+
+    var overlay = document.createElement('div');
+    overlay.className = 'vid-diamond-popup-overlay';
+    overlay.id = 'vidDiamondPopupOverlay';
+
+    overlay.innerHTML =
+        '<div class="vid-diamond-popup">' +
+            '<div class="vid-diamond-icon">' +
+                '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">' +
+                    '<circle cx="12" cy="12" r="10"/>' +
+                    '<line x1="12" y1="8" x2="12" y2="12"/>' +
+                    '<line x1="12" y1="16" x2="12.01" y2="16"/>' +
+                '</svg>' +
+            '</div>' +
+            '<h3 class="vid-diamond-title">Diamond မလုံလောက်ပါ</h3>' +
+            '<div class="vid-diamond-body">' +
+                '<div class="vid-diamond-row">' +
+                    '<span class="vid-diamond-label">Model</span>' +
+                    '<span class="vid-diamond-value">' + modelLabel + '</span>' +
+                '</div>' +
+                '<div class="vid-diamond-row">' +
+                    '<span class="vid-diamond-label">လိုအပ်ချက်</span>' +
+                    '<span class="vid-diamond-value required">' +
+                        '<img src="https://i.ibb.co/39SYGr6M/Grid-Art-20260805-102408042.png" />' +
+                        required +
+                    '</span>' +
+                '</div>' +
+                '<div class="vid-diamond-row">' +
+                    '<span class="vid-diamond-label">သင့်မှာ ရှိ</span>' +
+                    '<span class="vid-diamond-value current">' +
+                        '<img src="https://i.ibb.co/39SYGr6M/Grid-Art-20260805-102408042.png" />' +
+                        current +
+                    '</span>' +
+                '</div>' +
+                '<div class="vid-diamond-row missing">' +
+                    '<span class="vid-diamond-label">လိုအပ်သေးသည်</span>' +
+                    '<span class="vid-diamond-value">' +
+                        '<img src="https://i.ibb.co/39SYGr6M/Grid-Art-20260805-102408042.png" />' +
+                        (required - current) +
+                    '</span>' +
+                '</div>' +
+            '</div>' +
+            '<button class="vid-diamond-btn" id="vidDiamondOkBtn">ရပါပြီ</button>' +
+        '</div>';
+
+    document.body.appendChild(overlay);
+
+    function closePopup() {
+        overlay.remove();
+    }
+
+    document.getElementById('vidDiamondOkBtn').addEventListener('click', closePopup);
+    overlay.addEventListener('click', function(e) {
+        if (e.target === overlay) closePopup();
     });
 }
 
