@@ -9074,9 +9074,8 @@ body {
 
 <script>
 // ============================================================
-//  STAR ARCADE -- FULL script.js
-//  M Server + Auto Online + Play ID + Red Dot (New Msg)
-//  IndexedDB First + Background Firebase Listeners
+//  STAR ARCADE -- FULL script.js (PART 1)
+//  IndexedDB First + Background Sync + Change Detection
 //  Version: 2026-09-26
 // ============================================================
 
@@ -9265,6 +9264,9 @@ var onDisconnectRef = null;
 var searchResultUser = null;
 var selfDataListener = null;
 
+// ✅ Background Sync State
+var backgroundSyncStarted = false;
+
 function initDomRefs() {
     authOverlay = $('authOverlay');
     loginCard = $('loginCard');
@@ -9423,13 +9425,87 @@ function pickRandomFirestoreServer() {
 
 function pickMServerForUser() {
     var allServerIds = FIREBASE_SERVERS.map(function(s) { return s.id; });
-    
     if (allServerIds.length <= M_SERVER_TARGET_COUNT) {
         return allServerIds.slice();
     }
-    
     var shuffled = allServerIds.slice().sort(function() { return Math.random() - 0.5; });
     return shuffled.slice(0, M_SERVER_TARGET_COUNT);
+}
+
+// ===================================================
+//  ✅ CHANGE DETECTION
+// ===================================================
+function checkDataChanged(oldUser, newData) {
+    if (!oldUser || !newData) return true;
+    
+    var fields = [
+        'name', 'diamond', 'avatar', 'bio', 'play',
+        'frameUse', 'bannerUse', 'backgroundUse', 'bubbleUse', 'markUse',
+        'roleUse', 'friendsList', 'blockList',
+        'frameOwned', 'bannerOwned', 'backgroundOwned', 'bubbleOwned',
+        'roleOwned', 'mServer', 'online', 'isFirstLogin', 'accNo', 'authId'
+    ];
+    
+    for (var i = 0; i < fields.length; i++) {
+        var f = fields[i];
+        var oldVal = JSON.stringify(oldUser[f] === undefined ? null : oldUser[f]);
+        var newVal = JSON.stringify(newData[f] === undefined ? null : newData[f]);
+        if (oldVal !== newVal) {
+            console.log('📊 Data changed: ' + f);
+            return true;
+        }
+    }
+    return false;
+}
+
+function buildUpdatedUser(oldUser, newData) {
+    return {
+        accNo: newData.accNo !== undefined ? newData.accNo : oldUser.accNo,
+        authId: newData.authId || oldUser.authId,
+        name: newData.name || oldUser.name,
+        email: oldUser.email,
+        userId: oldUser.userId,
+        serverId: currentServerId,
+        diamond: newData.diamond !== undefined ? newData.diamond : oldUser.diamond,
+        avatar: newData.avatar || oldUser.avatar,
+        inviteCode: newData.inviteCode || oldUser.inviteCode,
+        bio: newData.bio !== undefined ? newData.bio : oldUser.bio,
+        play: newData.play !== undefined ? newData.play : oldUser.play,
+        friendsList: newData.friendsList || oldUser.friendsList,
+        blockList: newData.blockList || oldUser.blockList,
+        markUse: newData.markUse || oldUser.markUse,
+        frameUse: newData.frameUse || oldUser.frameUse,
+        bannerUse: newData.bannerUse || oldUser.bannerUse,
+        backgroundUse: newData.backgroundUse || oldUser.backgroundUse,
+        bubbleUse: newData.bubbleUse || oldUser.bubbleUse,
+        frameOwned: newData.frameOwned || oldUser.frameOwned,
+        bannerOwned: newData.bannerOwned || oldUser.bannerOwned,
+        backgroundOwned: newData.backgroundOwned || oldUser.backgroundOwned,
+        bubbleOwned: newData.bubbleOwned || oldUser.bubbleOwned,
+        roleUse: newData.roleUse || oldUser.roleUse,
+        roleOwned: newData.roleOwned || oldUser.roleOwned,
+        mServer: newData.mServer || oldUser.mServer,
+        online: newData.online !== undefined ? newData.online : oldUser.online,
+        isFirstLogin: newData.isFirstLogin !== undefined ? newData.isFirstLogin : oldUser.isFirstLogin
+    };
+}
+
+// ===================================================
+//  ✅ RENDER UI FROM CACHE (IndexedDB)
+// ===================================================
+function renderUIFromCache(user) {
+    if (!user) return;
+    
+    if (userNameEl) userNameEl.textContent = user.name || 'Player';
+    if (userIdEl) userIdEl.textContent = 'ID ' + (user.userId || '0000000000');
+    if (coinDisplay) coinDisplay.textContent = user.diamond || 0;
+    
+    var serverName = FIREBASE_SERVERS.find(function(s) { return s.id === currentServerId; });
+    if (userServerEl) userServerEl.textContent = serverName ? serverName.name : currentServerId;
+    
+    if (user.avatar && profileAvatar) profileAvatar.src = user.avatar;
+    
+    applyFrameToSidebar();
 }
 
 // ===================================================
@@ -9611,7 +9687,7 @@ function setupMServer() {
 }
 
 // ===================================================
-//  SELF DATA LISTENER
+//  ✅ SELF DATA LISTENER -- Change Detection
 // ===================================================
 function startSelfDataListener(userId, serverId) {
     stopSelfDataListener();
@@ -9622,46 +9698,31 @@ function startSelfDataListener(userId, serverId) {
     selfDataListener.on('value', function(snap) {
         var data = snap.val();
         if (!data || !currentUser) return;
-
-        var updated = {
-            accNo: data.accNo !== undefined ? data.accNo : currentUser.accNo,
-            authId: data.authId || currentUser.authId,
-            name: data.name || currentUser.name,
-            email: currentUser.email,
-            userId: currentUser.userId,
-            serverId: currentServerId,
-            diamond: data.diamond !== undefined ? data.diamond : currentUser.diamond,
-            avatar: data.avatar || currentUser.avatar,
-            inviteCode: data.inviteCode || currentUser.inviteCode,
-            bio: data.bio !== undefined ? data.bio : currentUser.bio,
-            play: data.play !== undefined ? data.play : currentUser.play,
-            friendsList: data.friendsList || currentUser.friendsList,
-            blockList: data.blockList || currentUser.blockList,
-            markUse: data.markUse || currentUser.markUse,
-            frameUse: data.frameUse || currentUser.frameUse,
-            bannerUse: data.bannerUse || currentUser.bannerUse,
-            backgroundUse: data.backgroundUse || currentUser.backgroundUse,
-            bubbleUse: data.bubbleUse || currentUser.bubbleUse,
-            frameOwned: data.frameOwned || currentUser.frameOwned,
-            bannerOwned: data.bannerOwned || currentUser.bannerOwned,
-            backgroundOwned: data.backgroundOwned || currentUser.backgroundOwned,
-            bubbleOwned: data.bubbleOwned || currentUser.bubbleOwned,
-            roleUse: data.roleUse || currentUser.roleUse,
-            roleOwned: data.roleOwned || currentUser.roleOwned,
-            mServer: data.mServer || currentUser.mServer,
-            online: data.online !== undefined ? data.online : currentUser.online,
-            isFirstLogin: data.isFirstLogin !== undefined ? data.isFirstLogin : currentUser.isFirstLogin
-        };
-
-        currentUser = updated;
+        
+        // ✅ Data ပြောင်းလဲမှု ရှိလား စစ်
+        var hasChanged = checkDataChanged(currentUser, data);
+        
+        if (!hasChanged) {
+            console.log('✅ Self data: No change → skip IDB update');
+            return;
+        }
+        
+        // ✅ ပြောင်းရင်မှ update
+        console.log('🔄 Self data changed → updating IDB + UI');
+        currentUser = buildUpdatedUser(currentUser, data);
         saveUserToDB(currentUser);
-
-        // ✅ Background မှာ UI update
+        
+        // UI update
         if (userNameEl) userNameEl.textContent = currentUser.name || 'Player';
         if (coinDisplay) coinDisplay.textContent = currentUser.diamond || 0;
         if (currentUser.avatar && profileAvatar) profileAvatar.src = currentUser.avatar;
         applyFrameToSidebar();
-        loadProfileData();
+        
+        // Profile screen ဖွင့်ထားရင် refresh
+        var fsProfile = document.getElementById('fs-profile');
+        if (fsProfile && !fsProfile.classList.contains('hidden')) {
+            loadProfileData();
+        }
     }, function(err) {
         console.warn('Self data listener error:', err.code);
     });
@@ -9770,27 +9831,50 @@ function ensureFirebaseAuth(serverId, email) {
 }
 
 // ===================================================
-//  ✅ ENTER APP -- IndexedDB First + Background Loading
+//  ✅ BACKGROUND SYNC -- Firebase Listeners
+// ===================================================
+function startBackgroundSync() {
+    if (backgroundSyncStarted) return;
+    if (!currentUser || !currentServerId) return;
+    backgroundSyncStarted = true;
+    
+    console.log('🔄 Background sync started');
+    
+    // 1. M Server setup + Self listener
+    setupMServer().then(function() {
+        if (currentDb && currentUser) {
+            startSelfDataListener(currentUser.userId, currentServerId);
+        }
+    }).catch(function(err) {
+        console.warn('setupMServer failed:', err);
+    });
+    
+    // 2. IndexedDB cache ကနေ Chat List ပြ
+    renderChatList();
+    
+    // 3. Background listeners (delay နဲ့ တစ်ခုချင်း)
+    setTimeout(function() { startFriendsListListener(); }, 300);
+    setTimeout(function() { startAppMessageListeners(); }, 500);
+    setTimeout(function() {
+        goOnline();
+        attachOnlineEventListeners();
+    }, 700);
+    setTimeout(function() { retryPendingMessages(); }, 1200);
+}
+
+// ===================================================
+//  ✅ ENTER APP -- IndexedDB First + Background Sync
 // ===================================================
 function enterApp(user) {
-    // ✅ 1. Auth ဖျောက် + App ချက်ချင်း ပြ
+    // ✅ 1. Auth ဖျောက် + App ချက်ချင်း ပြ (0ms)
     authOverlay.style.display = 'none';
     authOverlay.classList.add('hidden');
     appWrapper.classList.remove('hidden');
 
-    // ✅ 2. IndexedDB cache ကနေ ချက်ချင်း UI ဖြည့်
-    userNameEl.textContent = user.name || 'Player';
-    userIdEl.textContent = 'ID ' + (user.userId || '0000000000');
-    coinDisplay.textContent = user.diamond || 0;
+    // ✅ 2. IndexedDB cache ကနေ UI ဖြည့် (0ms)
+    renderUIFromCache(user);
 
-    var serverName = FIREBASE_SERVERS.find(function(s) { return s.id === currentServerId; });
-    userServerEl.textContent = serverName ? serverName.name : currentServerId;
-
-    if (user.avatar && user.avatar !== '') profileAvatar.src = user.avatar;
-
-    applyFrameToSidebar();
-
-    // ✅ 3. Home ချက်ချင်း ပြ (Loading overlay မပြ)
+    // ✅ 3. Home ချက်ချင်း ပြ (0ms)
     var defaultBtn = document.querySelector('.nav-btn[data-tab="home"]');
     if (defaultBtn) {
         activeNavBtn = defaultBtn;
@@ -9806,29 +9890,9 @@ function enterApp(user) {
         renderChatListTimer = null;
     }
 
-    // ✅ 4. UI render ပြီးချင်း Background မှာ Firebase listener တွေ စ
-    setTimeout(function() {
-        // 4a. M Server setup + Self listener (background)
-        setupMServer().then(function() {
-            if (currentDb && currentUser) {
-                startSelfDataListener(currentUser.userId, currentServerId);
-            }
-        }).catch(function(err) {
-            console.warn('setupMServer background failed:', err);
-        });
-
-        // 4b. IndexedDB cache ကနေ chat list ချက်ချင်း ပြ
-        renderChatList();
-
-        // 4c. Background listeners (delay နဲ့ တစ်ခုချင်း စ)
-        setTimeout(function() { startFriendsListListener(); }, 300);
-        setTimeout(function() { startAppMessageListeners(); }, 500);
-        setTimeout(function() {
-            goOnline();
-            attachOnlineEventListeners();
-        }, 700);
-        setTimeout(function() { retryPendingMessages(); }, 1200);
-    }, 50);  // ✅ UI render ပြီးချင်း 50ms အတွင်း background စ
+    // ✅ 4. Background sync ကို ချက်ချင်း စ (50ms)
+    backgroundSyncStarted = false;
+    setTimeout(startBackgroundSync, 50);
 
     window.addEventListener('beforeunload', function() {
         if (currentUser && currentServerId) {
@@ -9893,7 +9957,6 @@ function handlePlusMenuAction(action) {
     }, 200);
 }
 
-
 // ===================================================
 //  LEAST LOADED SERVER
 // ===================================================
@@ -9923,13 +9986,12 @@ function getLeastLoadedServer() {
 }
 
 // ===================================================
-//  ✅ NEW ACCOUNT -- Loading overlay ဖြုတ်
+//  ✅ NEW ACCOUNT -- Loading overlay မပြ
 // ===================================================
 function handleNewAccount() {
     if (isProcessing) return;
     isProcessing = true;
     newAccountBtn.disabled = true;
-    // ✅ Loading overlay မပြ
 
     getLeastLoadedServer().then(function(serverId) {
         if (!serverId) { isProcessing = false; newAccountBtn.disabled = false; alert('No server'); return; }
@@ -9957,7 +10019,6 @@ function handleNewAccount() {
                     var inviteCode = generateInviteCode();
                     var avatar = user.photoURL || '';
                     var name = user.displayName || 'Player';
-
                     var mServer = pickMServerForUser();
 
                     return getNextAccNo(getDbForServer(serverId)).then(function(accNo) {
@@ -10008,7 +10069,7 @@ function handleNewAccount() {
             if (userData.isFirstLogin === undefined || userData.isFirstLogin === true) {
                 setTimeout(function() { showFirstLoginPopup(); }, 300);
             } else {
-                enterApp(userData);  // ✅ ချက်ချင်း
+                enterApp(userData);
             }
             isProcessing = false;
             newAccountBtn.disabled = false;
@@ -10024,7 +10085,7 @@ function handleNewAccount() {
 }
 
 // ===================================================
-//  ✅ LOGIN -- Loading overlay ဖြုတ်
+//  ✅ LOGIN -- Loading overlay မပြ
 // ===================================================
 function handleLogin() {
     if (isProcessing) return;
@@ -10036,14 +10097,12 @@ function handleLogin() {
     var serverId = server.id;
     isProcessing = true;
     loginSubmitBtn.disabled = true;
-    // ✅ Loading overlay မပြ
 
     var auth = getAuthForServer(serverId);
     if (!auth) { isProcessing = false; loginSubmitBtn.disabled = false; showLoginPopupError('Auth unavailable'); return; }
 
     var provider = new firebase.auth.GoogleAuthProvider();
     provider.setCustomParameters({ prompt: 'select_account' });
-
     var newAuthId = null;
 
     auth.signInWithPopup(provider).then(function(result) {
@@ -10092,7 +10151,7 @@ function handleLogin() {
             currentDb = getDbForServer(serverId);
             currentAuth = getAuthForServer(serverId);
             closeLoginPopup();
-            enterApp(userData);  // ✅ ချက်ချင်း
+            enterApp(userData);
             isProcessing = false;
             loginSubmitBtn.disabled = false;
         });
@@ -10119,11 +10178,10 @@ function handleFirstLoginSave() {
 
     isFirstLoginProcessing = true;
     firstLoginSaveBtn.disabled = true;
-    showLoading('Saving profile...');
 
     var avatar = firstLoginAvatarPreview.src;
     var db = getDbForServer(currentServerId);
-    if (!db) { hideLoading(); isFirstLoginProcessing = false; firstLoginSaveBtn.disabled = false; alert('DB error'); return; }
+    if (!db) { isFirstLoginProcessing = false; firstLoginSaveBtn.disabled = false; alert('DB error'); return; }
 
     db.ref('users/' + currentUser.userId).update({ name: name, avatar: avatar, isFirstLogin: false })
     .then(function() {
@@ -10132,16 +10190,15 @@ function handleFirstLoginSave() {
         currentUser.isFirstLogin = false;
         saveUserToDB(currentUser);
 
-        userNameEl.textContent = name;
-        profileAvatar.src = avatar;
+        if (userNameEl) userNameEl.textContent = name;
+        if (profileAvatar) profileAvatar.src = avatar;
 
-        hideLoading();
         closeFirstLoginPopup();
         isFirstLoginProcessing = false;
         firstLoginSaveBtn.disabled = false;
-        enterApp(currentUser);  // ✅ ချက်ချင်း
+        enterApp(currentUser);
     }).catch(function() {
-        hideLoading(); isFirstLoginProcessing = false; firstLoginSaveBtn.disabled = false;
+        isFirstLoginProcessing = false; firstLoginSaveBtn.disabled = false;
         alert('Save failed');
     });
 }
@@ -10191,7 +10248,7 @@ function checkSession() {
                     if (userData.isFirstLogin === undefined || userData.isFirstLogin === true) {
                         setTimeout(function() { showFirstLoginPopup(); }, 300);
                     } else {
-                        enterApp(currentUser);  // ✅ ချက်ချင်း
+                        enterApp(currentUser);
                     }
                     resolve(true);
                 });
@@ -11041,7 +11098,6 @@ function markFriendOnline(sid, uid) {
         getFriendsCache().then(function(cache) {
             var key = getFriendCacheKey(sid, uid);
             var friend = cache[key];
-            
             if (friend) {
                 friend.online = true;
                 cache[key] = friend;
@@ -11392,11 +11448,15 @@ function deleteFriendAndSync(targetData) {
     .catch(function() { hideLoading(); alert('Failed'); });
 }
 
+// ===================================================
+//  ✅ FRIENDS LIST LISTENER -- Change Detection
+// ===================================================
 function startFriendsListListener() {
     if (!currentUser || !currentServerId) return;
     if (friendsListListener) { try { friendsListListener.off(); } catch(e) {} friendsListListener = null; }
     var myDb = getDbForServer(currentServerId);
     if (!myDb) return;
+    
     friendsListListener = myDb.ref('users/' + currentUser.userId + '/friendsList');
     friendsListListener.on('value', function(snap) {
         var list = snap.val();
@@ -11404,11 +11464,30 @@ function startFriendsListListener() {
         else if (!Array.isArray(list)) list = Object.keys(list).map(function(k) { return list[k]; });
 
         var oldList = Array.isArray(currentUser.friendsList) ? currentUser.friendsList : [];
-        var newOnes = list.filter(function(nf) { return !oldList.some(function(of) { return of.serverId === nf.serverId && of.userId === nf.userId; }); });
-        var removedOnes = oldList.filter(function(of) { return !list.some(function(nf) { return nf.serverId === of.serverId && nf.userId === of.userId; }); });
+        
+        // ✅ ပြောင်းလဲမှု ရှိလား စစ်
+        var hasChanged = JSON.stringify(oldList) !== JSON.stringify(list);
+        
+        if (!hasChanged) {
+            console.log('✅ Friends list: No change');
+            return;
+        }
+        
+        console.log('🔄 Friends list changed');
+        
+        var newOnes = list.filter(function(nf) { 
+            return !oldList.some(function(of) { 
+                return of.serverId === nf.serverId && of.userId === nf.userId; 
+            }); 
+        });
+        var removedOnes = oldList.filter(function(of) { 
+            return !list.some(function(nf) { 
+                return nf.serverId === of.serverId && nf.userId === of.userId; 
+            }); 
+        });
 
         currentUser.friendsList = list;
-        saveUserToDB(currentUser);
+        saveUserToDB(currentUser);  // ✅ ပြောင်းရင်မှ save
 
         if (newOnes.length > 0) {
             var promises = newOnes.map(function(e) {
@@ -13620,6 +13699,8 @@ function stopAllListeners() {
     try { stopChatRoomBlockListener(); } catch(e) {}
     try { stopAppMessageListeners(); } catch(e) {}
     try { if (onDisconnectRef) { onDisconnectRef.cancel(); onDisconnectRef = null; } } catch(e) {}
+    
+    backgroundSyncStarted = false;
 }
 
 function resetAllInMemoryState() {
@@ -13641,6 +13722,7 @@ function resetAllInMemoryState() {
     chatRoomUnlocked = {};
     bubblePickerOpen = false;
     currentReplyTo = null;
+    backgroundSyncStarted = false;
     var rb = document.getElementById('replyPreviewBar');
     if (rb) rb.remove();
 
@@ -13870,7 +13952,6 @@ document.querySelectorAll('.sidebar-btn[data-action]').forEach(function(btn) {
     });
 });
 
-    
     if (profileBtn) profileBtn.addEventListener('click', function() { loadProfileData(); openFullscreen('Profile', 'fs-profile'); });
 
     var openEditBtn = document.getElementById('openEditProfileBtn');
@@ -14073,7 +14154,7 @@ document.addEventListener('keydown', function(e) {
             authOverlay.classList.remove('hidden');
         }
         setTimeout(attachChatRoomAvatarClick, 1000);
-        console.log('STAR ARCADE Ready (IndexedDB First + Background Loading)');
+        console.log('STAR ARCADE Ready (IndexedDB First + Background Sync + Change Detection)');
     });
 });
 
