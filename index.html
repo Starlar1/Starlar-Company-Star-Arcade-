@@ -9076,7 +9076,7 @@ body {
 // ============================================================
 //  STAR ARCADE -- FULL script.js
 //  M Server + Auto Online + Play ID + Red Dot (New Msg)
-//  Version: 2026-09-21
+//  Version: 2026-09-26 (IndexedDB First + Background Sync)
 // ============================================================
 
 // ===================================================
@@ -9264,6 +9264,9 @@ var onDisconnectRef = null;
 var searchResultUser = null;
 var selfDataListener = null;
 
+// ✅ Background sync tracker
+var backgroundSyncCompleted = false;
+
 function initDomRefs() {
     authOverlay = $('authOverlay');
     loginCard = $('loginCard');
@@ -9429,6 +9432,63 @@ function pickMServerForUser() {
     
     var shuffled = allServerIds.slice().sort(function() { return Math.random() - 0.5; });
     return shuffled.slice(0, M_SERVER_TARGET_COUNT);
+}
+
+// ===================================================
+//  ✅ USER DATA COMPARE (IndexedDB vs Firebase)
+// ===================================================
+function compareUserData(oldData, newData) {
+    if (!oldData || !newData) return true;
+    
+    var importantKeys = [
+        'name', 'avatar', 'bio', 'play',
+        'diamond', 'frameUse', 'bannerUse', 'backgroundUse',
+        'bubbleUse', 'markUse', 'roleUse',
+        'friendsList', 'blockList', 'mServer',
+        'frameOwned', 'bannerOwned', 'backgroundOwned', 'bubbleOwned',
+        'roleOwned', 'isFirstLogin'
+    ];
+    
+    for (var i = 0; i < importantKeys.length; i++) {
+        var key = importantKeys[i];
+        var oldVal = JSON.stringify(oldData[key] !== undefined ? oldData[key] : null);
+        var newVal = JSON.stringify(newData[key] !== undefined ? newData[key] : null);
+        if (oldVal !== newVal) {
+            console.log('🔄 Data changed:', key);
+            return true;
+        }
+    }
+    return false;
+}
+
+// ===================================================
+//  ✅ UI REFRESH (Background sync ပြီးရင်)
+// ===================================================
+function refreshUserUI() {
+    if (!currentUser) return;
+
+    // Sidebar
+    if (userNameEl) userNameEl.textContent = currentUser.name || 'Player';
+    if (userIdEl) userIdEl.textContent = 'ID ' + (currentUser.userId || '0000000000');
+    if (coinDisplay) coinDisplay.textContent = currentUser.diamond || 0;
+    if (profileAvatar && currentUser.avatar) profileAvatar.src = currentUser.avatar;
+    
+    var server = FIREBASE_SERVERS.find(function(s) { return s.id === currentServerId; });
+    if (userServerEl && server) userServerEl.textContent = server.name;
+
+    // Frame
+    applyFrameToSidebar();
+
+    // Profile screen (ဖွင့်ထားရင်)
+    var profileScreen = document.getElementById('fs-profile');
+    if (profileScreen && !profileScreen.classList.contains('hidden')) {
+        loadProfileData();
+    }
+
+    // Chat list (chat tab ဖွင့်ထားရင်)
+    if (currentTab === 'chat') {
+        renderChatList();
+    }
 }
 
 // ===================================================
@@ -9610,7 +9670,7 @@ function setupMServer() {
 }
 
 // ===================================================
-//  SELF DATA LISTENER
+//  SELF DATA LISTENER (compare + refresh UI)
 // ===================================================
 function startSelfDataListener(userId, serverId) {
     stopSelfDataListener();
@@ -9652,14 +9712,16 @@ function startSelfDataListener(userId, serverId) {
             isFirstLogin: data.isFirstLogin !== undefined ? data.isFirstLogin : currentUser.isFirstLogin
         };
 
+        // ✅ ပြောင်းလဲမှု စစ်
+        var hasChange = compareUserData(currentUser, updated);
+        
         currentUser = updated;
-        saveUserToDB(currentUser);
+        saveUserToDB(currentUser);  // ✅ IndexedDB update
 
-        if (userNameEl) userNameEl.textContent = currentUser.name || 'Player';
-        if (coinDisplay) coinDisplay.textContent = currentUser.diamond || 0;
-        if (currentUser.avatar && profileAvatar) profileAvatar.src = currentUser.avatar;
-        applyFrameToSidebar();
-        loadProfileData();
+        // ✅ ပြောင်းလဲမှုရှိရင် UI refresh
+        if (hasChange) {
+            refreshUserUI();
+        }
     }, function(err) {
         console.warn('Self data listener error:', err.code);
     });
@@ -9768,6 +9830,96 @@ function ensureFirebaseAuth(serverId, email) {
 }
 
 // ===================================================
+//  ✅ BACKGROUND SYNC (IndexedDB အရင်ပြပြီး နောက်မှ)
+// ===================================================
+function startBackgroundSync(session) {
+    var email = session.email;
+    var serverId = session.serverId;
+
+    console.log('🔄 Background sync started');
+
+    // ✅ ၁။ Firebase user data sync (200ms နောက်)
+    setTimeout(function() {
+        fullSyncFromFirebase(email, serverId).then(function(freshData) {
+            if (!freshData || !freshData.userId) return;
+            if (!currentUser) return;
+
+            var hasChange = compareUserData(currentUser, freshData);
+            
+            // ✅ IndexedDB update
+            currentUser = freshData;
+            saveUserToDB(freshData);
+
+            // ✅ ပြောင်းလဲမှုရှိရင် UI update
+            if (hasChange) {
+                refreshUserUI();
+            }
+            console.log('✅ Background sync completed (user data)');
+        }).catch(function(err) {
+            console.warn('Background sync failed:', err.message);
+        });
+    }, 200);
+
+    // ✅ ၂။ Auth ကို နောက်မှ (800ms နောက်)
+    setTimeout(function() {
+        ensureFirebaseAuth(serverId, email).then(function(ok) {
+            if (ok) {
+                console.log('✅ Auth ready (background)');
+                // ✅ Auth ပြီးမှ message listeners တွေ စတင်
+                startAppMessageListeners();
+            } else {
+                console.warn('⚠️ Auth failed - offline mode');
+            }
+        });
+    }, 800);
+
+    // ✅ ၃။ Online status + listeners
+    setTimeout(function() {
+        if (currentUser && currentServerId) {
+            goOnline();
+            attachOnlineEventListeners();
+            setTimeout(function() { retryPendingMessages(); }, 500);
+        }
+    }, 1200);
+}
+
+// ===================================================
+//  ✅ FALLBACK FIREBASE LOGIN (Local DB မရှိရင်)
+// ===================================================
+function fallbackFirebaseLogin(session) {
+    return new Promise(function(resolve) {
+        fullSyncFromFirebase(session.email, session.serverId).then(function(userData) {
+            if (!userData) {
+                clearSessionFromDB();
+                return resolve(false);
+            }
+
+            currentUser = userData;
+            currentServerId = session.serverId;
+            currentDb = getDbForServer(session.serverId);
+            currentAuth = getAuthForServer(session.serverId);
+
+            saveUserToDB(userData);
+
+            if (userData.isFirstLogin === true) {
+                setTimeout(function() { showFirstLoginPopup(); }, 200);
+            } else {
+                enterApp(currentUser);
+            }
+            resolve(true);
+
+            // Background မှာ auth စစ်
+            setTimeout(function() {
+                ensureFirebaseAuth(session.serverId, session.email);
+            }, 500);
+        }).catch(function() {
+            clearSessionFromDB();
+            resolve(false);
+        });
+    });
+}
+
+// ===================================================
 //  ENTER APP
 // ===================================================
 function enterApp(user) {
@@ -9785,11 +9937,9 @@ function enterApp(user) {
     if (user.avatar && user.avatar !== '') profileAvatar.src = user.avatar;
 
     setupMServer().then(function() {
-    if (currentDb && currentUser) {
-        // ✅ Diamond Listener ဖြတ်လိုက် (Self Data က ကိုင်တယ်)
-        // listenDiamondUpdates(currentUser.userId, currentServerId);
-        startSelfDataListener(currentUser.userId, currentServerId);
-    }
+        if (currentDb && currentUser) {
+            startSelfDataListener(currentUser.userId, currentServerId);
+        }
 
         applyFrameToSidebar();
 
@@ -9810,12 +9960,18 @@ function enterApp(user) {
 
         setTimeout(function() { renderChatList(); }, 100);
         setTimeout(function() { startFriendsListListener(); }, 500);
-        setTimeout(function() { startAppMessageListeners(); }, 700);
+        
+        // ❌ startAppMessageListeners() ကို ဒီနေရာမှာ ဖြတ်
+        // ✅ startBackgroundSync() ထဲက ensureFirebaseAuth() ပြီးမှ ခေါ်မည်
+        
         setTimeout(function() {
-            goOnline();
-            attachOnlineEventListeners();
-        }, 900);
-        setTimeout(function() { retryPendingMessages(); }, 1500);
+            // ✅ Background sync ပြီးပြီဆိုရင် online သွား
+            if (backgroundSyncCompleted || (currentAuth && currentAuth.currentUser)) {
+                goOnline();
+                attachOnlineEventListeners();
+                setTimeout(function() { retryPendingMessages(); }, 500);
+            }
+        }, 1500);
     });
 
     window.addEventListener('beforeunload', function() {
@@ -9864,28 +10020,22 @@ function handlePlusMenuAction(action) {
         switch (action) {
             case 'partychat':
                 showToast('PartyChat');
-                // TODO: PartyChat screen ဖွင့်
                 break;
             case 'gamecard':
                 showToast('Game Card');
-                // TODO: Game Card screen ဖွင့်
                 break;
             case 'info':
                 showToast('Info');
-                // TODO: Info screen ဖွင့်
                 break;
             case 'post':
                 showToast('Post');
-                // TODO: Post screen ဖွင့်
                 break;
             case 'play':
                 showToast('Play');
-                // TODO: Play screen ဖွင့်
                 break;
         }
     }, 200);
 }
-
 
 // ===================================================
 //  LEAST LOADED SERVER
@@ -10159,42 +10309,46 @@ function showLoginPopupError(msg) {
 }
 
 // ===================================================
-//  CHECK SESSION
+//  ✅ CHECK SESSION -- IndexedDB First + Background Sync
 // ===================================================
 function checkSession() {
     return new Promise(function(resolve) {
         getSessionFromDB().then(function(session) {
             if (!session) return resolve(false);
+            
             var serverId = session.serverId;
             var email = session.email;
 
-            fullSyncFromFirebase(email, serverId).then(function(userData) {
-                if (!userData) {
-                    clearSessionFromDB();
-                    return resolve(false);
-                }
+            // ✅ ၁။ IndexedDB ကနေ user ကို ချက်ချင်း ယူ
+            getUserFromDB(email).then(function(localUser) {
+                if (localUser && localUser.userId && localUser.serverId) {
+                    // ✅ ၂။ Memory ထဲ ထည့်
+                    currentUser = localUser;
+                    currentServerId = serverId;
+                    currentDb = getDbForServer(serverId);
+                    currentAuth = getAuthForServer(serverId);
 
-                currentUser = userData;
-                currentServerId = serverId;
-                currentDb = getDbForServer(serverId);
-                currentAuth = getAuthForServer(serverId);
-
-                saveUserToDB(userData);
-
-                ensureFirebaseAuth(serverId, email).then(function(ok) {
-                    if (!ok) console.warn('Auth not ready');
-
-                    if (userData.isFirstLogin === undefined || userData.isFirstLogin === true) {
-                        setTimeout(function() { showFirstLoginPopup(); }, 300);
-                    } else {
-                        enterApp(currentUser);
+                    // ✅ ၃။ First login စစ်
+                    if (localUser.isFirstLogin === true) {
+                        setTimeout(function() { showFirstLoginPopup(); }, 200);
+                        resolve(true);
+                        startBackgroundSync(session);
+                        return;
                     }
+
+                    // ✅ ၄။ Home ချက်ချင်းပြ (0.1-0.5s)
+                    setTimeout(function() { enterApp(currentUser); }, 50);
                     resolve(true);
-                });
+
+                    // ✅ ၅။ Background မှာ sync လုပ်
+                    startBackgroundSync(session);
+                } else {
+                    // Local မှာ မရှိရင် Firebase ဆွဲ
+                    fallbackFirebaseLogin(session).then(resolve);
+                }
             }).catch(function(err) {
-                console.warn('Full sync failed:', err);
-                clearSessionFromDB();
-                resolve(false);
+                console.warn('Local DB read failed:', err);
+                fallbackFirebaseLogin(session).then(resolve);
             });
         }).catch(function() { resolve(false); });
     });
@@ -10227,8 +10381,6 @@ var FRAME_CONFIG = {
         { id: 1012, name: 'Try Star Arcade Event', image: 'https://i.ibb.co/LXzvWGVV/file-00000000a9a482119bfe79a1ebe75b83.png', price: 0, limited: true },
         { id: 1013, name: 'Try Star Arcade Event', image: 'https://i.ibb.co/vCB1P5Bc/file-00000000e6808230ad1ee163212cabcc.png', price: 0, limited: true },
         { id: 1014, name: 'Try Star Arcade Event', image: 'https://i.ibb.co/tprqy3xR/file-0000000018a481fa808592c5f933da24.png', price: 0, limited: true }
-        
-        
     ]
 };
 
@@ -10238,8 +10390,6 @@ var BANNER_CONFIG = {
         { id: 2002, name: 'Banner 2', image: 'https://i.ibb.co/3yk1VcgM/2af6241637e72e30efbb3d99f70b4dec.gif', price: 200, limited: false },
         { id: 2003, name: 'Banner 3', image: 'https://i.ibb.co/BKjNT681/d310d314fc99e1aedd20294e5cc6c5b1.gif', price: 200, limited: false },
         { id: 2004, name: 'Banner 4', image: 'https://i.ibb.co/mVYY8Kcd/file-000000002d3c8211846fdd63b8c65917.png', price: 0, limited: true }
-   
-    
     ]
 };
 
@@ -10249,8 +10399,6 @@ var BACKGROUND_CONFIG = {
         { id: 3002, name: 'Background 2', image: 'https://i.ibb.co/dJgs9L2P/cbfc1d22214fa4a188cb5a15bf26157b.jpg', price: 200, limited: false },
         { id: 3003, name: 'Background 3', image: 'https://i.ibb.co/LdJQd4Fz/cce831fb5c1c045b8a35afbf361cacc3.jpg', price: 200, limited: false },
         { id: 3004, name: 'Background 4', image: 'https://i.ibb.co/35qVk7Fj/file-00000000d72c81fd9f3b49e6730c9fd2.png', price: 0, limited: true }
-    
-    
     ]
 };
 
@@ -10263,8 +10411,6 @@ var BUBBLE_CONFIG = {
         { id: 4005, name: 'Bubble 5', image: 'https://i.ibb.co/vCXGG7cR/Grid-Art-20260925-132631846.png', price: 300, limited: false },
         { id: 4006, name: 'Try Star Arcade Event', image: 'https://i.ibb.co/3mXq7rR2/file-0000000062b882308f4a568c831d90c0.png', price: 0, limited: true },
         { id: 4007, name: 'Try Star Arcade Event', image: 'https://i.ibb.co/TqDZwC6z/file-00000000e934820bbf8a64cc5ff714b1.png', price: 0, limited: true }
-    
-    
     ]
 };
 
@@ -11014,7 +11160,7 @@ var FRIENDS_CACHE_KEY = 'friendsCache';
 var PINNED_FRIENDS_KEY = 'pinnedFriends';
 var CHAT_BACKGROUNDS_KEY = 'chatBackgrounds';
 var LOCKED_FRIENDS_KEY = 'lockedFriends';
-var NEW_MSG_FLAG_KEY = 'newMsgFlags';  // ✅ Red Dot Flag
+var NEW_MSG_FLAG_KEY = 'newMsgFlags';
 
 function getFriendsCache() {
     return getFromDB(FRIENDS_CACHE_KEY).then(function(c) { return c || {}; }).catch(function() { return {}; });
@@ -11062,7 +11208,6 @@ function markFriendOnline(sid, uid) {
     });
 }
 
-// ✅ Red Dot Flag သတ်မှတ်
 function markNewMsgFlag(sid, uid) {
     return new Promise(function(resolve) {
         getFromDB(NEW_MSG_FLAG_KEY).then(function(flags) {
@@ -11073,7 +11218,6 @@ function markNewMsgFlag(sid, uid) {
     });
 }
 
-// ✅ Red Dot Flag ဖျက် (Chat Full ဝင်တာနဲ့)
 function clearNewMsgFlag(sid, uid) {
     return new Promise(function(resolve) {
         getFromDB(NEW_MSG_FLAG_KEY).then(function(flags) {
@@ -11420,7 +11564,9 @@ function startFriendsListListener() {
             var promises = newOnes.map(function(e) {
                 return fetchUserFullData(e.serverId, e.userId).then(saveFriendToCache).catch(function() {});
             });
-            Promise.all(promises).then(renderChatList);
+            Promise.all(promises).then(function() {
+                if (currentTab === 'chat') renderChatList();
+            });
         }
         if (removedOnes.length > 0) {
             var promises = removedOnes.map(function(e) {
@@ -11434,9 +11580,13 @@ function startFriendsListListener() {
                     deleteAllMessagesWith(e.serverId, e.userId)
                 ]);
             });
-            Promise.all(promises).then(renderChatList);
+            Promise.all(promises).then(function() {
+                if (currentTab === 'chat') renderChatList();
+            });
         }
-        if (newOnes.length === 0 && removedOnes.length === 0) renderChatList();
+        if (newOnes.length === 0 && removedOnes.length === 0) {
+            if (currentTab === 'chat') renderChatList();
+        }
     });
 }
 
@@ -11488,7 +11638,7 @@ function doRenderChatList() {
                             locked: !!locked[key],
                             lastMessageTime: 0,
                             lastMessageText: '',
-                            hasNewMsg: flags[key] === true  // ✅ Red Dot
+                            hasNewMsg: flags[key] === true
                         };
                     });
 
@@ -11549,7 +11699,6 @@ function renderChatListRow(listEl, item) {
 
     var lockHtml = item.locked ? '<span class="chat-list-lock-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>' : '';
 
-    // ✅ Red Dot -- အနီရောင် အစက်လေး (1 ခုပဲ)
     var redDotHtml = '';
     if (item.hasNewMsg) {
         redDotHtml = '<span class="chat-list-unread-badge">1</span>';
@@ -11557,7 +11706,6 @@ function renderChatListRow(listEl, item) {
 
     var previewText = item.lastMessageText || 'Tap to open chat';
 
-    // ✅ Play ID
     var playHtml = '';
     if (cached.play && cached.play.trim() !== '') {
         var gameInfo = PLAY_CONFIG.getGameInfo(cached.play);
@@ -11699,7 +11847,6 @@ function openChatRoomNow(target) {
     iAmBlockedByThem = false;
     clearReplyState();
 
-    // ✅ Chat Room ထဲ ဝင်တာနဲ့ Red Dot Flag ဖျက်
     clearNewMsgFlag(target.serverId, target.userId).then(function() {
         renderChatList();
     });
@@ -11783,7 +11930,6 @@ function openChatRoomNow(target) {
             }
         });
 
-        // ✅ Chat Room ထဲ ဝင်တာနဲ့ Chat List ကို refresh
         renderChatList();
     });
 
@@ -11896,7 +12042,6 @@ function applyChatRoomData(data) {
     if (data.online) { statusEl.textContent = 'Online'; statusEl.classList.add('online'); }
     else { statusEl.textContent = 'Offline'; statusEl.classList.remove('online'); }
 
-    // ✅ Play ID ကို Chat Full Header မှာ ပြ
     var playEl = document.getElementById('chatRoomPlay');
     if (playEl) {
         playEl.innerHTML = '';
@@ -12740,13 +12885,11 @@ function startAppMessageListeners() {
                                 if (currentChatTarget && 
                                     currentChatTarget.userId === msg.senderId && 
                                     currentChatTarget.serverId === msg.senderServer) {
-                                    // ✅ Chat Room ထဲ ရောက်နေရင် → Flag မသတ်မှတ်
                                     requestAnimationFrame(function() { displayMessage(msg); });
                                     scrollToBottomDebounced();
                                     markAsSeenAndDelete(msg.messageId, sid, msg.senderServer, msg.senderId);
                                     renderChatList();
                                 } else {
-                                    // ✅ Chat List မှာပဲ ရှိနေရင် → Red Dot Flag သတ်မှတ်
                                     markNewMsgFlag(msg.senderServer, msg.senderId).then(function() {
                                         renderChatList();
                                     });
@@ -12861,7 +13004,6 @@ function loadFriendProfileIntoFsProfile(d) {
         }
     }
 
-    // ✅ ပြင်ထားတဲ့ နေရာ ၁ -- visibility + pointerEvents ပါ ဖျောက်
     var editWrap = document.querySelector('.profile-edit-btn-wrapper');
     if (editWrap) {
         editWrap.style.display = 'none';
@@ -13183,7 +13325,6 @@ function goBackFullscreen() {
         openedProfileFromChatList = false;
         currentViewingProfile = 'self';
         currentFriendProfileData = null;
-        // ✅ ပြင်ထားတဲ့ နေရာ ၂ -- visibility + pointerEvents ပါ reset
         var editWrap = document.querySelector('.profile-edit-btn-wrapper');
         if (editWrap) {
             editWrap.style.display = '';
@@ -13656,6 +13797,7 @@ function resetAllInMemoryState() {
     chatRoomUnlocked = {};
     bubblePickerOpen = false;
     currentReplyTo = null;
+    backgroundSyncCompleted = false;
     var rb = document.getElementById('replyPreviewBar');
     if (rb) rb.remove();
 
@@ -13698,11 +13840,11 @@ function resetUIAfterLogout() {
     } catch(e) {}
 
     try {
-    document.querySelectorAll('.nav-btn').forEach(function(b) { b.classList.remove('active'); });
-    var dn = document.querySelector('.nav-btn[data-tab="home"]');
-    if (dn) dn.classList.add('active');
-    switchTab('home');
-} catch(e) {}
+        document.querySelectorAll('.nav-btn').forEach(function(b) { b.classList.remove('active'); });
+        var dn = document.querySelector('.nav-btn[data-tab="home"]');
+        if (dn) dn.classList.add('active');
+        switchTab('home');
+    } catch(e) {}
 
     try {
         var flc = document.getElementById('friendsListContainer');
@@ -13762,7 +13904,6 @@ function logoutUser() {
 
     isProcessing = true;
     showLoading('Logging out...');
-
     performCleanupBeforeClear()
     .then(function() { return firebaseSignOutAll(); })
     .then(function() {
@@ -13869,24 +14010,23 @@ document.addEventListener('DOMContentLoaded', function() {
     if (fullscreenBackBtn) fullscreenBackBtn.addEventListener('click', goBackFullscreen);
     if (fullscreenOverlay) fullscreenOverlay.addEventListener('click', function(e) { if (e.target === fullscreenOverlay) closeFullscreen(); });
 
-document.querySelectorAll('.sidebar-btn[data-action]').forEach(function(btn) {
-    btn.addEventListener('click', function() {
-        var action = btn.dataset.action;
-        var map = {
-            shop: { title: 'Shop', fsId: 'fs-shop' },
-            tasks: { title: 'Tasks', fsId: 'fs-tasks' },
-            rank: { title: 'Rank', fsId: 'fs-rank' },
-            faq: { title: 'FAQ', fsId: 'fs-faq' },
-            invite: { title: 'Invite', fsId: 'fs-invite' },
-            settings: { title: 'Settings', fsId: 'fs-settings' }
-        };
-        var d = map[action] || { title: action, fsId: 'fs-search' };
-        openFullscreen(d.title, d.fsId);
-        closeSidebar();
+    document.querySelectorAll('.sidebar-btn[data-action]').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var action = btn.dataset.action;
+            var map = {
+                shop: { title: 'Shop', fsId: 'fs-shop' },
+                tasks: { title: 'Tasks', fsId: 'fs-tasks' },
+                rank: { title: 'Rank', fsId: 'fs-rank' },
+                faq: { title: 'FAQ', fsId: 'fs-faq' },
+                invite: { title: 'Invite', fsId: 'fs-invite' },
+                settings: { title: 'Settings', fsId: 'fs-settings' }
+            };
+            var d = map[action] || { title: action, fsId: 'fs-search' };
+            openFullscreen(d.title, d.fsId);
+            closeSidebar();
+        });
     });
-});
 
-    
     if (profileBtn) profileBtn.addEventListener('click', function() { loadProfileData(); openFullscreen('Profile', 'fs-profile'); });
 
     var openEditBtn = document.getElementById('openEditProfileBtn');
@@ -14015,46 +14155,41 @@ document.querySelectorAll('.sidebar-btn[data-action]').forEach(function(btn) {
     });
 
     if (bottomNav) {
-    bottomNav.addEventListener('click', function(e) {
-        var btn = e.target.closest('.nav-btn');
-        if (!btn) return;
-        var tab = btn.dataset.tab;
+        bottomNav.addEventListener('click', function(e) {
+            var btn = e.target.closest('.nav-btn');
+            if (!btn) return;
+            var tab = btn.dataset.tab;
 
-        // ✅ + ခလုတ်ကို နှိပ်ရင် Popup ဖွင့်/ပိတ်
-        if (tab === 'plus') {
-            e.preventDefault();
+            if (tab === 'plus') {
+                e.preventDefault();
+                e.stopPropagation();
+                if (plusMenuOpen) closePlusMenu();
+                else openPlusMenu();
+                return;
+            }
+
+            if (currentTab === tab) return;
+            if (activeNavBtn) activeNavBtn.classList.remove('active');
+            btn.classList.add('active');
+            activeNavBtn = btn;
+            currentTab = tab;
+            switchTab(tab);
+        });
+    }
+
+    var plusOverlayEl = document.getElementById('plusMenuOverlay');
+    if (plusOverlayEl) plusOverlayEl.addEventListener('click', closePlusMenu);
+
+    document.querySelectorAll('.plus-menu-btn').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
             e.stopPropagation();
-            if (plusMenuOpen) closePlusMenu();
-            else openPlusMenu();
-            return;
-        }
-
-        // ✅ တခြား tab တွေ
-        if (currentTab === tab) return;
-        if (activeNavBtn) activeNavBtn.classList.remove('active');
-        btn.classList.add('active');
-        activeNavBtn = btn;
-        currentTab = tab;
-        switchTab(tab);
+            handlePlusMenuAction(this.dataset.action);
+        });
     });
-}
 
-// ✅ Plus menu overlay click ရင် ပိတ်
-var plusOverlayEl = document.getElementById('plusMenuOverlay');
-if (plusOverlayEl) plusOverlayEl.addEventListener('click', closePlusMenu);
-
-// ✅ Plus menu buttons တွေ
-document.querySelectorAll('.plus-menu-btn').forEach(function(btn) {
-    btn.addEventListener('click', function(e) {
-        e.stopPropagation();
-        handlePlusMenuAction(this.dataset.action);
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && plusMenuOpen) closePlusMenu();
     });
-});
-
-// ✅ Escape key နှိပ်ရင် ပိတ်
-document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape' && plusMenuOpen) closePlusMenu();
-});
 
     setTimeout(initSlider, 100);
     setTimeout(initRoleSlider, 200);
@@ -14087,17 +14222,23 @@ document.addEventListener('keydown', function(e) {
     authOverlay.classList.add('hidden');
     appWrapper.classList.add('hidden');
 
+    // ✅ IndexedDB အရင်စစ်
     checkSession().then(function(has) {
-        if (has) console.log('Auto-login success');
-        else {
+        if (has) {
+            console.log('✅ Auto-login success (IndexedDB First)');
+        } else {
             authOverlay.style.display = 'flex';
             authOverlay.classList.remove('hidden');
+            console.log('⚠️ No session - show login');
         }
         setTimeout(attachChatRoomAvatarClick, 1000);
-        console.log('STAR ARCADE Ready (M Server + Auto Online + Play ID + Red Dot)');
+        console.log('STAR ARCADE Ready (IndexedDB First + Background Sync + M Server + Auto Online + Play ID + Red Dot)');
     });
 });
 
+
+    
+    
 
 
 // ============================================================
