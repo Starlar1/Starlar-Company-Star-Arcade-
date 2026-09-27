@@ -17796,13 +17796,15 @@ if (document.readyState === 'loading') {
 })();
 
 // ===================================================
-//  FLOATING BUBBLE CONTROL (v1.0)
-//  - App ဝင်တည်းက Permission တောင်း
+//  FLOATING BUBBLE CONTROL (v2.0)
+//  - App ဝင်တည်းက Overlay Permission တောင်း
 //  - App အပြင်ထွက်မှ Bubble ပေါ်
 //  - App ပြန်ဝင်ရင် Bubble ပျောက်
+//  - Bubble နှိပ်ရင် Chat Popup (App ထဲ မဝင်)
+//  - Bubble ဖိ/ရွှေ့ရင် အမှိုက်ပုံး ပေါ်
 // ===================================================
 
-// ✅ Chat Screen ဖွင့်ဖို့ (Android Bubble ကနေ ခေါ်မယ်)
+// ✅ Chat Screen ဖွင့်ဖို့ (Bubble ကနေ ခေါ်မယ်)
 function showChatScreen() {
     // Chat tab ကို ဖွင့်
     var chatBtn = document.querySelector('.nav-btn[data-tab="chat"]');
@@ -17819,7 +17821,7 @@ function showChatScreen() {
     }
 }
 
-// ✅ Overlay Permission တောင်းဖို့ (Android ကို ခေါ်)
+// ✅ Overlay Permission တောင်းဖို့
 function requestOverlayPermission() {
     if (window.Android && window.Android.requestOverlayPermission) {
         window.Android.requestOverlayPermission();
@@ -17841,7 +17843,9 @@ window.addEventListener('beforeunload', function() {
     }
 });
 
-console.log('Floating Bubble Control Ready');
+console.log('Floating Bubble Control Ready v2.0');
+
+    
 </script>
 </body>
 </html>
