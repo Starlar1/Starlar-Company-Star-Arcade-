@@ -17796,32 +17796,32 @@ if (document.readyState === 'loading') {
 })();
 
 // ===================================================
-//  FLOATING BUBBLE CONTROL (v3.0)
-//  - Chat Screen ကိုပဲ ပြ
-//  - Search Bar + Bottom Nav ဖျောက်
-//  - Chat List ဆွဲရွှေ့လို့ရ
-//  - Keyboard ပေါ်
+//  NATIVE GAME DETECT -- Android ကနေ Game Code လာရင်
 // ===================================================
 
-function showChatScreen() {
-    // Chat tab ကို ဖွင့်
-    var chatBtn = document.querySelector('.nav-btn[data-tab="chat"]');
-    if (chatBtn) chatBtn.click();
+function onNativeGameDetected(gameCode) {
+    if (!currentUser || !currentServerId) return;
 
-    // Chat Room ဖွင့်ထားရင် ပိတ်
-    var chatRoom = document.getElementById('fs-chat-room');
-    if (chatRoom && !chatRoom.classList.contains('hidden')) {
-        if (typeof goBackFullscreen === 'function') goBackFullscreen();
+    console.log('Game detected: ' + gameCode);
+
+    var db = getDbForServer(currentServerId);
+    if (!db) return;
+
+    db.ref('users/' + currentUser.userId).update({
+        play: gameCode || ''
+    }).then(function() {
+        currentUser.play = gameCode;
+        saveUserToDB(currentUser);
+        console.log('Play status updated: ' + gameCode);
+    }).catch(function(err) {
+        console.warn('Play update failed:', err);
+    });
+}
+
+function requestUsagePermission() {
+    if (window.Android && window.Android.requestUsagePermission) {
+        window.Android.requestUsagePermission();
     }
-
-    // ✅ Chat Screen ကို အပြည့်ဖြစ်အောင်
-    setTimeout(function() {
-        var chatList = document.getElementById('chatList');
-        if (chatList) {
-            chatList.style.paddingBottom = '120px';
-            chatList.style.overflowY = 'auto';
-        }
-    }, 500);
 }
 
 function requestOverlayPermission() {
@@ -17833,10 +17833,11 @@ function requestOverlayPermission() {
 document.addEventListener('DOMContentLoaded', function() {
     setTimeout(function() {
         requestOverlayPermission();
-    }, 1000);
+        requestUsagePermission();
+    }, 1500);
 });
 
-console.log('Floating Bubble Control Ready v3.0');
+console.log('Native Game Detect Ready');
     
     
 </script>
