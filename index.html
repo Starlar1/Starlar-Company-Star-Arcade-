@@ -7649,7 +7649,7 @@ body {
         <p id="loadingText">Processing...</p>
     </div>
 
-    <!-- FIRST LOGIN POPUP (Session ဟောင်း -- Google နဲ့ ဖွင့်ထားတဲ့ Account တွေအတွက်) -->
+    <!-- ✅ FIRST LOGIN POPUP (Account ဖွင့်ပြီးတာနဲ့ ပြ -- ပုံ + Name) -->
     <div class="first-login-popup-overlay hidden" id="firstLoginPopup">
         <div class="first-login-popup">
             <div class="first-login-popup-header">
@@ -7673,7 +7673,7 @@ body {
         </div>
     </div>
 
-    <!-- ✅ NEW ACCOUNT POPUP (Gmail + Password + Display Name) -->
+    <!-- ✅ NEW ACCOUNT POPUP (Gmail + Password ပဲ) -->
     <div class="login-popup-overlay hidden" id="newAccountPopup">
         <div class="login-popup">
             <div class="login-popup-header">
@@ -7693,10 +7693,6 @@ body {
                 <div class="login-popup-input-group">
                     <label>Password</label>
                     <input type="password" id="newAccPasswordInput" class="login-popup-input" placeholder="Min 6 characters" autocomplete="new-password" />
-                </div>
-                <div class="login-popup-input-group">
-                    <label>Display Name</label>
-                    <input type="text" id="newAccNameInput" class="login-popup-input" placeholder="Your display name" />
                 </div>
                 <div id="newAccountPopupError" class="login-popup-error hidden"></div>
                 <button class="login-popup-submit" id="newAccountSubmitBtn">Create Account</button>
@@ -9092,6 +9088,8 @@ body {
 //  STAR ARCADE -- FULL script.js
 //  M Server + Auto Online + Play ID + Red Dot (New Msg)
 //  ✅ Email/Password Auth System (Gmail + Password + Server No)
+//  ✅ First Login Popup (Avatar + Name) -- Account ဖွင့်ပြီးတာနဲ့ ပြ
+//  ✅ Loading on Buttons
 //  Version: 2026-09-27
 // ============================================================
 
@@ -9247,7 +9245,7 @@ var authOverlay, loginCard, newAccountBtn, loginBtn, loginPopup, loginPopupClose
     loginEmailInput, loginPasswordInput, loginServerInput,
     loginSubmitBtn, loginPopupError,
     newAccountPopup, newAccountPopupClose, newAccEmailInput,
-    newAccPasswordInput, newAccNameInput, newAccountSubmitBtn, newAccountPopupError,
+    newAccPasswordInput, newAccountSubmitBtn, newAccountPopupError,
     loadingOverlay, loadingText,
     appWrapper, sidebarToggleBtn, sidebarCloseBtn, sidebar, sidebarOverlay,
     searchContainer, mailBtn, coinCard, profileBtn, profileAvatar, coinDisplay,
@@ -9300,7 +9298,6 @@ function initDomRefs() {
     newAccountPopupClose = $('newAccountPopupClose');
     newAccEmailInput = $('newAccEmailInput');
     newAccPasswordInput = $('newAccPasswordInput');
-    newAccNameInput = $('newAccNameInput');
     newAccountSubmitBtn = $('newAccountSubmitBtn');
     newAccountPopupError = $('newAccountPopupError');
     loadingOverlay = $('loadingOverlay');
@@ -9760,8 +9757,7 @@ function fullSyncFromFirebase(email, serverId) {
 }
 
 // ===================================================
-//  ✅ ENSURE FIREBASE AUTH (Email/Password)
-//  Session ပြန်ဖွင့်ရင် current user ရှိပြီးသားဆို ဒီအတိုင်းထား၊ မရှိရင် resolve(false)
+//  ENSURE FIREBASE AUTH (Email/Password)
 // ===================================================
 function ensureFirebaseAuth(serverId, email) {
     return new Promise(function(resolve) {
@@ -9773,8 +9769,6 @@ function ensureFirebaseAuth(serverId, email) {
             return resolve(true);
         }
 
-        // ✅ Email/Password စနစ်မှာ session ကို Firebase ကိုယ်တိုင် ကိုင်တယ်
-        // Password မသိလို့ ပြန် sign in လုပ်လို့မရ။ Session မရှိရင် false ပြ
         console.log('Auth not active for:', email);
         resolve(false);
     });
@@ -9843,7 +9837,7 @@ function switchTab(tab) {
 }
 
 // ===================================================
-//  PLUS MENU POPUP (အဝိုင်း ၅ ခု)
+//  PLUS MENU POPUP
 // ===================================================
 var plusMenuOpen = false;
 
@@ -9911,14 +9905,13 @@ function getLeastLoadedServer() {
 }
 
 // ===================================================
-//  ✅ NEW ACCOUNT POPUP
+//  NEW ACCOUNT POPUP
 // ===================================================
 function showNewAccountPopup() {
     if (!newAccountPopup) return;
     newAccountPopup.classList.remove('hidden');
     if (newAccEmailInput) newAccEmailInput.value = '';
     if (newAccPasswordInput) newAccPasswordInput.value = '';
-    if (newAccNameInput) newAccNameInput.value = '';
     if (newAccountPopupError) {
         newAccountPopupError.textContent = '';
         newAccountPopupError.classList.add('hidden');
@@ -9934,14 +9927,13 @@ function showNewAccountError(msg) {
 }
 
 // ===================================================
-//  ✅ NEW ACCOUNT (Email + Password + Name)
+//  NEW ACCOUNT (Gmail + Password ပဲ -- Name က First Login Popup မှာ)
 // ===================================================
 function handleNewAccount() {
     if (isProcessing) return;
 
     var email = newAccEmailInput.value.trim();
     var password = newAccPasswordInput.value.trim();
-    var name = newAccNameInput.value.trim();
 
     if (!email || !email.includes('@')) {
         showNewAccountError('Gmail မှန်ကန်စွာ ထည့်ပါ');
@@ -9951,13 +9943,13 @@ function handleNewAccount() {
         showNewAccountError('Password အနည်းဆုံး 6 လုံး ထည့်ပါ');
         return;
     }
-    if (!name) {
-        showNewAccountError('Display Name ထည့်ပါ');
-        return;
-    }
 
     isProcessing = true;
+
+    // ✅ Loading -- Button + Overlay
+    var originalText = newAccountSubmitBtn.textContent;
     newAccountSubmitBtn.disabled = true;
+    newAccountSubmitBtn.textContent = 'Creating...';
     showLoading('Creating account...');
 
     getLeastLoadedServer().then(function(serverId) {
@@ -9965,14 +9957,12 @@ function handleNewAccount() {
         var auth = getAuthForServer(serverId);
         if (!auth) throw new Error('Auth unavailable');
 
-        // ✅ Email/Password နဲ့ Account ဖွင့်
         return auth.createUserWithEmailAndPassword(email, password).then(function(result) {
             var user = result.user;
             var authId = user.uid;
 
             return getUserFromFirebase(email, serverId).then(function(existingUser) {
                 if (existingUser) {
-                    // ရှိပြီးသား (ဖြစ်ခဲလှ) -- update ပဲ
                     existingUser.authId = authId;
                     return { userData: existingUser, serverId: serverId };
                 } else {
@@ -9985,7 +9975,7 @@ function handleNewAccount() {
                             accNo: accNo,
                             authId: authId,
                             email: email,
-                            name: name,
+                            name: 'Player',           // ✅ Default -- First Login Popup မှာ ပြင်မယ်
                             userId: userId,
                             diamond: 0,
                             inviteCode: inviteCode,
@@ -9997,7 +9987,7 @@ function handleNewAccount() {
                             avatar: '',
                             mServer: mServer,
                             serverId: serverId,
-                            isFirstLogin: false // ✅ Name ကို Popup မှာ ထည့်ပြီးသား
+                            isFirstLogin: true        // ✅ First Login Popup ပြမယ်
                         };
                         return saveUserToFirebase(userData, serverId).then(function(saved) {
                             if (!saved) throw new Error('Save failed');
@@ -10020,19 +10010,22 @@ function handleNewAccount() {
             currentServerId = serverId;
             currentDb = getDbForServer(serverId);
             currentAuth = getAuthForServer(serverId);
+
             hideLoading();
             closeNewAccountPopup();
 
-            // ✅ First Login Popup မလိုတော့ -- Name ကို Popup မှာ ထည့်ပြီးသား
-            setTimeout(function() { enterApp(userData); }, 400);
+            // ✅ First Login Popup ပြ (ပုံ + Name) -- မူရင်းအတိုင်း
+            setTimeout(function() { showFirstLoginPopup(); }, 300);
 
             isProcessing = false;
             newAccountSubmitBtn.disabled = false;
+            newAccountSubmitBtn.textContent = originalText;
         });
     }).catch(function(error) {
         hideLoading();
         isProcessing = false;
         newAccountSubmitBtn.disabled = false;
+        newAccountSubmitBtn.textContent = originalText;
         console.error('New account error:', error);
 
         if (error.code === 'auth/email-already-in-use') {
@@ -10052,7 +10045,7 @@ function handleNewAccount() {
 }
 
 // ===================================================
-//  ✅ LOGIN (Email + Password + Server No)
+//  LOGIN (Gmail + Password + Server No)
 // ===================================================
 function handleLogin() {
     if (isProcessing) return;
@@ -10070,7 +10063,11 @@ function handleLogin() {
 
     var serverId = server.id;
     isProcessing = true;
+
+    // ✅ Loading -- Button + Overlay
+    var originalText = loginSubmitBtn.textContent;
     loginSubmitBtn.disabled = true;
+    loginSubmitBtn.textContent = 'Logging in...';
     showLoading('Connecting to Server ' + serverNo + '...');
 
     var auth = getAuthForServer(serverId);
@@ -10078,6 +10075,7 @@ function handleLogin() {
         hideLoading();
         isProcessing = false;
         loginSubmitBtn.disabled = false;
+        loginSubmitBtn.textContent = originalText;
         showLoginPopupError('Auth unavailable');
         return;
     }
@@ -10091,6 +10089,7 @@ function handleLogin() {
                 hideLoading();
                 isProcessing = false;
                 loginSubmitBtn.disabled = false;
+                loginSubmitBtn.textContent = originalText;
                 showLoginPopupError('Server ' + serverNo + ' မှာ Account မတွေ့ပါ');
                 return null;
             }
@@ -10122,14 +10121,23 @@ function handleLogin() {
             currentAuth = getAuthForServer(serverId);
             hideLoading();
             closeLoginPopup();
-            setTimeout(function() { enterApp(userData); }, 400);
+
+            // ✅ First Login မပြီးသေးရင် First Login Popup ပြ
+            if (userData.isFirstLogin === undefined || userData.isFirstLogin === true) {
+                setTimeout(function() { showFirstLoginPopup(); }, 300);
+            } else {
+                setTimeout(function() { enterApp(userData); }, 400);
+            }
+
             isProcessing = false;
             loginSubmitBtn.disabled = false;
+            loginSubmitBtn.textContent = originalText;
         });
     }).catch(function(error) {
         hideLoading();
         isProcessing = false;
         loginSubmitBtn.disabled = false;
+        loginSubmitBtn.textContent = originalText;
         console.error('Login error:', error);
 
         if (error.code === 'auth/user-not-found') {
@@ -10153,8 +10161,7 @@ function handleLogin() {
 }
 
 // ===================================================
-//  FIRST LOGIN POPUP (အသုံးမလိုတော့ -- Name ကို New Account Popup မှာ ထည့်ပြီးသား)
-//  Session ဟောင်း (Google နဲ့ ဖွင့်ထားတဲ့ Account) တွေအတွက် ဆက်ထား
+//  FIRST LOGIN POPUP -- မူရင်းအတိုင်း (ပုံ + Name)
 // ===================================================
 function showFirstLoginPopup() { if (firstLoginPopup) firstLoginPopup.classList.remove('hidden'); }
 function closeFirstLoginPopup() { if (firstLoginPopup) firstLoginPopup.classList.add('hidden'); }
@@ -10165,12 +10172,23 @@ function handleFirstLoginSave() {
     if (!name) { alert('Enter display name'); return; }
 
     isFirstLoginProcessing = true;
+
+    // ✅ Loading -- Button + Overlay
+    var originalText = firstLoginSaveBtn.textContent;
     firstLoginSaveBtn.disabled = true;
+    firstLoginSaveBtn.textContent = 'Saving...';
     showLoading('Saving profile...');
 
     var avatar = firstLoginAvatarPreview.src;
     var db = getDbForServer(currentServerId);
-    if (!db) { hideLoading(); isFirstLoginProcessing = false; firstLoginSaveBtn.disabled = false; alert('DB error'); return; }
+    if (!db) {
+        hideLoading();
+        isFirstLoginProcessing = false;
+        firstLoginSaveBtn.disabled = false;
+        firstLoginSaveBtn.textContent = originalText;
+        alert('DB error');
+        return;
+    }
 
     db.ref('users/' + currentUser.userId).update({ name: name, avatar: avatar, isFirstLogin: false })
     .then(function() {
@@ -10186,9 +10204,13 @@ function handleFirstLoginSave() {
         closeFirstLoginPopup();
         isFirstLoginProcessing = false;
         firstLoginSaveBtn.disabled = false;
+        firstLoginSaveBtn.textContent = originalText;
         setTimeout(function() { enterApp(currentUser); }, 300);
     }).catch(function() {
-        hideLoading(); isFirstLoginProcessing = false; firstLoginSaveBtn.disabled = false;
+        hideLoading();
+        isFirstLoginProcessing = false;
+        firstLoginSaveBtn.disabled = false;
+        firstLoginSaveBtn.textContent = originalText;
         alert('Save failed');
     });
 }
@@ -12276,7 +12298,7 @@ function sendMessage() {
 }
 
 // ===================================================
-//  FIRESTORE SEND -- Auto-Switch Server on Error
+//  FIRESTORE SEND
 // ===================================================
 var MAX_FIRESTORE_RETRY = 20;
 
@@ -12734,7 +12756,7 @@ function applyChatBackground(imageData) {
 }
 
 // ===================================================
-//  APP MESSAGE LISTENERS -- M Server + Auto Online + Red Dot
+//  APP MESSAGE LISTENERS
 // ===================================================
 function startAppMessageListeners() {
     stopAppMessageListeners();
@@ -13542,18 +13564,12 @@ function clearAllMessagesData() {
                 return;
             }
 
-            if (typeof memoryMessages !== 'undefined') {
-                memoryMessages = {};
-            }
-            if (typeof pendingSaveKeys !== 'undefined') {
-                pendingSaveKeys = {};
-            }
+            if (typeof memoryMessages !== 'undefined') memoryMessages = {};
+            if (typeof pendingSaveKeys !== 'undefined') pendingSaveKeys = {};
 
             if (typeof starSessions !== 'undefined' && Array.isArray(starSessions)) {
                 starSessions = [];
-                if (typeof currentSessionId !== 'undefined') {
-                    currentSessionId = null;
-                }
+                if (typeof currentSessionId !== 'undefined') currentSessionId = null;
             }
 
             Promise.all(toDelete.map(function(k) {
@@ -13902,8 +13918,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // Enter key (New Account)
     if (newAccEmailInput) newAccEmailInput.addEventListener('keypress', function(e) { if (e.key === 'Enter') handleNewAccount(); });
     if (newAccPasswordInput) newAccPasswordInput.addEventListener('keypress', function(e) { if (e.key === 'Enter') handleNewAccount(); });
-    if (newAccNameInput) newAccNameInput.addEventListener('keypress', function(e) { if (e.key === 'Enter') handleNewAccount(); });
 
+    // First Login Popup -- Avatar + Save
     if (firstLoginAvatar) firstLoginAvatar.addEventListener('click', function() { firstLoginAvatarInput.click(); });
     if (firstLoginAvatarInput) firstLoginAvatarInput.addEventListener('change', function(e) {
         var f = e.target.files[0];
@@ -14144,7 +14160,7 @@ document.addEventListener('DOMContentLoaded', function() {
             authOverlay.classList.remove('hidden');
         }
         setTimeout(attachChatRoomAvatarClick, 1000);
-        console.log('STAR ARCADE Ready (Email/Password + M Server + Auto Online + Play ID + Red Dot)');
+        console.log('STAR ARCADE Ready (Email/Password + First Login Popup + Loading)');
     });
 });
 
