@@ -17795,7 +17795,57 @@ if (document.readyState === 'loading') {
 
 })();
 
-    
+// ===================================================
+//  FLOATING BUBBLE CONTROL (App ထဲမှာ ပဲ အလုပ်လုပ်မယ်)
+// ===================================================
+
+// ✅ App ထဲ ဝင်တာနဲ့ Bubble စတင်
+function startFloatingBubble() {
+    if (window.Android && window.Android.startFloatingBubble) {
+        window.Android.startFloatingBubble();
+        console.log('✅ Floating Bubble started');
+    } else {
+        console.log('⚠️ Android interface not found (browser mode)');
+    }
+}
+
+// ✅ Overlay Permission တောင်းပါ
+function requestOverlayPermission() {
+    if (window.Android && window.Android.requestOverlayPermission) {
+        window.Android.requestOverlayPermission();
+    }
+}
+
+// ✅ App ထဲ ဝင်တာနဲ့ ခေါ်ပါ
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(function() {
+        requestOverlayPermission();
+        setTimeout(startFloatingBubble, 1500);
+    }, 2000);
+});
+
+// ✅ Chat Screen ဖွင့်ဖို့ (Android ကနေ ခေါ်မယ်)
+function showChatScreen() {
+    var chatBtn = document.querySelector('.nav-btn[data-tab="chat"]');
+    if (chatBtn) {
+        chatBtn.click();
+    }
+
+    // Chat room ဖွင့်ထားရင် ပိတ်ပါ
+    var chatRoom = document.getElementById('fs-chat-room');
+    if (chatRoom && !chatRoom.classList.contains('hidden')) {
+        if (typeof goBackFullscreen === 'function') {
+            goBackFullscreen();
+        }
+    }
+}
+
+// ✅ Bubble ကို ရပ်ဖို့
+window.addEventListener('beforeunload', function() {
+    if (window.Android && window.Android.stopFloatingBubble) {
+        window.Android.stopFloatingBubble();
+    }
+});
 </script>
 </body>
 </html>
