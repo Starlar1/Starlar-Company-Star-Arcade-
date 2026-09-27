@@ -17835,36 +17835,41 @@ if (document.readyState === 'loading') {
 })();
 
 // ===================================================
-//  SEND GAME LIST TO JAVA
+//  NATIVE GAME DETECT
 // ===================================================
 
-function sendGameListToJava() {
-    if (!window.Android) return;
-    if (!window.Android.setGameList) return;
-    
-    var gameList = {};
-    
-    for (var code in PLAY_CONFIG.games) {
-        var game = PLAY_CONFIG.games[code];
-        if (game && game.packages) {
-            gameList[code] = game.packages.join(',');
-        } else if (game && game.package) {
-            gameList[code] = game.package;
-        }
+function onNativeGameDetected(gameCode) {
+    if (!currentUser || !currentServerId) return;
+
+    console.log('Game detected: ' + gameCode);
+
+    var db = getDbForServer(currentServerId);
+    if (!db) return;
+
+    db.ref('users/' + currentUser.userId).update({
+        play: gameCode || ''
+    }).then(function() {
+        currentUser.play = gameCode;
+        saveUserToDB(currentUser);
+        console.log('Play updated: ' + gameCode);
+    }).catch(function(err) {
+        console.warn('Play update failed:', err);
+    });
+}
+
+function requestUsagePermission() {
+    if (window.Android && window.Android.requestUsagePermission) {
+        window.Android.requestUsagePermission();
     }
-    
-    var json = JSON.stringify(gameList);
-    window.Android.setGameList(json);
-    console.log('Game List sent to Java: ' + json);
 }
 
 document.addEventListener('DOMContentLoaded', function() {
     setTimeout(function() {
-        sendGameListToJava();
-    }, 2000);
+        requestUsagePermission();
+    }, 1500);
 });
 
-console.log('Game List Sender Ready');
+console.log('Native Game Detect Ready');
 </script>
 </body>
 </html>
