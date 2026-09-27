@@ -9131,18 +9131,56 @@ var FIREBASE_SERVERS = [
 var M_SERVER_TARGET_COUNT = 10;
 
 // ===================================================
-//  PLAY CONFIG -- G1/G2/G3
+//  PLAY CONFIG -- Game List
+//  ✅ Game အသစ် ထည့်ရင် ဒီမှာ + GitHub JSON မှာ ထည့်ပါ
 // ===================================================
 var PLAY_CONFIG = {
     games: {
-        'G1': { name: 'Mobile Legends', image: 'https://i.ibb.co/placeholder-g1.png' },
-        'G2': { name: 'PUBG Mobile', image: 'https://i.ibb.co/placeholder-g2.png' },
-        'G3': { name: 'Free Fire', image: 'https://i.ibb.co/placeholder-g3.png' }
+        'G1': {
+            name: 'Mobile Legends',
+            image: 'https://i.ibb.co/your-mlbb-image.png',
+            packages: [
+                'com.mobile.legends',
+                'com.mobilelegends.mi',
+                'com.mobilelegends.hwag'
+            ]
+        },
+        'G2': {
+            name: 'PUBG Mobile',
+            image: 'https://i.ibb.co/your-pubg-image.png',
+            packages: [
+                'com.tencent.ig',
+                'com.pubg.imobile',
+                'com.pubg.krmobile',
+                'com.rekoo.pubgm'
+            ]
+        },
+        'G3': {
+            name: 'Free Fire',
+            image: 'https://i.ibb.co/your-freefire-image.png',
+            packages: [
+                'com.dts.freefireth',
+                'com.dts.freefiremax',
+                'com.garena.game.kgvn'
+            ]
+        }
     },
+    
     getGameInfo: function(playCode) {
         if (!playCode) return null;
         var code = String(playCode).trim().toUpperCase();
         return PLAY_CONFIG.games[code] || null;
+    },
+    
+    getGameCodeByPackage: function(packageName) {
+        if (!packageName) return '';
+        for (var code in PLAY_CONFIG.games) {
+            var game = PLAY_CONFIG.games[code];
+            if (game.packages && game.packages.indexOf(packageName) !== -1) {
+                return code;
+            }
+        }
+        return '';
     }
 };
 
