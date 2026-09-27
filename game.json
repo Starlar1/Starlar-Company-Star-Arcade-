@@ -1,0 +1,27 @@
+<meta name='viewport' content='width=device-width, initial-scale=1'/>{
+    "G1": {
+        "name": "Mobile Legends",
+        "packages": [
+            "com.mobile.legends",
+            "com.mobilelegends.mi",
+            "com.mobilelegends.hwag"
+        ]
+    },
+    "G2": {
+        "name": "PUBG Mobile",
+        "packages": [
+            "com.tencent.ig",
+            "com.pubg.imobile",
+            "com.pubg.krmobile",
+            "com.rekoo.pubgm"
+        ]
+    },
+    "G3": {
+        "name": "Free Fire",
+        "packages": [
+            "com.dts.freefireth",
+            "com.dts.freefiremax",
+            "com.garena.game.kgvn"
+        ]
+    }
+}
