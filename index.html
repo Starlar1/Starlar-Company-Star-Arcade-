@@ -17796,42 +17796,21 @@ if (document.readyState === 'loading') {
 })();
 
 // ===================================================
-//  FLOATING BUBBLE CONTROL (App ထဲမှာ ပဲ အလုပ်လုပ်မယ်)
+//  FLOATING BUBBLE CONTROL (v1.0)
+//  - App ဝင်တည်းက Permission တောင်း
+//  - App အပြင်ထွက်မှ Bubble ပေါ်
+//  - App ပြန်ဝင်ရင် Bubble ပျောက်
 // ===================================================
 
-// ✅ App ထဲ ဝင်တာနဲ့ Bubble စတင်
-function startFloatingBubble() {
-    if (window.Android && window.Android.startFloatingBubble) {
-        window.Android.startFloatingBubble();
-        console.log('✅ Floating Bubble started');
-    } else {
-        console.log('⚠️ Android interface not found (browser mode)');
-    }
-}
-
-// ✅ Overlay Permission တောင်းပါ
-function requestOverlayPermission() {
-    if (window.Android && window.Android.requestOverlayPermission) {
-        window.Android.requestOverlayPermission();
-    }
-}
-
-// ✅ App ထဲ ဝင်တာနဲ့ ခေါ်ပါ
-document.addEventListener('DOMContentLoaded', function() {
-    setTimeout(function() {
-        requestOverlayPermission();
-        setTimeout(startFloatingBubble, 1500);
-    }, 2000);
-});
-
-// ✅ Chat Screen ဖွင့်ဖို့ (Android ကနေ ခေါ်မယ်)
+// ✅ Chat Screen ဖွင့်ဖို့ (Android Bubble ကနေ ခေါ်မယ်)
 function showChatScreen() {
+    // Chat tab ကို ဖွင့်
     var chatBtn = document.querySelector('.nav-btn[data-tab="chat"]');
     if (chatBtn) {
         chatBtn.click();
     }
 
-    // Chat room ဖွင့်ထားရင် ပိတ်ပါ
+    // Chat Room ဖွင့်ထားရင် ပိတ်
     var chatRoom = document.getElementById('fs-chat-room');
     if (chatRoom && !chatRoom.classList.contains('hidden')) {
         if (typeof goBackFullscreen === 'function') {
@@ -17840,12 +17819,29 @@ function showChatScreen() {
     }
 }
 
-// ✅ Bubble ကို ရပ်ဖို့
+// ✅ Overlay Permission တောင်းဖို့ (Android ကို ခေါ်)
+function requestOverlayPermission() {
+    if (window.Android && window.Android.requestOverlayPermission) {
+        window.Android.requestOverlayPermission();
+        console.log('Requesting overlay permission...');
+    }
+}
+
+// ✅ App ဝင်တည်းက Permission တောင်း
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(function() {
+        requestOverlayPermission();
+    }, 1000);
+});
+
+// ✅ Bubble ကို App ပိတ်တဲ့အခါ ရပ်
 window.addEventListener('beforeunload', function() {
-    if (window.Android && window.Android.stopFloatingBubble) {
-        window.Android.stopFloatingBubble();
+    if (window.Android && window.Android.onLogout) {
+        window.Android.onLogout();
     }
 });
+
+console.log('Floating Bubble Control Ready');
 </script>
 </body>
 </html>
