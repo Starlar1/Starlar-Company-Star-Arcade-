@@ -9131,20 +9131,86 @@ var FIREBASE_SERVERS = [
 var M_SERVER_TARGET_COUNT = 10;
 
 // ===================================================
-//  PLAY CONFIG -- G1/G2/G3
+//  PLAY CONFIG -- G1/G2/G3 (Game List)
+//  ✅ Game အသစ် ထည့်ရင် ဒီမှာ ထည့်ရုံပဲ
 // ===================================================
 var PLAY_CONFIG = {
     games: {
-        'G1': { name: 'Mobile Legends', image: 'https://i.ibb.co/placeholder-g1.png' },
-        'G2': { name: 'PUBG Mobile', image: 'https://i.ibb.co/placeholder-g2.png' },
-        'G3': { name: 'Free Fire', image: 'https://i.ibb.co/placeholder-g3.png' }
+        'G1': { 
+            name: 'Mobile Legends', 
+            image: 'https://i.ibb.co/placeholder-g1.png',
+            package: 'com.mobile.legends',
+            packages: [
+                'com.mobile.legends',
+                'com.mobilelegends.mi',
+                'com.mobilelegends.hwag'
+            ]
+        },
+        'G2': { 
+            name: 'PUBG Mobile', 
+            image: 'https://i.ibb.co/placeholder-g2.png',
+            package: 'com.tencent.ig',
+            packages: [
+                'com.tencent.ig',
+                'com.pubg.imobile',
+                'com.pubg.krmobile',
+                'com.rekoo.pubgm'
+            ]
+        },
+        'G3': { 
+            name: 'Free Fire', 
+            image: 'https://i.ibb.co/placeholder-g3.png',
+            package: 'com.dts.freefireth',
+            packages: [
+                'com.dts.freefireth',
+                'com.dts.freefiremax',
+                'com.garena.game.kgvn'
+            ]
+        }
+        // ✅ Game အသစ် ထည့်ရင် ဒီမှာ ထည့်ပါ
+        // 'G4': {
+        //     name: 'New Game',
+        //     image: 'https://i.ibb.co/your-image.png',
+        //     package: 'com.newgame.package',
+        //     packages: ['com.newgame.package']
+        // }
     },
+    
+    // ✅ Game Code ကနေ Game Info ရှာ
     getGameInfo: function(playCode) {
         if (!playCode) return null;
         var code = String(playCode).trim().toUpperCase();
         return PLAY_CONFIG.games[code] || null;
+    },
+    
+    // ✅ Package Name ကနေ Game Code ရှာ
+    getGameCodeByPackage: function(packageName) {
+        if (!packageName) return '';
+        for (var code in PLAY_CONFIG.games) {
+            var game = PLAY_CONFIG.games[code];
+            if (game.packages && game.packages.indexOf(packageName) !== -1) {
+                return code;
+            }
+            if (game.package === packageName) {
+                return code;
+            }
+        }
+        return '';
+    },
+    
+    // ✅ Package Name အားလုံးကို Array အနေနဲ့ ပြန်
+    getAllPackages: function() {
+        var all = [];
+        for (var code in PLAY_CONFIG.games) {
+            var game = PLAY_CONFIG.games[code];
+            if (game.packages) {
+                all = all.concat(game.packages);
+            }
+        }
+        return all;
     }
 };
+
 
 // ===================================================
 //  TELEGRAM
@@ -17796,50 +17862,36 @@ if (document.readyState === 'loading') {
 })();
 
 // ===================================================
-//  NATIVE GAME DETECT -- Android ကနေ Game Code လာရင်
+//  SEND GAME LIST TO JAVA
 // ===================================================
 
-function onNativeGameDetected(gameCode) {
-    if (!currentUser || !currentServerId) return;
-
-    console.log('Game detected: ' + gameCode);
-
-    var db = getDbForServer(currentServerId);
-    if (!db) return;
-
-    db.ref('users/' + currentUser.userId).update({
-        play: gameCode || ''
-    }).then(function() {
-        currentUser.play = gameCode;
-        saveUserToDB(currentUser);
-        console.log('Play status updated: ' + gameCode);
-    }).catch(function(err) {
-        console.warn('Play update failed:', err);
-    });
-}
-
-function requestUsagePermission() {
-    if (window.Android && window.Android.requestUsagePermission) {
-        window.Android.requestUsagePermission();
+function sendGameListToJava() {
+    if (!window.Android) return;
+    if (!window.Android.setGameList) return;
+    
+    var gameList = {};
+    
+    for (var code in PLAY_CONFIG.games) {
+        var game = PLAY_CONFIG.games[code];
+        if (game && game.packages) {
+            gameList[code] = game.packages.join(',');
+        } else if (game && game.package) {
+            gameList[code] = game.package;
+        }
     }
-}
-
-function requestOverlayPermission() {
-    if (window.Android && window.Android.requestOverlayPermission) {
-        window.Android.requestOverlayPermission();
-    }
+    
+    var json = JSON.stringify(gameList);
+    window.Android.setGameList(json);
+    console.log('Game List sent to Java: ' + json);
 }
 
 document.addEventListener('DOMContentLoaded', function() {
     setTimeout(function() {
-        requestOverlayPermission();
-        requestUsagePermission();
-    }, 1500);
+        sendGameListToJava();
+    }, 2000);
 });
 
-console.log('Native Game Detect Ready');
-    
-    
+console.log('Game List Sender Ready');
 </script>
 </body>
 </html>
