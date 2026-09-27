@@ -7649,7 +7649,7 @@ body {
         <p id="loadingText">Processing...</p>
     </div>
 
-    <!-- FIRST LOGIN POPUP -->
+    <!-- FIRST LOGIN POPUP (Session ဟောင်း -- Google နဲ့ ဖွင့်ထားတဲ့ Account တွေအတွက်) -->
     <div class="first-login-popup-overlay hidden" id="firstLoginPopup">
         <div class="first-login-popup">
             <div class="first-login-popup-header">
@@ -7673,7 +7673,38 @@ body {
         </div>
     </div>
 
-    <!-- LOGIN POPUP -->
+    <!-- ✅ NEW ACCOUNT POPUP (Gmail + Password + Display Name) -->
+    <div class="login-popup-overlay hidden" id="newAccountPopup">
+        <div class="login-popup">
+            <div class="login-popup-header">
+                <h3>Create New Account</h3>
+                <button class="login-popup-close" id="newAccountPopupClose">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <line x1="18" y1="6" x2="6" y2="18"/>
+                        <line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="login-popup-body">
+                <div class="login-popup-input-group">
+                    <label>Gmail</label>
+                    <input type="email" id="newAccEmailInput" class="login-popup-input" placeholder="yourname@gmail.com" autocomplete="email" />
+                </div>
+                <div class="login-popup-input-group">
+                    <label>Password</label>
+                    <input type="password" id="newAccPasswordInput" class="login-popup-input" placeholder="Min 6 characters" autocomplete="new-password" />
+                </div>
+                <div class="login-popup-input-group">
+                    <label>Display Name</label>
+                    <input type="text" id="newAccNameInput" class="login-popup-input" placeholder="Your display name" />
+                </div>
+                <div id="newAccountPopupError" class="login-popup-error hidden"></div>
+                <button class="login-popup-submit" id="newAccountSubmitBtn">Create Account</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ✅ LOGIN POPUP (Gmail + Password + Server No) -->
     <div class="login-popup-overlay hidden" id="loginPopup">
         <div class="login-popup">
             <div class="login-popup-header">
@@ -7686,6 +7717,14 @@ body {
                 </button>
             </div>
             <div class="login-popup-body">
+                <div class="login-popup-input-group">
+                    <label>Gmail</label>
+                    <input type="email" id="loginEmailInput" class="login-popup-input" placeholder="yourname@gmail.com" autocomplete="email" />
+                </div>
+                <div class="login-popup-input-group">
+                    <label>Password</label>
+                    <input type="password" id="loginPasswordInput" class="login-popup-input" placeholder="Enter password" autocomplete="current-password" />
+                </div>
                 <div class="login-popup-input-group">
                     <label>Server No.</label>
                     <input type="number" id="loginServerInput" class="login-popup-input" placeholder="Enter Server No." min="1" />
@@ -7705,7 +7744,7 @@ body {
                 <p>Connect with gamers across the country</p>
             </div>
             <div class="auth-card" id="loginCard">
-                <h3>သင့် Google Account ဖြင့်၀င်ပါ</h3>
+                <h3>သင့် Gmail ဖြင့် ၀င်ပါ</h3>
                 <p class="sub">Sign in to access your account</p>
                 <button class="google-btn" id="newAccountBtn">
                     <svg width="22" height="22" viewBox="0 0 24 24">
@@ -7785,7 +7824,6 @@ body {
                             <span id="userServer">Server 1</span>
                         </div>
                         <nav class="sidebar-nav">
-                            <!-- ✅ Shop -->
                             <button class="sidebar-btn" data-action="shop">
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                     <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/>
@@ -7795,7 +7833,6 @@ body {
                                 <span>Shop</span>
                             </button>
 
-                            <!-- ✅ Tasks -->
                             <button class="sidebar-btn" data-action="tasks">
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                     <rect x="3" y="3" width="18" height="18" rx="3"/>
@@ -7806,7 +7843,6 @@ body {
                                 <span>Tasks</span>
                             </button>
 
-                            <!-- ✅ Rank (အသစ်) -->
                             <button class="sidebar-btn" data-action="rank">
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                     <path d="M2 4l3 12h14l3-12-6 4-4-8-4 8-6-4z"/>
@@ -7817,7 +7853,6 @@ body {
                                 <span>Rank</span>
                             </button>
 
-                            <!-- ✅ FAQ (အသစ်) -->
                             <button class="sidebar-btn" data-action="faq">
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                     <circle cx="12" cy="12" r="10"/>
@@ -7827,7 +7862,6 @@ body {
                                 <span>FAQ</span>
                             </button>
 
-                            <!-- ✅ Invite (အသစ်) -->
                             <button class="sidebar-btn" data-action="invite">
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                     <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
@@ -7838,7 +7872,6 @@ body {
                                 <span>Invite</span>
                             </button>
 
-                            <!-- ✅ Settings -->
                             <button class="sidebar-btn" data-action="settings">
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                     <circle cx="12" cy="12" r="3"/>
@@ -7898,7 +7931,6 @@ body {
 
                         <div class="screen hidden" id="screen-chat">
                             <div class="chat-list" id="chatList">
-                                <!-- Ai (အတု) -->
                                 <div class="chat-list-item disabled" data-chat="ai">
                                     <div class="chat-list-avatar-wrap">
                                         <img class="chat-list-avatar" src="https://i.ibb.co/PsRPMTyQ/Grid-Art-20260925-140329352.png" alt="STAR" />
@@ -7972,11 +8004,10 @@ body {
             </div>
         </main>
 
-        <!-- ✅ PLUS MENU POPUP (အဝိုင်း ၅ ခု) -->
+        <!-- PLUS MENU POPUP -->
         <div class="plus-menu-overlay hidden" id="plusMenuOverlay"></div>
 
         <div class="plus-menu" id="plusMenu">
-            <!-- အပေါ် တန်း ၁ -- ၃ ခု -->
             <div class="plus-menu-row">
                 <button class="plus-menu-btn" data-action="partychat">
                     <div class="plus-menu-btn-circle">
@@ -8016,7 +8047,6 @@ body {
                 </button>
             </div>
 
-            <!-- အောက် တန်း ၂ -- ၂ ခု -->
             <div class="plus-menu-row">
                 <button class="plus-menu-btn" data-action="post">
                     <div class="plus-menu-btn-circle">
@@ -8141,14 +8171,12 @@ body {
 
                 <div class="fs-screen hidden" id="fs-coin"><div class="screen-center"><p>Diamond balance and transactions</p></div></div>
 
-                <!-- ✅ PROFILE (Info ကို Banner အတွင်းမှာ ထည့်ပြီး) -->
+                <!-- PROFILE -->
                 <div class="fs-screen hidden" id="fs-profile">
                     <div class="profile-fullscreen">
-                        <!-- BANNER (Info တွေ အတွင်းမှာ) -->
                         <div class="profile-banner" id="profileBanner">
                             <div class="profile-banner-overlay"></div>
 
-                            <!-- ✅ PROFILE INFO (Banner အတွင်းမှာ) -->
                             <div class="profile-info-container">
                                 <div class="profile-avatar-wrapper" id="profileAvatarWrapper">
                                     <img id="fsProfileAvatar" src="" alt="avatar" />
@@ -8170,7 +8198,6 @@ body {
                             </div>
                         </div>
 
-                        <!-- BACKGROUND SECTION -->
                         <div class="profile-background-section" id="profileBackgroundSection">
                             <div class="profile-background-overlay"></div>
                             <div class="profile-bio-wrapper">
@@ -8260,7 +8287,6 @@ body {
                     </div>
                 </div>
 
-                <!-- ✅ RANK SCREEN (အလွတ်) -->
                 <div class="fs-screen hidden" id="fs-rank">
                     <div class="screen-center">
                         <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#ff6d1f" stroke-width="1.5">
@@ -8274,11 +8300,10 @@ body {
                     </div>
                 </div>
 
-                <!-- ✅ FAQ SCREEN -->
+                <!-- FAQ SCREEN -->
                 <div class="fs-screen hidden" id="fs-faq">
                     <div class="faq-container">
 
-                        <!-- ✅ FAQ Item 1 -->
                         <div class="faq-item">
                             <button class="faq-question">
                                 <div class="faq-icon faq-icon-info">
@@ -8301,7 +8326,6 @@ body {
                             </div>
                         </div>
 
-                        <!-- ✅ FAQ Item 2 -->
                         <div class="faq-item">
                             <button class="faq-question">
                                 <div class="faq-icon faq-icon-msg">
@@ -8325,7 +8349,6 @@ body {
                             </div>
                         </div>
 
-                        <!-- ✅ FAQ Item 3 -->
                         <div class="faq-item">
                             <button class="faq-question">
                                 <div class="faq-icon faq-icon-ai">
@@ -8347,7 +8370,6 @@ body {
                             </div>
                         </div>
 
-                        <!-- ✅ FAQ Item 4 -->
                         <div class="faq-item">
                             <button class="faq-question">
                                 <div class="faq-icon faq-icon-report">
@@ -8370,7 +8392,6 @@ body {
                             </div>
                         </div>
 
-                        <!-- ✅ FAQ Item 5 -->
                         <div class="faq-item">
                             <button class="faq-question">
                                 <div class="faq-icon faq-icon-warning">
@@ -8392,7 +8413,6 @@ body {
                             </div>
                         </div>
 
-                        <!-- ✅ FAQ Item 6 -->
                         <div class="faq-item">
                             <button class="faq-question">
                                 <div class="faq-icon faq-icon-contact">
@@ -8417,7 +8437,7 @@ body {
                     </div>
                 </div>
 
-                <!-- ✅ INVITE SCREEN (အလွတ်) -->
+                <!-- INVITE SCREEN -->
                 <div class="fs-screen hidden" id="fs-invite">
                     <div class="screen-center">
                         <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#ff6d1f" stroke-width="1.5">
@@ -8886,17 +8906,13 @@ body {
         </div>
     </div>
 
-    <!-- ============================================================
-         ✅ EVENT SYSTEM v11
-         ============================================================ -->
-
-    <!-- ✅ EVENT FAB -->
+    <!-- EVENT FAB -->
     <button class="event-fab hidden" id="eventFab" title="Event">
         <img id="eventFabImg" src="https://i.ibb.co/1tfynTbC/file-00000000ebf881faaf18b5e5bb7f76d4.png" alt="Event" />
         <span class="event-fab-badge" id="eventFabBadge">!</span>
     </button>
 
-    <!-- ✅ EVENT FULLSCREEN -->
+    <!-- EVENT FULLSCREEN -->
     <div class="event-screen hidden" id="eventScreen">
         <div class="event-overlay"></div>
 
@@ -8964,7 +8980,7 @@ body {
         </div>
     </div>
 
-    <!-- ✅ FREE TOKEN SCREEN -->
+    <!-- FREE TOKEN SCREEN -->
     <div class="event-sub-screen hidden" id="freeTokenScreen">
         <div class="event-overlay"></div>
 
@@ -8988,7 +9004,7 @@ body {
         <div class="event-sub-body" id="freeTokenTasksList"></div>
     </div>
 
-    <!-- ✅ EXCHANGE SCREEN -->
+    <!-- EXCHANGE SCREEN -->
     <div class="event-sub-screen hidden" id="exchangeScreen">
         <div class="event-overlay"></div>
 
@@ -9014,7 +9030,7 @@ body {
         </div>
     </div>
 
-    <!-- ✅ EXCHANGE INFO POPUP -->
+    <!-- EXCHANGE INFO POPUP -->
     <div class="event-popup-overlay hidden" id="exchangeInfoPopup">
         <div class="event-popup">
             <div class="event-popup-header">
@@ -9030,53 +9046,53 @@ body {
         </div>
     </div>
 
-<!-- ✅ BAN POPUP -->
-<div class="ban-popup-overlay hidden" id="banPopup">
-    <div class="ban-popup">
-        <div class="ban-popup-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                <circle cx="12" cy="12" r="10"/>
-                <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
-            </svg>
-        </div>
-        <h2 class="ban-popup-title">သင့် Account သည် ပိတ်ပင်ခံထားရသည်</h2>
-        <div class="ban-popup-body">
-            <p class="ban-popup-label">အကြောင်း</p>
-            <p class="ban-popup-reason">မမှန်မကန်လုပ်ခြင်း / Hack ခြင်း / Chat ရိုင်းစိုင်းသောစကားများ ပြောဆိုခြင်းကြောင့် ဖြစ်နိုင်သည်</p>
-            <div class="ban-popup-contact">
-                <p>အကူအညီလိုအပ်ပါက ဆက်သွယ်ပါ</p>
-                <a href="https://t.me/Starlar1" target="_blank" rel="noopener noreferrer">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M9.78 18.65l.28-4.23 7.68-6.92c.34-.31-.07-.46-.52-.19L7.74 13.3 3.64 12c-.88-.25-.89-.86.2-1.3l15.97-6.16c.73-.33 1.43.18 1.15 1.3l-2.72 12.81c-.19.91-.74 1.13-1.5.71L12.6 16.3l-1.99 1.93c-.23.23-.42.42-.83.42z"/>
-                    </svg>
-                    <span>@Starlar1</span>
-                </a>
-                <a href="https://www.tiktok.com/@novastarlar" target="_blank" rel="noopener noreferrer">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/>
-                    </svg>
-                    <span>@novastarlar</span>
-                </a>
+    <!-- BAN POPUP -->
+    <div class="ban-popup-overlay hidden" id="banPopup">
+        <div class="ban-popup">
+            <div class="ban-popup-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
+                </svg>
             </div>
+            <h2 class="ban-popup-title">သင့် Account သည် ပိတ်ပင်ခံထားရသည်</h2>
+            <div class="ban-popup-body">
+                <p class="ban-popup-label">အကြောင်း</p>
+                <p class="ban-popup-reason">မမှန်မကန်လုပ်ခြင်း / Hack ခြင်း / Chat ရိုင်းစိုင်းသောစကားများ ပြောဆိုခြင်းကြောင့် ဖြစ်နိုင်သည်</p>
+                <div class="ban-popup-contact">
+                    <p>အကူအညီလိုအပ်ပါက ဆက်သွယ်ပါ</p>
+                    <a href="https://t.me/Starlar1" target="_blank" rel="noopener noreferrer">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M9.78 18.65l.28-4.23 7.68-6.92c.34-.31-.07-.46-.52-.19L7.74 13.3 3.64 12c-.88-.25-.89-.86.2-1.3l15.97-6.16c.73-.33 1.43.18 1.15 1.3l-2.72 12.81c-.19.91-.74 1.13-1.5.71L12.6 16.3l-1.99 1.93c-.23.23-.42.42-.83.42z"/>
+                        </svg>
+                        <span>@Starlar1</span>
+                    </a>
+                    <a href="https://www.tiktok.com/@novastarlar" target="_blank" rel="noopener noreferrer">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/>
+                        </svg>
+                        <span>@novastarlar</span>
+                    </a>
+                </div>
+            </div>
+            <button class="ban-popup-btn" id="banNewAccountBtn">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <line x1="12" y1="5" x2="12" y2="19"/>
+                    <line x1="5" y1="12" x2="19" y2="12"/>
+                </svg>
+                <span>New Account</span>
+            </button>
         </div>
-        <button class="ban-popup-btn" id="banNewAccountBtn">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                <line x1="12" y1="5" x2="12" y2="19"/>
-                <line x1="5" y1="12" x2="19" y2="12"/>
-            </svg>
-            <span>New Account</span>
-        </button>
     </div>
-</div>
-
 
     <script src="script.js"></script>
 
 <script>
 // ============================================================
-//  STAR ARCADE -- FULL script.js (PART 1)
-//  IndexedDB First + Background Sync + Change Detection
-//  Version: 2026-09-26
+//  STAR ARCADE -- FULL script.js
+//  M Server + Auto Online + Play ID + Red Dot (New Msg)
+//  ✅ Email/Password Auth System (Gmail + Password + Server No)
+//  Version: 2026-09-27
 // ============================================================
 
 // ===================================================
@@ -9228,7 +9244,11 @@ function deleteFromDB(key) {
 function $(id) { return document.getElementById(id); }
 
 var authOverlay, loginCard, newAccountBtn, loginBtn, loginPopup, loginPopupClose,
-    loginServerInput, loginSubmitBtn, loginPopupError, loadingOverlay, loadingText,
+    loginEmailInput, loginPasswordInput, loginServerInput,
+    loginSubmitBtn, loginPopupError,
+    newAccountPopup, newAccountPopupClose, newAccEmailInput,
+    newAccPasswordInput, newAccNameInput, newAccountSubmitBtn, newAccountPopupError,
+    loadingOverlay, loadingText,
     appWrapper, sidebarToggleBtn, sidebarCloseBtn, sidebar, sidebarOverlay,
     searchContainer, mailBtn, coinCard, profileBtn, profileAvatar, coinDisplay,
     userNameEl, userIdEl, userServerEl, fullscreenOverlay, fullscreenBackBtn,
@@ -9264,9 +9284,6 @@ var onDisconnectRef = null;
 var searchResultUser = null;
 var selfDataListener = null;
 
-// ✅ Background Sync State
-var backgroundSyncStarted = false;
-
 function initDomRefs() {
     authOverlay = $('authOverlay');
     loginCard = $('loginCard');
@@ -9274,9 +9291,18 @@ function initDomRefs() {
     loginBtn = $('loginBtn');
     loginPopup = $('loginPopup');
     loginPopupClose = $('loginPopupClose');
+    loginEmailInput = $('loginEmailInput');
+    loginPasswordInput = $('loginPasswordInput');
     loginServerInput = $('loginServerInput');
     loginSubmitBtn = $('loginSubmitBtn');
     loginPopupError = $('loginPopupError');
+    newAccountPopup = $('newAccountPopup');
+    newAccountPopupClose = $('newAccountPopupClose');
+    newAccEmailInput = $('newAccEmailInput');
+    newAccPasswordInput = $('newAccPasswordInput');
+    newAccNameInput = $('newAccNameInput');
+    newAccountSubmitBtn = $('newAccountSubmitBtn');
+    newAccountPopupError = $('newAccountPopupError');
     loadingOverlay = $('loadingOverlay');
     loadingText = $('loadingText');
     appWrapper = $('appWrapper');
@@ -9425,87 +9451,9 @@ function pickRandomFirestoreServer() {
 
 function pickMServerForUser() {
     var allServerIds = FIREBASE_SERVERS.map(function(s) { return s.id; });
-    if (allServerIds.length <= M_SERVER_TARGET_COUNT) {
-        return allServerIds.slice();
-    }
+    if (allServerIds.length <= M_SERVER_TARGET_COUNT) return allServerIds.slice();
     var shuffled = allServerIds.slice().sort(function() { return Math.random() - 0.5; });
     return shuffled.slice(0, M_SERVER_TARGET_COUNT);
-}
-
-// ===================================================
-//  ✅ CHANGE DETECTION
-// ===================================================
-function checkDataChanged(oldUser, newData) {
-    if (!oldUser || !newData) return true;
-    
-    var fields = [
-        'name', 'diamond', 'avatar', 'bio', 'play',
-        'frameUse', 'bannerUse', 'backgroundUse', 'bubbleUse', 'markUse',
-        'roleUse', 'friendsList', 'blockList',
-        'frameOwned', 'bannerOwned', 'backgroundOwned', 'bubbleOwned',
-        'roleOwned', 'mServer', 'online', 'isFirstLogin', 'accNo', 'authId'
-    ];
-    
-    for (var i = 0; i < fields.length; i++) {
-        var f = fields[i];
-        var oldVal = JSON.stringify(oldUser[f] === undefined ? null : oldUser[f]);
-        var newVal = JSON.stringify(newData[f] === undefined ? null : newData[f]);
-        if (oldVal !== newVal) {
-            console.log('📊 Data changed: ' + f);
-            return true;
-        }
-    }
-    return false;
-}
-
-function buildUpdatedUser(oldUser, newData) {
-    return {
-        accNo: newData.accNo !== undefined ? newData.accNo : oldUser.accNo,
-        authId: newData.authId || oldUser.authId,
-        name: newData.name || oldUser.name,
-        email: oldUser.email,
-        userId: oldUser.userId,
-        serverId: currentServerId,
-        diamond: newData.diamond !== undefined ? newData.diamond : oldUser.diamond,
-        avatar: newData.avatar || oldUser.avatar,
-        inviteCode: newData.inviteCode || oldUser.inviteCode,
-        bio: newData.bio !== undefined ? newData.bio : oldUser.bio,
-        play: newData.play !== undefined ? newData.play : oldUser.play,
-        friendsList: newData.friendsList || oldUser.friendsList,
-        blockList: newData.blockList || oldUser.blockList,
-        markUse: newData.markUse || oldUser.markUse,
-        frameUse: newData.frameUse || oldUser.frameUse,
-        bannerUse: newData.bannerUse || oldUser.bannerUse,
-        backgroundUse: newData.backgroundUse || oldUser.backgroundUse,
-        bubbleUse: newData.bubbleUse || oldUser.bubbleUse,
-        frameOwned: newData.frameOwned || oldUser.frameOwned,
-        bannerOwned: newData.bannerOwned || oldUser.bannerOwned,
-        backgroundOwned: newData.backgroundOwned || oldUser.backgroundOwned,
-        bubbleOwned: newData.bubbleOwned || oldUser.bubbleOwned,
-        roleUse: newData.roleUse || oldUser.roleUse,
-        roleOwned: newData.roleOwned || oldUser.roleOwned,
-        mServer: newData.mServer || oldUser.mServer,
-        online: newData.online !== undefined ? newData.online : oldUser.online,
-        isFirstLogin: newData.isFirstLogin !== undefined ? newData.isFirstLogin : oldUser.isFirstLogin
-    };
-}
-
-// ===================================================
-//  ✅ RENDER UI FROM CACHE (IndexedDB)
-// ===================================================
-function renderUIFromCache(user) {
-    if (!user) return;
-    
-    if (userNameEl) userNameEl.textContent = user.name || 'Player';
-    if (userIdEl) userIdEl.textContent = 'ID ' + (user.userId || '0000000000');
-    if (coinDisplay) coinDisplay.textContent = user.diamond || 0;
-    
-    var serverName = FIREBASE_SERVERS.find(function(s) { return s.id === currentServerId; });
-    if (userServerEl) userServerEl.textContent = serverName ? serverName.name : currentServerId;
-    
-    if (user.avatar && profileAvatar) profileAvatar.src = user.avatar;
-    
-    applyFrameToSidebar();
 }
 
 // ===================================================
@@ -9663,31 +9611,25 @@ function updateUserOnlineStatus(userId, serverId, online) {
 // ===================================================
 function setupMServer() {
     if (!currentUser || !currentServerId) return Promise.resolve();
-    
     if (Array.isArray(currentUser.mServer) && currentUser.mServer.length > 0) {
         console.log('M Server already set:', currentUser.mServer);
         return Promise.resolve();
     }
-    
     var mServer = pickMServerForUser();
     console.log('Setting up M Server:', mServer);
-    
     var db = getDbForServer(currentServerId);
     if (!db) return Promise.resolve();
-    
     return db.ref('users/' + currentUser.userId).update({ mServer: mServer })
         .then(function() {
             currentUser.mServer = mServer;
             saveUserToDB(currentUser);
             console.log('M Server saved:', mServer);
         })
-        .catch(function(err) {
-            console.error('M Server setup failed:', err);
-        });
+        .catch(function(err) { console.error('M Server setup failed:', err); });
 }
 
 // ===================================================
-//  ✅ SELF DATA LISTENER -- Change Detection
+//  SELF DATA LISTENER
 // ===================================================
 function startSelfDataListener(userId, serverId) {
     stopSelfDataListener();
@@ -9698,34 +9640,46 @@ function startSelfDataListener(userId, serverId) {
     selfDataListener.on('value', function(snap) {
         var data = snap.val();
         if (!data || !currentUser) return;
-        
-        // ✅ Data ပြောင်းလဲမှု ရှိလား စစ်
-        var hasChanged = checkDataChanged(currentUser, data);
-        
-        if (!hasChanged) {
-            console.log('✅ Self data: No change → skip IDB update');
-            return;
-        }
-        
-        // ✅ ပြောင်းရင်မှ update
-        console.log('🔄 Self data changed → updating IDB + UI');
-        currentUser = buildUpdatedUser(currentUser, data);
+
+        var updated = {
+            accNo: data.accNo !== undefined ? data.accNo : currentUser.accNo,
+            authId: data.authId || currentUser.authId,
+            name: data.name || currentUser.name,
+            email: currentUser.email,
+            userId: currentUser.userId,
+            serverId: currentServerId,
+            diamond: data.diamond !== undefined ? data.diamond : currentUser.diamond,
+            avatar: data.avatar || currentUser.avatar,
+            inviteCode: data.inviteCode || currentUser.inviteCode,
+            bio: data.bio !== undefined ? data.bio : currentUser.bio,
+            play: data.play !== undefined ? data.play : currentUser.play,
+            friendsList: data.friendsList || currentUser.friendsList,
+            blockList: data.blockList || currentUser.blockList,
+            markUse: data.markUse || currentUser.markUse,
+            frameUse: data.frameUse || currentUser.frameUse,
+            bannerUse: data.bannerUse || currentUser.bannerUse,
+            backgroundUse: data.backgroundUse || currentUser.backgroundUse,
+            bubbleUse: data.bubbleUse || currentUser.bubbleUse,
+            frameOwned: data.frameOwned || currentUser.frameOwned,
+            bannerOwned: data.bannerOwned || currentUser.bannerOwned,
+            backgroundOwned: data.backgroundOwned || currentUser.backgroundOwned,
+            bubbleOwned: data.bubbleOwned || currentUser.bubbleOwned,
+            roleUse: data.roleUse || currentUser.roleUse,
+            roleOwned: data.roleOwned || currentUser.roleOwned,
+            mServer: data.mServer || currentUser.mServer,
+            online: data.online !== undefined ? data.online : currentUser.online,
+            isFirstLogin: data.isFirstLogin !== undefined ? data.isFirstLogin : currentUser.isFirstLogin
+        };
+
+        currentUser = updated;
         saveUserToDB(currentUser);
-        
-        // UI update
+
         if (userNameEl) userNameEl.textContent = currentUser.name || 'Player';
         if (coinDisplay) coinDisplay.textContent = currentUser.diamond || 0;
         if (currentUser.avatar && profileAvatar) profileAvatar.src = currentUser.avatar;
         applyFrameToSidebar();
-        
-        // Profile screen ဖွင့်ထားရင် refresh
-        var fsProfile = document.getElementById('fs-profile');
-        if (fsProfile && !fsProfile.classList.contains('hidden')) {
-            loadProfileData();
-        }
-    }, function(err) {
-        console.warn('Self data listener error:', err.code);
-    });
+        loadProfileData();
+    }, function(err) { console.warn('Self data listener error:', err.code); });
 }
 
 function stopSelfDataListener() {
@@ -9806,7 +9760,8 @@ function fullSyncFromFirebase(email, serverId) {
 }
 
 // ===================================================
-//  ENSURE FIREBASE AUTH
+//  ✅ ENSURE FIREBASE AUTH (Email/Password)
+//  Session ပြန်ဖွင့်ရင် current user ရှိပြီးသားဆို ဒီအတိုင်းထား၊ မရှိရင် resolve(false)
 // ===================================================
 function ensureFirebaseAuth(serverId, email) {
     return new Promise(function(resolve) {
@@ -9818,81 +9773,61 @@ function ensureFirebaseAuth(serverId, email) {
             return resolve(true);
         }
 
-        var provider = new firebase.auth.GoogleAuthProvider();
-        provider.setCustomParameters({ prompt: 'select_account' });
-        auth.signInWithPopup(provider).then(function(result) {
-            console.log('Auth re-signed in:', result.user.email);
-            resolve(true);
-        }).catch(function(err) {
-            console.warn('Auth re-signin failed:', err.code);
-            resolve(false);
-        });
+        // ✅ Email/Password စနစ်မှာ session ကို Firebase ကိုယ်တိုင် ကိုင်တယ်
+        // Password မသိလို့ ပြန် sign in လုပ်လို့မရ။ Session မရှိရင် false ပြ
+        console.log('Auth not active for:', email);
+        resolve(false);
     });
 }
 
 // ===================================================
-//  ✅ BACKGROUND SYNC -- Firebase Listeners
-// ===================================================
-function startBackgroundSync() {
-    if (backgroundSyncStarted) return;
-    if (!currentUser || !currentServerId) return;
-    backgroundSyncStarted = true;
-    
-    console.log('🔄 Background sync started');
-    
-    // 1. M Server setup + Self listener
-    setupMServer().then(function() {
-        if (currentDb && currentUser) {
-            startSelfDataListener(currentUser.userId, currentServerId);
-        }
-    }).catch(function(err) {
-        console.warn('setupMServer failed:', err);
-    });
-    
-    // 2. IndexedDB cache ကနေ Chat List ပြ
-    renderChatList();
-    
-    // 3. Background listeners (delay နဲ့ တစ်ခုချင်း)
-    setTimeout(function() { startFriendsListListener(); }, 300);
-    setTimeout(function() { startAppMessageListeners(); }, 500);
-    setTimeout(function() {
-        goOnline();
-        attachOnlineEventListeners();
-    }, 700);
-    setTimeout(function() { retryPendingMessages(); }, 1200);
-}
-
-// ===================================================
-//  ✅ ENTER APP -- IndexedDB First + Background Sync
+//  ENTER APP
 // ===================================================
 function enterApp(user) {
-    // ✅ 1. Auth ဖျောက် + App ချက်ချင်း ပြ (0ms)
     authOverlay.style.display = 'none';
     authOverlay.classList.add('hidden');
     appWrapper.classList.remove('hidden');
 
-    // ✅ 2. IndexedDB cache ကနေ UI ဖြည့် (0ms)
-    renderUIFromCache(user);
+    userNameEl.textContent = user.name || 'Player';
+    userIdEl.textContent = 'ID ' + (user.userId || '0000000000');
+    coinDisplay.textContent = user.diamond || 0;
 
-    // ✅ 3. Home ချက်ချင်း ပြ (0ms)
-    var defaultBtn = document.querySelector('.nav-btn[data-tab="home"]');
-    if (defaultBtn) {
-        activeNavBtn = defaultBtn;
-        defaultBtn.classList.add('active');
-    }
-    switchTab('home');
-    history.pushState(null, '', location.href);
+    var serverName = FIREBASE_SERVERS.find(function(s) { return s.id === currentServerId; });
+    userServerEl.textContent = serverName ? serverName.name : currentServerId;
 
-    clearMemoryMessages();
-    isRenderingChatList = false;
-    if (renderChatListTimer) {
-        clearTimeout(renderChatListTimer);
-        renderChatListTimer = null;
-    }
+    if (user.avatar && user.avatar !== '') profileAvatar.src = user.avatar;
 
-    // ✅ 4. Background sync ကို ချက်ချင်း စ (50ms)
-    backgroundSyncStarted = false;
-    setTimeout(startBackgroundSync, 50);
+    setupMServer().then(function() {
+        if (currentDb && currentUser) {
+            startSelfDataListener(currentUser.userId, currentServerId);
+        }
+
+        applyFrameToSidebar();
+
+        var defaultBtn = document.querySelector('.nav-btn[data-tab="home"]');
+        if (defaultBtn) {
+            activeNavBtn = defaultBtn;
+            defaultBtn.classList.add('active');
+        }
+        switchTab('home');
+        history.pushState(null, '', location.href);
+
+        clearMemoryMessages();
+        isRenderingChatList = false;
+        if (renderChatListTimer) {
+            clearTimeout(renderChatListTimer);
+            renderChatListTimer = null;
+        }
+
+        setTimeout(function() { renderChatList(); }, 100);
+        setTimeout(function() { startFriendsListListener(); }, 500);
+        setTimeout(function() { startAppMessageListeners(); }, 700);
+        setTimeout(function() {
+            goOnline();
+            attachOnlineEventListeners();
+        }, 900);
+        setTimeout(function() { retryPendingMessages(); }, 1500);
+    });
 
     window.addEventListener('beforeunload', function() {
         if (currentUser && currentServerId) {
@@ -9938,21 +9873,11 @@ function handlePlusMenuAction(action) {
     closePlusMenu();
     setTimeout(function() {
         switch (action) {
-            case 'partychat':
-                showToast('PartyChat');
-                break;
-            case 'gamecard':
-                showToast('Game Card');
-                break;
-            case 'info':
-                showToast('Info');
-                break;
-            case 'post':
-                showToast('Post');
-                break;
-            case 'play':
-                showToast('Play');
-                break;
+            case 'partychat': showToast('PartyChat'); break;
+            case 'gamecard': showToast('Game Card'); break;
+            case 'info': showToast('Info'); break;
+            case 'post': showToast('Post'); break;
+            case 'play': showToast('Play'); break;
         }
     }, 200);
 }
@@ -9986,56 +9911,97 @@ function getLeastLoadedServer() {
 }
 
 // ===================================================
-//  ✅ NEW ACCOUNT -- Loading overlay မပြ
+//  ✅ NEW ACCOUNT POPUP
+// ===================================================
+function showNewAccountPopup() {
+    if (!newAccountPopup) return;
+    newAccountPopup.classList.remove('hidden');
+    if (newAccEmailInput) newAccEmailInput.value = '';
+    if (newAccPasswordInput) newAccPasswordInput.value = '';
+    if (newAccNameInput) newAccNameInput.value = '';
+    if (newAccountPopupError) {
+        newAccountPopupError.textContent = '';
+        newAccountPopupError.classList.add('hidden');
+    }
+}
+function closeNewAccountPopup() {
+    if (newAccountPopup) newAccountPopup.classList.add('hidden');
+}
+function showNewAccountError(msg) {
+    if (!newAccountPopupError) return;
+    newAccountPopupError.textContent = msg;
+    newAccountPopupError.classList.remove('hidden');
+}
+
+// ===================================================
+//  ✅ NEW ACCOUNT (Email + Password + Name)
 // ===================================================
 function handleNewAccount() {
     if (isProcessing) return;
+
+    var email = newAccEmailInput.value.trim();
+    var password = newAccPasswordInput.value.trim();
+    var name = newAccNameInput.value.trim();
+
+    if (!email || !email.includes('@')) {
+        showNewAccountError('Gmail မှန်ကန်စွာ ထည့်ပါ');
+        return;
+    }
+    if (!password || password.length < 6) {
+        showNewAccountError('Password အနည်းဆုံး 6 လုံး ထည့်ပါ');
+        return;
+    }
+    if (!name) {
+        showNewAccountError('Display Name ထည့်ပါ');
+        return;
+    }
+
     isProcessing = true;
-    newAccountBtn.disabled = true;
+    newAccountSubmitBtn.disabled = true;
+    showLoading('Creating account...');
 
     getLeastLoadedServer().then(function(serverId) {
-        if (!serverId) { isProcessing = false; newAccountBtn.disabled = false; alert('No server'); return; }
+        if (!serverId) throw new Error('No server');
         var auth = getAuthForServer(serverId);
-        if (!auth) { isProcessing = false; newAccountBtn.disabled = false; alert('Auth unavailable'); return; }
+        if (!auth) throw new Error('Auth unavailable');
 
-        var provider = new firebase.auth.GoogleAuthProvider();
-        provider.setCustomParameters({ prompt: 'select_account' });
-
-        return auth.signInWithPopup(provider).then(function(result) {
+        // ✅ Email/Password နဲ့ Account ဖွင့်
+        return auth.createUserWithEmailAndPassword(email, password).then(function(result) {
             var user = result.user;
-            var email = user.email;
             var authId = user.uid;
-
-            if (!email || !email.includes('@gmail.com')) {
-                throw new Error('Please use a Gmail address');
-            }
 
             return getUserFromFirebase(email, serverId).then(function(existingUser) {
                 if (existingUser) {
+                    // ရှိပြီးသား (ဖြစ်ခဲလှ) -- update ပဲ
                     existingUser.authId = authId;
-                    return { userData: existingUser, serverId: serverId, isNew: false };
+                    return { userData: existingUser, serverId: serverId };
                 } else {
                     var userId = generateUserId();
                     var inviteCode = generateInviteCode();
-                    var avatar = user.photoURL || '';
-                    var name = user.displayName || 'Player';
                     var mServer = pickMServerForUser();
 
                     return getNextAccNo(getDbForServer(serverId)).then(function(accNo) {
                         var userData = {
-                            accNo: accNo, authId: authId,
-                            email: email, name: name,
-                            userId: userId, diamond: 0, inviteCode: inviteCode,
-                            bio: '', play: '', friendsList: [], blockList: [],
+                            accNo: accNo,
+                            authId: authId,
+                            email: email,
+                            name: name,
+                            userId: userId,
+                            diamond: 0,
+                            inviteCode: inviteCode,
+                            bio: '', play: '',
+                            friendsList: [], blockList: [],
                             frameUse: '', bannerUse: '', backgroundUse: '', bubbleUse: '', markUse: '',
                             frameOwned: [], bannerOwned: [], backgroundOwned: [], bubbleOwned: [],
-                            roleUse: '', roleOwned: [], avatar: avatar,
+                            roleUse: '', roleOwned: [],
+                            avatar: '',
                             mServer: mServer,
-                            serverId: serverId, isFirstLogin: true
+                            serverId: serverId,
+                            isFirstLogin: false // ✅ Name ကို Popup မှာ ထည့်ပြီးသား
                         };
                         return saveUserToFirebase(userData, serverId).then(function(saved) {
                             if (!saved) throw new Error('Save failed');
-                            return { userData: userData, serverId: serverId, isNew: true };
+                            return { userData: userData, serverId: serverId };
                         });
                     });
                 }
@@ -10043,17 +10009,6 @@ function handleNewAccount() {
         });
     }).then(function(result) {
         if (!result) return;
-        if (result.userData.authId) {
-            var db = getDbForServer(result.serverId);
-            if (db) {
-                return db.ref('users/' + result.userData.userId).update({ authId: result.userData.authId })
-                    .then(function() { return result; })
-                    .catch(function() { return result; });
-            }
-        }
-        return result;
-    }).then(function(result) {
-        if (!result) return;
         return updateUserOnlineStatus(result.userData.userId, result.serverId, true).then(function() { return result; });
     }).then(function(result) {
         if (!result) return;
@@ -10065,76 +10020,91 @@ function handleNewAccount() {
             currentServerId = serverId;
             currentDb = getDbForServer(serverId);
             currentAuth = getAuthForServer(serverId);
+            hideLoading();
+            closeNewAccountPopup();
 
-            if (userData.isFirstLogin === undefined || userData.isFirstLogin === true) {
-                setTimeout(function() { showFirstLoginPopup(); }, 300);
-            } else {
-                enterApp(userData);
-            }
+            // ✅ First Login Popup မလိုတော့ -- Name ကို Popup မှာ ထည့်ပြီးသား
+            setTimeout(function() { enterApp(userData); }, 400);
+
             isProcessing = false;
-            newAccountBtn.disabled = false;
+            newAccountSubmitBtn.disabled = false;
         });
     }).catch(function(error) {
-        isProcessing = false; newAccountBtn.disabled = false;
+        hideLoading();
+        isProcessing = false;
+        newAccountSubmitBtn.disabled = false;
         console.error('New account error:', error);
-        if (error.code === 'auth/popup-closed-by-user') alert('Sign-in cancelled');
-        else if (error.code === 'auth/popup-blocked') alert('Popup blocked');
-        else if (error.code === 'auth/network-request-failed') alert('Network error');
-        else alert('Failed: ' + error.message);
+
+        if (error.code === 'auth/email-already-in-use') {
+            showNewAccountError('ဒီ Gmail နဲ့ Account ရှိပြီးသား။ Login လုပ်ပါ။');
+        } else if (error.code === 'auth/weak-password') {
+            showNewAccountError('Password အားနည်းနေသည် (6 လုံး+)');
+        } else if (error.code === 'auth/invalid-email') {
+            showNewAccountError('Gmail ပုံစံ မှားနေသည်');
+        } else if (error.code === 'auth/network-request-failed') {
+            showNewAccountError('Internet ချိတ်ဆက်မှု မကောင်း');
+        } else if (error.code === 'auth/operation-not-allowed') {
+            showNewAccountError('Firebase မှာ Email/Password ကို Enable လုပ်ပါ');
+        } else {
+            showNewAccountError('Error: ' + error.message);
+        }
     });
 }
 
 // ===================================================
-//  ✅ LOGIN -- Loading overlay မပြ
+//  ✅ LOGIN (Email + Password + Server No)
 // ===================================================
 function handleLogin() {
     if (isProcessing) return;
+
+    var email = loginEmailInput.value.trim();
+    var password = loginPasswordInput.value.trim();
     var serverNo = parseInt(loginServerInput.value.trim());
-    if (!serverNo || isNaN(serverNo)) { showLoginPopupError('Enter valid Server No.'); return; }
+
+    if (!email) { showLoginPopupError('Gmail ထည့်ပါ'); return; }
+    if (!password) { showLoginPopupError('Password ထည့်ပါ'); return; }
+    if (!serverNo || isNaN(serverNo)) { showLoginPopupError('Server No. ထည့်ပါ'); return; }
+
     var server = FIREBASE_SERVERS.find(function(s) { return s.number === serverNo; });
-    if (!server) { showLoginPopupError('Server not found'); return; }
+    if (!server) { showLoginPopupError('Server မတွေ့ပါ'); return; }
 
     var serverId = server.id;
     isProcessing = true;
     loginSubmitBtn.disabled = true;
+    showLoading('Connecting to Server ' + serverNo + '...');
 
     var auth = getAuthForServer(serverId);
-    if (!auth) { isProcessing = false; loginSubmitBtn.disabled = false; showLoginPopupError('Auth unavailable'); return; }
+    if (!auth) {
+        hideLoading();
+        isProcessing = false;
+        loginSubmitBtn.disabled = false;
+        showLoginPopupError('Auth unavailable');
+        return;
+    }
 
-    var provider = new firebase.auth.GoogleAuthProvider();
-    provider.setCustomParameters({ prompt: 'select_account' });
-    var newAuthId = null;
-
-    auth.signInWithPopup(provider).then(function(result) {
+    auth.signInWithEmailAndPassword(email, password).then(function(result) {
         var user = result.user;
-        var email = user.email;
-        newAuthId = user.uid;
-
-        if (!email || !email.includes('@gmail.com')) {
-            isProcessing = false; loginSubmitBtn.disabled = false;
-            showLoginPopupError('Please use Gmail');
-            return null;
-        }
+        showLoading('Loading your data...');
 
         return fullSyncFromFirebase(email, serverId).then(function(userData) {
             if (!userData) {
-                isProcessing = false; loginSubmitBtn.disabled = false;
-                showLoginPopupError('No account on Server ' + serverNo + '. Create new.');
+                hideLoading();
+                isProcessing = false;
+                loginSubmitBtn.disabled = false;
+                showLoginPopupError('Server ' + serverNo + ' မှာ Account မတွေ့ပါ');
                 return null;
             }
-            userData.authId = newAuthId;
-            return { userData: userData, serverId: serverId, email: email };
+            userData.authId = user.uid;
+            return { userData: userData, serverId: serverId };
         });
     }).then(function(result) {
         if (!result) return;
         var db = getDbForServer(result.serverId);
         if (db) {
-            return db.ref('users/' + result.userData.userId).update({ authId: newAuthId })
+            return db.ref('users/' + result.userData.userId)
+                .update({ authId: result.userData.authId })
                 .then(function() { return result; })
-                .catch(function(err) {
-                    console.warn('authId update failed:', err);
-                    return result;
-                });
+                .catch(function(err) { console.warn('authId update failed:', err); return result; });
         }
         return result;
     }).then(function(result) {
@@ -10150,23 +10120,41 @@ function handleLogin() {
             currentServerId = serverId;
             currentDb = getDbForServer(serverId);
             currentAuth = getAuthForServer(serverId);
+            hideLoading();
             closeLoginPopup();
-            enterApp(userData);
+            setTimeout(function() { enterApp(userData); }, 400);
             isProcessing = false;
             loginSubmitBtn.disabled = false;
         });
     }).catch(function(error) {
-        isProcessing = false; loginSubmitBtn.disabled = false;
+        hideLoading();
+        isProcessing = false;
+        loginSubmitBtn.disabled = false;
         console.error('Login error:', error);
-        if (error.code === 'auth/popup-closed-by-user') showLoginPopupError('Cancelled');
-        else if (error.code === 'auth/popup-blocked') showLoginPopupError('Popup blocked');
-        else if (error.code === 'auth/network-request-failed') showLoginPopupError('Network error');
-        else showLoginPopupError('Failed: ' + error.message);
+
+        if (error.code === 'auth/user-not-found') {
+            showLoginPopupError('ဒီ Gmail နဲ့ Account မရှိပါ');
+        } else if (error.code === 'auth/wrong-password') {
+            showLoginPopupError('Password မှားနေသည်');
+        } else if (error.code === 'auth/invalid-email') {
+            showLoginPopupError('Gmail ပုံစံ မှားနေသည်');
+        } else if (error.code === 'auth/invalid-credential') {
+            showLoginPopupError('Gmail / Password မှားနေသည်');
+        } else if (error.code === 'auth/too-many-requests') {
+            showLoginPopupError('အကြိမ်အများကြီး မှားယွင်း။ ခဏနေမှ ပြန်စမ်းပါ');
+        } else if (error.code === 'auth/network-request-failed') {
+            showLoginPopupError('Internet ချိတ်ဆက်မှု မကောင်း');
+        } else if (error.code === 'auth/operation-not-allowed') {
+            showLoginPopupError('Firebase မှာ Email/Password ကို Enable လုပ်ပါ');
+        } else {
+            showLoginPopupError('Error: ' + error.message);
+        }
     });
 }
 
 // ===================================================
-//  FIRST LOGIN POPUP
+//  FIRST LOGIN POPUP (အသုံးမလိုတော့ -- Name ကို New Account Popup မှာ ထည့်ပြီးသား)
+//  Session ဟောင်း (Google နဲ့ ဖွင့်ထားတဲ့ Account) တွေအတွက် ဆက်ထား
 // ===================================================
 function showFirstLoginPopup() { if (firstLoginPopup) firstLoginPopup.classList.remove('hidden'); }
 function closeFirstLoginPopup() { if (firstLoginPopup) firstLoginPopup.classList.add('hidden'); }
@@ -10178,10 +10166,11 @@ function handleFirstLoginSave() {
 
     isFirstLoginProcessing = true;
     firstLoginSaveBtn.disabled = true;
+    showLoading('Saving profile...');
 
     var avatar = firstLoginAvatarPreview.src;
     var db = getDbForServer(currentServerId);
-    if (!db) { isFirstLoginProcessing = false; firstLoginSaveBtn.disabled = false; alert('DB error'); return; }
+    if (!db) { hideLoading(); isFirstLoginProcessing = false; firstLoginSaveBtn.disabled = false; alert('DB error'); return; }
 
     db.ref('users/' + currentUser.userId).update({ name: name, avatar: avatar, isFirstLogin: false })
     .then(function() {
@@ -10190,15 +10179,16 @@ function handleFirstLoginSave() {
         currentUser.isFirstLogin = false;
         saveUserToDB(currentUser);
 
-        if (userNameEl) userNameEl.textContent = name;
-        if (profileAvatar) profileAvatar.src = avatar;
+        userNameEl.textContent = name;
+        profileAvatar.src = avatar;
 
+        hideLoading();
         closeFirstLoginPopup();
         isFirstLoginProcessing = false;
         firstLoginSaveBtn.disabled = false;
-        enterApp(currentUser);
+        setTimeout(function() { enterApp(currentUser); }, 300);
     }).catch(function() {
-        isFirstLoginProcessing = false; firstLoginSaveBtn.disabled = false;
+        hideLoading(); isFirstLoginProcessing = false; firstLoginSaveBtn.disabled = false;
         alert('Save failed');
     });
 }
@@ -10209,6 +10199,8 @@ function handleFirstLoginSave() {
 function showLoginPopup() {
     if (loginPopup) {
         loginPopup.classList.remove('hidden');
+        loginEmailInput.value = '';
+        loginPasswordInput.value = '';
         loginServerInput.value = '';
         loginPopupError.classList.add('hidden');
     }
@@ -10220,7 +10212,7 @@ function showLoginPopupError(msg) {
 }
 
 // ===================================================
-//  ✅ CHECK SESSION -- IndexedDB First
+//  CHECK SESSION
 // ===================================================
 function checkSession() {
     return new Promise(function(resolve) {
@@ -10243,7 +10235,11 @@ function checkSession() {
                 saveUserToDB(userData);
 
                 ensureFirebaseAuth(serverId, email).then(function(ok) {
-                    if (!ok) console.warn('Auth not ready');
+                    if (!ok) {
+                        console.warn('Auth not ready -- show login');
+                        clearSessionFromDB();
+                        return resolve(false);
+                    }
 
                     if (userData.isFirstLogin === undefined || userData.isFirstLogin === true) {
                         setTimeout(function() { showFirstLoginPopup(); }, 300);
@@ -11108,9 +11104,7 @@ function markFriendOnline(sid, uid) {
             } else {
                 resolve();
             }
-        }).catch(function() {
-            resolve();
-        });
+        }).catch(function() { resolve(); });
     });
 }
 
@@ -11220,18 +11214,18 @@ function saveMessageToLocalDB(msg) {
     var friendId = msg.type === 'sent' ? msg.receiverId : msg.senderId;
     var friendServer = msg.type === 'sent' ? msg.receiverServer : msg.senderServer;
     var key = getMessagesKey(friendServer, friendId);
-    
+
     var messages = memoryMessages[key] || [];
     var idx = messages.findIndex(function(m) { return m.messageId === msg.messageId; });
     if (idx >= 0) messages[idx] = Object.assign({}, messages[idx], msg);
     else messages.push(msg);
-    
+
     messages.sort(function(a, b) { return a.timestamp - b.timestamp; });
     memoryMessages[key] = messages;
-    
+
     pendingSaveKeys[key] = true;
     if (!flushTimer) flushTimer = setTimeout(flushPendingSaves, FLUSH_INTERVAL);
-    
+
     return Promise.resolve();
 }
 
@@ -11448,15 +11442,11 @@ function deleteFriendAndSync(targetData) {
     .catch(function() { hideLoading(); alert('Failed'); });
 }
 
-// ===================================================
-//  ✅ FRIENDS LIST LISTENER -- Change Detection
-// ===================================================
 function startFriendsListListener() {
     if (!currentUser || !currentServerId) return;
     if (friendsListListener) { try { friendsListListener.off(); } catch(e) {} friendsListListener = null; }
     var myDb = getDbForServer(currentServerId);
     if (!myDb) return;
-    
     friendsListListener = myDb.ref('users/' + currentUser.userId + '/friendsList');
     friendsListListener.on('value', function(snap) {
         var list = snap.val();
@@ -11464,30 +11454,11 @@ function startFriendsListListener() {
         else if (!Array.isArray(list)) list = Object.keys(list).map(function(k) { return list[k]; });
 
         var oldList = Array.isArray(currentUser.friendsList) ? currentUser.friendsList : [];
-        
-        // ✅ ပြောင်းလဲမှု ရှိလား စစ်
-        var hasChanged = JSON.stringify(oldList) !== JSON.stringify(list);
-        
-        if (!hasChanged) {
-            console.log('✅ Friends list: No change');
-            return;
-        }
-        
-        console.log('🔄 Friends list changed');
-        
-        var newOnes = list.filter(function(nf) { 
-            return !oldList.some(function(of) { 
-                return of.serverId === nf.serverId && of.userId === nf.userId; 
-            }); 
-        });
-        var removedOnes = oldList.filter(function(of) { 
-            return !list.some(function(nf) { 
-                return nf.serverId === of.serverId && nf.userId === of.userId; 
-            }); 
-        });
+        var newOnes = list.filter(function(nf) { return !oldList.some(function(of) { return of.serverId === nf.serverId && of.userId === nf.userId; }); });
+        var removedOnes = oldList.filter(function(of) { return !list.some(function(nf) { return nf.serverId === of.serverId && nf.userId === of.userId; }); });
 
         currentUser.friendsList = list;
-        saveUserToDB(currentUser);  // ✅ ပြောင်းရင်မှ save
+        saveUserToDB(currentUser);
 
         if (newOnes.length > 0) {
             var promises = newOnes.map(function(e) {
@@ -11550,7 +11521,7 @@ function doRenderChatList() {
             getLockedFriends().then(function(locked) {
                 getFromDB(NEW_MSG_FLAG_KEY).then(function(newMsgFlags) {
                     var flags = newMsgFlags || {};
-                    
+
                     var friends = currentUser.friendsList.map(function(f) {
                         var key = getFriendCacheKey(f.serverId, f.userId);
                         return {
@@ -11634,7 +11605,6 @@ function renderChatListRow(listEl, item) {
         var gameInfo = PLAY_CONFIG.getGameInfo(cached.play);
         var gameName = gameInfo ? gameInfo.name : cached.play;
         var gameImage = gameInfo ? gameInfo.image : '';
-        
         if (gameImage) {
             playHtml = '<div class="chat-list-play">' +
                            '<img class="chat-list-play-img" src="' + gameImage + '" />' +
@@ -11884,11 +11854,11 @@ function updateChatBlockUI() {
 // ===================================================
 function startChatRoomMessageListeners(target) {
     stopChatRoomMessageListeners();
-    
+
     var mServer = Array.isArray(currentUser.mServer) && currentUser.mServer.length > 0
         ? currentUser.mServer
         : [currentServerId];
-    
+
     mServer.forEach(function(sid) {
         var fsdb = getFirestoreForServer(sid);
         if (!fsdb) return;
@@ -11905,13 +11875,13 @@ function startChatRoomMessageListeners(target) {
                         msg.serverId = sid;
                         msg.type = 'received';
                         msg.seen = false;
-                        
+
                         saveMessageToLocalDB(msg).then(function() {
                             markFriendOnline(msg.senderServer, msg.senderId).then(function() {
                                 renderChatList();
-                                
-                                if (currentChatTarget && 
-                                    currentChatTarget.userId === target.userId && 
+
+                                if (currentChatTarget &&
+                                    currentChatTarget.userId === target.userId &&
                                     currentChatTarget.serverId === target.serverId) {
                                     requestAnimationFrame(function() { displayMessage(msg); });
                                     scrollToBottomDebounced();
@@ -11969,18 +11939,16 @@ function applyChatRoomData(data) {
     if (playEl) {
         playEl.innerHTML = '';
         playEl.style.display = 'none';
-        
         if (data.play && data.play.trim() !== '') {
             var gameInfo = PLAY_CONFIG.getGameInfo(data.play);
             var gameName = gameInfo ? gameInfo.name : data.play;
             var gameImage = gameInfo ? gameInfo.image : '';
-            
             if (gameImage) {
-                playEl.innerHTML = 
+                playEl.innerHTML =
                     '<img class="chat-room-play-img" src="' + gameImage + '" />' +
                     '<span class="chat-room-play-name">' + escapeHtml(gameName) + '</span>';
             } else {
-                playEl.innerHTML = 
+                playEl.innerHTML =
                     '<span class="chat-room-play-name">' + escapeHtml(gameName) + '</span>';
             }
             playEl.style.display = 'inline-flex';
@@ -12326,30 +12294,30 @@ function trySendToFirestore(messageId, messageData, localMsg, attempt) {
 
     getFriendFromCache(messageData.receiverServer, messageData.receiverId).then(function(cached) {
         var targetServers = [];
-        
+
         if (cached && Array.isArray(cached.mServer) && cached.mServer.length > 0) {
             targetServers = cached.mServer.slice();
         } else {
             targetServers = [messageData.receiverServer];
         }
-        
+
         if (!localMsg._triedServers) localMsg._triedServers = [];
         var availableServers = targetServers.filter(function(s) {
             return localMsg._triedServers.indexOf(s) === -1;
         });
-        
+
         if (availableServers.length === 0) {
             localMsg._triedServers = [];
             availableServers = targetServers.slice();
         }
-        
+
         var chosenServerId = availableServers[Math.floor(Math.random() * availableServers.length)];
         localMsg._triedServers.push(chosenServerId);
-        
+
         var fsdb = getFirestoreForServer(chosenServerId);
         if (!fsdb) {
-            setTimeout(function() { 
-                trySendToFirestore(messageId, messageData, localMsg, attempt + 1); 
+            setTimeout(function() {
+                trySendToFirestore(messageId, messageData, localMsg, attempt + 1);
             }, backoff);
             return;
         }
@@ -12365,29 +12333,21 @@ function trySendToFirestore(messageId, messageData, localMsg, attempt) {
         })
         .catch(function(err) {
             console.warn('Send error (' + chosenServerId + '):', err.code, '→ trying another server');
-            
-            if (err.code === 'resource-exhausted') {
-                backoff = 300;
-            } else if (err.code === 'permission-denied') {
-                backoff = 300;
-            } else if (err.code === 'unavailable') {
-                backoff = 1000;
-            } else if (err.code === 'deadline-exceeded') {
-                backoff = 1500;
-            } else if (err.code === 'unauthenticated') {
-                backoff = 2000;
-            } else if (err.code === 'internal') {
-                backoff = 1000;
-            } else if (err.code === 'cancelled') {
-                return;
-            }
-            
+
+            if (err.code === 'resource-exhausted') { backoff = 300; }
+            else if (err.code === 'permission-denied') { backoff = 300; }
+            else if (err.code === 'unavailable') { backoff = 1000; }
+            else if (err.code === 'deadline-exceeded') { backoff = 1500; }
+            else if (err.code === 'unauthenticated') { backoff = 2000; }
+            else if (err.code === 'internal') { backoff = 1000; }
+            else if (err.code === 'cancelled') { return; }
+
             if (attempt === 0) {
                 showToast('Server busy. Trying another...');
             }
-            
-            setTimeout(function() { 
-                trySendToFirestore(messageId, messageData, localMsg, attempt + 1); 
+
+            setTimeout(function() {
+                trySendToFirestore(messageId, messageData, localMsg, attempt + 1);
             }, backoff);
         });
     }).catch(function(err) {
@@ -12395,8 +12355,8 @@ function trySendToFirestore(messageId, messageData, localMsg, attempt) {
         var chosenServerId = messageData.receiverServer;
         var fsdb = getFirestoreForServer(chosenServerId);
         if (!fsdb) {
-            setTimeout(function() { 
-                trySendToFirestore(messageId, messageData, localMsg, attempt + 1); 
+            setTimeout(function() {
+                trySendToFirestore(messageId, messageData, localMsg, attempt + 1);
             }, backoff);
             return;
         }
@@ -12409,8 +12369,8 @@ function trySendToFirestore(messageId, messageData, localMsg, attempt) {
             renderChatList();
         })
         .catch(function() {
-            setTimeout(function() { 
-                trySendToFirestore(messageId, messageData, localMsg, attempt + 1); 
+            setTimeout(function() {
+                trySendToFirestore(messageId, messageData, localMsg, attempt + 1);
             }, backoff);
         });
     });
@@ -12779,17 +12739,17 @@ function applyChatBackground(imageData) {
 function startAppMessageListeners() {
     stopAppMessageListeners();
     if (!currentUser || !currentServerId) return;
-    
+
     var mServer = Array.isArray(currentUser.mServer) && currentUser.mServer.length > 0
         ? currentUser.mServer
         : [currentServerId];
-    
+
     console.log('Listening to M Servers:', mServer);
-    
+
     mServer.forEach(function(sid) {
         var fsdb = getFirestoreForServer(sid);
         if (!fsdb) return;
-        
+
         var unsub = fsdb.collection('messages')
             .where('receiverId', '==', currentUser.userId)
             .where('receiverServer', '==', currentServerId)
@@ -12801,12 +12761,11 @@ function startAppMessageListeners() {
                         msg.serverId = sid;
                         msg.type = 'received';
                         msg.seen = false;
-                        
+
                         saveMessageToLocalDB(msg).then(function() {
                             markFriendOnline(msg.senderServer, msg.senderId).then(function() {
-                                
-                                if (currentChatTarget && 
-                                    currentChatTarget.userId === msg.senderId && 
+                                if (currentChatTarget &&
+                                    currentChatTarget.userId === msg.senderId &&
                                     currentChatTarget.serverId === msg.senderServer) {
                                     requestAnimationFrame(function() { displayMessage(msg); });
                                     scrollToBottomDebounced();
@@ -13699,8 +13658,6 @@ function stopAllListeners() {
     try { stopChatRoomBlockListener(); } catch(e) {}
     try { stopAppMessageListeners(); } catch(e) {}
     try { if (onDisconnectRef) { onDisconnectRef.cancel(); onDisconnectRef = null; } } catch(e) {}
-    
-    backgroundSyncStarted = false;
 }
 
 function resetAllInMemoryState() {
@@ -13722,7 +13679,6 @@ function resetAllInMemoryState() {
     chatRoomUnlocked = {};
     bubblePickerOpen = false;
     currentReplyTo = null;
-    backgroundSyncStarted = false;
     var rb = document.getElementById('replyPreviewBar');
     if (rb) rb.remove();
 
@@ -13765,11 +13721,11 @@ function resetUIAfterLogout() {
     } catch(e) {}
 
     try {
-    document.querySelectorAll('.nav-btn').forEach(function(b) { b.classList.remove('active'); });
-    var dn = document.querySelector('.nav-btn[data-tab="home"]');
-    if (dn) dn.classList.add('active');
-    switchTab('home');
-} catch(e) {}
+        document.querySelectorAll('.nav-btn').forEach(function(b) { b.classList.remove('active'); });
+        var dn = document.querySelector('.nav-btn[data-tab="home"]');
+        if (dn) dn.classList.add('active');
+        switchTab('home');
+    } catch(e) {}
 
     try {
         var flc = document.getElementById('friendsListContainer');
@@ -13829,7 +13785,8 @@ function logoutUser() {
 
     isProcessing = true;
     showLoading('Logging out...');
-performCleanupBeforeClear()
+
+    performCleanupBeforeClear()
     .then(function() { return firebaseSignOutAll(); })
     .then(function() {
         return getAllKeysWithPrefix('messages_').then(function(msgKeys) {
@@ -13909,11 +13866,43 @@ function showLogoutOptionsPopup() {
 document.addEventListener('DOMContentLoaded', function() {
     initDomRefs();
 
-    if (newAccountBtn) newAccountBtn.addEventListener('click', handleNewAccount);
-    if (loginBtn) loginBtn.addEventListener('click', function() { if (!isProcessing) showLoginPopup(); });
+    // ✅ New Account -- Popup ဖွင့်
+    if (newAccountBtn) {
+        newAccountBtn.addEventListener('click', function() {
+            if (!isProcessing) showNewAccountPopup();
+        });
+    }
+    if (newAccountPopupClose) newAccountPopupClose.addEventListener('click', closeNewAccountPopup);
+    if (newAccountPopup) {
+        newAccountPopup.addEventListener('click', function(e) {
+            if (e.target === newAccountPopup) closeNewAccountPopup();
+        });
+    }
+    if (newAccountSubmitBtn) newAccountSubmitBtn.addEventListener('click', handleNewAccount);
+
+    // ✅ Login -- Popup ဖွင့်
+    if (loginBtn) {
+        loginBtn.addEventListener('click', function() {
+            if (!isProcessing) showLoginPopup();
+        });
+    }
     if (loginPopupClose) loginPopupClose.addEventListener('click', closeLoginPopup);
-    if (loginPopup) loginPopup.addEventListener('click', function(e) { if (e.target === loginPopup) closeLoginPopup(); });
+    if (loginPopup) {
+        loginPopup.addEventListener('click', function(e) {
+            if (e.target === loginPopup) closeLoginPopup();
+        });
+    }
     if (loginSubmitBtn) loginSubmitBtn.addEventListener('click', handleLogin);
+
+    // Enter key (Login)
+    if (loginEmailInput) loginEmailInput.addEventListener('keypress', function(e) { if (e.key === 'Enter') handleLogin(); });
+    if (loginPasswordInput) loginPasswordInput.addEventListener('keypress', function(e) { if (e.key === 'Enter') handleLogin(); });
+    if (loginServerInput) loginServerInput.addEventListener('keypress', function(e) { if (e.key === 'Enter') handleLogin(); });
+
+    // Enter key (New Account)
+    if (newAccEmailInput) newAccEmailInput.addEventListener('keypress', function(e) { if (e.key === 'Enter') handleNewAccount(); });
+    if (newAccPasswordInput) newAccPasswordInput.addEventListener('keypress', function(e) { if (e.key === 'Enter') handleNewAccount(); });
+    if (newAccNameInput) newAccNameInput.addEventListener('keypress', function(e) { if (e.key === 'Enter') handleNewAccount(); });
 
     if (firstLoginAvatar) firstLoginAvatar.addEventListener('click', function() { firstLoginAvatarInput.click(); });
     if (firstLoginAvatarInput) firstLoginAvatarInput.addEventListener('change', function(e) {
@@ -13935,22 +13924,22 @@ document.addEventListener('DOMContentLoaded', function() {
     if (fullscreenBackBtn) fullscreenBackBtn.addEventListener('click', goBackFullscreen);
     if (fullscreenOverlay) fullscreenOverlay.addEventListener('click', function(e) { if (e.target === fullscreenOverlay) closeFullscreen(); });
 
-document.querySelectorAll('.sidebar-btn[data-action]').forEach(function(btn) {
-    btn.addEventListener('click', function() {
-        var action = btn.dataset.action;
-        var map = {
-            shop: { title: 'Shop', fsId: 'fs-shop' },
-            tasks: { title: 'Tasks', fsId: 'fs-tasks' },
-            rank: { title: 'Rank', fsId: 'fs-rank' },
-            faq: { title: 'FAQ', fsId: 'fs-faq' },
-            invite: { title: 'Invite', fsId: 'fs-invite' },
-            settings: { title: 'Settings', fsId: 'fs-settings' }
-        };
-        var d = map[action] || { title: action, fsId: 'fs-search' };
-        openFullscreen(d.title, d.fsId);
-        closeSidebar();
+    document.querySelectorAll('.sidebar-btn[data-action]').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var action = btn.dataset.action;
+            var map = {
+                shop: { title: 'Shop', fsId: 'fs-shop' },
+                tasks: { title: 'Tasks', fsId: 'fs-tasks' },
+                rank: { title: 'Rank', fsId: 'fs-rank' },
+                faq: { title: 'FAQ', fsId: 'fs-faq' },
+                invite: { title: 'Invite', fsId: 'fs-invite' },
+                settings: { title: 'Settings', fsId: 'fs-settings' }
+            };
+            var d = map[action] || { title: action, fsId: 'fs-search' };
+            openFullscreen(d.title, d.fsId);
+            closeSidebar();
+        });
     });
-});
 
     if (profileBtn) profileBtn.addEventListener('click', function() { loadProfileData(); openFullscreen('Profile', 'fs-profile'); });
 
@@ -14071,6 +14060,7 @@ document.querySelectorAll('.sidebar-btn[data-action]').forEach(function(btn) {
             if (fullscreenOverlay && fullscreenOverlay.classList.contains('active')) closeFullscreen();
             else if (sidebar && sidebar.classList.contains('open')) closeSidebar();
             else if (loginPopup && !loginPopup.classList.contains('hidden')) closeLoginPopup();
+            else if (newAccountPopup && !newAccountPopup.classList.contains('hidden')) closeNewAccountPopup();
         }
     });
 
@@ -14080,41 +14070,41 @@ document.querySelectorAll('.sidebar-btn[data-action]').forEach(function(btn) {
     });
 
     if (bottomNav) {
-    bottomNav.addEventListener('click', function(e) {
-        var btn = e.target.closest('.nav-btn');
-        if (!btn) return;
-        var tab = btn.dataset.tab;
+        bottomNav.addEventListener('click', function(e) {
+            var btn = e.target.closest('.nav-btn');
+            if (!btn) return;
+            var tab = btn.dataset.tab;
 
-        if (tab === 'plus') {
-            e.preventDefault();
+            if (tab === 'plus') {
+                e.preventDefault();
+                e.stopPropagation();
+                if (plusMenuOpen) closePlusMenu();
+                else openPlusMenu();
+                return;
+            }
+
+            if (currentTab === tab) return;
+            if (activeNavBtn) activeNavBtn.classList.remove('active');
+            btn.classList.add('active');
+            activeNavBtn = btn;
+            currentTab = tab;
+            switchTab(tab);
+        });
+    }
+
+    var plusOverlayEl = document.getElementById('plusMenuOverlay');
+    if (plusOverlayEl) plusOverlayEl.addEventListener('click', closePlusMenu);
+
+    document.querySelectorAll('.plus-menu-btn').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
             e.stopPropagation();
-            if (plusMenuOpen) closePlusMenu();
-            else openPlusMenu();
-            return;
-        }
-
-        if (currentTab === tab) return;
-        if (activeNavBtn) activeNavBtn.classList.remove('active');
-        btn.classList.add('active');
-        activeNavBtn = btn;
-        currentTab = tab;
-        switchTab(tab);
+            handlePlusMenuAction(this.dataset.action);
+        });
     });
-}
 
-var plusOverlayEl = document.getElementById('plusMenuOverlay');
-if (plusOverlayEl) plusOverlayEl.addEventListener('click', closePlusMenu);
-
-document.querySelectorAll('.plus-menu-btn').forEach(function(btn) {
-    btn.addEventListener('click', function(e) {
-        e.stopPropagation();
-        handlePlusMenuAction(this.dataset.action);
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && plusMenuOpen) closePlusMenu();
     });
-});
-
-document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape' && plusMenuOpen) closePlusMenu();
-});
 
     setTimeout(initSlider, 100);
     setTimeout(initRoleSlider, 200);
@@ -14154,9 +14144,11 @@ document.addEventListener('keydown', function(e) {
             authOverlay.classList.remove('hidden');
         }
         setTimeout(attachChatRoomAvatarClick, 1000);
-        console.log('STAR ARCADE Ready (IndexedDB First + Background Sync + Change Detection)');
+        console.log('STAR ARCADE Ready (Email/Password + M Server + Auto Online + Play ID + Red Dot)');
     });
 });
+
+
 
     
 
