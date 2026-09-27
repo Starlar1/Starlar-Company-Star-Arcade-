@@ -17796,55 +17796,48 @@ if (document.readyState === 'loading') {
 })();
 
 // ===================================================
-//  FLOATING BUBBLE CONTROL (v2.0)
-//  - App ဝင်တည်းက Overlay Permission တောင်း
-//  - App အပြင်ထွက်မှ Bubble ပေါ်
-//  - App ပြန်ဝင်ရင် Bubble ပျောက်
-//  - Bubble နှိပ်ရင် Chat Popup (App ထဲ မဝင်)
-//  - Bubble ဖိ/ရွှေ့ရင် အမှိုက်ပုံး ပေါ်
+//  FLOATING BUBBLE CONTROL (v3.0)
+//  - Chat Screen ကိုပဲ ပြ
+//  - Search Bar + Bottom Nav ဖျောက်
+//  - Chat List ဆွဲရွှေ့လို့ရ
+//  - Keyboard ပေါ်
 // ===================================================
 
-// ✅ Chat Screen ဖွင့်ဖို့ (Bubble ကနေ ခေါ်မယ်)
 function showChatScreen() {
     // Chat tab ကို ဖွင့်
     var chatBtn = document.querySelector('.nav-btn[data-tab="chat"]');
-    if (chatBtn) {
-        chatBtn.click();
-    }
+    if (chatBtn) chatBtn.click();
 
     // Chat Room ဖွင့်ထားရင် ပိတ်
     var chatRoom = document.getElementById('fs-chat-room');
     if (chatRoom && !chatRoom.classList.contains('hidden')) {
-        if (typeof goBackFullscreen === 'function') {
-            goBackFullscreen();
-        }
+        if (typeof goBackFullscreen === 'function') goBackFullscreen();
     }
+
+    // ✅ Chat Screen ကို အပြည့်ဖြစ်အောင်
+    setTimeout(function() {
+        var chatList = document.getElementById('chatList');
+        if (chatList) {
+            chatList.style.paddingBottom = '120px';
+            chatList.style.overflowY = 'auto';
+        }
+    }, 500);
 }
 
-// ✅ Overlay Permission တောင်းဖို့
 function requestOverlayPermission() {
     if (window.Android && window.Android.requestOverlayPermission) {
         window.Android.requestOverlayPermission();
-        console.log('Requesting overlay permission...');
     }
 }
 
-// ✅ App ဝင်တည်းက Permission တောင်း
 document.addEventListener('DOMContentLoaded', function() {
     setTimeout(function() {
         requestOverlayPermission();
     }, 1000);
 });
 
-// ✅ Bubble ကို App ပိတ်တဲ့အခါ ရပ်
-window.addEventListener('beforeunload', function() {
-    if (window.Android && window.Android.onLogout) {
-        window.Android.onLogout();
-    }
-});
-
-console.log('Floating Bubble Control Ready v2.0');
-
+console.log('Floating Bubble Control Ready v3.0');
+    
     
 </script>
 </body>
