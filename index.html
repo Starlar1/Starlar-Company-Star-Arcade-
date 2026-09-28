@@ -9131,59 +9131,20 @@ var FIREBASE_SERVERS = [
 var M_SERVER_TARGET_COUNT = 10;
 
 // ===================================================
-//  PLAY CONFIG -- Game List
-//  ✅ Game အသစ် ထည့်ရင် ဒီမှာ + GitHub JSON မှာ ထည့်ပါ
+//  PLAY CONFIG -- G1/G2/G3
 // ===================================================
 var PLAY_CONFIG = {
     games: {
-        'G1': {
-            name: 'Mobile Legends',
-            image: 'https://i.ibb.co/your-mlbb-image.png',
-            packages: [
-                'com.mobile.legends',
-                'com.mobilelegends.mi',
-                'com.mobilelegends.hwag'
-            ]
-        },
-        'G2': {
-            name: 'PUBG Mobile',
-            image: 'https://i.ibb.co/your-pubg-image.png',
-            packages: [
-                'com.tencent.ig',
-                'com.pubg.imobile',
-                'com.pubg.krmobile',
-                'com.rekoo.pubgm'
-            ]
-        },
-        'G3': {
-            name: 'Free Fire',
-            image: 'https://i.ibb.co/your-freefire-image.png',
-            packages: [
-                'com.dts.freefireth',
-                'com.dts.freefiremax',
-                'com.garena.game.kgvn'
-            ]
-        }
+        'G1': { name: 'Mobile Legends', image: 'https://i.ibb.co/placeholder-g1.png' },
+        'G2': { name: 'PUBG Mobile', image: 'https://i.ibb.co/placeholder-g2.png' },
+        'G3': { name: 'Free Fire', image: 'https://i.ibb.co/placeholder-g3.png' }
     },
-    
     getGameInfo: function(playCode) {
         if (!playCode) return null;
         var code = String(playCode).trim().toUpperCase();
         return PLAY_CONFIG.games[code] || null;
-    },
-    
-    getGameCodeByPackage: function(packageName) {
-        if (!packageName) return '';
-        for (var code in PLAY_CONFIG.games) {
-            var game = PLAY_CONFIG.games[code];
-            if (game.packages && game.packages.indexOf(packageName) !== -1) {
-                return code;
-            }
-        }
-        return '';
     }
 };
-
 
 // ===================================================
 //  TELEGRAM
@@ -9496,84 +9457,16 @@ function pickMServerForUser() {
 //  NEXT ACC NO
 // ===================================================
 function getNextAccNo(db) {
-    return new Promise(function(resolve) {
+    return new Promise(function(resolve, reject) {
         try {
-            // ✅ အရင် ဖတ် (current value ရယူ)
-            db.ref('serverInfo/accNo').once('value')
-                .then(function(snap) {
-                    var current = snap.val();
-                    var next = (parseInt(current) || 0) + 1;
-
-                    // ✅ Transaction နဲ့ ရေး
-                    db.ref('serverInfo/accNo').transaction(function(currVal) {
-                        return (parseInt(currVal) || 0) + 1;
-                    }, function(error, committed, snapshot) {
-
-                        // ✅ Case 1: Transaction Error
-                        if (error) {
-                            // ✅ Fallback: တိုက်ရိုက် set ကြိုးစား
-                            db.ref('serverInfo/accNo').set(next)
-                                .then(function() { resolve(next); })
-                                .catch(function(e) {
-                                    // ✅ Fallback ၂: Random number + Alert
-                                    alert(
-                                        '❌ ACC NO ERROR\n\n' +
-                                        '📌 Function: getNextAccNo\n' +
-                                        '📌 Stage: Transaction + Fallback\n\n' +
-                                        'Code: ' + (e.code || 'unknown') + '\n' +
-                                        'Message: ' + (e.message || 'unknown') + '\n\n' +
-                                        '👉 Random number သုံးမည်'
-                                    );
-                                    resolve(Math.floor(Math.random() * 100000));
-                                });
-                        }
-                        // ✅ Case 2: Committed မဖြစ်
-                        else if (!committed) {
-                            // ✅ Fallback: တိုက်ရိုက် set
-                            db.ref('serverInfo/accNo').set(next)
-                                .then(function() { resolve(next); })
-                                .catch(function(e) {
-                                    alert(
-                                        '❌ ACC NO ERROR\n\n' +
-                                        '📌 Function: getNextAccNo\n' +
-                                        '📌 Stage: Not Committed + Fallback\n\n' +
-                                        'Code: ' + (e.code || 'unknown') + '\n' +
-                                        'Message: ' + (e.message || 'unknown') + '\n\n' +
-                                        '👉 Random number သုံးမည်'
-                                    );
-                                    resolve(Math.floor(Math.random() * 100000));
-                                });
-                        }
-                        // ✅ Case 3: အောင်မြင်
-                        else {
-                            resolve(snapshot.val());
-                        }
-                    });
-                })
-                .catch(function(err) {
-                    // ✅ Read Error
-                    alert(
-                        '❌ ACC NO READ ERROR\n\n' +
-                        '📌 Function: getNextAccNo\n' +
-                        '📌 Stage: Read\n\n' +
-                        'Code: ' + (err.code || 'unknown') + '\n' +
-                        'Message: ' + (err.message || 'unknown') + '\n\n' +
-                        '👉 Random number သုံးမည်'
-                    );
-                    resolve(Math.floor(Math.random() * 100000));
-                });
-        } catch(e) {
-            // ✅ Try-Catch Error
-            alert(
-                '❌ ACC NO CATCH ERROR\n\n' +
-                '📌 Function: getNextAccNo\n' +
-                '📌 Stage: Catch\n\n' +
-                'Code: ' + (e.code || 'unknown') + '\n' +
-                'Message: ' + (e.message || 'unknown') + '\n\n' +
-                '👉 Random number သုံးမည်'
-            );
-            resolve(Math.floor(Math.random() * 100000));
-        }
+            db.ref('serverInfo/accNo').transaction(function(current) {
+                return (current || 0) + 1;
+            }, function(error, committed, snapshot) {
+                if (error) reject(error);
+                else if (!committed) reject(new Error('Not committed'));
+                else resolve(snapshot.val());
+            });
+        } catch(e) { reject(e); }
     });
 }
 
@@ -9662,103 +9555,53 @@ function getUserFromFirebase(email, serverId) {
 function saveUserToFirebase(userData, serverId) {
     return new Promise(function(resolve) {
         var db = getDbForServer(serverId);
-        if (!db) {
-            alert('❌ DB ERROR\n\nServer ID: ' + serverId);
-            return resolve(false);
-        }
-        var server = FIREBASE_SERVERS.find(function(s) { return s.id === serverId; });
-        var serverName = server ? server.name : serverId;
-        var userId = userData.userId;
-        var baseRef = db.ref('users/' + userId);
+        if (!db) return resolve(false);
+        var serverName = FIREBASE_SERVERS.find(function(s) { return s.id === serverId; }).name;
 
-        // ===================================================
-        // ✅ Step 0: User data ရှိပြီးသားလား စစ်
-        // ===================================================
-        baseRef.once('value').then(function(snap) {
-            var exists = snap.exists();
-            var dataExists = exists && snap.val() && Object.keys(snap.val()).length > 0;
-
-            // ✅ Case 1: User data ရှိပြီးသား → diamond/owned ကျော်
-            if (dataExists) {
-                return Promise.all([
-                    baseRef.child('accNo').set(userData.accNo || 0),
-                    baseRef.child('authId').set(userData.authId || ''),
-                    baseRef.child('serverNo').set(serverName),
-                    baseRef.child('email').set(userData.email || ''),
-                    baseRef.child('name').set(userData.name || 'Player'),
-                    baseRef.child('userId').set(userId),
-                    baseRef.child('inviteCode').set(userData.inviteCode || ''),
-                    baseRef.child('bio').set(userData.bio || ''),
-                    baseRef.child('play').set(userData.play || ''),
-                    baseRef.child('friendsList').set(userData.friendsList || []),
-                    baseRef.child('blockList').set(userData.blockList || []),
-                    baseRef.child('frameUse').set(userData.frameUse || ''),
-                    baseRef.child('bannerUse').set(userData.bannerUse || ''),
-                    baseRef.child('backgroundUse').set(userData.backgroundUse || ''),
-                    baseRef.child('bubbleUse').set(userData.bubbleUse || ''),
-                    baseRef.child('markUse').set(userData.markUse || ''),
-                    baseRef.child('roleUse').set(userData.roleUse || ''),
-                    baseRef.child('mServer').set(userData.mServer || []),
-                    baseRef.child('online').set(true),
-                    baseRef.child('avatar').set(userData.avatar || ''),
-                    baseRef.child('isFirstLogin').set(userData.isFirstLogin !== undefined ? userData.isFirstLogin : true)
-                ]);
-            }
-
-            // ✅ Case 2: User အသစ် → diamond/owned အရင် ရေး
-            return Promise.all([
-                baseRef.child('diamond').set(0),
-                baseRef.child('frameOwned').set([]),
-                baseRef.child('bannerOwned').set([]),
-                baseRef.child('backgroundOwned').set([]),
-                baseRef.child('bubbleOwned').set([]),
-                baseRef.child('roleOwned').set([]),
-                baseRef.child('markOwned').set([])
-            ])
-            .then(function() {
-                return Promise.all([
-                    baseRef.child('accNo').set(userData.accNo || 0),
-                    baseRef.child('authId').set(userData.authId || ''),
-                    baseRef.child('serverNo').set(serverName),
-                    baseRef.child('email').set(userData.email || ''),
-                    baseRef.child('name').set(userData.name || 'Player'),
-                    baseRef.child('userId').set(userId),
-                    baseRef.child('inviteCode').set(userData.inviteCode || ''),
-                    baseRef.child('bio').set(userData.bio || ''),
-                    baseRef.child('play').set(userData.play || ''),
-                    baseRef.child('friendsList').set(userData.friendsList || []),
-                    baseRef.child('blockList').set(userData.blockList || []),
-                    baseRef.child('frameUse').set(userData.frameUse || ''),
-                    baseRef.child('bannerUse').set(userData.bannerUse || ''),
-                    baseRef.child('backgroundUse').set(userData.backgroundUse || ''),
-                    baseRef.child('bubbleUse').set(userData.bubbleUse || ''),
-                    baseRef.child('markUse').set(userData.markUse || ''),
-                    baseRef.child('roleUse').set(userData.roleUse || ''),
-                    baseRef.child('mServer').set(userData.mServer || []),
-                    baseRef.child('online').set(true),
-                    baseRef.child('avatar').set(userData.avatar || ''),
-                    baseRef.child('isFirstLogin').set(userData.isFirstLogin !== undefined ? userData.isFirstLogin : true)
-                ]);
-            });
-        })
-        .then(function() {
-            resolve(true);
-        })
-        .catch(function(err) {
-            alert(
-                '❌ SAVE FAILED\n\n' +
-                '📌 Function: saveUserToFirebase\n\n' +
-                'Code: ' + (err.code || 'unknown') + '\n' +
-                'Message: ' + (err.message || 'unknown') + '\n\n' +
-                'User ID: ' + userId + '\n' +
-                'Server: ' + serverName
-            );
-            console.error('saveUserToFirebase error:', err);
-            resolve(false);
-        });
+        db.ref('users/' + userData.userId).set({
+            accNo: userData.accNo || 0,
+            authId: userData.authId || '',
+            serverNo: serverName,
+            email: userData.email,
+            name: userData.name,
+            userId: userData.userId,
+            diamond: userData.diamond || 0,
+            inviteCode: userData.inviteCode,
+            bio: userData.bio || '',
+            play: userData.play || '',
+            friendsList: userData.friendsList || [],
+            blockList: userData.blockList || [],
+            frameUse: userData.frameUse || '',
+            bannerUse: userData.bannerUse || '',
+            backgroundUse: userData.backgroundUse || '',
+            bubbleUse: userData.bubbleUse || '',
+            markUse: userData.markUse || '',
+            frameOwned: userData.frameOwned || [],
+            bannerOwned: userData.bannerOwned || [],
+            backgroundOwned: userData.backgroundOwned || [],
+            bubbleOwned: userData.bubbleOwned || [],
+            roleUse: userData.roleUse || '',
+            roleOwned: userData.roleOwned || [],
+            mServer: userData.mServer || [],
+            online: true,
+            avatar: userData.avatar || '',
+            isFirstLogin: userData.isFirstLogin !== undefined ? userData.isFirstLogin : true
+        }).then(function() { resolve(true); }).catch(function() { resolve(false); });
     });
 }
 
+function updateUserOnlineStatus(userId, serverId, online) {
+    return new Promise(function(resolve, reject) {
+        var db = getDbForServer(serverId);
+        if (!db) return reject(new Error('No DB'));
+        var auth = getAuthForServer(serverId);
+        if (!auth || !auth.currentUser) {
+            console.warn('No auth -- skip online update');
+            return resolve();
+        }
+        db.ref('users/' + userId + '/online').set(online).then(resolve).catch(reject);
+    });
+}
 
 // ===================================================
 //  SETUP M SERVER
@@ -10103,51 +9946,36 @@ function handleNewAccount() {
 
     isProcessing = true;
 
-    // ✅ Loading
+    // ✅ Loading -- Button + Overlay
     var originalText = newAccountSubmitBtn.textContent;
     newAccountSubmitBtn.disabled = true;
     newAccountSubmitBtn.textContent = 'Creating...';
     showLoading('Creating account...');
 
-    // ✅ Track လုပ်မည့် function အမည်
-    var currentStep = 'getLeastLoadedServer';
-    var stepServerId = null;
-    var stepUserId = null;
-
     getLeastLoadedServer().then(function(serverId) {
         if (!serverId) throw new Error('No server');
-        stepServerId = serverId;
-
         var auth = getAuthForServer(serverId);
         if (!auth) throw new Error('Auth unavailable');
-
-        currentStep = 'Firebase Auth (createUser)';
 
         return auth.createUserWithEmailAndPassword(email, password).then(function(result) {
             var user = result.user;
             var authId = user.uid;
 
-            currentStep = 'getUserFromFirebase (check existing)';
-
             return getUserFromFirebase(email, serverId).then(function(existingUser) {
                 if (existingUser) {
                     existingUser.authId = authId;
-                    stepUserId = existingUser.userId;
                     return { userData: existingUser, serverId: serverId };
                 } else {
                     var userId = generateUserId();
-                    stepUserId = userId;
                     var inviteCode = generateInviteCode();
                     var mServer = pickMServerForUser();
-
-                    currentStep = 'getNextAccNo';
 
                     return getNextAccNo(getDbForServer(serverId)).then(function(accNo) {
                         var userData = {
                             accNo: accNo,
                             authId: authId,
                             email: email,
-                            name: 'Player',
+                            name: 'Player',           // ✅ Default -- First Login Popup မှာ ပြင်မယ်
                             userId: userId,
                             diamond: 0,
                             inviteCode: inviteCode,
@@ -10159,11 +9987,8 @@ function handleNewAccount() {
                             avatar: '',
                             mServer: mServer,
                             serverId: serverId,
-                            isFirstLogin: true
+                            isFirstLogin: true        // ✅ First Login Popup ပြမယ်
                         };
-
-                        currentStep = 'saveUserToFirebase';
-
                         return saveUserToFirebase(userData, serverId).then(function(saved) {
                             if (!saved) throw new Error('Save failed');
                             return { userData: userData, serverId: serverId };
@@ -10174,15 +9999,11 @@ function handleNewAccount() {
         });
     }).then(function(result) {
         if (!result) return;
-        currentStep = 'updateUserOnlineStatus';
-        stepUserId = result.userData.userId;
         return updateUserOnlineStatus(result.userData.userId, result.serverId, true).then(function() { return result; });
     }).then(function(result) {
         if (!result) return;
         var userData = result.userData;
         var serverId = result.serverId;
-
-        currentStep = 'saveUserToDB (local)';
 
         saveUserToDB(userData).then(function() {
             currentUser = userData;
@@ -10193,6 +10014,7 @@ function handleNewAccount() {
             hideLoading();
             closeNewAccountPopup();
 
+            // ✅ First Login Popup ပြ (ပုံ + Name) -- မူရင်းအတိုင်း
             setTimeout(function() { showFirstLoginPopup(); }, 300);
 
             isProcessing = false;
@@ -10204,39 +10026,8 @@ function handleNewAccount() {
         isProcessing = false;
         newAccountSubmitBtn.disabled = false;
         newAccountSubmitBtn.textContent = originalText;
+        console.error('New account error:', error);
 
-        // ✅ Stack ကနေ function ရှာ
-        var stack = (error.stack || '').substring(0, 600);
-        var funcFromStack = 'unknown';
-
-        if (stack.indexOf('getNextAccNo') !== -1) funcFromStack = 'getNextAccNo';
-        else if (stack.indexOf('saveUserToFirebase') !== -1) funcFromStack = 'saveUserToFirebase';
-        else if (stack.indexOf('updateUserOnlineStatus') !== -1) funcFromStack = 'updateUserOnlineStatus';
-        else if (stack.indexOf('createUserWithEmailAndPassword') !== -1) funcFromStack = 'Firebase Auth';
-        else if (stack.indexOf('getUserFromFirebase') !== -1) funcFromStack = 'getUserFromFirebase';
-        else if (stack.indexOf('saveUserToDB') !== -1) funcFromStack = 'saveUserToDB';
-
-        // ✅ Auth status ရယူ
-        var authInfo = 'NULL';
-        try {
-            var authObj = getAuthForServer(stepServerId || currentServerId);
-            if (authObj && authObj.currentUser) authInfo = authObj.currentUser.email;
-        } catch(e) {}
-
-        // ✅ UI Alert — အတိအကျ ပြ
-        alert(
-            '❌ NEW ACCOUNT ERROR\n\n' +
-            '📌 Step (current): ' + currentStep + '\n' +
-            '📌 Function (stack): ' + funcFromStack + '\n\n' +
-            'Code: ' + (error.code || 'unknown') + '\n' +
-            'Message: ' + (error.message || 'unknown') + '\n\n' +
-            'Server ID: ' + (stepServerId || currentServerId || 'NULL') + '\n' +
-            'User ID: ' + (stepUserId || 'NULL') + '\n' +
-            'Auth User: ' + authInfo + '\n\n' +
-            'Stack (အပိုင်း):\n' + stack
-        );
-
-        // ✅ UI မှာ error message ပြ
         if (error.code === 'auth/email-already-in-use') {
             showNewAccountError('ဒီ Gmail နဲ့ Account ရှိပြီးသား။ Login လုပ်ပါ။');
         } else if (error.code === 'auth/weak-password') {
@@ -10247,10 +10038,8 @@ function handleNewAccount() {
             showNewAccountError('Internet ချိတ်ဆက်မှု မကောင်း');
         } else if (error.code === 'auth/operation-not-allowed') {
             showNewAccountError('Firebase မှာ Email/Password ကို Enable လုပ်ပါ');
-        } else if (error.message === 'Save failed') {
-            showNewAccountError('Save failed — ' + currentStep + ' မှာ ကျရှုံး');
         } else {
-            showNewAccountError('Step ' + currentStep + ' — ' + (error.message || error.code));
+            showNewAccountError('Error: ' + error.message);
         }
     });
 }
@@ -10401,16 +10190,7 @@ function handleFirstLoginSave() {
         return;
     }
 
-    var userId = currentUser.userId;
-    var baseRef = db.ref('users/' + userId);
-
-    // ✅ Child တစ်ခုချင်း ရေး (Parent update မသုံး)
-    // Rule မှာ $userId.write: false ဖြစ်လို့ parent update က block ဖြစ်တယ်
-    Promise.all([
-        baseRef.child('name').set(name),
-        baseRef.child('avatar').set(avatar),
-        baseRef.child('isFirstLogin').set(false)
-    ])
+    db.ref('users/' + currentUser.userId).update({ name: name, avatar: avatar, isFirstLogin: false })
     .then(function() {
         currentUser.name = name;
         currentUser.avatar = avatar;
@@ -10426,14 +10206,12 @@ function handleFirstLoginSave() {
         firstLoginSaveBtn.disabled = false;
         firstLoginSaveBtn.textContent = originalText;
         setTimeout(function() { enterApp(currentUser); }, 300);
-    })
-    .catch(function(err) {
-        console.error('First login save error:', err);
+    }).catch(function() {
         hideLoading();
         isFirstLoginProcessing = false;
         firstLoginSaveBtn.disabled = false;
         firstLoginSaveBtn.textContent = originalText;
-        alert('Save failed: ' + (err.message || err.code || 'Unknown'));
+        alert('Save failed');
     });
 }
 
@@ -14385,8 +14163,6 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log('STAR ARCADE Ready (Email/Password + First Login Popup + Loading)');
     });
 });
-
-
 
     
 
