@@ -11,6 +11,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <link rel="stylesheet" href="style.css" />
 
@@ -7639,6 +7640,797 @@ body {
     .vid-diamond-row.missing .vid-diamond-value { font-size: 15px; }
     .vid-diamond-btn { font-size: 14px; padding: 13px; }
 }
+
+/* ============================================================
+   ✅ POST SYSTEM STYLES v2.0
+   ============================================================ */
+.post-create-screen,
+.post-feed-screen {
+    position: fixed;
+    inset: 0;
+    background: var(--bg-body);
+    z-index: 10060;
+    display: flex;
+    flex-direction: column;
+    animation: postSlideIn 0.25s ease;
+}
+.post-create-screen.hidden,
+.post-feed-screen.hidden { display: none !important; }
+
+@keyframes postSlideIn {
+    from { opacity: 0; transform: translateX(20px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+.post-create-header,
+.post-feed-header {
+    display: flex; align-items: center; gap: 8px;
+    padding: 14px 16px;
+    background: var(--bg-header);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+}
+.post-create-back,
+.post-feed-back {
+    width: 40px; height: 40px;
+    border-radius: 12px; border: none;
+    background: transparent; color: var(--accent);
+    cursor: pointer; display: flex;
+    align-items: center; justify-content: center;
+    flex-shrink: 0; transition: all 0.2s ease;
+}
+.post-create-back:active,
+.post-feed-back:active { background: var(--bg-hover); transform: scale(0.92); }
+.post-create-title,
+.post-feed-title {
+    flex: 1; text-align: center;
+    font-size: 16px; font-weight: 700; color: var(--text-main);
+}
+
+.post-create-body {
+    flex: 1; overflow-y: auto; padding: 16px;
+    display: flex; flex-direction: column; gap: 18px;
+}
+
+/* ============ HOME FEED TABS ============ */
+.post-tabs-bar {
+    display: flex;
+    gap: 8px;
+    padding: 10px 12px;
+    background: var(--bg-header);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+.post-tabs-bar::-webkit-scrollbar { display: none; }
+
+.post-tab-chip {
+    flex-shrink: 0;
+    padding: 8px 18px;
+    border-radius: 18px;
+    border: 1.5px solid var(--border-light);
+    background: var(--bg-input);
+    color: var(--text-sub);
+    font-size: 13px;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+}
+.post-tab-chip:active { transform: scale(0.95); }
+.post-tab-chip.active {
+    background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+    border-color: var(--accent);
+    color: #fff;
+    box-shadow: 0 3px 12px rgba(255, 109, 31, 0.4);
+}
+.post-tab-chip svg { width: 14px; height: 14px; }
+
+.post-tab-desc {
+    font-size: 11px;
+    color: var(--text-muted);
+    padding: 6px 16px 2px;
+    line-height: 1.4;
+    background: var(--bg-body);
+    flex-shrink: 0;
+}
+
+/* ============ HOME EMBED ============ */
+#screen-home {
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100% !important;
+    height: 100% !important;
+    align-items: stretch !important;
+    justify-content: flex-start !important;
+}
+
+.post-feed-embedded {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-body);
+    overflow: hidden;
+}
+
+.post-feed-embedded .post-feed-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 12px 0;
+    -webkit-overflow-scrolling: touch;
+}
+
+.post-feed-loading,
+.post-feed-empty {
+    text-align: center; color: var(--text-muted);
+    font-size: 14px; padding: 60px 20px;
+    line-height: 1.6;
+}
+
+.post-feed-load-more {
+    text-align: center;
+    padding: 16px 20px 30px;
+    color: var(--accent);
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+.post-feed-load-more:active { opacity: 0.6; }
+.post-feed-load-more .spinner-mini {
+    width: 16px; height: 16px;
+    border: 2px solid var(--border-light);
+    border-top: 2px solid var(--accent);
+    border-radius: 50%;
+    animation: postSpin 0.7s linear infinite;
+}
+
+/* ============ CREATE POST ============ */
+.post-media-section { display: flex; flex-direction: column; gap: 12px; }
+.post-media-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;
+}
+.post-media-slot {
+    aspect-ratio: 1;
+    border-radius: 12px;
+    background: var(--bg-input);
+    border: 2px dashed var(--border-light);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 4px; cursor: pointer; position: relative;
+    overflow: hidden; transition: all 0.2s ease;
+}
+.post-media-slot:active { transform: scale(0.96); border-color: var(--accent); background: rgba(255,109,31,0.06); }
+.post-media-slot.has-media { border-style: solid; border-color: var(--accent); }
+.post-media-slot img,
+.post-media-slot video {
+    width: 100%; height: 100%; object-fit: cover;
+    border-radius: 10px;
+}
+.post-media-slot .slot-plus {
+    color: var(--text-muted);
+    display: flex; flex-direction: column;
+    align-items: center; gap: 2px;
+}
+.post-media-slot .slot-label {
+    font-size: 9px; color: var(--text-muted);
+    font-weight: 600; text-align: center;
+    padding: 0 4px; line-height: 1.2;
+}
+.post-media-slot .slot-remove {
+    position: absolute; top: 4px; right: 4px;
+    width: 24px; height: 24px; border-radius: 50%;
+    border: none; background: rgba(255,68,68,0.95);
+    color: #fff; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    z-index: 2; box-shadow: 0 2px 6px rgba(255,68,68,0.4);
+}
+.post-media-slot .slot-badge {
+    position: absolute; bottom: 4px; left: 4px;
+    background: rgba(0,0,0,0.7); color: #fff;
+    font-size: 9px; font-weight: 700;
+    padding: 2px 6px; border-radius: 6px;
+    z-index: 2; backdrop-filter: blur(4px);
+}
+.post-media-actions {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+}
+.post-media-add-btn {
+    display: flex; align-items: center; justify-content: center;
+    gap: 8px; padding: 12px;
+    border: 1.5px solid var(--border-light);
+    border-radius: 12px; background: var(--bg-card);
+    color: var(--text-main); font-size: 13px;
+    font-weight: 700; font-family: inherit;
+    cursor: pointer; transition: all 0.2s ease;
+}
+.post-media-add-btn:active { transform: scale(0.96); border-color: var(--accent); background: rgba(255,109,31,0.08); }
+
+.post-input-group { display: flex; flex-direction: column; gap: 8px; }
+.post-input-group > label {
+    font-size: 13px; font-weight: 700;
+    color: var(--text-sub); padding-left: 4px;
+    letter-spacing: 0.3px;
+}
+.post-textarea {
+    width: 100%; padding: 12px 14px;
+    border: 1.5px solid var(--border-light);
+    border-radius: 12px; background: var(--bg-input);
+    color: var(--text-main); font-size: 14px;
+    font-family: inherit; outline: none;
+    resize: vertical; min-height: 80px; max-height: 150px;
+    transition: border-color 0.2s ease; line-height: 1.5;
+}
+.post-textarea:focus { border-color: var(--accent); }
+.post-textarea::placeholder { color: var(--text-muted); }
+
+.post-role-list { display: flex; flex-direction: column; gap: 8px; }
+.post-role-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 14px; background: var(--bg-card);
+    border: 2px solid var(--border-light);
+    border-radius: 12px; cursor: pointer;
+    transition: all 0.2s ease; position: relative;
+}
+.post-role-item:active { transform: scale(0.98); background: var(--bg-hover); }
+.post-role-item.selected {
+    border-color: var(--accent);
+    background: rgba(255,109,31,0.08);
+    box-shadow: 0 0 0 2px rgba(255,109,31,0.15);
+}
+.post-role-item img {
+    width: 44px; height: 44px; border-radius: 10px;
+    object-fit: cover; flex-shrink: 0; background: var(--bg-input);
+}
+.post-role-item .role-info { flex: 1; min-width: 0; }
+.post-role-item .role-name {
+    font-size: 14px; font-weight: 700;
+    color: var(--text-main); margin-bottom: 2px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.post-role-item .role-desc {
+    font-size: 11px; color: var(--text-muted);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.post-role-item .role-check {
+    width: 22px; height: 22px; border-radius: 50%;
+    background: var(--accent); color: #fff;
+    display: none; align-items: center; justify-content: center;
+    flex-shrink: 0;
+}
+.post-role-item.selected .role-check { display: flex; }
+
+.post-create-footer {
+    padding: 12px 16px;
+    padding-bottom: calc(12px + env(safe-area-inset-bottom, 4px));
+    background: var(--bg-header);
+    border-top: 1px solid var(--border);
+    flex-shrink: 0;
+}
+.post-submit-btn {
+    width: 100%; padding: 14px; border: none;
+    border-radius: 14px;
+    background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+    color: #fff; font-size: 15px; font-weight: 800;
+    font-family: inherit; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    gap: 8px; box-shadow: 0 4px 16px rgba(255,109,31,0.4);
+    transition: all 0.2s ease;
+}
+.post-submit-btn:active:not(:disabled) { transform: scale(0.97); opacity: 0.9; }
+.post-submit-btn:disabled {
+    background: var(--bg-input); color: var(--text-muted);
+    box-shadow: none; cursor: not-allowed; opacity: 0.6;
+}
+
+/* ============ POST CARD ============ */
+.post-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    margin: 0 12px 14px;
+    overflow: hidden;
+    animation: postCardIn 0.3s ease;
+}
+@keyframes postCardIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.post-card-header {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 14px;
+}
+.post-card-avatar-wrap {
+    width: 44px; height: 44px; border-radius: 50%;
+    flex-shrink: 0; position: relative;
+    background: var(--bg-input); overflow: visible;
+    cursor: pointer;
+    transition: transform 0.15s ease;
+}
+.post-card-avatar-wrap:active { transform: scale(0.92); }
+.post-card-avatar-wrap img {
+    width: 100%; height: 100%; border-radius: 50%;
+    object-fit: cover; display: block;
+}
+.post-card-frame {
+    position: absolute; top: -6px; left: -6px;
+    width: calc(100% + 12px); height: calc(100% + 12px);
+    border-radius: 50%; pointer-events: none;
+    background-size: contain; background-position: center;
+    background-repeat: no-repeat;
+}
+.post-card-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.post-card-name-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.post-card-name {
+    font-size: 14px; font-weight: 700; color: var(--text-main);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.post-card-server {
+    font-size: 10px; font-weight: 600; color: var(--accent);
+    background: var(--accent-bg); padding: 1px 8px; border-radius: 8px;
+}
+.post-card-role-badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-size: 10px; font-weight: 700; color: #fff;
+    background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+    padding: 2px 8px; border-radius: 8px;
+}
+.post-card-role-badge img {
+    width: 12px; height: 12px; border-radius: 4px; object-fit: cover;
+}
+.post-card-time { font-size: 11px; color: var(--text-muted); }
+.post-card-chat-btn {
+    padding: 7px 14px; border: none; border-radius: 18px;
+    background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+    color: #fff; font-size: 12px; font-weight: 700;
+    font-family: inherit; cursor: pointer; flex-shrink: 0;
+    transition: all 0.2s ease;
+    display: flex; align-items: center; gap: 5px;
+}
+.post-card-chat-btn:active { transform: scale(0.95); opacity: 0.9; }
+.post-card-chat-btn:disabled {
+    background: var(--bg-input); color: var(--text-muted);
+    opacity: 0.5; cursor: not-allowed;
+}
+.post-card-caption {
+    padding: 0 14px 10px; font-size: 13.5px;
+    color: var(--text-main); line-height: 1.55;
+    word-break: break-word; white-space: pre-wrap;
+}
+.post-card-caption .caption-name {
+    font-weight: 800; color: var(--accent); margin-right: 6px;
+}
+.post-card-media { position: relative; width: 100%; background: #0a0a0f; }
+.post-card-media img,
+.post-card-media video {
+    width: 100%; display: block; cursor: pointer;
+    max-height: 480px; object-fit: cover; background: #000;
+}
+.post-card-media-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 2px; background: #000;
+}
+.post-card-media-grid img {
+    aspect-ratio: 1; object-fit: cover;
+    width: 100%; height: 100%; cursor: pointer;
+}
+.post-card-media-grid .media-more-overlay {
+    position: absolute; inset: 0;
+    background: rgba(0,0,0,0.65);
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-size: 24px; font-weight: 800;
+    pointer-events: none; backdrop-filter: blur(4px);
+}
+.post-card-media-grid .media-cell { position: relative; cursor: pointer; }
+.post-card-actions {
+    display: flex; align-items: center; gap: 4px;
+    padding: 8px 14px 12px; border-top: 1px solid var(--border);
+}
+.post-action-btn {
+    display: flex; align-items: center; gap: 6px;
+    padding: 8px 12px; border: none; border-radius: 10px;
+    background: transparent; color: var(--text-sub);
+    font-size: 13px; font-weight: 700;
+    font-family: inherit; cursor: pointer;
+    transition: all 0.2s ease; flex: 1; justify-content: center;
+}
+.post-action-btn:active { background: var(--bg-hover); transform: scale(0.96); }
+.post-action-btn.liked { color: #ff3b30; }
+.post-action-btn.liked svg { fill: #ff3b30; stroke: #ff3b30; }
+
+/* ============ VIEWER ============ */
+.post-viewer-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.98);
+    z-index: 10070;
+    display: flex; flex-direction: column;
+    animation: postFadeIn 0.2s ease;
+}
+.post-viewer-overlay.hidden { display: none !important; }
+@keyframes postFadeIn { from { opacity: 0; } to { opacity: 1; } }
+.post-viewer-close {
+    position: absolute; top: 14px; right: 14px;
+    width: 40px; height: 40px; border-radius: 50%;
+    border: none; background: rgba(255,255,255,0.1);
+    color: #fff; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    z-index: 5; backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    transition: all 0.2s ease;
+}
+.post-viewer-close:active { transform: scale(0.9); background: rgba(255,255,255,0.2); }
+.post-viewer-counter {
+    position: absolute; top: 18px; left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0,0,0,0.7); color: #fff;
+    font-size: 13px; font-weight: 700;
+    padding: 6px 14px; border-radius: 14px;
+    z-index: 5; backdrop-filter: blur(6px);
+}
+.post-viewer-counter.hidden { display: none !important; }
+.post-viewer-body {
+    flex: 1; display: flex; align-items: center;
+    justify-content: center; padding: 60px 0 80px;
+    overflow: hidden; position: relative;
+}
+.post-viewer-body img,
+.post-viewer-body video {
+    max-width: 100%; max-height: 100%;
+    object-fit: contain; display: block; border-radius: 4px;
+}
+.post-viewer-nav {
+    position: absolute; top: 50%;
+    transform: translateY(-50%);
+    width: 44px; height: 44px; border-radius: 50%;
+    border: none; background: rgba(255,255,255,0.15);
+    color: #fff; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    z-index: 4; backdrop-filter: blur(6px);
+    transition: all 0.2s ease;
+}
+.post-viewer-nav:active { transform: translateY(-50%) scale(0.9); background: rgba(255,255,255,0.25); }
+.post-viewer-nav.prev { left: 12px; }
+.post-viewer-nav.next { right: 12px; }
+.post-viewer-nav.hidden { display: none !important; }
+.post-viewer-dots {
+    position: absolute; bottom: 75px; left: 50%;
+    transform: translateX(-50%);
+    display: flex; gap: 6px; z-index: 4;
+}
+.post-viewer-dots.hidden { display: none !important; }
+.post-viewer-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: rgba(255,255,255,0.3);
+    transition: all 0.2s ease;
+}
+.post-viewer-dot.active {
+    background: #fff; width: 22px; border-radius: 4px;
+}
+.post-viewer-footer {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    padding: 16px 20px;
+    padding-bottom: calc(16px + env(safe-area-inset-bottom, 4px));
+    background: linear-gradient(to top, rgba(0,0,0,0.95), transparent);
+    display: flex; justify-content: center;
+}
+.post-viewer-download {
+    display: flex; align-items: center; gap: 10px;
+    padding: 12px 28px; border: none; border-radius: 24px;
+    background: linear-gradient(135deg, #ff6d1f, #e0550a);
+    color: #fff; font-size: 15px; font-weight: 700;
+    font-family: inherit; cursor: pointer;
+    box-shadow: 0 4px 20px rgba(255,109,31,0.4);
+    transition: all 0.2s ease;
+}
+.post-viewer-download:active { transform: scale(0.95); opacity: 0.9; }
+
+/* ============ UPLOAD OVERLAY ============ */
+.post-upload-overlay {
+    position: fixed; inset: 0;
+    background: rgba(10,10,15,0.95);
+    z-index: 10080;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 20px; backdrop-filter: blur(8px);
+}
+.post-upload-overlay.hidden { display: none !important; }
+.post-upload-spinner {
+    width: 60px; height: 60px;
+    border: 4px solid var(--border-light);
+    border-top: 4px solid var(--accent);
+    border-radius: 50%;
+    animation: postSpin 0.8s linear infinite;
+}
+@keyframes postSpin { to { transform: rotate(360deg); } }
+.post-upload-text {
+    font-size: 15px; font-weight: 700;
+    color: var(--text-main); text-align: center;
+    padding: 0 20px;
+}
+.post-upload-sub { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+.post-upload-progress {
+    width: 240px; height: 8px;
+    background: var(--bg-input); border-radius: 4px;
+    overflow: hidden; margin-top: 8px;
+}
+.post-upload-progress-fill {
+    height: 100%; width: 0%;
+    background: linear-gradient(90deg, var(--accent), #ff9a4a);
+    border-radius: 4px; transition: width 0.3s ease;
+}
+
+/* ============ PROFILE POPUP (Post View) ============ */
+.post-user-popup-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 10075;
+    background: rgba(0, 0, 0, 0.75);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    animation: postFadeIn 0.2s ease;
+}
+.post-user-popup-overlay.hidden { display: none !important; }
+
+.post-user-popup {
+    position: relative;
+    width: 100%;
+    max-width: 320px;
+    background: var(--bg-header);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 16px 64px rgba(0, 0, 0, 0.8);
+    animation: popIn 0.25s ease;
+    display: flex;
+    flex-direction: column;
+}
+
+.post-user-popup-banner {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    min-height: 110px;
+    max-height: 160px;
+    overflow: hidden;
+    flex-shrink: 0;
+    background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
+}
+.post-user-popup-banner-img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    z-index: 0;
+}
+.post-user-popup-banner-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, transparent 30%, rgba(10, 10, 15, 0.7) 100%);
+    pointer-events: none;
+    z-index: 1;
+}
+.post-user-popup-close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(0, 0, 0, 0.55);
+    color: #fff;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 5;
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+}
+.post-user-popup-close:active { transform: scale(0.9); background: rgba(0, 0, 0, 0.8); }
+
+.post-user-popup-body {
+    position: relative;
+    padding: 0 18px 18px;
+    margin-top: -40px;
+    display: flex;
+    flex-direction: column;
+    z-index: 3;
+}
+.post-user-popup-body::before {
+    content: '';
+    position: absolute;
+    top: 40px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #12121c;
+    border-radius: 0 0 20px 20px;
+    z-index: -1;
+}
+.post-user-popup-body > * { position: relative; z-index: 2; }
+
+.post-user-popup-avatar {
+    position: relative;
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 10px;
+    border-radius: 50%;
+    border: 4px solid var(--bg-header);
+    background: var(--bg-card);
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.6);
+    overflow: visible;
+    z-index: 2;
+}
+.post-user-popup-avatar img {
+    width: 100%; height: 100%;
+    border-radius: 50%; object-fit: cover; display: block;
+}
+.post-user-popup-frame {
+    position: absolute;
+    top: -8px; left: -8px;
+    width: calc(100% + 16px);
+    height: calc(100% + 16px);
+    border-radius: 50%;
+    pointer-events: none;
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+    z-index: 3;
+}
+
+.post-user-popup-name-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 6px;
+}
+.post-user-popup-name {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-main);
+    text-align: center;
+    margin: 0;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+}
+.post-user-popup-mark {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    padding: 2px;
+    flex-shrink: 0;
+}
+.post-user-popup-mark img {
+    width: 100%; height: 100%;
+    border-radius: 50%; object-fit: cover;
+}
+
+.post-user-popup-info {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+}
+.post-user-popup-server {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--accent);
+    background: var(--accent-bg);
+    padding: 2px 10px;
+    border-radius: 10px;
+}
+.post-user-popup-online {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--text-muted);
+}
+.post-user-popup-online::before {
+    content: '';
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--text-muted);
+}
+.post-user-popup-online.online { color: #44ff88; }
+.post-user-popup-online.online::before {
+    background: #44ff88;
+    box-shadow: 0 0 5px rgba(68, 255, 136, 0.7);
+    animation: onlinePulse 2s ease-in-out infinite;
+}
+
+.post-user-popup-bio {
+    font-size: 12.5px;
+    color: rgba(255, 255, 255, 0.9);
+    line-height: 1.6;
+    text-align: center;
+    padding: 10px 12px;
+    background: rgba(0, 0, 0, 0.35);
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    max-height: 80px;
+    overflow-y: auto;
+    word-break: break-word;
+    margin-bottom: 12px;
+    backdrop-filter: blur(4px);
+}
+.post-user-popup-bio::-webkit-scrollbar { width: 3px; }
+.post-user-popup-bio::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 3px; }
+.post-user-popup-bio .bio-placeholder { color: rgba(255,255,255,0.4); font-style: italic; }
+
+.post-user-popup-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 12px 16px;
+    border: 1.5px solid rgba(255, 109, 31, 0.4);
+    border-radius: 12px;
+    background: linear-gradient(135deg, rgba(255, 109, 31, 0.2), rgba(255, 109, 31, 0.08));
+    color: var(--accent);
+    font-size: 14px;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    backdrop-filter: blur(4px);
+}
+.post-user-popup-btn:active {
+    transform: scale(0.97);
+    background: rgba(255, 109, 31, 0.3);
+}
+.post-user-popup-btn:disabled {
+    border-color: var(--border-light);
+    background: var(--bg-input);
+    color: var(--text-muted);
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+.post-user-popup-btn svg { flex-shrink: 0; width: 16px; height: 16px; }
+
+@media (max-width: 480px) {
+    .post-card { margin: 0 8px 12px; border-radius: 14px; }
+    .post-card-avatar-wrap { width: 40px; height: 40px; }
+    .post-card-name { font-size: 13px; }
+    .post-card-caption { font-size: 13px; }
+    .post-card-chat-btn { padding: 6px 12px; font-size: 11px; }
+    .post-action-btn { font-size: 12px; padding: 7px 8px; }
+    .post-media-slot .slot-label { font-size: 8px; }
+    .post-role-item img { width: 40px; height: 40px; }
+    .post-role-item .role-name { font-size: 13px; }
+    .post-viewer-nav { width: 38px; height: 38px; }
+    .post-viewer-nav.prev { left: 8px; }
+    .post-viewer-nav.next { right: 8px; }
+    .post-tab-chip { padding: 7px 14px; font-size: 12px; }
+    .post-user-popup { max-width: 290px; }
+    .post-user-popup-avatar { width: 70px; height: 70px; }
+    .post-user-popup-name { font-size: 16px; }
+}
 </style>
 </head>
 <body>
@@ -9080,6 +9872,148 @@ body {
             </button>
         </div>
     </div>
+
+<!-- ============================================================
+     ✅ POST SYSTEM HTML v2.0
+     ============================================================ -->
+<div class="post-create-screen hidden" id="postCreateScreen">
+    <div class="post-create-header">
+        <button class="post-create-back" id="postCreateBackBtn">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="15,18 9,12 15,6"/>
+            </svg>
+        </button>
+        <span class="post-create-title">Create Post</span>
+        <div style="width:40px;"></div>
+    </div>
+
+    <div class="post-create-body">
+        <div class="post-media-section">
+            <div class="post-media-grid" id="postMediaGrid"></div>
+            <div class="post-media-actions" id="postMediaActions">
+                <button class="post-media-add-btn" id="postAddImageBtn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="18" height="18" rx="2"/>
+                        <circle cx="8.5" cy="8.5" r="1.5"/>
+                        <polyline points="21 15 16 10 5 21"/>
+                    </svg>
+                    <span>Image</span>
+                </button>
+                <button class="post-media-add-btn" id="postAddVideoBtn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="23 7 16 12 23 17 23 7"/>
+                        <rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
+                    </svg>
+                    <span>Video</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="post-input-group">
+            <label>Caption / Name</label>
+            <textarea id="postCaptionInput" class="post-textarea" placeholder="ရေးပါ..." rows="3" maxlength="500"></textarea>
+        </div>
+
+        <div class="post-input-group">
+            <label>Post Role (Optional)</label>
+            <div class="post-role-list" id="postRoleList"></div>
+        </div>
+    </div>
+
+    <div class="post-create-footer">
+        <button class="post-submit-btn" id="postSubmitBtn" disabled>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="19" x2="12" y2="5"/>
+                <polyline points="5 12 12 5 19 12"/>
+            </svg>
+            <span>Post တင်မည်</span>
+        </button>
+    </div>
+</div>
+
+<div class="post-viewer-overlay hidden" id="postViewerOverlay">
+    <button class="post-viewer-close" id="postViewerClose">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+    </button>
+    <div class="post-viewer-counter hidden" id="postViewerCounter">1 / 1</div>
+    <div class="post-viewer-body" id="postViewerBody"></div>
+    <button class="post-viewer-nav prev hidden" id="postViewerPrev">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <polyline points="15,18 9,12 15,6"/>
+        </svg>
+    </button>
+    <button class="post-viewer-nav next hidden" id="postViewerNext">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <polyline points="9,18 15,12 9,6"/>
+        </svg>
+    </button>
+    <div class="post-viewer-dots hidden" id="postViewerDots"></div>
+    <div class="post-viewer-footer">
+        <button class="post-viewer-download" id="postViewerDownload">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="7,10 12,15 17,10"/>
+                <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            <span>Download</span>
+        </button>
+    </div>
+</div>
+
+<div class="post-upload-overlay hidden" id="postUploadOverlay">
+    <div class="post-upload-spinner"></div>
+    <div class="post-upload-text" id="postUploadText">Uploading...</div>
+    <div class="post-upload-sub" id="postUploadSub">Please wait</div>
+    <div class="post-upload-progress">
+        <div class="post-upload-progress-fill" id="postUploadProgress"></div>
+    </div>
+</div>
+
+<!-- Profile Popup (Post View) -->
+<div class="post-user-popup-overlay hidden" id="postUserPopupOverlay">
+    <div class="post-user-popup">
+        <div class="post-user-popup-banner" id="postUserPopupBanner">
+            <img class="post-user-popup-banner-img" id="postUserPopupBannerImg" src="" alt="" style="display:none;" />
+            <div class="post-user-popup-banner-overlay"></div>
+            <button class="post-user-popup-close" id="postUserPopupClose">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <line x1="18" y1="6" x2="6" y2="18"/>
+                    <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+            </button>
+        </div>
+        <div class="post-user-popup-body">
+            <div class="post-user-popup-avatar">
+                <img id="postUserPopupAvatar" src="" alt="avatar" />
+                <div class="post-user-popup-frame" id="postUserPopupFrame"></div>
+            </div>
+            <div class="post-user-popup-name-row">
+                <h3 class="post-user-popup-name" id="postUserPopupName">Player</h3>
+                <span class="post-user-popup-mark" id="postUserPopupMark"></span>
+            </div>
+            <div class="post-user-popup-info">
+                <span class="post-user-popup-server" id="postUserPopupServer">Server 1</span>
+                <span class="post-user-popup-online" id="postUserPopupOnline">Offline</span>
+            </div>
+            <div class="post-user-popup-bio" id="postUserPopupBio">
+                <span class="bio-placeholder">No bio yet...</span>
+            </div>
+            <button class="post-user-popup-btn" id="postUserPopupActionBtn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                    <circle cx="9" cy="7" r="4"/>
+                    <line x1="19" y1="8" x2="19" y2="14"/>
+                    <line x1="22" y1="11" x2="16" y2="11"/>
+                </svg>
+                <span>Add Chat</span>
+            </button>
+        </div>
+    </div>
+</div>
+
 
     <script src="script.js"></script>
 
@@ -17873,6 +18807,1665 @@ if (document.readyState === 'loading') {
     });
 
     console.log('✅ Star Arcade Android Sync Ready');
+
+})();
+
+// ============================================================
+// ✅ POST SYSTEM v2.0
+//  • Home Embed Feed (All / TopLike / Role)
+//  • Random Server Pick (5 posts per load)
+//  • Auto Server Selection (least loaded for upload)
+//  • Server On/Off Toggle (upload/view flags)
+//  • Supabase Storage Only
+//  • Post Owner Profile Popup -- Add Chat button
+// script.js ရဲ့ အောက်ဆုံးမှာ ထည့်ပါ
+// ============================================================
+(function() {
+    'use strict';
+
+    // ===================================================
+    //  ⚙️ SERVER CONFIG (ဒီနေရာမှာ Server အသစ်ထည့်ပါ)
+    //  uploadEnabled: Post တင် ခွင့်ပြု/မပြု
+    //  viewEnabled:   ကြည့် ခွင့်ပြု/မပြု
+    // ===================================================
+    var POST_SERVERS = [
+        {
+            id: 'server1',
+            name: 'Server 1',
+            supabaseUrl: 'https://agvpdmzhbltpmqovxdyy.supabase.co',
+            supabaseKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFndnBkbXpoYmx0cG1xb3Z4ZHl5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA1OTMwMzMsImV4cCI6MjEwNjE2OTAzM30.KBOR6qrR4zFDked0k4XyHZmxFWbefjpxe8D24QmM5Zg',
+            uploadEnabled: true,
+            viewEnabled: true
+        },
+        {
+            id: 'server2',
+            name: 'Server 2',
+            supabaseUrl: 'https://rmwvknsstjfarbnduicx.supabase.co',
+            supabaseKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJtd3ZrbnNzdGpmYXJibmR1aWN4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA1OTMxNTksImV4cCI6MjEwNjE2OTE1OX0.AV-a7ZBY4Lbq75dDotofbD9QDLtsI8V9HdQrgajbxDM',
+            uploadEnabled: true,
+            viewEnabled: true
+        }
+        // ✅ Server အသစ်ထည့်ချင်ရင် ဒီမှာ ထပ်ထည့်ပါ
+        // {
+        //     id: 'server3',
+        //     name: 'Server 3',
+        //     supabaseUrl: 'https://xxxxx.supabase.co',
+        //     supabaseKey: 'eyJhbGciOiJ...',
+        //     uploadEnabled: true,
+        //     viewEnabled: true
+        // }
+    ];
+
+    // ===================================================
+    //  CONFIG
+    // ===================================================
+    var POST_BUCKET = 'posts';
+    var POST_MAX_SIZE = 50 * 1024 * 1024; // 50MB
+    var POST_MAX_IMAGES = 6;
+    var POST_CACHE_KEY = 'postCache_v2';
+    var POST_LOAD_COUNT = 5;
+
+    var POST_ROLES = [
+        { id: 'role_gamer', name: 'Gamer', image: 'https://i.ibb.co/r2k0J5rJ/Grid-Art-20260829-171212620.png', desc: 'Pro Gamer' },
+        { id: 'role_artist', name: 'Artist', image: 'https://i.ibb.co/r2k0J5rJ/Grid-Art-20260829-171212620.png', desc: 'Content Creator' },
+        { id: 'role_streamer', name: 'Streamer', image: 'https://i.ibb.co/r2k0J5rJ/Grid-Art-20260829-171212620.png', desc: 'Live Streamer' },
+        { id: 'role_other', name: 'Other', image: 'https://i.ibb.co/r2k0J5rJ/Grid-Art-20260829-171212620.png', desc: 'Custom Role' }
+    ];
+
+    // ===================================================
+    //  STATE
+    // ===================================================
+    var supabaseClients = {};
+    var postImages = [];
+    var postVideo = null;
+    var postSelectedRole = null;
+    var postSubmitting = false;
+    var viewerMedia = [];
+    var viewerIndex = 0;
+
+    // Feed state
+    var currentFeedTab = 'all';       // 'all' | 'toplike' | 'role'
+    var currentFeedRole = null;
+    var feedLoadedServers = {};        // { serverId: { loaded: n, pool: [posts] } }
+    var feedAllPosts = [];             // Currently displayed posts
+    var feedLoading = false;
+    var feedExhausted = false;
+
+    // Profile popup state
+    var popupCurrentUser = null;
+
+    // ===================================================
+    //  UTILS
+    // ===================================================
+    function genPostId() {
+        return 'post_' + Date.now() + '_' + Math.random().toString(36).substr(2, 8);
+    }
+
+    function formatBytes(bytes) {
+        if (bytes < 1024) return bytes + ' B';
+        if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+        return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+    }
+
+    function escapeHtmlP(s) {
+        if (!s) return '';
+        return String(s).replace(/[&<>"']/g, function(c) {
+            return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c];
+        });
+    }
+
+    function formatPostTime(ts) {
+        if (!ts) return '';
+        var diff = Date.now() - ts;
+        var min = Math.floor(diff / 60000);
+        if (min < 1) return 'now';
+        if (min < 60) return min + 'm';
+        var hr = Math.floor(min / 60);
+        if (hr < 24) return hr + 'h';
+        var day = Math.floor(hr / 24);
+        if (day < 7) return day + 'd';
+        var d = new Date(ts);
+        return d.getDate() + '/' + (d.getMonth() + 1);
+    }
+
+    function getSupabaseClient(serverId) {
+        if (supabaseClients[serverId]) return supabaseClients[serverId];
+        var srv = POST_SERVERS.find(function(s) { return s.id === serverId; });
+        if (!srv) return null;
+        if (typeof supabase === 'undefined') {
+            console.warn('Supabase SDK not loaded');
+            return null;
+        }
+        var client = supabase.createClient(srv.supabaseUrl, srv.supabaseKey);
+        supabaseClients[serverId] = client;
+        return client;
+    }
+
+    function getServerById(serverId) {
+        return POST_SERVERS.find(function(s) { return s.id === serverId; }) || null;
+    }
+
+    function getEnabledUploadServers() {
+        return POST_SERVERS.filter(function(s) { return s.uploadEnabled === true; });
+    }
+
+    function getEnabledViewServers() {
+        return POST_SERVERS.filter(function(s) { return s.viewEnabled === true; });
+    }
+
+    function getRandomEnabledViewServer() {
+        var arr = getEnabledViewServers();
+        if (arr.length === 0) return null;
+        return arr[Math.floor(Math.random() * arr.length)];
+    }
+
+    function fileToDataURL(file) {
+        return new Promise(function(resolve, reject) {
+            var reader = new FileReader();
+            reader.onload = function(e) { resolve(e.target.result); };
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+        });
+    }
+
+    function compressImage(file, maxWidth, quality) {
+        return new Promise(function(resolve) {
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                var img = new Image();
+                img.onload = function() {
+                    try {
+                        var canvas = document.createElement('canvas');
+                        var w = img.width, h = img.height;
+                        if (w > maxWidth) { h = Math.round(h * maxWidth / w); w = maxWidth; }
+                        canvas.width = w; canvas.height = h;
+                        var ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, w, h);
+                        canvas.toBlob(function(blob) {
+                            resolve(blob || file);
+                        }, 'image/jpeg', quality);
+                    } catch(err) { resolve(file); }
+                };
+                img.onerror = function() { resolve(file); };
+                img.src = e.target.result;
+            };
+            reader.onerror = function() { resolve(file); };
+            reader.readAsDataURL(file);
+        });
+    }
+
+    // ===================================================
+    //  BUILD HOME FEED UI (Inject into #screen-home)
+    // ===================================================
+    function ensureHomeFeedUI() {
+        var home = document.getElementById('screen-home');
+        if (!home) return;
+        if (home.querySelector('.post-feed-embedded')) return;
+
+        home.innerHTML = '';
+
+        var wrap = document.createElement('div');
+        wrap.className = 'post-feed-embedded';
+        wrap.innerHTML =
+            '<div class="post-tabs-bar">' +
+                '<button class="post-tab-chip active" data-tab="all">' +
+                    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
+                        '<rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>' +
+                        '<rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>' +
+                    '</svg>All' +
+                '</button>' +
+                '<button class="post-tab-chip" data-tab="toplike">' +
+                    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
+                        '<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>' +
+                    '</svg>Like များဆုံး' +
+                '</button>' +
+                '<button class="post-tab-chip" data-tab="role">' +
+                    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
+                        '<circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>' +
+                        '<path d="M2 12h20"/>' +
+                    '</svg>Role' +
+                '</button>' +
+            '</div>' +
+            '<div class="post-tab-desc" id="postTabDesc">Post အားလုံး ပြသနေသည်</div>' +
+            '<div class="post-feed-body" id="postFeedBody"></div>';
+
+        home.appendChild(wrap);
+
+        // Tab events
+        wrap.querySelectorAll('.post-tab-chip').forEach(function(chip) {
+            chip.addEventListener('click', function() {
+                var tab = this.dataset.tab;
+                if (currentFeedTab === tab) return;
+                wrap.querySelectorAll('.post-tab-chip').forEach(function(c) { c.classList.remove('active'); });
+                this.classList.add('active');
+                switchFeedTab(tab);
+            });
+        });
+    }
+
+    function switchFeedTab(tab) {
+        currentFeedTab = tab;
+        var descEl = document.getElementById('postTabDesc');
+
+        if (tab === 'all') {
+            if (descEl) descEl.textContent = 'Post အားလုံး ပြသနေသည်';
+            resetFeed();
+            loadFeedNext();
+        } else if (tab === 'toplike') {
+            if (descEl) descEl.textContent = 'Like အများဆုံး Post များ ပြသနေသည်';
+            resetFeed();
+            loadFeedNext();
+        } else if (tab === 'role') {
+            showRoleSelectPopup();
+        }
+    }
+
+    function resetFeed() {
+        feedAllPosts = [];
+        feedLoadedServers = {};
+        feedLoading = false;
+        feedExhausted = false;
+        var body = document.getElementById('postFeedBody');
+        if (body) body.innerHTML = '<div class="post-feed-loading">Loading...</div>';
+    }
+
+    // ===================================================
+    //  LOAD FEED (Random server, 5 posts)
+    // ===================================================
+    function loadFeedNext() {
+        if (feedLoading || feedExhausted) return;
+        feedLoading = true;
+
+        if (currentFeedTab === 'role' && !currentFeedRole) {
+            feedLoading = false;
+            return;
+        }
+
+        var body = document.getElementById('postFeedBody');
+        if (!body) { feedLoading = false; return; }
+
+        // If first load, clear loading text
+        if (feedAllPosts.length === 0) {
+            body.innerHTML = '<div class="post-feed-loading">Loading...</div>';
+        } else {
+            // Add loading indicator at bottom
+            var existingLoader = document.getElementById('feedLoadMoreIndicator');
+            if (existingLoader) existingLoader.remove();
+            var loader = document.createElement('div');
+            loader.id = 'feedLoadMoreIndicator';
+            loader.className = 'post-feed-load-more';
+            loader.innerHTML = '<div class="spinner-mini"></div><span>Loading...</span>';
+            body.appendChild(loader);
+        }
+
+        // Pick a random enabled view server
+        var srv = getRandomEnabledViewServer();
+        if (!srv) {
+            feedLoading = false;
+            feedExhausted = true;
+            renderFeed();
+            return;
+        }
+
+        var sb = getSupabaseClient(srv.id);
+        if (!sb) {
+            feedLoading = false;
+            feedExhausted = true;
+            renderFeed();
+            return;
+        }
+
+        // Fetch posts from this server
+        fetchPostsFromServer(sb, srv.id, 30).then(function(allPosts) {
+            // Filter by tab
+            var filtered = allPosts;
+            if (currentFeedTab === 'toplike') {
+                filtered = allPosts.slice().sort(function(a, b) {
+                    return (b.likeCount || 0) - (a.likeCount || 0);
+                }).filter(function(p) { return (p.likeCount || 0) > 0; });
+            } else if (currentFeedTab === 'role') {
+                filtered = allPosts.filter(function(p) {
+                    return p.roleId === currentFeedRole;
+                });
+            }
+
+            // Exclude already displayed
+            var existingIds = {};
+            feedAllPosts.forEach(function(p) { existingIds[p.postId] = true; });
+            filtered = filtered.filter(function(p) { return !existingIds[p.postId]; });
+
+            // Take next 5
+            var batch = filtered.slice(0, POST_LOAD_COUNT);
+
+            if (batch.length === 0) {
+                // Try another server (auto retry once)
+                if (!feedLoadedServers[srv.id]) {
+                    feedLoadedServers[srv.id] = { tried: true };
+                }
+                // Try another random server
+                var remaining = getEnabledViewServers().filter(function(s) {
+                    return !feedLoadedServers[s.id];
+                });
+
+                if (remaining.length === 0) {
+                    feedLoading = false;
+                    feedExhausted = true;
+                    renderFeed();
+                } else {
+                    feedLoading = false;
+                    loadFeedNext();
+                }
+                return;
+            }
+
+            feedLoadedServers[srv.id] = { tried: true };
+
+            batch.forEach(function(p) { feedAllPosts.push(p); });
+
+            feedLoading = false;
+
+            // Auto-save to cache
+            if (typeof setToDB === 'function') {
+                setToDB(POST_CACHE_KEY, feedAllPosts.slice(0, 50)).catch(function() {});
+            }
+
+            renderFeed();
+        }).catch(function(err) {
+            console.warn('Feed fetch error:', err);
+            feedLoadedServers[srv.id] = { tried: true };
+            feedLoading = false;
+
+            var remaining = getEnabledViewServers().filter(function(s) {
+                return !feedLoadedServers[s.id];
+            });
+            if (remaining.length === 0) {
+                feedExhausted = true;
+                renderFeed();
+            } else {
+                loadFeedNext();
+            }
+        });
+    }
+
+    function renderFeed() {
+        var body = document.getElementById('postFeedBody');
+        if (!body) return;
+
+        // Remove loading indicator
+        var loader = document.getElementById('feedLoadMoreIndicator');
+        if (loader) loader.remove();
+
+        if (feedAllPosts.length === 0) {
+            if (feedExhausted) {
+                body.innerHTML = '<div class="post-feed-empty">Post မရှိပါ<br><br>+ ခလုတ်နှိပ်ပြီး Post တင်လိုက်ပါ</div>';
+            } else {
+                body.innerHTML = '<div class="post-feed-loading">Loading...</div>';
+            }
+            return;
+        }
+
+        // Clear and rebuild
+        body.innerHTML = '';
+        feedAllPosts.forEach(function(post) {
+            body.appendChild(buildPostCard(post));
+        });
+
+        // Load more button
+        if (!feedExhausted) {
+            var moreBtn = document.createElement('div');
+            moreBtn.className = 'post-feed-load-more';
+            moreBtn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg><span>နောက်ထပ် ကြည့်မည်</span>';
+            moreBtn.addEventListener('click', function() {
+                loadFeedNext();
+            });
+
+            // Auto-load when scrolled to bottom
+            body.appendChild(moreBtn);
+
+            // Auto-load on scroll
+            if (!body._feedScrollBound) {
+                body._feedScrollBound = true;
+                body.addEventListener('scroll', function() {
+                    if (body.scrollTop + body.clientHeight >= body.scrollHeight - 200) {
+                        if (!feedLoading && !feedExhausted) {
+                            loadFeedNext();
+                        }
+                    }
+                });
+            }
+        } else if (feedAllPosts.length > 0) {
+            var endEl = document.createElement('div');
+            endEl.className = 'post-feed-load-more';
+            endEl.style.cursor = 'default';
+            endEl.innerHTML = '<span style="color:var(--text-muted);">အားလုံး ပြပြီးပါပြီ</span>';
+            body.appendChild(endEl);
+        }
+    }
+
+    // ===================================================
+    //  FETCH POSTS FROM A SERVER
+    // ===================================================
+    function fetchPostsFromServer(sb, serverId, limit) {
+        limit = limit || 50;
+
+        return sb.storage.from(POST_BUCKET).list('meta', {
+            limit: limit,
+            sortBy: { column: 'created_at', order: 'desc' }
+        }).then(function(res) {
+            if (res.error) throw res.error;
+            var files = res.data || [];
+            var jsonFiles = files.filter(function(f) {
+                return f.name && f.name.indexOf('.json') !== -1;
+            });
+
+            if (jsonFiles.length === 0) return [];
+
+            var promises = jsonFiles.map(function(f) {
+                var urlRes = sb.storage.from(POST_BUCKET).getPublicUrl('meta/' + f.name);
+                var url = urlRes.data.publicUrl;
+                return fetch(url, { cache: 'no-store' })
+                    .then(function(r) { return r.json(); })
+                    .catch(function() { return null; });
+            });
+
+            return Promise.all(promises).then(function(arr) {
+                var posts = arr.filter(function(p) { return p && p.postId; });
+                // Attach server info
+                posts.forEach(function(p) { p._serverId = serverId; });
+                posts.sort(function(a, b) { return (b.createdAt || 0) - (a.createdAt || 0); });
+                return posts;
+            });
+        });
+    }
+
+    // ===================================================
+    //  ROLE SELECT POPUP
+    // ===================================================
+    function showRoleSelectPopup() {
+        // Clear existing
+        var ex = document.querySelector('.role-select-overlay');
+        if (ex) ex.remove();
+
+        var overlay = document.createElement('div');
+        overlay.className = 'post-user-popup-overlay role-select-overlay';
+
+        var btnHTML = '';
+        POST_ROLES.forEach(function(role) {
+            btnHTML +=
+                '<div class="post-role-item" data-rid="' + role.id + '" style="margin-bottom:8px;">' +
+                    '<img src="' + role.image + '" />' +
+                    '<div class="role-info">' +
+                        '<div class="role-name">' + escapeHtmlP(role.name) + '</div>' +
+                        '<div class="role-desc">' + escapeHtmlP(role.desc) + '</div>' +
+                    '</div>' +
+                '</div>';
+        });
+
+        overlay.innerHTML =
+            '<div class="post-user-popup" style="max-width:340px;">' +
+                '<div class="post-user-popup-banner" style="background:linear-gradient(135deg,#1a1a2e,#16213e,#0f3460);min-height:80px;max-height:100px;">' +
+                    '<div class="post-user-popup-banner-overlay"></div>' +
+                    '<button class="post-user-popup-close" id="roleSelectClose">' +
+                        '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>' +
+                    '</button>' +
+                '</div>' +
+                '<div class="post-user-popup-body" style="margin-top:-30px;padding-top:0;">' +
+                    '<h3 style="text-align:center;color:var(--text-main);font-size:16px;font-weight:800;margin:0 0 12px;padding-top:8px;">Role ရွေးပါ</h3>' +
+                    '<div style="max-height:300px;overflow-y:auto;">' + btnHTML + '</div>' +
+                '</div>' +
+            '</div>';
+
+        document.body.appendChild(overlay);
+
+        document.getElementById('roleSelectClose').addEventListener('click', function() {
+            overlay.remove();
+            // Revert to All tab
+            var allChip = document.querySelector('.post-tab-chip[data-tab="all"]');
+            if (allChip) {
+                document.querySelectorAll('.post-tab-chip').forEach(function(c) { c.classList.remove('active'); });
+                allChip.classList.add('active');
+            }
+            currentFeedTab = 'all';
+            currentFeedRole = null;
+            var descEl = document.getElementById('postTabDesc');
+            if (descEl) descEl.textContent = 'Post အားလုံး ပြသနေသည်';
+            resetFeed();
+            loadFeedNext();
+        });
+
+        overlay.querySelectorAll('.post-role-item').forEach(function(el) {
+            el.addEventListener('click', function() {
+                var rid = this.dataset.rid;
+                var role = POST_ROLES.find(function(r) { return r.id === rid; });
+                if (!role) return;
+                currentFeedRole = rid;
+                currentFeedTab = 'role';
+                overlay.remove();
+                var descEl = document.getElementById('postTabDesc');
+                if (descEl) descEl.textContent = 'Role "' + role.name + '" Post များ ပြသနေသည်';
+                resetFeed();
+                loadFeedNext();
+            });
+        });
+    }
+
+    // ===================================================
+    //  PROFILE POPUP (Post Owner)
+    // ===================================================
+    function showPostUserPopup(userInfo) {
+        var overlay = document.getElementById('postUserPopupOverlay');
+        if (!overlay) return;
+
+        popupCurrentUser = userInfo;
+
+        var avatarEl = document.getElementById('postUserPopupAvatar');
+        var frameEl = document.getElementById('postUserPopupFrame');
+        var nameEl = document.getElementById('postUserPopupName');
+        var markEl = document.getElementById('postUserPopupMark');
+        var serverEl = document.getElementById('postUserPopupServer');
+        var onlineEl = document.getElementById('postUserPopupOnline');
+        var bioEl = document.getElementById('postUserPopupBio');
+        var bannerImg = document.getElementById('postUserPopupBannerImg');
+        var bannerEl = document.getElementById('postUserPopupBanner');
+        var actionBtn = document.getElementById('postUserPopupActionBtn');
+
+        // Avatar
+        avatarEl.src = userInfo.avatar || 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 100 100"%3E%3Ccircle cx="50" cy="50" r="45" fill="%2322222e"/%3E%3Ccircle cx="50" cy="35" r="18" fill="%235a5a6a"/%3E%3Cpath d="M20 75c0-18 12-30 30-30s30 12 30 30" fill="%235a5a6a"/%3E%3C/svg%3E';
+
+        // Frame
+        if (userInfo.frameUse && typeof FRAME_CONFIG !== 'undefined') {
+            var frame = FRAME_CONFIG.frames.find(function(f) { return String(f.id) === String(userInfo.frameUse); });
+            if (frame) {
+                frameEl.style.backgroundImage = 'url("' + frame.image + '")';
+            } else {
+                frameEl.style.backgroundImage = 'none';
+            }
+        } else {
+            frameEl.style.backgroundImage = 'none';
+        }
+
+        // Name
+        nameEl.textContent = userInfo.name || 'Player';
+
+        // Mark
+        if (userInfo.markUse && typeof MARK_CONFIG !== 'undefined') {
+            var mark = MARK_CONFIG.marks.find(function(m) { return String(m.id) === String(userInfo.markUse); });
+            if (mark) {
+                markEl.innerHTML = '<img src="' + mark.image + '" />';
+                markEl.style.display = 'inline-flex';
+            } else {
+                markEl.style.display = 'none';
+            }
+        } else {
+            markEl.style.display = 'none';
+        }
+
+        // Server
+        serverEl.textContent = userInfo.serverNo || 'Server 1';
+
+        // Online
+        if (userInfo.online) {
+            onlineEl.textContent = 'Online';
+            onlineEl.classList.add('online');
+        } else {
+            onlineEl.textContent = 'Offline';
+            onlineEl.classList.remove('online');
+        }
+
+        // Banner
+        if (userInfo.bannerUse && typeof BANNER_CONFIG !== 'undefined') {
+            var banner = BANNER_CONFIG.banners.find(function(b) { return String(b.id) === String(userInfo.bannerUse); });
+            if (banner) {
+                bannerImg.src = banner.image;
+                bannerImg.style.display = 'block';
+            } else {
+                bannerImg.style.display = 'none';
+            }
+        } else {
+            bannerImg.style.display = 'none';
+        }
+
+        // Bio
+        if (userInfo.bio && userInfo.bio.trim()) {
+            bioEl.innerHTML = escapeHtmlP(userInfo.bio).replace(/\n/g, '<br>');
+        } else {
+            bioEl.innerHTML = '<span class="bio-placeholder">No bio yet...</span>';
+        }
+
+        // Action button
+        var isMe = (typeof currentUser !== 'undefined' && currentUser &&
+                    String(currentUser.userId) === String(userInfo.userId) &&
+                    currentServerId === userInfo.serverId);
+
+        if (isMe) {
+            actionBtn.disabled = true;
+            actionBtn.querySelector('span').textContent = 'This is You';
+            actionBtn.onclick = null;
+        } else {
+            var already = (typeof isFriend === 'function')
+                ? isFriend(userInfo.serverId, userInfo.userId)
+                : false;
+
+            if (already) {
+                actionBtn.querySelector('span').textContent = 'Chat';
+                actionBtn.innerHTML =
+                    '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
+                        '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>' +
+                    '</svg><span>Chat</span>';
+                actionBtn.disabled = false;
+                actionBtn.onclick = function() {
+                    closePostUserPopup();
+                    if (typeof openChatRoom === 'function') {
+                        openChatRoom({
+                            serverId: userInfo.serverId,
+                            userId: userInfo.userId,
+                            serverNo: userInfo.serverNo
+                        });
+                    }
+                };
+            } else {
+                actionBtn.innerHTML =
+                    '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
+                        '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>' +
+                        '<circle cx="9" cy="7" r="4"/>' +
+                        '<line x1="19" y1="8" x2="19" y2="14"/>' +
+                        '<line x1="22" y1="11" x2="16" y2="11"/>' +
+                    '</svg><span>Add Chat</span>';
+                actionBtn.disabled = false;
+                actionBtn.onclick = function() {
+                    addPostUserAsFriend(userInfo);
+                };
+            }
+        }
+
+        overlay.classList.remove('hidden');
+    }
+
+    function closePostUserPopup() {
+        var overlay = document.getElementById('postUserPopupOverlay');
+        if (overlay) overlay.classList.add('hidden');
+        popupCurrentUser = null;
+    }
+
+    function addPostUserAsFriend(userInfo) {
+        if (typeof currentUser === 'undefined' || !currentUser) {
+            if (typeof showToast === 'function') showToast('Login first');
+            return;
+        }
+
+        var actionBtn = document.getElementById('postUserPopupActionBtn');
+        if (actionBtn) {
+            actionBtn.disabled = true;
+            actionBtn.querySelector('span').textContent = 'Adding...';
+        }
+
+        // Use existing addFriendAndSync if available
+        if (typeof addFriendAndSync === 'function') {
+            // We need a targetData object with serverId, serverNo, userId
+            var target = {
+                serverId: userInfo.serverId,
+                serverNo: userInfo.serverNo,
+                userId: userInfo.userId,
+                name: userInfo.name,
+                avatar: userInfo.avatar
+            };
+            try {
+                addFriendAndSync(target);
+                setTimeout(function() {
+                    closePostUserPopup();
+                }, 600);
+            } catch(e) {
+                console.warn('addFriendAndSync error:', e);
+                fallbackAddFriend(userInfo, actionBtn);
+            }
+        } else {
+            fallbackAddFriend(userInfo, actionBtn);
+        }
+    }
+
+    function fallbackAddFriend(userInfo, actionBtn) {
+        // Fallback: directly add via Firebase
+        if (typeof getDbForServer !== 'function' || typeof currentServerId === 'undefined') {
+            if (actionBtn) { actionBtn.disabled = false; actionBtn.querySelector('span').textContent = 'Add Chat'; }
+            return;
+        }
+
+        var myDb = getDbForServer(currentServerId);
+        var theirDb = getDbForServer(userInfo.serverId);
+        if (!myDb || !theirDb) {
+            if (actionBtn) { actionBtn.disabled = false; actionBtn.querySelector('span').textContent = 'Add Chat'; }
+            return;
+        }
+
+        var myServer = FIREBASE_SERVERS.find(function(s) { return s.id === currentServerId; });
+        var myServerNo = myServer ? myServer.number : 1;
+        var theirEntry = { serverId: userInfo.serverId, serverNo: userInfo.serverNo, userId: userInfo.userId };
+        var myEntry = { serverId: currentServerId, serverNo: myServerNo, userId: currentUser.userId };
+
+        var myList = (currentUser.friendsList || []).slice();
+        if (!myList.some(function(f) {
+            return String(f.serverId) === String(userInfo.serverId) && String(f.userId) === String(userInfo.userId);
+        })) {
+            myList.push(theirEntry);
+        }
+
+        myDb.ref('users/' + currentUser.userId).update({ friendsList: myList })
+        .then(function() { return theirDb.ref('users/' + userInfo.userId + '/friendsList').once('value'); })
+        .then(function(snap) {
+            var tl = snap.val() || [];
+            if (!Array.isArray(tl)) tl = Object.keys(tl).map(function(k) { return tl[k]; });
+            if (!tl.some(function(f) {
+                return String(f.serverId) === String(currentServerId) && String(f.userId) === String(currentUser.userId);
+            })) {
+                tl.push(myEntry);
+            }
+            return theirDb.ref('users/' + userInfo.userId).update({ friendsList: tl });
+        })
+        .then(function() {
+            currentUser.friendsList = myList;
+            if (typeof saveUserToDB === 'function') saveUserToDB(currentUser);
+            if (typeof showToast === 'function') showToast('Friend added');
+            closePostUserPopup();
+        })
+        .catch(function(err) {
+            console.warn('Add friend error:', err);
+            if (actionBtn) {
+                actionBtn.disabled = false;
+                actionBtn.querySelector('span').textContent = 'Add Chat';
+            }
+            if (typeof showToast === 'function') showToast('Failed');
+        });
+    }
+
+    // ===================================================
+    //  OPEN CREATE POST
+    // ===================================================
+    function openPostCreate() {
+        if (typeof currentUser === 'undefined' || !currentUser) {
+            if (typeof showToast === 'function') showToast('Login first');
+            return;
+        }
+
+        var uploadServers = getEnabledUploadServers();
+        if (uploadServers.length === 0) {
+            if (typeof showToast === 'function') showToast('Post တင် ပိတ်ထားသည်');
+            return;
+        }
+
+        postImages = [];
+        postVideo = null;
+        postSelectedRole = null;
+        postSubmitting = false;
+
+        var captionEl = document.getElementById('postCaptionInput');
+        if (captionEl) captionEl.value = '';
+
+        renderPostMediaGrid();
+        renderPostRoleList();
+        updatePostSubmitBtn();
+
+        var screen = document.getElementById('postCreateScreen');
+        if (screen) {
+            screen.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+    }
+
+    function closePostCreate() {
+        var screen = document.getElementById('postCreateScreen');
+        if (screen) screen.classList.add('hidden');
+        document.body.style.overflow = '';
+    }
+
+    // ===================================================
+    //  MEDIA GRID
+    // ===================================================
+    function renderPostMediaGrid() {
+        var grid = document.getElementById('postMediaGrid');
+        if (!grid) return;
+        grid.innerHTML = '';
+
+        if (postVideo) {
+            var videoCell = document.createElement('div');
+            videoCell.className = 'post-media-slot has-media';
+            videoCell.style.gridColumn = 'span 3';
+            videoCell.style.aspectRatio = 'auto';
+            videoCell.style.minHeight = '180px';
+            videoCell.innerHTML =
+                '<video src="' + postVideo.dataUrl + '" controls playsinline preload="metadata" style="width:100%;height:100%;border-radius:10px;object-fit:contain;background:#000;"></video>' +
+                '<button class="slot-remove" data-type="video">' +
+                    '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>' +
+                '</button>' +
+                '<div class="slot-badge">' + formatBytes(postVideo.size) + '</div>';
+
+            videoCell.querySelector('.slot-remove').addEventListener('click', function(e) {
+                e.stopPropagation();
+                postVideo = null;
+                renderPostMediaGrid();
+                updatePostSubmitBtn();
+            });
+            grid.appendChild(videoCell);
+            return;
+        }
+
+        for (var i = 0; i < POST_MAX_IMAGES; i++) {
+            var slot = document.createElement('div');
+            slot.className = 'post-media-slot';
+            slot.dataset.index = i;
+
+            var imgData = postImages[i];
+
+            if (imgData) {
+                slot.classList.add('has-media');
+                slot.innerHTML =
+                    '<img src="' + imgData.dataUrl + '" />' +
+                    '<button class="slot-remove" data-index="' + i + '">' +
+                        '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>' +
+                    '</button>' +
+                    '<div class="slot-badge">' + formatBytes(imgData.size) + '</div>';
+
+                slot.querySelector('.slot-remove').addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    var idx = parseInt(this.dataset.index);
+                    postImages.splice(idx, 1);
+                    renderPostMediaGrid();
+                    updatePostSubmitBtn();
+                });
+            } else {
+                slot.innerHTML =
+                    '<div class="slot-plus">' +
+                        '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>' +
+                        '<div class="slot-label">Image ' + (i + 1) + '</div>' +
+                    '</div>';
+
+                slot.addEventListener('click', function() {
+                    pickPostImage();
+                });
+            }
+
+            grid.appendChild(slot);
+        }
+    }
+
+    function pickPostImage() {
+        if (postImages.length >= POST_MAX_IMAGES) {
+            if (typeof showToast === 'function') showToast('Max ' + POST_MAX_IMAGES + ' images');
+            return;
+        }
+
+        var input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'image/*';
+        input.multiple = true;
+        input.onchange = function(e) {
+            var files = Array.from(e.target.files || []);
+            if (files.length === 0) return;
+
+            var validFiles = files.filter(function(f) {
+                if (!f.type || f.type.indexOf('image/') !== 0) return false;
+                if (f.size > POST_MAX_SIZE) {
+                    if (typeof showToast === 'function') showToast(f.name + ' too large (max 50MB)');
+                    return false;
+                }
+                return true;
+            });
+
+            if (validFiles.length === 0) return;
+
+            var spaceLeft = POST_MAX_IMAGES - postImages.length;
+            var toAdd = validFiles.slice(0, spaceLeft);
+
+            if (validFiles.length > spaceLeft) {
+                if (typeof showToast === 'function') showToast('Added ' + toAdd.length + ' (max ' + POST_MAX_IMAGES + ')');
+            }
+
+            var promises = toAdd.map(function(file) {
+                return fileToDataURL(file).then(function(dataUrl) {
+                    return { file: file, dataUrl: dataUrl, size: file.size };
+                });
+            });
+
+            Promise.all(promises).then(function(items) {
+                items.forEach(function(item) {
+                    if (postImages.length < POST_MAX_IMAGES) postImages.push(item);
+                });
+                renderPostMediaGrid();
+                updatePostSubmitBtn();
+            });
+        };
+        input.click();
+    }
+
+    function pickPostVideo() {
+        if (postImages.length > 0) {
+            if (typeof showToast === 'function') showToast('Remove images first');
+            return;
+        }
+
+        var input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'video/*';
+        input.onchange = function(e) {
+            var file = e.target.files[0];
+            if (!file) return;
+
+            if (!file.type || file.type.indexOf('video/') !== 0) {
+                if (typeof showToast === 'function') showToast('Please select a video');
+                return;
+            }
+            if (file.size > POST_MAX_SIZE) {
+                if (typeof showToast === 'function') showToast('Video too large (max 50MB)');
+                return;
+            }
+
+            fileToDataURL(file).then(function(dataUrl) {
+                postVideo = { file: file, dataUrl: dataUrl, size: file.size };
+                renderPostMediaGrid();
+                updatePostSubmitBtn();
+            });
+        };
+        input.click();
+    }
+
+    // ===================================================
+    //  ROLE LIST
+    // ===================================================
+    function renderPostRoleList() {
+        var list = document.getElementById('postRoleList');
+        if (!list) return;
+        list.innerHTML = '';
+
+        POST_ROLES.forEach(function(role) {
+            var item = document.createElement('div');
+            item.className = 'post-role-item';
+            if (postSelectedRole && postSelectedRole.id === role.id) item.classList.add('selected');
+            item.dataset.roleId = role.id;
+            item.innerHTML =
+                '<img src="' + role.image + '" />' +
+                '<div class="role-info">' +
+                    '<div class="role-name">' + escapeHtmlP(role.name) + '</div>' +
+                    '<div class="role-desc">' + escapeHtmlP(role.desc) + '</div>' +
+                '</div>' +
+                '<div class="role-check">' +
+                    '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>' +
+                '</div>';
+
+            item.addEventListener('click', function() {
+                var rid = this.dataset.roleId;
+                if (postSelectedRole && postSelectedRole.id === rid) {
+                    postSelectedRole = null;
+                } else {
+                    postSelectedRole = POST_ROLES.find(function(r) { return r.id === rid; }) || null;
+                }
+                renderPostRoleList();
+            });
+
+            list.appendChild(item);
+        });
+    }
+
+    function updatePostSubmitBtn() {
+        var btn = document.getElementById('postSubmitBtn');
+        if (!btn) return;
+        var hasMedia = (postImages.length > 0) || postVideo;
+        btn.disabled = !hasMedia || postSubmitting;
+    }
+
+    // ===================================================
+    //  UPLOAD UI
+    // ===================================================
+    function showPostUpload(text, sub, percent) {
+        var ov = document.getElementById('postUploadOverlay');
+        var t = document.getElementById('postUploadText');
+        var s = document.getElementById('postUploadSub');
+        var p = document.getElementById('postUploadProgress');
+        if (ov) ov.classList.remove('hidden');
+        if (t) t.textContent = text || 'Uploading...';
+        if (s) s.textContent = sub || '';
+        if (p) p.style.width = (percent || 0) + '%';
+    }
+
+    function updatePostUpload(percent, sub) {
+        var p = document.getElementById('postUploadProgress');
+        var s = document.getElementById('postUploadSub');
+        if (p) p.style.width = percent + '%';
+        if (s && sub) s.textContent = sub;
+    }
+
+    function hidePostUpload() {
+        var ov = document.getElementById('postUploadOverlay');
+        if (ov) ov.classList.add('hidden');
+    }
+
+    // ===================================================
+    //  UPLOAD
+    // ===================================================
+    function uploadPostFile(sb, path, blob) {
+        return sb.storage.from(POST_BUCKET).upload(path, blob, {
+            cacheControl: '3600',
+            upsert: false,
+            contentType: blob.type || 'application/octet-stream'
+        });
+    }
+
+    function getPublicUrl(sb, path) {
+        var res = sb.storage.from(POST_BUCKET).getPublicUrl(path);
+        return res.data.publicUrl;
+    }
+
+    // ===================================================
+    //  PICK LEAST LOADED SERVER FOR UPLOAD
+    // ===================================================
+    function pickLeastLoadedUploadServer() {
+        return new Promise(function(resolve) {
+            var servers = getEnabledUploadServers();
+            if (servers.length === 0) return resolve(null);
+
+            var promises = servers.map(function(srv) {
+                var sb = getSupabaseClient(srv.id);
+                if (!sb) return Promise.resolve({ srv: srv, count: 999999 });
+                return sb.storage.from(POST_BUCKET).list('meta', { limit: 1000 })
+                    .then(function(res) {
+                        var count = (res.data || []).length;
+                        return { srv: srv, count: count };
+                    })
+                    .catch(function() { return { srv: srv, count: 999999 }; });
+            });
+
+            Promise.all(promises).then(function(results) {
+                results.sort(function(a, b) { return a.count - b.count; });
+                resolve(results[0].srv);
+            }).catch(function() {
+                resolve(servers[0]);
+            });
+        });
+    }
+
+    // ===================================================
+    //  SUBMIT POST
+    // ===================================================
+    function submitPost() {
+        if (postSubmitting) return;
+        if (typeof currentUser === 'undefined' || !currentUser) {
+            if (typeof showToast === 'function') showToast('Login first');
+            return;
+        }
+
+        var hasMedia = (postImages.length > 0) || postVideo;
+        if (!hasMedia) {
+            if (typeof showToast === 'function') showToast('Select image or video');
+            return;
+        }
+
+        postSubmitting = true;
+        updatePostSubmitBtn();
+        showPostUpload('Preparing...', 'Choosing best server...', 3);
+
+        pickLeastLoadedUploadServer().then(function(srv) {
+            if (!srv) throw new Error('No server available');
+
+            var sb = getSupabaseClient(srv.id);
+            if (!sb) throw new Error('Supabase not ready');
+
+            updatePostUpload(8, 'Uploading to ' + srv.name + '...');
+
+            var postId = genPostId();
+            var isVideo = !!postVideo;
+            var caption = (document.getElementById('postCaptionInput') || {}).value || '';
+
+            var compressPromises = postImages.map(function(item) {
+                return compressImage(item.file, 1200, 0.82).then(function(blob) {
+                    return { blob: blob, original: item };
+                });
+            });
+
+            var allCompressed = isVideo ? Promise.resolve([]) : Promise.all(compressPromises);
+
+            return allCompressed.then(function(compressedItems) {
+                updatePostUpload(15, 'Uploading media...');
+
+                var uploadPromises = [];
+
+                if (isVideo) {
+                    var ext = (postVideo.file.name.split('.').pop() || 'mp4').toLowerCase();
+                    var videoPath = 'media/' + postId + '_video.' + ext;
+                    uploadPromises.push(
+                        uploadPostFile(sb, videoPath, postVideo.file).then(function(res) {
+                            if (res.error) throw res.error;
+                            return { type: 'video', path: videoPath };
+                        })
+                    );
+                } else {
+                    compressedItems.forEach(function(c, idx) {
+                        var imgPath = 'media/' + postId + '_' + idx + '.jpg';
+                        uploadPromises.push(
+                            uploadPostFile(sb, imgPath, c.blob).then(function(res) {
+                                if (res.error) throw res.error;
+                                return { type: 'image', path: imgPath, index: idx };
+                            })
+                        );
+                    });
+                }
+
+                return Promise.all(uploadPromises).then(function(uploaded) {
+                    updatePostUpload(70, 'Saving metadata...');
+
+                    var mediaUrls = uploaded.map(function(u) {
+                        return {
+                            type: u.type,
+                            url: getPublicUrl(sb, u.path),
+                            path: u.path
+                        };
+                    });
+
+                    // ✅ User info ကို IndexedDB (currentUser) ကနေ ယူ
+                    var serverObj = (typeof FIREBASE_SERVERS !== 'undefined')
+                        ? FIREBASE_SERVERS.find(function(s) { return s.id === currentServerId; })
+                        : null;
+                    var serverName = serverObj ? serverObj.name : 'Server 1';
+
+                    var postData = {
+                        postId: postId,
+                        userId: String(currentUser.userId || ''),
+                        userName: currentUser.name || 'Player',
+                        serverId: currentServerId,
+                        serverNo: serverName,
+                        userAvatar: currentUser.avatar || '',
+                        userFrame: currentUser.frameUse || '',
+                        userMark: currentUser.markUse || '',
+                        userBanner: currentUser.bannerUse || '',
+                        userBio: currentUser.bio || '',
+                        caption: caption,
+                        postType: isVideo ? 'video' : 'image',
+                        mediaUrls: mediaUrls,
+                        roleId: postSelectedRole ? postSelectedRole.id : '',
+                        roleName: postSelectedRole ? postSelectedRole.name : '',
+                        roleImage: postSelectedRole ? postSelectedRole.image : '',
+                        likes: [],
+                        likeCount: 0,
+                        createdAt: Date.now()
+                    };
+
+                    var metaPath = 'meta/' + postId + '.json';
+                    var metaBlob = new Blob([JSON.stringify(postData)], { type: 'application/json' });
+
+                    return uploadPostFile(sb, metaPath, metaBlob).then(function(res) {
+                        if (res.error) throw res.error;
+                        return postData;
+                    });
+                });
+            });
+        }).then(function(postData) {
+            updatePostUpload(100, 'Done!');
+
+            setTimeout(function() {
+                hidePostUpload();
+                postSubmitting = false;
+                closePostCreate();
+                if (typeof showToast === 'function') showToast('Post တင်ပြီးပါပြီ');
+
+                // Refresh feed
+                resetFeed();
+                loadFeedNext();
+            }, 500);
+        }).catch(function(err) {
+            console.error('Post upload error:', err);
+            hidePostUpload();
+            postSubmitting = false;
+            updatePostSubmitBtn();
+
+            var msg = 'Upload failed';
+            if (err && err.message) {
+                if (err.message.indexOf('exceeded') !== -1 || err.message.indexOf('size') !== -1) {
+                    msg = 'File too large (max 50MB)';
+                } else if (err.message.indexOf('policy') !== -1 || err.message.indexOf('permission') !== -1) {
+                    msg = 'Permission denied - check Supabase policy';
+                } else {
+                    msg = err.message;
+                }
+            }
+            if (typeof showToast === 'function') showToast(msg);
+        });
+    }
+
+    // ===================================================
+    //  POST CARD BUILD
+    // ===================================================
+    function buildPostCard(post) {
+        var card = document.createElement('div');
+        card.className = 'post-card';
+        card.dataset.postId = post.postId;
+
+        var avatar = post.userAvatar || 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 100 100"%3E%3Ccircle cx="50" cy="50" r="45" fill="%2322222e"/%3E%3C/svg%3E';
+
+        var frameHtml = '';
+        if (post.userFrame && typeof FRAME_CONFIG !== 'undefined') {
+            var frame = FRAME_CONFIG.frames.find(function(f) { return String(f.id) === String(post.userFrame); });
+            if (frame) {
+                frameHtml = '<div class="post-card-frame" style="background-image:url(\'' + frame.image + '\')"></div>';
+            }
+        }
+
+        var roleBadge = '';
+        if (post.roleName && post.roleImage) {
+            roleBadge = '<span class="post-card-role-badge">' +
+                '<img src="' + post.roleImage + '" />' +
+                escapeHtmlP(post.roleName) +
+            '</span>';
+        }
+
+        var timeStr = formatPostTime(post.createdAt);
+
+        var isMe = (typeof currentUser !== 'undefined' && currentUser &&
+                    String(currentUser.userId) === String(post.userId) &&
+                    currentServerId === post.serverId);
+
+        var chatBtn = isMe
+            ? '<button class="post-card-chat-btn" disabled><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>You</button>'
+            : '<button class="post-card-chat-btn" data-action="chat"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Chat</button>';
+
+        var captionHtml = '';
+        if (post.caption && post.caption.trim()) {
+            captionHtml = '<div class="post-card-caption">' +
+                '<span class="caption-name">' + escapeHtmlP(post.userName) + '</span>' +
+                escapeHtmlP(post.caption) +
+            '</div>';
+        }
+
+        var mediaHtml = buildPostMediaHtml(post);
+        var liked = isPostLikedByMe(post);
+
+        card.innerHTML =
+            '<div class="post-card-header">' +
+                '<div class="post-card-avatar-wrap" data-action="profile">' +
+                    '<img src="' + avatar + '" />' +
+                    frameHtml +
+                '</div>' +
+                '<div class="post-card-info">' +
+                    '<div class="post-card-name-row">' +
+                        '<span class="post-card-name">' + escapeHtmlP(post.userName) + '</span>' +
+                        roleBadge +
+                    '</div>' +
+                    '<div class="post-card-name-row">' +
+                        '<span class="post-card-server">' + escapeHtmlP(post.serverNo || 'Server 1') + '</span>' +
+                        '<span class="post-card-time">' + timeStr + '</span>' +
+                    '</div>' +
+                '</div>' +
+                chatBtn +
+            '</div>' +
+            captionHtml +
+            mediaHtml +
+            '<div class="post-card-actions">' +
+                '<button class="post-action-btn ' + (liked ? 'liked' : '') + '" data-action="like">' +
+                    '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
+                        '<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>' +
+                    '</svg>' +
+                    '<span class="like-count">' + (post.likeCount || 0) + '</span>' +
+                '</button>' +
+            '</div>';
+
+        attachPostCardEvents(card, post);
+        return card;
+    }
+
+    function buildPostMediaHtml(post) {
+        var media = post.mediaUrls || [];
+        if (media.length === 0) return '';
+
+        if (post.postType === 'video') {
+            var v = media[0];
+            return '<div class="post-card-media">' +
+                '<video src="' + v.url + '" controls playsinline preload="metadata"></video>' +
+            '</div>';
+        }
+
+        if (media.length === 1) {
+            return '<div class="post-card-media">' +
+                '<img src="' + media[0].url + '" data-index="0" />' +
+            '</div>';
+        }
+
+        if (media.length === 2) {
+            return '<div class="post-card-media"><div class="post-card-media-grid" style="grid-template-columns:1fr 1fr;">' +
+                media.slice(0, 2).map(function(m, i) {
+                    return '<div class="media-cell"><img src="' + m.url + '" data-index="' + i + '" /></div>';
+                }).join('') +
+            '</div></div>';
+        }
+
+        var display = media.slice(0, 6);
+        var extra = media.length - 6;
+        var html = '<div class="post-card-media"><div class="post-card-media-grid">';
+        display.forEach(function(m, i) {
+            var overlay = (i === 5 && extra > 0) ? '<div class="media-more-overlay">+' + extra + '</div>' : '';
+            html += '<div class="media-cell"><img src="' + m.url + '" data-index="' + i + '" />' + overlay + '</div>';
+        });
+        html += '</div></div>';
+        return html;
+    }
+
+    function attachPostCardEvents(card, post) {
+        // Media click
+        card.querySelectorAll('.post-card-media img, .post-card-media-grid img').forEach(function(img) {
+            img.addEventListener('click', function(e) {
+                e.stopPropagation();
+                var idx = parseInt(this.dataset.index) || 0;
+                openPostViewer(post, idx);
+            });
+        });
+
+        // Chat button
+        var chatBtn = card.querySelector('.post-card-chat-btn[data-action="chat"]');
+        if (chatBtn) {
+            chatBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                if (typeof openChatRoom === 'function') {
+                    openChatRoom({
+                        serverId: post.serverId,
+                        userId: post.userId,
+                        serverNo: post.serverNo
+                    });
+                }
+            });
+        }
+
+        // Profile avatar click → popup
+        var avatarWrap = card.querySelector('.post-card-avatar-wrap[data-action="profile"]');
+        if (avatarWrap) {
+            avatarWrap.addEventListener('click', function(e) {
+                e.stopPropagation();
+                // Build userInfo from post
+                var userInfo = {
+                    userId: post.userId,
+                    serverId: post.serverId,
+                    serverNo: post.serverNo,
+                    name: post.userName,
+                    avatar: post.userAvatar,
+                    frameUse: post.userFrame,
+                    markUse: post.userMark,
+                    bannerUse: post.userBanner,
+                    bio: post.userBio,
+                    online: false
+                };
+                showPostUserPopup(userInfo);
+            });
+        }
+
+        // Like
+        var likeBtn = card.querySelector('.post-action-btn[data-action="like"]');
+        if (likeBtn) {
+            likeBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                togglePostLike(post, likeBtn);
+            });
+        }
+    }
+
+    // ===================================================
+    //  LIKE
+    // ===================================================
+    function isPostLikedByMe(post) {
+        if (typeof currentUser === 'undefined' || !currentUser) return false;
+        var uid = String(currentUser.userId || '');
+        var sid = currentServerId || '';
+        var likes = post.likes || [];
+        return likes.some(function(l) {
+            return String(l.userId) === uid && l.serverId === sid;
+        });
+    }
+
+    function togglePostLike(post, btn) {
+        if (typeof currentUser === 'undefined' || !currentUser) return;
+
+        var uid = String(currentUser.userId || '');
+        var sid = currentServerId || '';
+        var likes = Array.isArray(post.likes) ? post.likes.slice() : [];
+
+        var idx = likes.findIndex(function(l) {
+            return String(l.userId) === uid && l.serverId === sid;
+        });
+
+        if (idx >= 0) likes.splice(idx, 1);
+        else likes.push({ userId: uid, serverId: sid });
+
+        post.likes = likes;
+        post.likeCount = likes.length;
+
+        var countEl = btn.querySelector('.like-count');
+        if (countEl) countEl.textContent = likes.length;
+        btn.classList.toggle('liked', idx < 0);
+
+        // Update local copy in feedAllPosts
+        var localIdx = feedAllPosts.findIndex(function(p) { return p.postId === post.postId; });
+        if (localIdx >= 0) feedAllPosts[localIdx] = post;
+
+        // Save to Supabase (use post's _serverId)
+        var targetServerId = post._serverId || post.serverId || currentServerId;
+        var sb = getSupabaseClient(targetServerId);
+        if (!sb) return;
+
+        var metaPath = 'meta/' + post.postId + '.json';
+        var metaBlob = new Blob([JSON.stringify(post)], { type: 'application/json' });
+
+        sb.storage.from(POST_BUCKET).upload(metaPath, metaBlob, {
+            cacheControl: '0',
+            upsert: true,
+            contentType: 'application/json'
+        }).catch(function(err) {
+            console.warn('Like save error:', err);
+        });
+
+        // Save cache
+        if (typeof setToDB === 'function') {
+            setToDB(POST_CACHE_KEY, feedAllPosts).catch(function() {});
+        }
+    }
+
+    // ===================================================
+    //  VIEWER
+    // ===================================================
+    function openPostViewer(post, startIndex) {
+        viewerMedia = (post.mediaUrls || []).slice();
+        viewerIndex = startIndex || 0;
+
+        var overlay = document.getElementById('postViewerOverlay');
+        if (!overlay) return;
+        overlay.classList.remove('hidden');
+        renderViewerContent();
+    }
+
+    function closePostViewer() {
+        var overlay = document.getElementById('postViewerOverlay');
+        if (overlay) overlay.classList.add('hidden');
+        var body = document.getElementById('postViewerBody');
+        if (body) body.innerHTML = '';
+        viewerMedia = [];
+        viewerIndex = 0;
+    }
+
+    function renderViewerContent() {
+        var body = document.getElementById('postViewerBody');
+        var counter = document.getElementById('postViewerCounter');
+        var prevBtn = document.getElementById('postViewerPrev');
+        var nextBtn = document.getElementById('postViewerNext');
+        var dots = document.getElementById('postViewerDots');
+        if (!body) return;
+
+        body.innerHTML = '';
+
+        if (viewerMedia.length === 0) return;
+
+        var m = viewerMedia[viewerIndex];
+        if (!m) return;
+
+        if (m.type === 'video') {
+            var vid = document.createElement('video');
+            vid.src = m.url;
+            vid.controls = true;
+            vid.playsInline = true;
+            vid.autoplay = true;
+            vid.preload = 'metadata';
+            body.appendChild(vid);
+        } else {
+            var img = document.createElement('img');
+            img.src = m.url;
+            img.alt = 'media';
+            body.appendChild(img);
+        }
+
+        if (viewerMedia.length > 1) {
+            counter.classList.remove('hidden');
+            counter.textContent = (viewerIndex + 1) + ' / ' + viewerMedia.length;
+
+            prevBtn.classList.remove('hidden');
+            nextBtn.classList.remove('hidden');
+
+            dots.classList.remove('hidden');
+            dots.innerHTML = '';
+            viewerMedia.forEach(function(_, i) {
+                var d = document.createElement('div');
+                d.className = 'post-viewer-dot' + (i === viewerIndex ? ' active' : '');
+                dots.appendChild(d);
+            });
+
+            prevBtn.onclick = function() {
+                viewerIndex = (viewerIndex - 1 + viewerMedia.length) % viewerMedia.length;
+                renderViewerContent();
+            };
+            nextBtn.onclick = function() {
+                viewerIndex = (viewerIndex + 1) % viewerMedia.length;
+                renderViewerContent();
+            };
+        } else {
+            counter.classList.add('hidden');
+            prevBtn.classList.add('hidden');
+            nextBtn.classList.add('hidden');
+            dots.classList.add('hidden');
+        }
+    }
+
+    function downloadCurrentViewer() {
+        if (viewerMedia.length === 0) return;
+        var m = viewerMedia[viewerIndex];
+        if (!m || !m.url) return;
+
+        var isVideo = m.type === 'video';
+        var ext = isVideo ? '.mp4' : '.jpg';
+        var filename = 'star_arcade_' + Date.now() + ext;
+
+        fetch(m.url)
+            .then(function(res) { return res.blob(); })
+            .then(function(blob) {
+                var url = URL.createObjectURL(blob);
+                var a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                if (typeof showToast === 'function') showToast('Downloaded');
+            })
+            .catch(function() {
+                window.open(m.url, '_blank');
+                if (typeof showToast === 'function') showToast('Opened in new tab');
+            });
+    }
+
+    // ===================================================
+    //  PLUS MENU POST HOOK
+    // ===================================================
+    function hookPlusMenuPost() {
+        // Intercept the existing plus menu Post action
+        document.addEventListener('click', function(e) {
+            var btn = e.target.closest('.plus-menu-btn[data-action="post"]');
+            if (!btn) return;
+            e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+
+            // Close plus menu if open
+            if (typeof closePlusMenu === 'function') closePlusMenu();
+
+            setTimeout(function() {
+                openPostCreate();
+            }, 150);
+        }, true); // capture phase
+    }
+
+    // ===================================================
+    //  INIT
+    // ===================================================
+    function init() {
+        // Ensure home UI
+        ensureHomeFeedUI();
+
+        // Initial feed load
+        setTimeout(function() {
+            resetFeed();
+            loadFeedNext();
+        }, 800);
+
+        // Create post screen events
+        var backBtn = document.getElementById('postCreateBackBtn');
+        if (backBtn) backBtn.addEventListener('click', closePostCreate);
+
+        var addImgBtn = document.getElementById('postAddImageBtn');
+        if (addImgBtn) addImgBtn.addEventListener('click', pickPostImage);
+
+        var addVidBtn = document.getElementById('postAddVideoBtn');
+        if (addVidBtn) addVidBtn.addEventListener('click', pickPostVideo);
+
+        var submitBtn = document.getElementById('postSubmitBtn');
+        if (submitBtn) submitBtn.addEventListener('click', submitPost);
+
+        // Viewer events
+        var viewerClose = document.getElementById('postViewerClose');
+        if (viewerClose) viewerClose.addEventListener('click', closePostViewer);
+
+        var viewerOverlay = document.getElementById('postViewerOverlay');
+        if (viewerOverlay) {
+            viewerOverlay.addEventListener('click', function(e) {
+                if (e.target === viewerOverlay) closePostViewer();
+            });
+        }
+
+        var dlBtn = document.getElementById('postViewerDownload');
+        if (dlBtn) dlBtn.addEventListener('click', downloadCurrentViewer);
+
+        // Profile popup events
+        var popupClose = document.getElementById('postUserPopupClose');
+        if (popupClose) popupClose.addEventListener('click', closePostUserPopup);
+
+        var popupOverlay = document.getElementById('postUserPopupOverlay');
+        if (popupOverlay) {
+            popupOverlay.addEventListener('click', function(e) {
+                if (e.target === popupOverlay) closePostUserPopup();
+            });
+        }
+
+        // Hook + Post button
+        hookPlusMenuPost();
+
+        // Watch for home screen becoming active (in case UI is re-created)
+        var observer = new MutationObserver(function() {
+            ensureHomeFeedUI();
+        });
+        var homeEl = document.getElementById('screen-home');
+        if (homeEl) {
+            observer.observe(homeEl, { childList: true });
+        }
+
+        console.log('✅ Post System v2.0 Ready');
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(init, 1300);
+        });
+    } else {
+        setTimeout(init, 1300);
+    }
 
 })();
 </script>
