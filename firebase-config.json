@@ -1,4 +1,4 @@
-<meta name='viewport' content='width=device-width, initial-scale=1'/><script>{
+{
   "servers": {
     "server1": {
       "name": "Server 1",
@@ -17,4 +17,4 @@
       "appId": "1:702395527575:web:f633355c4ea0915f3914d2"
     }
   }
-}</script>
+}
