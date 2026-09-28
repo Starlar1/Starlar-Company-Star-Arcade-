@@ -9496,16 +9496,84 @@ function pickMServerForUser() {
 //  NEXT ACC NO
 // ===================================================
 function getNextAccNo(db) {
-    return new Promise(function(resolve, reject) {
+    return new Promise(function(resolve) {
         try {
-            db.ref('serverInfo/accNo').transaction(function(current) {
-                return (current || 0) + 1;
-            }, function(error, committed, snapshot) {
-                if (error) reject(error);
-                else if (!committed) reject(new Error('Not committed'));
-                else resolve(snapshot.val());
-            });
-        } catch(e) { reject(e); }
+            // ✅ အရင် ဖတ် (current value ရယူ)
+            db.ref('serverInfo/accNo').once('value')
+                .then(function(snap) {
+                    var current = snap.val();
+                    var next = (parseInt(current) || 0) + 1;
+
+                    // ✅ Transaction နဲ့ ရေး
+                    db.ref('serverInfo/accNo').transaction(function(currVal) {
+                        return (parseInt(currVal) || 0) + 1;
+                    }, function(error, committed, snapshot) {
+
+                        // ✅ Case 1: Transaction Error
+                        if (error) {
+                            // ✅ Fallback: တိုက်ရိုက် set ကြိုးစား
+                            db.ref('serverInfo/accNo').set(next)
+                                .then(function() { resolve(next); })
+                                .catch(function(e) {
+                                    // ✅ Fallback ၂: Random number + Alert
+                                    alert(
+                                        '❌ ACC NO ERROR\n\n' +
+                                        '📌 Function: getNextAccNo\n' +
+                                        '📌 Stage: Transaction + Fallback\n\n' +
+                                        'Code: ' + (e.code || 'unknown') + '\n' +
+                                        'Message: ' + (e.message || 'unknown') + '\n\n' +
+                                        '👉 Random number သုံးမည်'
+                                    );
+                                    resolve(Math.floor(Math.random() * 100000));
+                                });
+                        }
+                        // ✅ Case 2: Committed မဖြစ်
+                        else if (!committed) {
+                            // ✅ Fallback: တိုက်ရိုက် set
+                            db.ref('serverInfo/accNo').set(next)
+                                .then(function() { resolve(next); })
+                                .catch(function(e) {
+                                    alert(
+                                        '❌ ACC NO ERROR\n\n' +
+                                        '📌 Function: getNextAccNo\n' +
+                                        '📌 Stage: Not Committed + Fallback\n\n' +
+                                        'Code: ' + (e.code || 'unknown') + '\n' +
+                                        'Message: ' + (e.message || 'unknown') + '\n\n' +
+                                        '👉 Random number သုံးမည်'
+                                    );
+                                    resolve(Math.floor(Math.random() * 100000));
+                                });
+                        }
+                        // ✅ Case 3: အောင်မြင်
+                        else {
+                            resolve(snapshot.val());
+                        }
+                    });
+                })
+                .catch(function(err) {
+                    // ✅ Read Error
+                    alert(
+                        '❌ ACC NO READ ERROR\n\n' +
+                        '📌 Function: getNextAccNo\n' +
+                        '📌 Stage: Read\n\n' +
+                        'Code: ' + (err.code || 'unknown') + '\n' +
+                        'Message: ' + (err.message || 'unknown') + '\n\n' +
+                        '👉 Random number သုံးမည်'
+                    );
+                    resolve(Math.floor(Math.random() * 100000));
+                });
+        } catch(e) {
+            // ✅ Try-Catch Error
+            alert(
+                '❌ ACC NO CATCH ERROR\n\n' +
+                '📌 Function: getNextAccNo\n' +
+                '📌 Stage: Catch\n\n' +
+                'Code: ' + (e.code || 'unknown') + '\n' +
+                'Message: ' + (e.message || 'unknown') + '\n\n' +
+                '👉 Random number သုံးမည်'
+            );
+            resolve(Math.floor(Math.random() * 100000));
+        }
     });
 }
 
@@ -9603,18 +9671,17 @@ function saveUserToFirebase(userData, serverId) {
         var userId = userData.userId;
         var baseRef = db.ref('users/' + userId);
 
+        // ===================================================
         // ✅ Step 0: User data ရှိပြီးသားလား စစ်
+        // ===================================================
         baseRef.once('value').then(function(snap) {
             var exists = snap.exists();
+            var dataExists = exists && snap.val() && Object.keys(snap.val()).length > 0;
 
-            // ===================================================
-            // ✅ ဒီ User က Firebase မှာ ရှိပြီးသားဆိုရင်
-            // - diamond, frameOwned စတာတွေ ကျော်လိုက်
-            // ===================================================
-            if (exists) {
-                console.log('✅ User already exists in Firebase — skipping diamond/owned');
+            if (dataExists) {
+                // ✅ User data ရှိပြီးသား → diamond/owned ကျော်
+                console.log('✅ User already exists — skipping diamond/owned');
                 return Promise.all([
-                    // ✅ ကျန် field တွေ ရေး (အားလုံး .write: true ဖြစ်လို့ ရ)
                     baseRef.child('accNo').set(userData.accNo || 0),
                     baseRef.child('authId').set(userData.authId || ''),
                     baseRef.child('serverNo').set(serverName),
@@ -9640,7 +9707,7 @@ function saveUserToFirebase(userData, serverId) {
             }
 
             // ===================================================
-            // ✅ User အသစ်ဆိုရင် — Step 1: Diamond + Owned ရေး
+            // ✅ User အသစ် → Step 1: Diamond + Owned ရေး
             // ===================================================
             return Promise.all([
                 baseRef.child('diamond').set(0),
@@ -9683,8 +9750,10 @@ function saveUserToFirebase(userData, serverId) {
             resolve(true);
         })
         .catch(function(err) {
+            // ✅ UI Alert
             alert(
                 '❌ SAVE FAILED\n\n' +
+                '📌 Function: saveUserToFirebase\n\n' +
                 'Code: ' + (err.code || 'unknown') + '\n' +
                 'Message: ' + (err.message || 'unknown') + '\n\n' +
                 'User ID: ' + userId + '\n' +
@@ -9697,31 +9766,6 @@ function saveUserToFirebase(userData, serverId) {
 }
 
 
-function updateUserOnlineStatus(userId, serverId, online) {
-    return new Promise(function(resolve, reject) {
-        var db = getDbForServer(serverId);
-        if (!db) {
-            alert('❌ ONLINE STATUS ERROR\n\nDB မရပါ');
-            return reject(new Error('No DB'));
-        }
-        var auth = getAuthForServer(serverId);
-        if (!auth || !auth.currentUser) {
-            console.warn('No auth -- skip online update');
-            return resolve();
-        }
-        db.ref('users/' + userId + '/online').set(online)
-            .then(resolve)
-            .catch(function(err) {
-                alert(
-                    '❌ ONLINE STATUS FAILED\n\n' +
-                    'Code: ' + (err.code || 'unknown') + '\n' +
-                    'Message: ' + (err.message || 'unknown')
-                );
-                reject(err);
-            });
-    });
-}
-
 // ===================================================
 //  SETUP M SERVER
 // ===================================================
@@ -9731,28 +9775,17 @@ function setupMServer() {
         console.log('M Server already set:', currentUser.mServer);
         return Promise.resolve();
     }
-
     var mServer = pickMServerForUser();
     console.log('Setting up M Server:', mServer);
-
     var db = getDbForServer(currentServerId);
     if (!db) return Promise.resolve();
-
-    // ✅ Parent update မသုံး — Child ပဲ ရေး
-    return db.ref('users/' + currentUser.userId + '/mServer').set(mServer)
+    return db.ref('users/' + currentUser.userId).update({ mServer: mServer })
         .then(function() {
             currentUser.mServer = mServer;
             saveUserToDB(currentUser);
             console.log('M Server saved:', mServer);
         })
-        .catch(function(err) {
-            alert(
-                '❌ M SERVER FAILED\n\n' +
-                'Code: ' + (err.code || 'unknown') + '\n' +
-                'Message: ' + (err.message || 'unknown')
-            );
-            console.error('M Server setup failed:', err);
-        });
+        .catch(function(err) { console.error('M Server setup failed:', err); });
 }
 
 // ===================================================
@@ -10076,36 +10109,51 @@ function handleNewAccount() {
 
     isProcessing = true;
 
-    // ✅ Loading -- Button + Overlay
+    // ✅ Loading
     var originalText = newAccountSubmitBtn.textContent;
     newAccountSubmitBtn.disabled = true;
     newAccountSubmitBtn.textContent = 'Creating...';
     showLoading('Creating account...');
 
+    // ✅ Track လုပ်မည့် function အမည်
+    var currentStep = 'getLeastLoadedServer';
+    var stepServerId = null;
+    var stepUserId = null;
+
     getLeastLoadedServer().then(function(serverId) {
         if (!serverId) throw new Error('No server');
+        stepServerId = serverId;
+
         var auth = getAuthForServer(serverId);
         if (!auth) throw new Error('Auth unavailable');
+
+        currentStep = 'Firebase Auth (createUser)';
 
         return auth.createUserWithEmailAndPassword(email, password).then(function(result) {
             var user = result.user;
             var authId = user.uid;
 
+            currentStep = 'getUserFromFirebase (check existing)';
+
             return getUserFromFirebase(email, serverId).then(function(existingUser) {
                 if (existingUser) {
                     existingUser.authId = authId;
+                    stepUserId = existingUser.userId;
                     return { userData: existingUser, serverId: serverId };
                 } else {
                     var userId = generateUserId();
+                    stepUserId = userId;
                     var inviteCode = generateInviteCode();
                     var mServer = pickMServerForUser();
+
+                    currentStep = 'getNextAccNo';
 
                     return getNextAccNo(getDbForServer(serverId)).then(function(accNo) {
                         var userData = {
                             accNo: accNo,
                             authId: authId,
                             email: email,
-                            name: 'Player',           // ✅ Default -- First Login Popup မှာ ပြင်မယ်
+                            name: 'Player',
                             userId: userId,
                             diamond: 0,
                             inviteCode: inviteCode,
@@ -10117,8 +10165,11 @@ function handleNewAccount() {
                             avatar: '',
                             mServer: mServer,
                             serverId: serverId,
-                            isFirstLogin: true        // ✅ First Login Popup ပြမယ်
+                            isFirstLogin: true
                         };
+
+                        currentStep = 'saveUserToFirebase';
+
                         return saveUserToFirebase(userData, serverId).then(function(saved) {
                             if (!saved) throw new Error('Save failed');
                             return { userData: userData, serverId: serverId };
@@ -10129,11 +10180,15 @@ function handleNewAccount() {
         });
     }).then(function(result) {
         if (!result) return;
+        currentStep = 'updateUserOnlineStatus';
+        stepUserId = result.userData.userId;
         return updateUserOnlineStatus(result.userData.userId, result.serverId, true).then(function() { return result; });
     }).then(function(result) {
         if (!result) return;
         var userData = result.userData;
         var serverId = result.serverId;
+
+        currentStep = 'saveUserToDB (local)';
 
         saveUserToDB(userData).then(function() {
             currentUser = userData;
@@ -10144,7 +10199,6 @@ function handleNewAccount() {
             hideLoading();
             closeNewAccountPopup();
 
-            // ✅ First Login Popup ပြ (ပုံ + Name) -- မူရင်းအတိုင်း
             setTimeout(function() { showFirstLoginPopup(); }, 300);
 
             isProcessing = false;
@@ -10156,8 +10210,39 @@ function handleNewAccount() {
         isProcessing = false;
         newAccountSubmitBtn.disabled = false;
         newAccountSubmitBtn.textContent = originalText;
-        console.error('New account error:', error);
 
+        // ✅ Stack ကနေ function ရှာ
+        var stack = (error.stack || '').substring(0, 600);
+        var funcFromStack = 'unknown';
+
+        if (stack.indexOf('getNextAccNo') !== -1) funcFromStack = 'getNextAccNo';
+        else if (stack.indexOf('saveUserToFirebase') !== -1) funcFromStack = 'saveUserToFirebase';
+        else if (stack.indexOf('updateUserOnlineStatus') !== -1) funcFromStack = 'updateUserOnlineStatus';
+        else if (stack.indexOf('createUserWithEmailAndPassword') !== -1) funcFromStack = 'Firebase Auth';
+        else if (stack.indexOf('getUserFromFirebase') !== -1) funcFromStack = 'getUserFromFirebase';
+        else if (stack.indexOf('saveUserToDB') !== -1) funcFromStack = 'saveUserToDB';
+
+        // ✅ Auth status ရယူ
+        var authInfo = 'NULL';
+        try {
+            var authObj = getAuthForServer(stepServerId || currentServerId);
+            if (authObj && authObj.currentUser) authInfo = authObj.currentUser.email;
+        } catch(e) {}
+
+        // ✅ UI Alert — အတိအကျ ပြ
+        alert(
+            '❌ NEW ACCOUNT ERROR\n\n' +
+            '📌 Step (current): ' + currentStep + '\n' +
+            '📌 Function (stack): ' + funcFromStack + '\n\n' +
+            'Code: ' + (error.code || 'unknown') + '\n' +
+            'Message: ' + (error.message || 'unknown') + '\n\n' +
+            'Server ID: ' + (stepServerId || currentServerId || 'NULL') + '\n' +
+            'User ID: ' + (stepUserId || 'NULL') + '\n' +
+            'Auth User: ' + authInfo + '\n\n' +
+            'Stack (အပိုင်း):\n' + stack
+        );
+
+        // ✅ UI မှာ error message ပြ
         if (error.code === 'auth/email-already-in-use') {
             showNewAccountError('ဒီ Gmail နဲ့ Account ရှိပြီးသား။ Login လုပ်ပါ။');
         } else if (error.code === 'auth/weak-password') {
@@ -10168,8 +10253,10 @@ function handleNewAccount() {
             showNewAccountError('Internet ချိတ်ဆက်မှု မကောင်း');
         } else if (error.code === 'auth/operation-not-allowed') {
             showNewAccountError('Firebase မှာ Email/Password ကို Enable လုပ်ပါ');
+        } else if (error.message === 'Save failed') {
+            showNewAccountError('Save failed — ' + currentStep + ' မှာ ကျရှုံး');
         } else {
-            showNewAccountError('Error: ' + error.message);
+            showNewAccountError('Step ' + currentStep + ' — ' + (error.message || error.code));
         }
     });
 }
