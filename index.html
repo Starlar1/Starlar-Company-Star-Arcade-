@@ -11,6 +11,8 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+    <!-- Supabase SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <link rel="stylesheet" href="style.css" />
@@ -7642,10 +7644,9 @@ body {
 }
 
 /* ============================================================
-   ✅ POST SYSTEM STYLES v2.0
+   ✅ POST SYSTEM STYLES v2.1
    ============================================================ */
-.post-create-screen,
-.post-feed-screen {
+.post-create-screen {
     position: fixed;
     inset: 0;
     background: var(--bg-body);
@@ -7654,24 +7655,21 @@ body {
     flex-direction: column;
     animation: postSlideIn 0.25s ease;
 }
-.post-create-screen.hidden,
-.post-feed-screen.hidden { display: none !important; }
+.post-create-screen.hidden { display: none !important; }
 
 @keyframes postSlideIn {
     from { opacity: 0; transform: translateX(20px); }
     to { opacity: 1; transform: translateX(0); }
 }
 
-.post-create-header,
-.post-feed-header {
+.post-create-header {
     display: flex; align-items: center; gap: 8px;
     padding: 14px 16px;
     background: var(--bg-header);
     border-bottom: 1px solid var(--border);
     flex-shrink: 0;
 }
-.post-create-back,
-.post-feed-back {
+.post-create-back {
     width: 40px; height: 40px;
     border-radius: 12px; border: none;
     background: transparent; color: var(--accent);
@@ -7679,10 +7677,8 @@ body {
     align-items: center; justify-content: center;
     flex-shrink: 0; transition: all 0.2s ease;
 }
-.post-create-back:active,
-.post-feed-back:active { background: var(--bg-hover); transform: scale(0.92); }
-.post-create-title,
-.post-feed-title {
+.post-create-back:active { background: var(--bg-hover); transform: scale(0.92); }
+.post-create-title {
     flex: 1; text-align: center;
     font-size: 16px; font-weight: 700; color: var(--text-main);
 }
@@ -7692,11 +7688,11 @@ body {
     display: flex; flex-direction: column; gap: 18px;
 }
 
-/* ============ HOME FEED TABS ============ */
+/* ============ HOME TABS (သေးသေး) ============ */
 .post-tabs-bar {
     display: flex;
-    gap: 8px;
-    padding: 10px 12px;
+    gap: 6px;
+    padding: 7px 10px;
     background: var(--bg-header);
     border-bottom: 1px solid var(--border);
     flex-shrink: 0;
@@ -7707,19 +7703,19 @@ body {
 
 .post-tab-chip {
     flex-shrink: 0;
-    padding: 8px 18px;
-    border-radius: 18px;
+    padding: 5px 12px;
+    border-radius: 14px;
     border: 1.5px solid var(--border-light);
     background: var(--bg-input);
     color: var(--text-sub);
-    font-size: 13px;
+    font-size: 11px;
     font-weight: 700;
     font-family: inherit;
     cursor: pointer;
     transition: all 0.2s ease;
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 4px;
     white-space: nowrap;
 }
 .post-tab-chip:active { transform: scale(0.95); }
@@ -7727,14 +7723,14 @@ body {
     background: linear-gradient(135deg, var(--accent), var(--accent-dark));
     border-color: var(--accent);
     color: #fff;
-    box-shadow: 0 3px 12px rgba(255, 109, 31, 0.4);
+    box-shadow: 0 2px 8px rgba(255, 109, 31, 0.35);
 }
-.post-tab-chip svg { width: 14px; height: 14px; }
+.post-tab-chip svg { width: 12px; height: 12px; }
 
 .post-tab-desc {
-    font-size: 11px;
+    font-size: 10px;
     color: var(--text-muted);
-    padding: 6px 16px 2px;
+    padding: 4px 14px 2px;
     line-height: 1.4;
     background: var(--bg-body);
     flex-shrink: 0;
@@ -7769,25 +7765,26 @@ body {
 .post-feed-loading,
 .post-feed-empty {
     text-align: center; color: var(--text-muted);
-    font-size: 14px; padding: 60px 20px;
+    font-size: 13px; padding: 50px 20px;
     line-height: 1.6;
 }
 
 .post-feed-load-more {
     text-align: center;
-    padding: 16px 20px 30px;
+    padding: 14px 20px 24px;
     color: var(--accent);
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 700;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
+    gap: 6px;
+    transition: opacity 0.2s ease;
 }
 .post-feed-load-more:active { opacity: 0.6; }
 .post-feed-load-more .spinner-mini {
-    width: 16px; height: 16px;
+    width: 14px; height: 14px;
     border: 2px solid var(--border-light);
     border-top: 2px solid var(--accent);
     border-radius: 50%;
@@ -7853,7 +7850,13 @@ body {
     font-weight: 700; font-family: inherit;
     cursor: pointer; transition: all 0.2s ease;
 }
-.post-media-add-btn:active { transform: scale(0.96); border-color: var(--accent); background: rgba(255,109,31,0.08); }
+.post-media-add-btn:active:not(:disabled) { transform: scale(0.96); border-color: var(--accent); background: rgba(255,109,31,0.08); }
+.post-media-add-btn:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+    background: var(--bg-input);
+    color: var(--text-muted);
+}
 
 .post-input-group { display: flex; flex-direction: column; gap: 8px; }
 .post-input-group > label {
@@ -8400,7 +8403,7 @@ body {
     transition: all 0.2s ease;
     backdrop-filter: blur(4px);
 }
-.post-user-popup-btn:active {
+.post-user-popup-btn:active:not(:disabled) {
     transform: scale(0.97);
     background: rgba(255, 109, 31, 0.3);
 }
@@ -8426,7 +8429,9 @@ body {
     .post-viewer-nav { width: 38px; height: 38px; }
     .post-viewer-nav.prev { left: 8px; }
     .post-viewer-nav.next { right: 8px; }
-    .post-tab-chip { padding: 7px 14px; font-size: 12px; }
+    .post-tab-chip { padding: 5px 10px; font-size: 10px; }
+    .post-tab-chip svg { width: 11px; height: 11px; }
+    .post-tab-desc { font-size: 9px; padding: 3px 12px 2px; }
     .post-user-popup { max-width: 290px; }
     .post-user-popup-avatar { width: 70px; height: 70px; }
     .post-user-popup-name { font-size: 16px; }
@@ -8441,7 +8446,7 @@ body {
         <p id="loadingText">Processing...</p>
     </div>
 
-    <!-- ✅ FIRST LOGIN POPUP (Account ဖွင့်ပြီးတာနဲ့ ပြ -- ပုံ + Name) -->
+    <!-- ✅ FIRST LOGIN POPUP -->
     <div class="first-login-popup-overlay hidden" id="firstLoginPopup">
         <div class="first-login-popup">
             <div class="first-login-popup-header">
@@ -8465,7 +8470,7 @@ body {
         </div>
     </div>
 
-    <!-- ✅ NEW ACCOUNT POPUP (Gmail + Password ပဲ) -->
+    <!-- ✅ NEW ACCOUNT POPUP -->
     <div class="login-popup-overlay hidden" id="newAccountPopup">
         <div class="login-popup">
             <div class="login-popup-header">
@@ -8492,7 +8497,7 @@ body {
         </div>
     </div>
 
-    <!-- ✅ LOGIN POPUP (Gmail + Password + Server No) -->
+    <!-- ✅ LOGIN POPUP -->
     <div class="login-popup-overlay hidden" id="loginPopup">
         <div class="login-popup">
             <div class="login-popup-header">
@@ -8673,16 +8678,8 @@ body {
 
                 <div class="content-right">
                     <div class="tab-content" id="tabContent">
-                        <div class="screen hidden" id="screen-home">
-                            <div class="screen-center">
-                                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#ff6d1f" stroke-width="1.5">
-                                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-                                    <polyline points="9 22 9 12 15 12 15 22"/>
-                                </svg>
-                                <h3>Home</h3>
-                                <p>Coming soon</p>
-                            </div>
-                        </div>
+                        <!-- ✅ HOME SCREEN -- JS Auto-fill Post Feed -->
+                        <div class="screen hidden" id="screen-home"></div>
 
                         <div class="screen hidden" id="screen-game">
                             <div class="screen-center">
@@ -9873,147 +9870,148 @@ body {
         </div>
     </div>
 
-<!-- ============================================================
-     ✅ POST SYSTEM HTML v2.0
-     ============================================================ -->
-<div class="post-create-screen hidden" id="postCreateScreen">
-    <div class="post-create-header">
-        <button class="post-create-back" id="postCreateBackBtn">
+    <!-- ============================================================
+         ✅ POST SYSTEM HTML v2.1
+         ============================================================ -->
+    <div class="post-create-screen hidden" id="postCreateScreen">
+        <div class="post-create-header">
+            <button class="post-create-back" id="postCreateBackBtn">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <polyline points="15,18 9,12 15,6"/>
+                </svg>
+            </button>
+            <span class="post-create-title">Create Post</span>
+            <div style="width:40px;"></div>
+        </div>
+
+        <div class="post-create-body">
+            <div class="post-media-section">
+                <div class="post-media-grid" id="postMediaGrid"></div>
+                <div class="post-media-actions" id="postMediaActions">
+                    <button class="post-media-add-btn" id="postAddImageBtn">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="3" width="18" height="18" rx="2"/>
+                            <circle cx="8.5" cy="8.5" r="1.5"/>
+                            <polyline points="21 15 16 10 5 21"/>
+                        </svg>
+                        <span>Image</span>
+                    </button>
+                    <button class="post-media-add-btn" id="postAddVideoBtn">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polygon points="23 7 16 12 23 17 23 7"/>
+                            <rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
+                        </svg>
+                        <span>Video</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="post-input-group">
+                <label>Caption / Name</label>
+                <textarea id="postCaptionInput" class="post-textarea" placeholder="ရေးပါ..." rows="3" maxlength="500"></textarea>
+            </div>
+
+            <div class="post-input-group">
+                <label>Post Role (Optional)</label>
+                <div class="post-role-list" id="postRoleList"></div>
+            </div>
+        </div>
+
+        <div class="post-create-footer">
+            <button class="post-submit-btn" id="postSubmitBtn" disabled>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="12" y1="19" x2="12" y2="5"/>
+                    <polyline points="5 12 12 5 19 12"/>
+                </svg>
+                <span>Post တင်မည်</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Post Viewer -->
+    <div class="post-viewer-overlay hidden" id="postViewerOverlay">
+        <button class="post-viewer-close" id="postViewerClose">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <line x1="18" y1="6" x2="6" y2="18"/>
+                <line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+        </button>
+        <div class="post-viewer-counter hidden" id="postViewerCounter">1 / 1</div>
+        <div class="post-viewer-body" id="postViewerBody"></div>
+        <button class="post-viewer-nav prev hidden" id="postViewerPrev">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                 <polyline points="15,18 9,12 15,6"/>
             </svg>
         </button>
-        <span class="post-create-title">Create Post</span>
-        <div style="width:40px;"></div>
-    </div>
-
-    <div class="post-create-body">
-        <div class="post-media-section">
-            <div class="post-media-grid" id="postMediaGrid"></div>
-            <div class="post-media-actions" id="postMediaActions">
-                <button class="post-media-add-btn" id="postAddImageBtn">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <rect x="3" y="3" width="18" height="18" rx="2"/>
-                        <circle cx="8.5" cy="8.5" r="1.5"/>
-                        <polyline points="21 15 16 10 5 21"/>
-                    </svg>
-                    <span>Image</span>
-                </button>
-                <button class="post-media-add-btn" id="postAddVideoBtn">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <polygon points="23 7 16 12 23 17 23 7"/>
-                        <rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
-                    </svg>
-                    <span>Video</span>
-                </button>
-            </div>
-        </div>
-
-        <div class="post-input-group">
-            <label>Caption / Name</label>
-            <textarea id="postCaptionInput" class="post-textarea" placeholder="ရေးပါ..." rows="3" maxlength="500"></textarea>
-        </div>
-
-        <div class="post-input-group">
-            <label>Post Role (Optional)</label>
-            <div class="post-role-list" id="postRoleList"></div>
-        </div>
-    </div>
-
-    <div class="post-create-footer">
-        <button class="post-submit-btn" id="postSubmitBtn" disabled>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <line x1="12" y1="19" x2="12" y2="5"/>
-                <polyline points="5 12 12 5 19 12"/>
+        <button class="post-viewer-nav next hidden" id="postViewerNext">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="9,18 15,12 9,6"/>
             </svg>
-            <span>Post တင်မည်</span>
         </button>
-    </div>
-</div>
-
-<div class="post-viewer-overlay hidden" id="postViewerOverlay">
-    <button class="post-viewer-close" id="postViewerClose">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <line x1="18" y1="6" x2="6" y2="18"/>
-            <line x1="6" y1="6" x2="18" y2="18"/>
-        </svg>
-    </button>
-    <div class="post-viewer-counter hidden" id="postViewerCounter">1 / 1</div>
-    <div class="post-viewer-body" id="postViewerBody"></div>
-    <button class="post-viewer-nav prev hidden" id="postViewerPrev">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <polyline points="15,18 9,12 15,6"/>
-        </svg>
-    </button>
-    <button class="post-viewer-nav next hidden" id="postViewerNext">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <polyline points="9,18 15,12 9,6"/>
-        </svg>
-    </button>
-    <div class="post-viewer-dots hidden" id="postViewerDots"></div>
-    <div class="post-viewer-footer">
-        <button class="post-viewer-download" id="postViewerDownload">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                <polyline points="7,10 12,15 17,10"/>
-                <line x1="12" y1="15" x2="12" y2="3"/>
-            </svg>
-            <span>Download</span>
-        </button>
-    </div>
-</div>
-
-<div class="post-upload-overlay hidden" id="postUploadOverlay">
-    <div class="post-upload-spinner"></div>
-    <div class="post-upload-text" id="postUploadText">Uploading...</div>
-    <div class="post-upload-sub" id="postUploadSub">Please wait</div>
-    <div class="post-upload-progress">
-        <div class="post-upload-progress-fill" id="postUploadProgress"></div>
-    </div>
-</div>
-
-<!-- Profile Popup (Post View) -->
-<div class="post-user-popup-overlay hidden" id="postUserPopupOverlay">
-    <div class="post-user-popup">
-        <div class="post-user-popup-banner" id="postUserPopupBanner">
-            <img class="post-user-popup-banner-img" id="postUserPopupBannerImg" src="" alt="" style="display:none;" />
-            <div class="post-user-popup-banner-overlay"></div>
-            <button class="post-user-popup-close" id="postUserPopupClose">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                    <line x1="18" y1="6" x2="6" y2="18"/>
-                    <line x1="6" y1="6" x2="18" y2="18"/>
+        <div class="post-viewer-dots hidden" id="postViewerDots"></div>
+        <div class="post-viewer-footer">
+            <button class="post-viewer-download" id="postViewerDownload">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="7,10 12,15 17,10"/>
+                    <line x1="12" y1="15" x2="12" y2="3"/>
                 </svg>
-            </button>
-        </div>
-        <div class="post-user-popup-body">
-            <div class="post-user-popup-avatar">
-                <img id="postUserPopupAvatar" src="" alt="avatar" />
-                <div class="post-user-popup-frame" id="postUserPopupFrame"></div>
-            </div>
-            <div class="post-user-popup-name-row">
-                <h3 class="post-user-popup-name" id="postUserPopupName">Player</h3>
-                <span class="post-user-popup-mark" id="postUserPopupMark"></span>
-            </div>
-            <div class="post-user-popup-info">
-                <span class="post-user-popup-server" id="postUserPopupServer">Server 1</span>
-                <span class="post-user-popup-online" id="postUserPopupOnline">Offline</span>
-            </div>
-            <div class="post-user-popup-bio" id="postUserPopupBio">
-                <span class="bio-placeholder">No bio yet...</span>
-            </div>
-            <button class="post-user-popup-btn" id="postUserPopupActionBtn">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
-                    <circle cx="9" cy="7" r="4"/>
-                    <line x1="19" y1="8" x2="19" y2="14"/>
-                    <line x1="22" y1="11" x2="16" y2="11"/>
-                </svg>
-                <span>Add Chat</span>
+                <span>Download</span>
             </button>
         </div>
     </div>
-</div>
 
+    <!-- Post Upload Overlay -->
+    <div class="post-upload-overlay hidden" id="postUploadOverlay">
+        <div class="post-upload-spinner"></div>
+        <div class="post-upload-text" id="postUploadText">Uploading...</div>
+        <div class="post-upload-sub" id="postUploadSub">Please wait</div>
+        <div class="post-upload-progress">
+            <div class="post-upload-progress-fill" id="postUploadProgress"></div>
+        </div>
+    </div>
+
+    <!-- Profile Popup (Post Owner) -- Add Chat button -->
+    <div class="post-user-popup-overlay hidden" id="postUserPopupOverlay">
+        <div class="post-user-popup">
+            <div class="post-user-popup-banner" id="postUserPopupBanner">
+                <img class="post-user-popup-banner-img" id="postUserPopupBannerImg" src="" alt="" style="display:none;" />
+                <div class="post-user-popup-banner-overlay"></div>
+                <button class="post-user-popup-close" id="postUserPopupClose">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <line x1="18" y1="6" x2="6" y2="18"/>
+                        <line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="post-user-popup-body">
+                <div class="post-user-popup-avatar">
+                    <img id="postUserPopupAvatar" src="" alt="avatar" />
+                    <div class="post-user-popup-frame" id="postUserPopupFrame"></div>
+                </div>
+                <div class="post-user-popup-name-row">
+                    <h3 class="post-user-popup-name" id="postUserPopupName">Player</h3>
+                    <span class="post-user-popup-mark" id="postUserPopupMark"></span>
+                </div>
+                <div class="post-user-popup-info">
+                    <span class="post-user-popup-server" id="postUserPopupServer">Server 1</span>
+                    <span class="post-user-popup-online" id="postUserPopupOnline">Offline</span>
+                </div>
+                <div class="post-user-popup-bio" id="postUserPopupBio">
+                    <span class="bio-placeholder">No bio yet...</span>
+                </div>
+                <button class="post-user-popup-btn" id="postUserPopupActionBtn">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                        <circle cx="9" cy="7" r="4"/>
+                        <line x1="19" y1="8" x2="19" y2="14"/>
+                        <line x1="22" y1="11" x2="16" y2="11"/>
+                    </svg>
+                    <span>Add Chat</span>
+                </button>
+            </div>
+        </div>
+    </div>
 
     <script src="script.js"></script>
 
@@ -18811,10 +18809,12 @@ if (document.readyState === 'loading') {
 })();
 
 // ============================================================
-// ✅ POST SYSTEM v2.0
+// ✅ POST SYSTEM v2.1
 //  • Home Embed Feed (All / TopLike / Role)
-//  • Random Server Pick (5 posts per load)
+//  • Video OR Image (တစ်မျိုးပဲ ရွေးလို့ရ)
+//  • Load 5 at a time (Manual: အောက်ဆွဲမှ)
 //  • Auto Server Selection (least loaded for upload)
+//  • Random Server Pick (feed)
 //  • Server On/Off Toggle (upload/view flags)
 //  • Supabase Storage Only
 //  • Post Owner Profile Popup -- Add Chat button
@@ -18824,9 +18824,7 @@ if (document.readyState === 'loading') {
     'use strict';
 
     // ===================================================
-    //  ⚙️ SERVER CONFIG (ဒီနေရာမှာ Server အသစ်ထည့်ပါ)
-    //  uploadEnabled: Post တင် ခွင့်ပြု/မပြု
-    //  viewEnabled:   ကြည့် ခွင့်ပြု/မပြု
+    //  ⚙️ SERVER CONFIG
     // ===================================================
     var POST_SERVERS = [
         {
@@ -18845,22 +18843,13 @@ if (document.readyState === 'loading') {
             uploadEnabled: true,
             viewEnabled: true
         }
-        // ✅ Server အသစ်ထည့်ချင်ရင် ဒီမှာ ထပ်ထည့်ပါ
-        // {
-        //     id: 'server3',
-        //     name: 'Server 3',
-        //     supabaseUrl: 'https://xxxxx.supabase.co',
-        //     supabaseKey: 'eyJhbGciOiJ...',
-        //     uploadEnabled: true,
-        //     viewEnabled: true
-        // }
     ];
 
     // ===================================================
     //  CONFIG
     // ===================================================
     var POST_BUCKET = 'posts';
-    var POST_MAX_SIZE = 50 * 1024 * 1024; // 50MB
+    var POST_MAX_SIZE = 50 * 1024 * 1024;
     var POST_MAX_IMAGES = 6;
     var POST_CACHE_KEY = 'postCache_v2';
     var POST_LOAD_COUNT = 5;
@@ -18883,15 +18872,13 @@ if (document.readyState === 'loading') {
     var viewerMedia = [];
     var viewerIndex = 0;
 
-    // Feed state
-    var currentFeedTab = 'all';       // 'all' | 'toplike' | 'role'
+    var currentFeedTab = 'all';
     var currentFeedRole = null;
-    var feedLoadedServers = {};        // { serverId: { loaded: n, pool: [posts] } }
-    var feedAllPosts = [];             // Currently displayed posts
+    var feedLoadedServers = {};
+    var feedAllPosts = [];
     var feedLoading = false;
     var feedExhausted = false;
 
-    // Profile popup state
     var popupCurrentUser = null;
 
     // ===================================================
@@ -18939,10 +18926,6 @@ if (document.readyState === 'loading') {
         var client = supabase.createClient(srv.supabaseUrl, srv.supabaseKey);
         supabaseClients[serverId] = client;
         return client;
-    }
-
-    function getServerById(serverId) {
-        return POST_SERVERS.find(function(s) { return s.id === serverId; }) || null;
     }
 
     function getEnabledUploadServers() {
@@ -18995,7 +18978,7 @@ if (document.readyState === 'loading') {
     }
 
     // ===================================================
-    //  BUILD HOME FEED UI (Inject into #screen-home)
+    //  BUILD HOME FEED UI
     // ===================================================
     function ensureHomeFeedUI() {
         var home = document.getElementById('screen-home');
@@ -19017,7 +19000,7 @@ if (document.readyState === 'loading') {
                 '<button class="post-tab-chip" data-tab="toplike">' +
                     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
                         '<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>' +
-                    '</svg>Like များဆုံး' +
+                    '</svg>Like' +
                 '</button>' +
                 '<button class="post-tab-chip" data-tab="role">' +
                     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
@@ -19031,11 +19014,10 @@ if (document.readyState === 'loading') {
 
         home.appendChild(wrap);
 
-        // Tab events
         wrap.querySelectorAll('.post-tab-chip').forEach(function(chip) {
             chip.addEventListener('click', function() {
                 var tab = this.dataset.tab;
-                if (currentFeedTab === tab) return;
+                if (currentFeedTab === tab && tab !== 'role') return;
                 wrap.querySelectorAll('.post-tab-chip').forEach(function(c) { c.classList.remove('active'); });
                 this.classList.add('active');
                 switchFeedTab(tab);
@@ -19070,7 +19052,7 @@ if (document.readyState === 'loading') {
     }
 
     // ===================================================
-    //  LOAD FEED (Random server, 5 posts)
+    //  LOAD FEED (5 at a time)
     // ===================================================
     function loadFeedNext() {
         if (feedLoading || feedExhausted) return;
@@ -19084,13 +19066,13 @@ if (document.readyState === 'loading') {
         var body = document.getElementById('postFeedBody');
         if (!body) { feedLoading = false; return; }
 
-        // If first load, clear loading text
+        // Add loading indicator at bottom (or replace if first)
+        var existingLoader = document.getElementById('feedLoadMoreIndicator');
+        if (existingLoader) existingLoader.remove();
+
         if (feedAllPosts.length === 0) {
             body.innerHTML = '<div class="post-feed-loading">Loading...</div>';
         } else {
-            // Add loading indicator at bottom
-            var existingLoader = document.getElementById('feedLoadMoreIndicator');
-            if (existingLoader) existingLoader.remove();
             var loader = document.createElement('div');
             loader.id = 'feedLoadMoreIndicator';
             loader.className = 'post-feed-load-more';
@@ -19098,8 +19080,16 @@ if (document.readyState === 'loading') {
             body.appendChild(loader);
         }
 
-        // Pick a random enabled view server
-        var srv = getRandomEnabledViewServer();
+        // Pick a random view-enabled server NOT yet tried (or all if all tried)
+        var allEnabled = getEnabledViewServers();
+        var notTried = allEnabled.filter(function(s) { return !feedLoadedServers[s.id]; });
+        var srv = null;
+        if (notTried.length > 0) {
+            srv = notTried[Math.floor(Math.random() * notTried.length)];
+        } else if (allEnabled.length > 0) {
+            srv = allEnabled[Math.floor(Math.random() * allEnabled.length)];
+        }
+
         if (!srv) {
             feedLoading = false;
             feedExhausted = true;
@@ -19110,15 +19100,14 @@ if (document.readyState === 'loading') {
         var sb = getSupabaseClient(srv.id);
         if (!sb) {
             feedLoading = false;
-            feedExhausted = true;
-            renderFeed();
+            feedLoadedServers[srv.id] = true;
+            loadFeedNext();
             return;
         }
 
-        // Fetch posts from this server
-        fetchPostsFromServer(sb, srv.id, 30).then(function(allPosts) {
-            // Filter by tab
+        fetchPostsFromServer(sb, srv.id, 100).then(function(allPosts) {
             var filtered = allPosts;
+
             if (currentFeedTab === 'toplike') {
                 filtered = allPosts.slice().sort(function(a, b) {
                     return (b.likeCount || 0) - (a.likeCount || 0);
@@ -19134,37 +19123,22 @@ if (document.readyState === 'loading') {
             feedAllPosts.forEach(function(p) { existingIds[p.postId] = true; });
             filtered = filtered.filter(function(p) { return !existingIds[p.postId]; });
 
-            // Take next 5
+            // Take exactly 5
             var batch = filtered.slice(0, POST_LOAD_COUNT);
 
-            if (batch.length === 0) {
-                // Try another server (auto retry once)
-                if (!feedLoadedServers[srv.id]) {
-                    feedLoadedServers[srv.id] = { tried: true };
-                }
-                // Try another random server
-                var remaining = getEnabledViewServers().filter(function(s) {
-                    return !feedLoadedServers[s.id];
-                });
+            feedLoadedServers[srv.id] = true;
 
-                if (remaining.length === 0) {
-                    feedLoading = false;
-                    feedExhausted = true;
-                    renderFeed();
-                } else {
-                    feedLoading = false;
-                    loadFeedNext();
-                }
+            if (batch.length === 0) {
+                // This server had nothing — try another
+                feedLoading = false;
+                loadFeedNext();
                 return;
             }
-
-            feedLoadedServers[srv.id] = { tried: true };
 
             batch.forEach(function(p) { feedAllPosts.push(p); });
 
             feedLoading = false;
 
-            // Auto-save to cache
             if (typeof setToDB === 'function') {
                 setToDB(POST_CACHE_KEY, feedAllPosts.slice(0, 50)).catch(function() {});
             }
@@ -19172,17 +19146,19 @@ if (document.readyState === 'loading') {
             renderFeed();
         }).catch(function(err) {
             console.warn('Feed fetch error:', err);
-            feedLoadedServers[srv.id] = { tried: true };
+            feedLoadedServers[srv.id] = true;
             feedLoading = false;
 
-            var remaining = getEnabledViewServers().filter(function(s) {
-                return !feedLoadedServers[s.id];
-            });
-            if (remaining.length === 0) {
+            // Try another server
+            var remaining = getEnabledViewServers().filter(function(s) { return !feedLoadedServers[s.id]; });
+            if (remaining.length === 0 && feedAllPosts.length === 0) {
                 feedExhausted = true;
                 renderFeed();
-            } else {
+            } else if (remaining.length > 0) {
                 loadFeedNext();
+            } else {
+                // No more servers but we have posts — just stop
+                renderFeed();
             }
         });
     }
@@ -19191,7 +19167,6 @@ if (document.readyState === 'loading') {
         var body = document.getElementById('postFeedBody');
         if (!body) return;
 
-        // Remove loading indicator
         var loader = document.getElementById('feedLoadMoreIndicator');
         if (loader) loader.remove();
 
@@ -19204,13 +19179,12 @@ if (document.readyState === 'loading') {
             return;
         }
 
-        // Clear and rebuild
         body.innerHTML = '';
         feedAllPosts.forEach(function(post) {
             body.appendChild(buildPostCard(post));
         });
 
-        // Load more button
+        // Load more button (always visible if not exhausted, or if there might be more)
         if (!feedExhausted) {
             var moreBtn = document.createElement('div');
             moreBtn.className = 'post-feed-load-more';
@@ -19218,35 +19192,16 @@ if (document.readyState === 'loading') {
             moreBtn.addEventListener('click', function() {
                 loadFeedNext();
             });
-
-            // Auto-load when scrolled to bottom
             body.appendChild(moreBtn);
-
-            // Auto-load on scroll
-            if (!body._feedScrollBound) {
-                body._feedScrollBound = true;
-                body.addEventListener('scroll', function() {
-                    if (body.scrollTop + body.clientHeight >= body.scrollHeight - 200) {
-                        if (!feedLoading && !feedExhausted) {
-                            loadFeedNext();
-                        }
-                    }
-                });
-            }
-        } else if (feedAllPosts.length > 0) {
-            var endEl = document.createElement('div');
-            endEl.className = 'post-feed-load-more';
-            endEl.style.cursor = 'default';
-            endEl.innerHTML = '<span style="color:var(--text-muted);">အားလုံး ပြပြီးပါပြီ</span>';
-            body.appendChild(endEl);
         }
+        // ❌ Auto-scroll load ဖျက်ထားသည် (Manual only)
     }
 
     // ===================================================
-    //  FETCH POSTS FROM A SERVER
+    //  FETCH POSTS
     // ===================================================
     function fetchPostsFromServer(sb, serverId, limit) {
-        limit = limit || 50;
+        limit = limit || 100;
 
         return sb.storage.from(POST_BUCKET).list('meta', {
             limit: limit,
@@ -19270,7 +19225,6 @@ if (document.readyState === 'loading') {
 
             return Promise.all(promises).then(function(arr) {
                 var posts = arr.filter(function(p) { return p && p.postId; });
-                // Attach server info
                 posts.forEach(function(p) { p._serverId = serverId; });
                 posts.sort(function(a, b) { return (b.createdAt || 0) - (a.createdAt || 0); });
                 return posts;
@@ -19282,7 +19236,6 @@ if (document.readyState === 'loading') {
     //  ROLE SELECT POPUP
     // ===================================================
     function showRoleSelectPopup() {
-        // Clear existing
         var ex = document.querySelector('.role-select-overlay');
         if (ex) ex.remove();
 
@@ -19319,7 +19272,6 @@ if (document.readyState === 'loading') {
 
         document.getElementById('roleSelectClose').addEventListener('click', function() {
             overlay.remove();
-            // Revert to All tab
             var allChip = document.querySelector('.post-tab-chip[data-tab="all"]');
             if (allChip) {
                 document.querySelectorAll('.post-tab-chip').forEach(function(c) { c.classList.remove('active'); });
@@ -19342,7 +19294,7 @@ if (document.readyState === 'loading') {
                 currentFeedTab = 'role';
                 overlay.remove();
                 var descEl = document.getElementById('postTabDesc');
-                if (descEl) descEl.textContent = 'Role "' + role.name + '" Post များ ပြသနေသည်';
+                if (descEl) descEl.textContent = 'Role "' + role.name + '" Post များ';
                 resetFeed();
                 loadFeedNext();
             });
@@ -19366,13 +19318,10 @@ if (document.readyState === 'loading') {
         var onlineEl = document.getElementById('postUserPopupOnline');
         var bioEl = document.getElementById('postUserPopupBio');
         var bannerImg = document.getElementById('postUserPopupBannerImg');
-        var bannerEl = document.getElementById('postUserPopupBanner');
         var actionBtn = document.getElementById('postUserPopupActionBtn');
 
-        // Avatar
         avatarEl.src = userInfo.avatar || 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 100 100"%3E%3Ccircle cx="50" cy="50" r="45" fill="%2322222e"/%3E%3Ccircle cx="50" cy="35" r="18" fill="%235a5a6a"/%3E%3Cpath d="M20 75c0-18 12-30 30-30s30 12 30 30" fill="%235a5a6a"/%3E%3C/svg%3E';
 
-        // Frame
         if (userInfo.frameUse && typeof FRAME_CONFIG !== 'undefined') {
             var frame = FRAME_CONFIG.frames.find(function(f) { return String(f.id) === String(userInfo.frameUse); });
             if (frame) {
@@ -19384,10 +19333,8 @@ if (document.readyState === 'loading') {
             frameEl.style.backgroundImage = 'none';
         }
 
-        // Name
         nameEl.textContent = userInfo.name || 'Player';
 
-        // Mark
         if (userInfo.markUse && typeof MARK_CONFIG !== 'undefined') {
             var mark = MARK_CONFIG.marks.find(function(m) { return String(m.id) === String(userInfo.markUse); });
             if (mark) {
@@ -19400,10 +19347,8 @@ if (document.readyState === 'loading') {
             markEl.style.display = 'none';
         }
 
-        // Server
         serverEl.textContent = userInfo.serverNo || 'Server 1';
 
-        // Online
         if (userInfo.online) {
             onlineEl.textContent = 'Online';
             onlineEl.classList.add('online');
@@ -19412,7 +19357,6 @@ if (document.readyState === 'loading') {
             onlineEl.classList.remove('online');
         }
 
-        // Banner
         if (userInfo.bannerUse && typeof BANNER_CONFIG !== 'undefined') {
             var banner = BANNER_CONFIG.banners.find(function(b) { return String(b.id) === String(userInfo.bannerUse); });
             if (banner) {
@@ -19425,7 +19369,6 @@ if (document.readyState === 'loading') {
             bannerImg.style.display = 'none';
         }
 
-        // Bio
         if (userInfo.bio && userInfo.bio.trim()) {
             bioEl.innerHTML = escapeHtmlP(userInfo.bio).replace(/\n/g, '<br>');
         } else {
@@ -19439,7 +19382,7 @@ if (document.readyState === 'loading') {
 
         if (isMe) {
             actionBtn.disabled = true;
-            actionBtn.querySelector('span').textContent = 'This is You';
+            actionBtn.innerHTML = '<span>This is You</span>';
             actionBtn.onclick = null;
         } else {
             var already = (typeof isFriend === 'function')
@@ -19447,7 +19390,6 @@ if (document.readyState === 'loading') {
                 : false;
 
             if (already) {
-                actionBtn.querySelector('span').textContent = 'Chat';
                 actionBtn.innerHTML =
                     '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
                         '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>' +
@@ -19496,12 +19438,11 @@ if (document.readyState === 'loading') {
         var actionBtn = document.getElementById('postUserPopupActionBtn');
         if (actionBtn) {
             actionBtn.disabled = true;
-            actionBtn.querySelector('span').textContent = 'Adding...';
+            actionBtn.innerHTML = '<span>Adding...</span>';
         }
 
-        // Use existing addFriendAndSync if available
+        // Prefer existing addFriendAndSync if available
         if (typeof addFriendAndSync === 'function') {
-            // We need a targetData object with serverId, serverNo, userId
             var target = {
                 serverId: userInfo.serverId,
                 serverNo: userInfo.serverNo,
@@ -19511,29 +19452,29 @@ if (document.readyState === 'loading') {
             };
             try {
                 addFriendAndSync(target);
-                setTimeout(function() {
-                    closePostUserPopup();
-                }, 600);
+                setTimeout(function() { closePostUserPopup(); }, 800);
+                return;
             } catch(e) {
                 console.warn('addFriendAndSync error:', e);
-                fallbackAddFriend(userInfo, actionBtn);
             }
-        } else {
-            fallbackAddFriend(userInfo, actionBtn);
         }
-    }
 
-    function fallbackAddFriend(userInfo, actionBtn) {
-        // Fallback: directly add via Firebase
+        // Fallback: direct Firebase add
         if (typeof getDbForServer !== 'function' || typeof currentServerId === 'undefined') {
-            if (actionBtn) { actionBtn.disabled = false; actionBtn.querySelector('span').textContent = 'Add Chat'; }
+            if (actionBtn) {
+                actionBtn.disabled = false;
+                actionBtn.innerHTML = '<span>Add Chat</span>';
+            }
             return;
         }
 
         var myDb = getDbForServer(currentServerId);
         var theirDb = getDbForServer(userInfo.serverId);
         if (!myDb || !theirDb) {
-            if (actionBtn) { actionBtn.disabled = false; actionBtn.querySelector('span').textContent = 'Add Chat'; }
+            if (actionBtn) {
+                actionBtn.disabled = false;
+                actionBtn.innerHTML = '<span>Add Chat</span>';
+            }
             return;
         }
 
@@ -19571,7 +19512,7 @@ if (document.readyState === 'loading') {
             console.warn('Add friend error:', err);
             if (actionBtn) {
                 actionBtn.disabled = false;
-                actionBtn.querySelector('span').textContent = 'Add Chat';
+                actionBtn.innerHTML = '<span>Add Chat</span>';
             }
             if (typeof showToast === 'function') showToast('Failed');
         });
@@ -19603,6 +19544,7 @@ if (document.readyState === 'loading') {
         renderPostMediaGrid();
         renderPostRoleList();
         updatePostSubmitBtn();
+        updateMediaButtonsState();
 
         var screen = document.getElementById('postCreateScreen');
         if (screen) {
@@ -19615,6 +19557,47 @@ if (document.readyState === 'loading') {
         var screen = document.getElementById('postCreateScreen');
         if (screen) screen.classList.add('hidden');
         document.body.style.overflow = '';
+    }
+
+    // ===================================================
+    //  ✅ MEDIA BUTTONS STATE (Image OR Video -- တစ်မျိုးပဲ)
+    // ===================================================
+    function updateMediaButtonsState() {
+        var imgBtn = document.getElementById('postAddImageBtn');
+        var vidBtn = document.getElementById('postAddVideoBtn');
+        if (!imgBtn || !vidBtn) return;
+
+        var hasVideo = !!postVideo;
+        var hasImages = postImages.length > 0;
+        var maxImages = postImages.length >= POST_MAX_IMAGES;
+
+        // Image button:
+        //   - If video exists → disabled
+        //   - If max images reached → disabled
+        //   - Else enabled
+        if (hasVideo || maxImages) {
+            imgBtn.disabled = true;
+            imgBtn.style.opacity = '0.35';
+            imgBtn.style.cursor = 'not-allowed';
+        } else {
+            imgBtn.disabled = false;
+            imgBtn.style.opacity = '';
+            imgBtn.style.cursor = '';
+        }
+
+        // Video button:
+        //   - If images exist → disabled
+        //   - If video exists → disabled (already selected)
+        //   - Else enabled
+        if (hasVideo || hasImages) {
+            vidBtn.disabled = true;
+            vidBtn.style.opacity = '0.35';
+            vidBtn.style.cursor = 'not-allowed';
+        } else {
+            vidBtn.disabled = false;
+            vidBtn.style.opacity = '';
+            vidBtn.style.cursor = '';
+        }
     }
 
     // ===================================================
@@ -19643,8 +19626,10 @@ if (document.readyState === 'loading') {
                 postVideo = null;
                 renderPostMediaGrid();
                 updatePostSubmitBtn();
+                updateMediaButtonsState();
             });
             grid.appendChild(videoCell);
+            updateMediaButtonsState();
             return;
         }
 
@@ -19685,9 +19670,16 @@ if (document.readyState === 'loading') {
 
             grid.appendChild(slot);
         }
+
+        updateMediaButtonsState();
     }
 
     function pickPostImage() {
+        // Block if video already selected
+        if (postVideo) {
+            if (typeof showToast === 'function') showToast('Video ရွေးပြီးပါပြီ');
+            return;
+        }
         if (postImages.length >= POST_MAX_IMAGES) {
             if (typeof showToast === 'function') showToast('Max ' + POST_MAX_IMAGES + ' images');
             return;
@@ -19737,8 +19729,13 @@ if (document.readyState === 'loading') {
     }
 
     function pickPostVideo() {
+        // Block if images already selected
         if (postImages.length > 0) {
-            if (typeof showToast === 'function') showToast('Remove images first');
+            if (typeof showToast === 'function') showToast('Image ရွေးပြီးပါပြီ');
+            return;
+        }
+        if (postVideo) {
+            if (typeof showToast === 'function') showToast('Video ရွေးပြီးပါပြီ');
             return;
         }
 
@@ -19837,9 +19834,6 @@ if (document.readyState === 'loading') {
         if (ov) ov.classList.add('hidden');
     }
 
-    // ===================================================
-    //  UPLOAD
-    // ===================================================
     function uploadPostFile(sb, path, blob) {
         return sb.storage.from(POST_BUCKET).upload(path, blob, {
             cacheControl: '3600',
@@ -20145,7 +20139,6 @@ if (document.readyState === 'loading') {
     }
 
     function attachPostCardEvents(card, post) {
-        // Media click
         card.querySelectorAll('.post-card-media img, .post-card-media-grid img').forEach(function(img) {
             img.addEventListener('click', function(e) {
                 e.stopPropagation();
@@ -20154,7 +20147,6 @@ if (document.readyState === 'loading') {
             });
         });
 
-        // Chat button
         var chatBtn = card.querySelector('.post-card-chat-btn[data-action="chat"]');
         if (chatBtn) {
             chatBtn.addEventListener('click', function(e) {
@@ -20169,12 +20161,10 @@ if (document.readyState === 'loading') {
             });
         }
 
-        // Profile avatar click → popup
         var avatarWrap = card.querySelector('.post-card-avatar-wrap[data-action="profile"]');
         if (avatarWrap) {
             avatarWrap.addEventListener('click', function(e) {
                 e.stopPropagation();
-                // Build userInfo from post
                 var userInfo = {
                     userId: post.userId,
                     serverId: post.serverId,
@@ -20191,7 +20181,6 @@ if (document.readyState === 'loading') {
             });
         }
 
-        // Like
         var likeBtn = card.querySelector('.post-action-btn[data-action="like"]');
         if (likeBtn) {
             likeBtn.addEventListener('click', function(e) {
@@ -20235,11 +20224,9 @@ if (document.readyState === 'loading') {
         if (countEl) countEl.textContent = likes.length;
         btn.classList.toggle('liked', idx < 0);
 
-        // Update local copy in feedAllPosts
         var localIdx = feedAllPosts.findIndex(function(p) { return p.postId === post.postId; });
         if (localIdx >= 0) feedAllPosts[localIdx] = post;
 
-        // Save to Supabase (use post's _serverId)
         var targetServerId = post._serverId || post.serverId || currentServerId;
         var sb = getSupabaseClient(targetServerId);
         if (!sb) return;
@@ -20255,7 +20242,6 @@ if (document.readyState === 'loading') {
             console.warn('Like save error:', err);
         });
 
-        // Save cache
         if (typeof setToDB === 'function') {
             setToDB(POST_CACHE_KEY, feedAllPosts).catch(function() {});
         }
@@ -20376,7 +20362,6 @@ if (document.readyState === 'loading') {
     //  PLUS MENU POST HOOK
     // ===================================================
     function hookPlusMenuPost() {
-        // Intercept the existing plus menu Post action
         document.addEventListener('click', function(e) {
             var btn = e.target.closest('.plus-menu-btn[data-action="post"]');
             if (!btn) return;
@@ -20384,42 +20369,43 @@ if (document.readyState === 'loading') {
             e.stopPropagation();
             e.stopImmediatePropagation();
 
-            // Close plus menu if open
             if (typeof closePlusMenu === 'function') closePlusMenu();
 
             setTimeout(function() {
                 openPostCreate();
             }, 150);
-        }, true); // capture phase
+        }, true);
     }
 
     // ===================================================
     //  INIT
     // ===================================================
     function init() {
-        // Ensure home UI
         ensureHomeFeedUI();
 
-        // Initial feed load
         setTimeout(function() {
             resetFeed();
             loadFeedNext();
         }, 800);
 
-        // Create post screen events
         var backBtn = document.getElementById('postCreateBackBtn');
         if (backBtn) backBtn.addEventListener('click', closePostCreate);
 
         var addImgBtn = document.getElementById('postAddImageBtn');
-        if (addImgBtn) addImgBtn.addEventListener('click', pickPostImage);
+        if (addImgBtn) addImgBtn.addEventListener('click', function() {
+            if (this.disabled) return;
+            pickPostImage();
+        });
 
         var addVidBtn = document.getElementById('postAddVideoBtn');
-        if (addVidBtn) addVidBtn.addEventListener('click', pickPostVideo);
+        if (addVidBtn) addVidBtn.addEventListener('click', function() {
+            if (this.disabled) return;
+            pickPostVideo();
+        });
 
         var submitBtn = document.getElementById('postSubmitBtn');
         if (submitBtn) submitBtn.addEventListener('click', submitPost);
 
-        // Viewer events
         var viewerClose = document.getElementById('postViewerClose');
         if (viewerClose) viewerClose.addEventListener('click', closePostViewer);
 
@@ -20433,7 +20419,6 @@ if (document.readyState === 'loading') {
         var dlBtn = document.getElementById('postViewerDownload');
         if (dlBtn) dlBtn.addEventListener('click', downloadCurrentViewer);
 
-        // Profile popup events
         var popupClose = document.getElementById('postUserPopupClose');
         if (popupClose) popupClose.addEventListener('click', closePostUserPopup);
 
@@ -20444,10 +20429,8 @@ if (document.readyState === 'loading') {
             });
         }
 
-        // Hook + Post button
         hookPlusMenuPost();
 
-        // Watch for home screen becoming active (in case UI is re-created)
         var observer = new MutationObserver(function() {
             ensureHomeFeedUI();
         });
@@ -20456,7 +20439,7 @@ if (document.readyState === 'loading') {
             observer.observe(homeEl, { childList: true });
         }
 
-        console.log('✅ Post System v2.0 Ready');
+        console.log('✅ Post System v2.1 Ready');
     }
 
     if (document.readyState === 'loading') {
