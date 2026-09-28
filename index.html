@@ -17834,41 +17834,90 @@ if (document.readyState === 'loading') {
 
 })();
 
-// ===================================================
-//  NATIVE GAME DETECT
-// ===================================================
+// ============================================================
+// ✅ ANDROID SYNC (User Info + Usage Permission)
+// index.html ရဲ့ အောက်ဆုံးမှာ ထည့်ပါ
+// ============================================================
+(function() {
+    'use strict';
 
-function onNativeGameDetected(gameCode) {
-    if (!currentUser || !currentServerId) return;
+    // ✅ User Info ကို Android ဆီ ပို့
+    function sendUserInfoToAndroid() {
+        try {
+            if (!window.Android || !window.Android.setUserInfo) {
+                return false;
+            }
+            if (typeof currentUser === 'undefined' || !currentUser) {
+                return false;
+            }
+            if (typeof currentServerId === 'undefined' || !currentServerId) {
+                return false;
+            }
 
-    console.log('Game detected: ' + gameCode);
-
-    var db = getDbForServer(currentServerId);
-    if (!db) return;
-
-    db.ref('users/' + currentUser.userId).update({
-        play: gameCode || ''
-    }).then(function() {
-        currentUser.play = gameCode;
-        saveUserToDB(currentUser);
-        console.log('Play updated: ' + gameCode);
-    }).catch(function(err) {
-        console.warn('Play update failed:', err);
-    });
-}
-
-function requestUsagePermission() {
-    if (window.Android && window.Android.requestUsagePermission) {
-        window.Android.requestUsagePermission();
+            window.Android.setUserInfo(currentUser.userId, currentServerId);
+            console.log('✅ User info sent to Android: ' + currentUser.userId + ' / ' + currentServerId);
+            return true;
+        } catch(e) {
+            console.warn('setUserInfo error:', e);
+            return false;
+        }
     }
-}
 
-document.addEventListener('DOMContentLoaded', function() {
+    // ✅ enterApp() ကို Hook လုပ်
+    if (typeof window.enterApp === 'function') {
+        var originalEnterApp = window.enterApp;
+        window.enterApp = function(user) {
+            var result = originalEnterApp.apply(this, arguments);
+            setTimeout(function() {
+                sendUserInfoToAndroid();
+            }, 500);
+            return result;
+        };
+        console.log('✅ enterApp hooked for Android sync');
+    }
+
+    // ✅ App Foreground ပြန်ဝင်တဲ့အခါ ပြန်ပို့
+    document.addEventListener('visibilitychange', function() {
+        if (document.visibilityState === 'visible') {
+            setTimeout(sendUserInfoToAndroid, 500);
+        }
+    });
+
+    // ✅ App စဝင်ပြီး ၃ စက္ကန့်အကြာ စမ်းကြည့်
     setTimeout(function() {
-        requestUsagePermission();
-    }, 1500);
-});
+        sendUserInfoToAndroid();
+    }, 3000);
 
+    // ✅ ၅ စက္ကန့်တစ်ခါ ပြန်စစ် (Login နောက်ကျရင်)
+    var checkInterval = setInterval(function() {
+        if (sendUserInfoToAndroid()) {
+            clearInterval(checkInterval);
+        }
+    }, 5000);
+
+    // ✅ ၁ မိနစ်အကြာ ရပ်လိုက်
+    setTimeout(function() {
+        clearInterval(checkInterval);
+    }, 60000);
+
+    // ✅ Usage Permission တောင်း
+    function requestUsagePermission() {
+        if (window.Android && window.Android.requestUsagePermission) {
+            window.Android.requestUsagePermission();
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(function() {
+            requestUsagePermission();
+        }, 1500);
+    });
+
+    console.log('✅ Star Arcade Android Sync Ready');
+
+})();
+
+    
 console.log('Native Game Detect Ready');
 </script>
 </body>
