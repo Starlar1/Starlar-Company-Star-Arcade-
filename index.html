@@ -9597,14 +9597,14 @@ function saveUserToFirebase(userData, serverId) {
         if (!db) return resolve(false);
         var serverName = FIREBASE_SERVERS.find(function(s) { return s.id === serverId; }).name;
 
-        db.ref('users/' + userData.userId).set({
+        // ✅ Step 1: User base info (diamond + owned arrays မပါဘဲ)
+        var userBase = {
             accNo: userData.accNo || 0,
             authId: userData.authId || '',
             serverNo: serverName,
             email: userData.email,
             name: userData.name,
             userId: userData.userId,
-            diamond: userData.diamond || 0,
             inviteCode: userData.inviteCode,
             bio: userData.bio || '',
             play: userData.play || '',
@@ -9615,17 +9615,45 @@ function saveUserToFirebase(userData, serverId) {
             backgroundUse: userData.backgroundUse || '',
             bubbleUse: userData.bubbleUse || '',
             markUse: userData.markUse || '',
-            frameOwned: userData.frameOwned || [],
-            bannerOwned: userData.bannerOwned || [],
-            backgroundOwned: userData.backgroundOwned || [],
-            bubbleOwned: userData.bubbleOwned || [],
             roleUse: userData.roleUse || '',
-            roleOwned: userData.roleOwned || [],
             mServer: userData.mServer || [],
             online: true,
             avatar: userData.avatar || '',
             isFirstLogin: userData.isFirstLogin !== undefined ? userData.isFirstLogin : true
-        }).then(function() { resolve(true); }).catch(function() { resolve(false); });
+        };
+
+        // ✅ Step 1: User base info ရေး (diamond မပါ)
+        db.ref('users/' + userData.userId).set(userBase)
+        .then(function() {
+            // ✅ Step 2: Diamond = 0 (!data.exists() ဖြစ်လို့ ရ)
+            return db.ref('users/' + userData.userId + '/diamond').set(0);
+        })
+        .then(function() {
+            // ✅ Step 3: Owned arrays အားလုံး = [] (!data.exists() ဖြစ်လို့ ရ)
+            return db.ref('users/' + userData.userId + '/frameOwned').set([]);
+        })
+        .then(function() {
+            return db.ref('users/' + userData.userId + '/bannerOwned').set([]);
+        })
+        .then(function() {
+            return db.ref('users/' + userData.userId + '/backgroundOwned').set([]);
+        })
+        .then(function() {
+            return db.ref('users/' + userData.userId + '/bubbleOwned').set([]);
+        })
+        .then(function() {
+            return db.ref('users/' + userData.userId + '/roleOwned').set([]);
+        })
+        .then(function() {
+            return db.ref('users/' + userData.userId + '/markOwned').set([]);
+        })
+        .then(function() {
+            resolve(true);
+        })
+        .catch(function(err) {
+            console.error('saveUserToFirebase error:', err);
+            resolve(false);
+        });
     });
 }
 
@@ -17916,9 +17944,6 @@ if (document.readyState === 'loading') {
     console.log('✅ Star Arcade Android Sync Ready');
 
 })();
-
-    
-console.log('Native Game Detect Ready');
 </script>
 </body>
 </html>
