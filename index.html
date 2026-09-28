@@ -9663,7 +9663,7 @@ function saveUserToFirebase(userData, serverId) {
     return new Promise(function(resolve) {
         var db = getDbForServer(serverId);
         if (!db) {
-            alert('❌ DB ERROR\n\nServer ID: ' + serverId + '\nDB မရပါ');
+            alert('❌ DB ERROR\n\nServer ID: ' + serverId);
             return resolve(false);
         }
         var server = FIREBASE_SERVERS.find(function(s) { return s.id === serverId; });
@@ -9678,9 +9678,8 @@ function saveUserToFirebase(userData, serverId) {
             var exists = snap.exists();
             var dataExists = exists && snap.val() && Object.keys(snap.val()).length > 0;
 
+            // ✅ Case 1: User data ရှိပြီးသား → diamond/owned ကျော်
             if (dataExists) {
-                // ✅ User data ရှိပြီးသား → diamond/owned ကျော်
-                console.log('✅ User already exists — skipping diamond/owned');
                 return Promise.all([
                     baseRef.child('accNo').set(userData.accNo || 0),
                     baseRef.child('authId').set(userData.authId || ''),
@@ -9706,9 +9705,7 @@ function saveUserToFirebase(userData, serverId) {
                 ]);
             }
 
-            // ===================================================
-            // ✅ User အသစ် → Step 1: Diamond + Owned ရေး
-            // ===================================================
+            // ✅ Case 2: User အသစ် → diamond/owned အရင် ရေး
             return Promise.all([
                 baseRef.child('diamond').set(0),
                 baseRef.child('frameOwned').set([]),
@@ -9719,7 +9716,6 @@ function saveUserToFirebase(userData, serverId) {
                 baseRef.child('markOwned').set([])
             ])
             .then(function() {
-                // ✅ Step 2: ကျန် field တွေ ရေး
                 return Promise.all([
                     baseRef.child('accNo').set(userData.accNo || 0),
                     baseRef.child('authId').set(userData.authId || ''),
@@ -9746,11 +9742,9 @@ function saveUserToFirebase(userData, serverId) {
             });
         })
         .then(function() {
-            console.log('✅ saveUserToFirebase SUCCESS:', userId);
             resolve(true);
         })
         .catch(function(err) {
-            // ✅ UI Alert
             alert(
                 '❌ SAVE FAILED\n\n' +
                 '📌 Function: saveUserToFirebase\n\n' +
