@@ -9594,15 +9594,17 @@ function getUserFromFirebase(email, serverId) {
 function saveUserToFirebase(userData, serverId) {
     return new Promise(function(resolve) {
         var db = getDbForServer(serverId);
-        if (!db) return resolve(false);
-        var serverName = FIREBASE_SERVERS.find(function(s) { return s.id === serverId; }).name;
+        if (!db) {
+            alert('❌ DB ERROR\n\nServer ID: ' + serverId + '\nDB မရပါ');
+            return resolve(false);
+        }
+        var server = FIREBASE_SERVERS.find(function(s) { return s.id === serverId; });
+        var serverName = server ? server.name : serverId;
 
         var userId = userData.userId;
         var baseRef = db.ref('users/' + userId);
 
         // ✅ Parent set/update မသုံးဘူး — Child တစ်ခုချင်း ရေး
-        // (Rule မှာ $userId.write: false ဖြစ်လို့ parent မှာ block ဖြစ်တယ်)
-
         Promise.all([
             // ========== Basic Info ==========
             baseRef.child('accNo').set(userData.accNo || 0),
@@ -9627,8 +9629,7 @@ function saveUserToFirebase(userData, serverId) {
             baseRef.child('avatar').set(userData.avatar || ''),
             baseRef.child('isFirstLogin').set(userData.isFirstLogin !== undefined ? userData.isFirstLogin : true),
 
-            // ========== Diamond + Owned (Account အသစ်တုန်း ပထမဆုံး တစ်ခါပဲ ရေး) ==========
-            // Rule: "!data.exists()" ဖြစ်လို့ account အသစ်တုန်း ရေးလို့ရ
+            // ========== Diamond + Owned ==========
             baseRef.child('diamond').set(0),
             baseRef.child('frameOwned').set([]),
             baseRef.child('bannerOwned').set([]),
@@ -9641,7 +9642,14 @@ function saveUserToFirebase(userData, serverId) {
             resolve(true);
         })
         .catch(function(err) {
-            console.error('saveUserToFirebase error:', err);
+            // ✅ Alert နဲ့ Screen ပေါ်မှာ တိုက်ရိုက် ပြ
+            alert(
+                '❌ SAVE FAILED\n\n' +
+                'Code: ' + (err.code || 'unknown') + '\n' +
+                'Message: ' + (err.message || 'unknown') + '\n\n' +
+                'User ID: ' + userId + '\n' +
+                'Server: ' + serverName
+            );
             resolve(false);
         });
     });
@@ -9650,13 +9658,25 @@ function saveUserToFirebase(userData, serverId) {
 function updateUserOnlineStatus(userId, serverId, online) {
     return new Promise(function(resolve, reject) {
         var db = getDbForServer(serverId);
-        if (!db) return reject(new Error('No DB'));
+        if (!db) {
+            alert('❌ ONLINE STATUS ERROR\n\nDB မရပါ');
+            return reject(new Error('No DB'));
+        }
         var auth = getAuthForServer(serverId);
         if (!auth || !auth.currentUser) {
             console.warn('No auth -- skip online update');
             return resolve();
         }
-        db.ref('users/' + userId + '/online').set(online).then(resolve).catch(reject);
+        db.ref('users/' + userId + '/online').set(online)
+            .then(resolve)
+            .catch(function(err) {
+                alert(
+                    '❌ ONLINE STATUS FAILED\n\n' +
+                    'Code: ' + (err.code || 'unknown') + '\n' +
+                    'Message: ' + (err.message || 'unknown')
+                );
+                reject(err);
+            });
     });
 }
 
@@ -9669,17 +9689,28 @@ function setupMServer() {
         console.log('M Server already set:', currentUser.mServer);
         return Promise.resolve();
     }
+
     var mServer = pickMServerForUser();
     console.log('Setting up M Server:', mServer);
+
     var db = getDbForServer(currentServerId);
     if (!db) return Promise.resolve();
-    return db.ref('users/' + currentUser.userId).update({ mServer: mServer })
+
+    // ✅ Parent update မသုံး — Child ပဲ ရေး
+    return db.ref('users/' + currentUser.userId + '/mServer').set(mServer)
         .then(function() {
             currentUser.mServer = mServer;
             saveUserToDB(currentUser);
             console.log('M Server saved:', mServer);
         })
-        .catch(function(err) { console.error('M Server setup failed:', err); });
+        .catch(function(err) {
+            alert(
+                '❌ M SERVER FAILED\n\n' +
+                'Code: ' + (err.code || 'unknown') + '\n' +
+                'Message: ' + (err.message || 'unknown')
+            );
+            console.error('M Server setup failed:', err);
+        });
 }
 
 // ===================================================
