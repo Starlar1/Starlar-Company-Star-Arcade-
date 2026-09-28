@@ -9597,56 +9597,46 @@ function saveUserToFirebase(userData, serverId) {
         if (!db) return resolve(false);
         var serverName = FIREBASE_SERVERS.find(function(s) { return s.id === serverId; }).name;
 
-        // ✅ Step 1: User base info (diamond + owned arrays မပါဘဲ)
-        var userBase = {
-            accNo: userData.accNo || 0,
-            authId: userData.authId || '',
-            serverNo: serverName,
-            email: userData.email,
-            name: userData.name,
-            userId: userData.userId,
-            inviteCode: userData.inviteCode,
-            bio: userData.bio || '',
-            play: userData.play || '',
-            friendsList: userData.friendsList || [],
-            blockList: userData.blockList || [],
-            frameUse: userData.frameUse || '',
-            bannerUse: userData.bannerUse || '',
-            backgroundUse: userData.backgroundUse || '',
-            bubbleUse: userData.bubbleUse || '',
-            markUse: userData.markUse || '',
-            roleUse: userData.roleUse || '',
-            mServer: userData.mServer || [],
-            online: true,
-            avatar: userData.avatar || '',
-            isFirstLogin: userData.isFirstLogin !== undefined ? userData.isFirstLogin : true
-        };
+        var userId = userData.userId;
+        var baseRef = db.ref('users/' + userId);
 
-        // ✅ Step 1: User base info ရေး (diamond မပါ)
-        db.ref('users/' + userData.userId).set(userBase)
-        .then(function() {
-            // ✅ Step 2: Diamond = 0 (!data.exists() ဖြစ်လို့ ရ)
-            return db.ref('users/' + userData.userId + '/diamond').set(0);
-        })
-        .then(function() {
-            // ✅ Step 3: Owned arrays အားလုံး = [] (!data.exists() ဖြစ်လို့ ရ)
-            return db.ref('users/' + userData.userId + '/frameOwned').set([]);
-        })
-        .then(function() {
-            return db.ref('users/' + userData.userId + '/bannerOwned').set([]);
-        })
-        .then(function() {
-            return db.ref('users/' + userData.userId + '/backgroundOwned').set([]);
-        })
-        .then(function() {
-            return db.ref('users/' + userData.userId + '/bubbleOwned').set([]);
-        })
-        .then(function() {
-            return db.ref('users/' + userData.userId + '/roleOwned').set([]);
-        })
-        .then(function() {
-            return db.ref('users/' + userData.userId + '/markOwned').set([]);
-        })
+        // ✅ Parent set/update မသုံးဘူး — Child တစ်ခုချင်း ရေး
+        // (Rule မှာ $userId.write: false ဖြစ်လို့ parent မှာ block ဖြစ်တယ်)
+
+        Promise.all([
+            // ========== Basic Info ==========
+            baseRef.child('accNo').set(userData.accNo || 0),
+            baseRef.child('authId').set(userData.authId || ''),
+            baseRef.child('serverNo').set(serverName),
+            baseRef.child('email').set(userData.email || ''),
+            baseRef.child('name').set(userData.name || 'Player'),
+            baseRef.child('userId').set(userId),
+            baseRef.child('inviteCode').set(userData.inviteCode || ''),
+            baseRef.child('bio').set(userData.bio || ''),
+            baseRef.child('play').set(userData.play || ''),
+            baseRef.child('friendsList').set(userData.friendsList || []),
+            baseRef.child('blockList').set(userData.blockList || []),
+            baseRef.child('frameUse').set(userData.frameUse || ''),
+            baseRef.child('bannerUse').set(userData.bannerUse || ''),
+            baseRef.child('backgroundUse').set(userData.backgroundUse || ''),
+            baseRef.child('bubbleUse').set(userData.bubbleUse || ''),
+            baseRef.child('markUse').set(userData.markUse || ''),
+            baseRef.child('roleUse').set(userData.roleUse || ''),
+            baseRef.child('mServer').set(userData.mServer || []),
+            baseRef.child('online').set(true),
+            baseRef.child('avatar').set(userData.avatar || ''),
+            baseRef.child('isFirstLogin').set(userData.isFirstLogin !== undefined ? userData.isFirstLogin : true),
+
+            // ========== Diamond + Owned (Account အသစ်တုန်း ပထမဆုံး တစ်ခါပဲ ရေး) ==========
+            // Rule: "!data.exists()" ဖြစ်လို့ account အသစ်တုန်း ရေးလို့ရ
+            baseRef.child('diamond').set(0),
+            baseRef.child('frameOwned').set([]),
+            baseRef.child('bannerOwned').set([]),
+            baseRef.child('backgroundOwned').set([]),
+            baseRef.child('bubbleOwned').set([]),
+            baseRef.child('roleOwned').set([]),
+            baseRef.child('markOwned').set([])
+        ])
         .then(function() {
             resolve(true);
         })
@@ -10257,7 +10247,16 @@ function handleFirstLoginSave() {
         return;
     }
 
-    db.ref('users/' + currentUser.userId).update({ name: name, avatar: avatar, isFirstLogin: false })
+    var userId = currentUser.userId;
+    var baseRef = db.ref('users/' + userId);
+
+    // ✅ Child တစ်ခုချင်း ရေး (Parent update မသုံး)
+    // Rule မှာ $userId.write: false ဖြစ်လို့ parent update က block ဖြစ်တယ်
+    Promise.all([
+        baseRef.child('name').set(name),
+        baseRef.child('avatar').set(avatar),
+        baseRef.child('isFirstLogin').set(false)
+    ])
     .then(function() {
         currentUser.name = name;
         currentUser.avatar = avatar;
@@ -10273,12 +10272,14 @@ function handleFirstLoginSave() {
         firstLoginSaveBtn.disabled = false;
         firstLoginSaveBtn.textContent = originalText;
         setTimeout(function() { enterApp(currentUser); }, 300);
-    }).catch(function() {
+    })
+    .catch(function(err) {
+        console.error('First login save error:', err);
         hideLoading();
         isFirstLoginProcessing = false;
         firstLoginSaveBtn.disabled = false;
         firstLoginSaveBtn.textContent = originalText;
-        alert('Save failed');
+        alert('Save failed: ' + (err.message || err.code || 'Unknown'));
     });
 }
 
