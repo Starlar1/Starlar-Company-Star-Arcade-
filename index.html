@@ -9600,7 +9600,6 @@ function saveUserToFirebase(userData, serverId) {
         }
         var server = FIREBASE_SERVERS.find(function(s) { return s.id === serverId; });
         var serverName = server ? server.name : serverId;
-
         var userId = userData.userId;
         var baseRef = db.ref('users/' + userId);
 
@@ -9642,7 +9641,7 @@ function saveUserToFirebase(userData, serverId) {
             resolve(true);
         })
         .catch(function(err) {
-            // ✅ Alert နဲ့ Screen ပေါ်မှာ တိုက်ရိုက် ပြ
+            // ✅ Alert နဲ့ Screen ပေါ် တိုက်ရိုက် ပြ
             alert(
                 '❌ SAVE FAILED\n\n' +
                 'Code: ' + (err.code || 'unknown') + '\n' +
@@ -9650,6 +9649,7 @@ function saveUserToFirebase(userData, serverId) {
                 'User ID: ' + userId + '\n' +
                 'Server: ' + serverName
             );
+            console.error('saveUserToFirebase error:', err);
             resolve(false);
         });
     });
