@@ -1,0 +1,20 @@
+<meta name='viewport' content='width=device-width, initial-scale=1'/><script>{
+  "servers": {
+    "server1": {
+      "name": "Server 1",
+      "number": 1,
+      "apiKey": "AIzaSyBVnqFU9QdmggdEe3-zMS3KUMXNPlRPaAc",
+      "databaseUrl": "https://star-arcade-1-default-rtdb.asia-southeast1.firebasedatabase.app",
+      "projectId": "star-arcade-1",
+      "appId": "1:459725858092:web:7890fbf8f8ff2b56f43889"
+    },
+    "server2": {
+      "name": "Server 2",
+      "number": 2,
+      "apiKey": "AIzaSyDXXTHMknyDDh9djEJhs4H8LSai3xv8xFY",
+      "databaseUrl": "https://star-arcade-2-1a619-default-rtdb.asia-southeast1.firebasedatabase.app",
+      "projectId": "star-arcade-2-1a619",
+      "appId": "1:702395527575:web:f633355c4ea0915f3914d2"
+    }
+  }
+}</script>
