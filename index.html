@@ -9832,6 +9832,52 @@ body {
     .post-viewer-footer { padding: 10px 16px; }
     .comment-sheet { height: 85vh; max-height: 85vh; }
 }
+
+    /* ============================================================
+   ✅ CHAT LINK FIX -- Standalone
+   ============================================================ */
+
+/* ✅ Chat Link ကို နှိပ်လို့ရအောင် */
+.chat-link {
+    pointer-events: auto !important;
+    cursor: pointer !important;
+    position: relative;
+    z-index: 5;
+}
+
+/* ✅ Message Bubble ထဲက Link ကို အောက်ဆုံး */
+.chat-message .chat-link {
+    pointer-events: auto !important;
+    cursor: pointer !important;
+}
+
+.chat-message.has-bubble .chat-link {
+    position: relative;
+    z-index: 10;
+    pointer-events: auto !important;
+}
+
+/* ✅ Reply Quote က Link ကို မဖုံးအောင် */
+.msg-reply-quote {
+    pointer-events: auto;
+}
+
+/* ✅ Post Share Link */
+.post-share-link {
+    pointer-events: auto !important;
+    cursor: pointer !important;
+    position: relative;
+    z-index: 10;
+}
+
+/* ✅ Link Preview Card */
+.link-preview-card {
+    pointer-events: auto !important;
+    cursor: pointer !important;
+    position: relative;
+    z-index: 5;
+}
+    
 </style>
 </head>
 <body>
