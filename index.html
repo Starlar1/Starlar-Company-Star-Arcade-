@@ -9628,6 +9628,110 @@ body {
     .post-viewer-footer { padding: 10px 16px; }
     .comment-sheet { height: 85vh; max-height: 85vh; }
 }
+
+/* ✅ Comment Bubble Picker (Comment Sheet ထဲမှာ သီးသန့်) */
+.comment-bubble-picker {
+    background: var(--bg-card);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    max-height: 220px;
+    overflow-y: auto;
+    padding: 10px;
+    animation: slideUp 0.25s ease;
+    flex-shrink: 0;
+}
+
+.comment-bubble-picker-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 4px 8px 10px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 10px;
+}
+
+.comment-bubble-picker-header span {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+.comment-bubble-picker-close {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    border: none;
+    background: var(--bg-input);
+    color: var(--text-muted);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.comment-bubble-picker-close:active { transform: scale(0.9); background: var(--bg-hover); }
+
+.comment-bubble-picker-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+}
+
+.comment-bubble-slot {
+    aspect-ratio: 1;
+    border-radius: 10px;
+    background: var(--bg-input);
+    border: 2px solid var(--border-light);
+    cursor: pointer;
+    overflow: hidden;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.comment-bubble-slot:active { transform: scale(0.95); }
+
+.comment-bubble-slot.active {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px rgba(255, 109, 31, 0.3);
+}
+
+.comment-bubble-slot.none-slot {
+    background: rgba(255, 255, 255, 0.03);
+    border-style: dashed;
+}
+
+.comment-bubble-slot.none-slot.active {
+    border-style: solid;
+    border-color: var(--accent);
+    background: rgba(255, 109, 31, 0.08);
+}
+
+.comment-bubble-slot-none {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    color: var(--text-muted);
+    font-size: 10px;
+    font-weight: 600;
+}
+
+.comment-bubble-slot-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
 </style>
 </head>
 <body>
@@ -20086,21 +20190,18 @@ if (document.readyState === 'loading') {
 })();
 
 // ============================================================
-// ✅ POST SYSTEM v13.0 -- FULL STANDALONE
-//  • Post Card: Profile Circle - Name - Add
-//  • Profile နှိပ်မှ Pop (Post Card မှာ View မပါ)
-//  • Comment: Profile - Name - View (View နှိပ်မှ Pop)
-//  • Comment အောက်မှာ: Bubble Icon - Input Bar - Send (Profile မပါ)
-//  • ပုံအားလုံး Imbb Link ပုံပဲ ပေါ် / View နှိပ်မှ အစစ်မြင်
-//  • Tab ရွေးပြီးသား ထပ်နှိပ်ရင် Retry
-//  • စစဝင်ရင် Supabase 1 ကျပန်း 5 Post -- 1 ခုပြီး 1 ခု ချက်ချင်းပြ
-//  • အောက်ဆွဲမှ နောက် Server ထပ် 5 ခု
-//  • New Post ပေါလာရင် Flash မဖြစ် (ငြိမ်)
+// ✅ POST SYSTEM v17.0 -- FULL STANDALONE
+//  • Post Card: တင်သူရဲ့ အစစ်ပုံ - Name - Add
+//    → Profile Circle နှိပ် → Server သွား → Full Profile Popup
+//  • Comment: Imbb ပုံပဲ - Name - View
+//    → View နှိပ် → Server သွား → Full Profile Popup
+//  • Comment: Profile Circle နှိပ် → ဘာမှ မဖြစ်
+//  • Comment Bubble Picker -- Comment Sheet ထဲမှာ သီးသန့်
 // ============================================================
 (function() {
     'use strict';
 
-    console.log('✅ Post System v13.0 Loading...');
+    console.log('✅ Post System v17.0 Loading...');
 
     // ===================================================
     //  SUPABASE CONFIG
@@ -20132,12 +20233,12 @@ if (document.readyState === 'loading') {
     var POST_MAX_VIDEO_DURATION = 10;
     var POST_MAX_IMAGES = 6;
     var POST_LOAD_COUNT = 5;
-    var POST_LIST_KEY = 'myPostList_v13';
-    var FAVOURITE_KEY = 'favouritePosts_v13';
+    var POST_LIST_KEY = 'myPostList_v17';
+    var FAVOURITE_KEY = 'favouritePosts_v17';
     var SHARE_LINK_PREFIX = 'Post.';
     var COMMENT_MAX_LINES = 30;
 
-    // ✅ Imbb Placeholder Image (လူတိုင်း အတူတူ)
+    // ✅ Imbb Placeholder (Comment မှာ ပြ)
     var IMBB_PLACEHOLDER = 'https://i.ibb.co/r2k0J5rJ/Grid-Art-20260829-171212620.png';
 
     var POST_ROLES = [
@@ -20171,9 +20272,11 @@ if (document.readyState === 'loading') {
     var commentTargetPost = null;
     var commentsList = [];
 
-    // ✅ Flash မဖြစ်အောင် Track
     var lastRenderedIds = {};
     var isInitialLoad = true;
+
+    var commentBubblePickerOpen = false;
+    var commentSelectedBubbleId = '';
 
     // ===================================================
     //  SERVER CHECK
@@ -20351,7 +20454,80 @@ if (document.readyState === 'loading') {
     }
 
     // ===================================================
-    //  FAVOURITE (IndexedDB)
+    //  ✅ USER INFO FETCH -- Server သွားယူ
+    // ===================================================
+    function fetchUserInfoFromServer(serverNo, userId) {
+        return new Promise(function(resolve) {
+            if (typeof window.getDbForServer !== 'function') {
+                console.warn('getDbForServer မရှိပါ');
+                return resolve(null);
+            }
+            var srv = getServerByNumber(serverNo);
+            if (!srv) return resolve(null);
+            var db = window.getDbForServer(srv.id);
+            if (!db) return resolve(null);
+
+            console.log('📥 Fetching user:', userId, 'from Server', serverNo);
+
+            db.ref('users/' + userId).once('value').then(function(snap) {
+                var data = snap.val();
+                if (data) {
+                    data.userId = userId;
+                    data.serverNo = 'Server ' + serverNo;
+                    data.serverId = srv.id;
+                    console.log('✅ User data fetched:', data.name);
+                    resolve(data);
+                } else {
+                    console.warn('❌ User မတွေ့ပါ');
+                    resolve(null);
+                }
+            }).catch(function(err) {
+                console.warn('❌ Fetch error:', err);
+                resolve(null);
+            });
+        });
+    }
+
+    // ✅ Profile Popup ဖွင့် (Post Card / Comment View)
+    function openProfilePopupWithFetch(userId, serverNo) {
+        // ✅ Loading Popup ပြ
+        var loadingOverlay = document.createElement('div');
+        loadingOverlay.className = 'post-user-popup-overlay';
+        loadingOverlay.id = 'profileLoadingOverlay';
+        loadingOverlay.innerHTML =
+            '<div class="post-user-popup" style="max-width:220px;padding:28px;text-align:center;">' +
+                '<div class="post-upload-spinner" style="margin:0 auto 14px;width:44px;height:44px;border-width:3px;"></div>' +
+                '<div style="color:var(--text-main);font-size:14px;font-weight:700;">Profile ရှာနေသည်...</div>' +
+            '</div>';
+        document.body.appendChild(loadingOverlay);
+
+        fetchUserInfoFromServer(serverNo, userId).then(function(userData) {
+            loadingOverlay.remove();
+
+            if (userData) {
+                showPostUserPopup({
+                    userId: userId,
+                    serverId: userData.serverId,
+                    serverNo: userData.serverNo,
+                    name: userData.name || 'Player',
+                    avatar: userData.avatar || IMBB_PLACEHOLDER,
+                    frameUse: userData.frameUse || '',
+                    markUse: userData.markUse || '',
+                    bannerUse: userData.bannerUse || '',
+                    bio: userData.bio || '',
+                    online: userData.online === true
+                });
+            } else {
+                if (typeof showToast === 'function') showToast('User မတွေ့ပါ');
+            }
+        }).catch(function() {
+            loadingOverlay.remove();
+            if (typeof showToast === 'function') showToast('Failed to load profile');
+        });
+    }
+
+    // ===================================================
+    //  FAVOURITE
     // ===================================================
     function loadFavourites() {
         return new Promise(function(resolve) {
@@ -20416,7 +20592,7 @@ if (document.readyState === 'loading') {
     }
 
     // ===================================================
-    //  SERVER STORAGE CHECK
+    //  SERVER STORAGE
     // ===================================================
     function getServerStorageUsage(serverId) {
         return new Promise(function(resolve) {
@@ -20468,7 +20644,6 @@ if (document.readyState === 'loading') {
     //  FEED
     // ===================================================
     function switchFeedTab(tab) {
-        // ✅ တူတဲ့ Tab ကို ထပ်နှိပ်ရင် Retry
         if (currentFeedTab === tab) {
             if (typeof showToast === 'function') showToast('Reloading...');
             if (tab === 'favourite') {
@@ -20510,7 +20685,6 @@ if (document.readyState === 'loading') {
         if (body) body.innerHTML = '<div class="post-feed-loading">Loading...</div>';
     }
 
-    // ✅ တစ်ခုပြီး တစ်ခု ချက်ချင်းပြ
     function loadFeedNext() {
         if (feedLoading || feedExhausted) return;
         if (!isGlobalViewEnabled()) {
@@ -20526,7 +20700,6 @@ if (document.readyState === 'loading') {
         var body = document.getElementById('postFeedBody');
         if (!body) { feedLoading = false; return; }
 
-        // ✅ Initial Load ဆိုရင် Loading ပြ
         if (isInitialLoad && feedAllPosts.length === 0) {
             body.innerHTML = '<div class="post-feed-loading">Loading...</div>';
         }
@@ -20571,7 +20744,6 @@ if (document.readyState === 'loading') {
                 return;
             }
 
-            // ✅ တစ်ခုပြီး တစ်ခု ချက်ချင်းပြ
             var idx = 0;
             function showNext() {
                 if (idx >= batch.length) {
@@ -20583,11 +20755,7 @@ if (document.readyState === 'loading') {
                 feedAllPosts.push(post);
                 appendSinglePost(post);
                 idx++;
-
-                // ✅ နောက်တစ်ခုကို ချက်ချင်းပြ
-                requestAnimationFrame(function() {
-                    setTimeout(showNext, 50);
-                });
+                requestAnimationFrame(function() { setTimeout(showNext, 50); });
             }
             showNext();
         }).catch(function(err) {
@@ -20599,33 +20767,26 @@ if (document.readyState === 'loading') {
         });
     }
 
-    // ✅ တစ်ခုချင်း Append (Flash မဖြစ်)
     function appendSinglePost(post) {
         var body = document.getElementById('postFeedBody');
         if (!body) return;
 
-        // ✅ ရှိပြီးသား Loading/Empty ဖျက်
         var loadingEl = body.querySelector('.post-feed-loading');
         if (loadingEl) loadingEl.remove();
         var emptyEl = body.querySelector('.post-feed-empty');
         if (emptyEl) emptyEl.remove();
-
-        // ✅ Loading Indicator ရှိရင် ဖျက်
         var indicator = document.getElementById('feedLoadMoreIndicator');
         if (indicator) indicator.remove();
 
-        // ✅ ဒီ Post ရှိပြီးသားလား စစ်
         if (lastRenderedIds[post.postId]) return;
         lastRenderedIds[post.postId] = true;
 
-        // ✅ Card ဖန်တီးပြီး Append
         var card = buildPostCard(post);
         card.style.opacity = '0';
         card.style.transform = 'translateY(10px)';
         card.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
         body.appendChild(card);
 
-        // ✅ Animation
         requestAnimationFrame(function() {
             card.style.opacity = '1';
             card.style.transform = 'translateY(0)';
@@ -20652,11 +20813,9 @@ if (document.readyState === 'loading') {
             return;
         }
 
-        // ✅ ရှိပြီးသား Card တွေ ရှိရင် မဖျက်
         var existingCards = body.querySelectorAll('.post-card');
         if (existingCards.length > 0) return;
 
-        // ✅ အားလုံး ပြ
         body.innerHTML = '';
         feedAllPosts.forEach(function(post) {
             if (lastRenderedIds[post.postId]) return;
@@ -20808,7 +20967,7 @@ if (document.readyState === 'loading') {
     }
 
     // ===================================================
-    //  PROFILE POPUP (View နှိပ်မှ ပြ)
+    //  PROFILE POPUP
     // ===================================================
     function showPostUserPopup(userInfo) {
         var overlay = document.getElementById('postUserPopupOverlay');
@@ -20824,8 +20983,8 @@ if (document.readyState === 'loading') {
         var bannerImg = document.getElementById('postUserPopupBannerImg');
         var actionBtn = document.getElementById('postUserPopupActionBtn');
 
-        // ✅ Imbb Placeholder ပုံပဲ ပြ (View နှိပ်မှ)
-        avatarEl.src = IMBB_PLACEHOLDER;
+        // ✅ အစစ် Avatar ပြ
+        avatarEl.src = userInfo.avatar || IMBB_PLACEHOLDER;
 
         if (userInfo.frameUse && typeof FRAME_CONFIG !== 'undefined') {
             var frame = FRAME_CONFIG.frames.find(function(f) { return String(f.id) === String(userInfo.frameUse); });
@@ -21011,9 +21170,6 @@ if (document.readyState === 'loading') {
         document.body.style.overflow = '';
     }
 
-    // ===================================================
-    //  MEDIA BUTTONS STATE
-    // ===================================================
     function updateMediaButtonsState() {
         var imgBtn = document.getElementById('postAddImageBtn');
         var vidBtn = document.getElementById('postAddVideoBtn');
@@ -21036,9 +21192,6 @@ if (document.readyState === 'loading') {
         setBtn(linkBtn, hasVideo || hasImages || hasLink);
     }
 
-    // ===================================================
-    //  MEDIA GRID -- Link ရွေးရင် ပုံအကွက် ပျောက်
-    // ===================================================
     function renderPostMediaGrid() {
         var grid = document.getElementById('postMediaGrid');
         if (!grid) return;
@@ -21335,12 +21488,13 @@ if (document.readyState === 'loading') {
             var isLink = !!postLinkData;
             var caption = (document.getElementById('postCaptionInput') || {}).value || '';
 
+            // ✅ တင်သူရဲ့ အစစ် Avatar ကို ယူ
             var userInfo = {
                 userId: String(window.currentUser.userId || ''),
                 userName: window.currentUser.name || 'Player',
                 serverId: window.currentServerId || '',
                 serverNo: getServerNameFromConfig(window.currentServerId),
-                userAvatar: window.currentUser.avatar || '',
+                userAvatar: window.currentUser.avatar || '',  // ✅ အစစ် Avatar
                 userFrame: window.currentUser.frameUse || '',
                 userMark: window.currentUser.markUse || '',
                 userBanner: window.currentUser.bannerUse || '',
@@ -21446,15 +21600,15 @@ if (document.readyState === 'loading') {
     }
 
     // ===================================================
-    //  POST CARD -- Profile Circle - Name - Add
+    //  ✅ POST CARD -- တင်သူရဲ့ အစစ်ပုံ - Name - Add
     // ===================================================
     function buildPostCard(post) {
         var card = document.createElement('div');
         card.className = 'post-card';
         card.dataset.postId = post.postId;
 
-        // ✅ Imbb Placeholder ပုံပဲ ပြ
-        var avatar = IMBB_PLACEHOLDER;
+        // ✅ တင်သူရဲ့ အစစ်ပုံ (Post Data ထဲမှာ ပါပြီးသား)
+        var avatar = post.userAvatar || IMBB_PLACEHOLDER;
 
         var frameHtml = '';
         if (post.userFrame && typeof FRAME_CONFIG !== 'undefined') {
@@ -21491,7 +21645,7 @@ if (document.readyState === 'loading') {
         var liked = isPostLikedByMe(post);
         var faved = isFavourited(post.postId);
 
-        // ✅ Post Card မှာ View မပါ / Profile Circle ကို နှိပ်ရင် Pop
+        // ✅ Post Card: Profile Circle (အစစ်ပုံ) - Name - Add
         card.innerHTML =
             '<div class="post-card-header">' +
                 '<div class="post-card-avatar-wrap" data-action="profile">' +
@@ -21586,17 +21740,19 @@ if (document.readyState === 'loading') {
             }
         });
 
-        // ✅ Profile Circle နှိပ်ရင် Profile Popup
+        // ✅ Post Card Profile Circle နှိပ် → Server သွား → Full Profile Popup
         var profileWrap = card.querySelector('.post-card-avatar-wrap[data-action="profile"]');
         if (profileWrap) {
             profileWrap.style.cursor = 'pointer';
             profileWrap.addEventListener('click', function(e) {
                 e.stopPropagation();
-                showPostUserPopup({
-                    userId: post.userId, serverId: post.serverId, serverNo: post.serverNo,
-                    name: post.userName, avatar: post.userAvatar, frameUse: post.userFrame,
-                    markUse: post.userMark, bannerUse: post.userBanner, bio: post.userBio, online: false
-                });
+                // ✅ သူ့ Server သွား → အစစ် Data ယူ → Popup
+                var serverNo = 1;
+                if (post.serverNo) {
+                    var m = String(post.serverNo).match(/\d+/);
+                    if (m) serverNo = parseInt(m[0]);
+                }
+                openProfilePopupWithFetch(post.userId, serverNo);
             });
         }
 
@@ -21665,8 +21821,9 @@ if (document.readyState === 'loading') {
     }
 
     // ===================================================
-    //  COMMENT (TikTok Style Bottom Bar) -- Profile - Name - View
-    //  အောက်မှာ: Bubble Icon - Input Bar - Send (Profile မပါ)
+    //  ✅ COMMENT -- Imbb ပုံပဲ - Name - View
+    //  Profile Circle နှိပ် → ဘာမှ မဖြစ်
+    //  View နှိပ် → Server သွား → Full Profile Popup
     // ===================================================
     function openCommentScreen(post) {
         if (!isGlobalCommentEnabled()) { if (typeof showToast === 'function') showToast('Comment ခွင့် ပိတ်ထားသည်'); return; }
@@ -21724,6 +21881,11 @@ if (document.readyState === 'loading') {
         document.body.style.overflow = '';
         commentTargetPost = null;
         commentsList = [];
+
+        // ✅ Bubble Picker ပိတ်
+        commentBubblePickerOpen = false;
+        var bp = document.getElementById('commentBubblePicker');
+        if (bp) bp.remove();
     }
 
     function renderComments(comments) {
@@ -21738,7 +21900,7 @@ if (document.readyState === 'loading') {
         comments.forEach(function(c) { list.appendChild(buildCommentItem(c)); });
     }
 
-    // ✅ Comment Item: Profile - Name - View
+    // ✅ Comment Item -- Imbb ပုံပဲ - Name - View
     function buildCommentItem(c) {
         var item = document.createElement('div');
         item.className = 'comment-item';
@@ -21753,9 +21915,9 @@ if (document.readyState === 'loading') {
             }
         }
 
-        // ✅ Profile Circle (Imbb Placeholder) - Name - View
+        // ✅ Comment: Imbb ပုံပဲ - Name - View
         item.innerHTML =
-            '<div class="comment-item-avatar" data-action="profile" style="cursor:pointer;">' +
+            '<div class="comment-item-avatar">' +
                 '<img src="' + IMBB_PLACEHOLDER + '" />' +
             '</div>' +
             '<div class="comment-item-body">' +
@@ -21769,31 +21931,21 @@ if (document.readyState === 'loading') {
                 '</div>' +
             '</div>';
 
-        // ✅ Profile Circle နှိပ်ရင် Pop
-        var avatarEl = item.querySelector('.comment-item-avatar[data-action="profile"]');
-        if (avatarEl) {
-            avatarEl.addEventListener('click', function(e) {
-                e.stopPropagation();
-                showPostUserPopup({
-                    userId: c.userId, serverId: c.userServerId, serverNo: c.userServerNo,
-                    name: c.userName, avatar: c.userAvatar, frameUse: c.userFrame,
-                    markUse: c.userMark, bannerUse: c.userBanner, bio: c.userBio, online: false
-                });
-            });
-        }
-
-        // ✅ View ခလုတ် နှိပ်ရင် Pop
+        // ✅ View ခလုတ် နှိပ် → Server သွား → Popup
         var viewBtn = item.querySelector('.comment-item-view-btn[data-action="view"]');
         if (viewBtn) {
             viewBtn.addEventListener('click', function(e) {
                 e.stopPropagation();
-                showPostUserPopup({
-                    userId: c.userId, serverId: c.userServerId, serverNo: c.userServerNo,
-                    name: c.userName, avatar: c.userAvatar, frameUse: c.userFrame,
-                    markUse: c.userMark, bannerUse: c.userBanner, bio: c.userBio, online: false
-                });
+                var serverNo = 1;
+                if (c.userServerNo) {
+                    var m = String(c.userServerNo).match(/\d+/);
+                    if (m) serverNo = parseInt(m[0]);
+                }
+                openProfilePopupWithFetch(c.userId, serverNo);
             });
         }
+
+        // ✅ Comment Profile Circle ကို နှိပ်လို့ မရ (data-action မထည့်)
 
         return item;
     }
@@ -21832,7 +21984,7 @@ if (document.readyState === 'loading') {
             userMark: window.currentUser.markUse || '',
             userBanner: window.currentUser.bannerUse || '',
             userBio: window.currentUser.bio || '',
-            bubbleId: window.currentUser.bubbleUse || '',
+            bubbleId: commentSelectedBubbleId || window.currentUser.bubbleUse || '',
             text: text,
             createdAt: Date.now()
         };
@@ -21860,6 +22012,97 @@ if (document.readyState === 'loading') {
                 });
             })
             .catch(function(err) { console.warn('Comment save error:', err); });
+    }
+
+    // ===================================================
+    //  ✅ COMMENT BUBBLE PICKER -- Comment Sheet ထဲမှာ သီးသန့်
+    // ===================================================
+    function toggleCommentBubblePicker() {
+        var sheet = document.getElementById('commentSheet');
+        if (!sheet) return;
+
+        // ✅ ရှိပြီးသား Picker ရှိရင် ဖျက်
+        var existing = document.getElementById('commentBubblePicker');
+        if (existing) {
+            existing.remove();
+            commentBubblePickerOpen = false;
+            return;
+        }
+
+        // ✅ User ရဲ့ Bubble Owned ကို ယူ
+        var owned = (window.currentUser && Array.isArray(window.currentUser.bubbleOwned))
+            ? window.currentUser.bubbleOwned : [];
+        var currentUse = (window.currentUser && window.currentUser.bubbleUse) || '';
+
+        var slots = [{ id: '', name: 'None', image: '', isNone: true, isUsed: currentUse === '' && !commentSelectedBubbleId }];
+        owned.forEach(function(bId) {
+            var b = (typeof BUBBLE_CONFIG !== 'undefined')
+                ? BUBBLE_CONFIG.bubbles.find(function(x) { return x.id === bId; })
+                : null;
+            if (b) slots.push({ id: b.id, name: b.name, image: b.image, isNone: false, isUsed: (commentSelectedBubbleId || currentUse) === b.id });
+        });
+
+        var picker = document.createElement('div');
+        picker.id = 'commentBubblePicker';
+        picker.className = 'comment-bubble-picker';
+
+        var html = '<div class="comment-bubble-picker-header">' +
+            '<span>Bubble ရွေးပါ</span>' +
+            '<button class="comment-bubble-picker-close" id="commentBubblePickerClose">' +
+                '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>' +
+            '</button>' +
+        '</div>';
+        html += '<div class="comment-bubble-picker-grid">';
+        slots.forEach(function(s) {
+            var cls = 'comment-bubble-slot' + (s.isUsed ? ' active' : '') + (s.isNone ? ' none-slot' : '');
+            html += '<div class="' + cls + '" data-bubble-id="' + s.id + '" data-is-none="' + s.isNone + '">';
+            if (s.isNone) {
+                html += '<div class="comment-bubble-slot-none">' +
+                    '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>' +
+                    '<span>None</span>' +
+                '</div>';
+            } else {
+                html += '<img src="' + s.image + '" class="comment-bubble-slot-image" />';
+            }
+            html += '</div>';
+        });
+        html += '</div>';
+        picker.innerHTML = html;
+
+        // ✅ Comment Sheet ထဲမှာ Input Bar ရဲ့ အပေါ်မှာ ထည့်
+        var inputBar = sheet.querySelector('.comment-input-bar');
+        if (inputBar) {
+            inputBar.parentNode.insertBefore(picker, inputBar);
+        } else {
+            sheet.appendChild(picker);
+        }
+
+        commentBubblePickerOpen = true;
+
+        // ✅ Close
+        document.getElementById('commentBubblePickerClose').addEventListener('click', function() {
+            picker.remove();
+            commentBubblePickerOpen = false;
+        });
+
+        // ✅ Bubble ရွေး
+        picker.querySelectorAll('.comment-bubble-slot').forEach(function(el) {
+            el.addEventListener('click', function() {
+                var bId = this.dataset.bubbleId;
+                var isNone = this.dataset.isNone === 'true';
+
+                if (isNone || bId === '') {
+                    commentSelectedBubbleId = '';
+                    if (typeof showToast === 'function') showToast('Bubble ဖျက်ပြီး');
+                } else {
+                    commentSelectedBubbleId = parseInt(bId);
+                    if (typeof showToast === 'function') showToast('Bubble ရွေးပြီး');
+                }
+
+                picker.remove();
+                commentBubblePickerOpen = false;
+            });
+        });
     }
 
     // ===================================================
@@ -22007,11 +22250,9 @@ if (document.readyState === 'loading') {
     function init() {
         loadFavourites().then(function() { console.log('✅ Favourites loaded:', favouritePosts.length); });
 
-        // ✅ Tab Chip
         document.querySelectorAll('.post-tab-chip').forEach(function(chip) {
             chip.addEventListener('click', function() {
                 var tab = this.dataset.tab;
-                // ✅ တူတဲ့ Tab ထပ်နှိပ်ရင် Retry
                 if (currentFeedTab === tab && tab !== 'role') {
                     document.querySelectorAll('.post-tab-chip').forEach(function(c) { c.classList.remove('active'); });
                     this.classList.add('active');
@@ -22105,19 +22346,19 @@ if (document.readyState === 'loading') {
             commentSendBtn.addEventListener('click', sendComment);
         }
 
-        // ✅ Bubble Picker Button
+        // ✅ Comment Bubble Button -- Comment Sheet ထဲမှာ သီးသန့်
         var bubbleBtn = document.getElementById('commentBubbleBtn');
         if (bubbleBtn) {
-            bubbleBtn.addEventListener('click', function() {
-                if (typeof toggleBubblePicker === 'function') toggleBubblePicker();
-                else if (typeof showToast === 'function') showToast('Bubble Picker');
+            bubbleBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                toggleCommentBubblePicker();
             });
         }
 
         hookPlusMenuPost();
         initPostShareLinkHandler();
 
-        console.log('✅ Post System v13.0 Ready');
+        console.log('✅ Post System v17.0 Ready');
     }
 
     if (document.readyState === 'loading') {
