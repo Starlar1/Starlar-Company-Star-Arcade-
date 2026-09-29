@@ -22767,7 +22767,379 @@ if (document.readyState === 'loading') {
     }
 
 })();
-        
+
+// ============================================================
+// ✅ CHAT LINK FIX v1.0 -- Standalone (Override မလုပ်)
+//  • Chat ထဲက Link ကို နှိပ်လို့ရအောင်
+//  • Post Share Link ကို Handle
+//  • Normal Link ကို Chrome ဖွင့်
+//  • ရှိပြီးသား Code ကို လုံးဝ မထိ
+// ============================================================
+(function() {
+    'use strict';
+
+    console.log('✅ Chat Link Fix v1.0 Loading...');
+
+    // ===================================================
+    //  1. Global Click Handler -- Chat Link အားလုံး
+    // ===================================================
+    document.addEventListener('click', function(e) {
+        // ✅ Post Share Link ကို ဦးစား
+        var postLink = e.target.closest('.post-share-link');
+        if (postLink) {
+            e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+
+            var serverNo = parseInt(postLink.dataset.serverNo);
+            var postId = postLink.dataset.postId;
+            if (!serverNo || !postId) return;
+
+            console.log('🔗 Post Link Clicked:', serverNo, postId);
+
+            // ✅ Home Tab သွား
+            try {
+                if (typeof window.switchTab === 'function') window.switchTab('home');
+            } catch(err) {}
+
+            var homeBtn = document.querySelector('.nav-btn[data-tab="home"]');
+            if (homeBtn) {
+                document.querySelectorAll('.nav-btn').forEach(function(b) { b.classList.remove('active'); });
+                homeBtn.classList.add('active');
+            }
+            try { window.currentTab = 'home'; } catch(err) {}
+
+            try {
+                if (typeof window.closeFullscreen === 'function') window.closeFullscreen();
+            } catch(err) {}
+
+            if (typeof window.showToast === 'function') window.showToast('Post ရှာနေသည်...');
+
+            // ✅ Post ကို Supabase ကနေ ရှာ
+            fetchPostFromSupabase(serverNo, postId).then(function(post) {
+                if (!post) {
+                    if (typeof window.showToast === 'function') window.showToast('Post မတွေ့ပါ');
+                    return;
+                }
+
+                try {
+                    window.feedAllPosts = [post];
+                    window.feedExhausted = true;
+                    window.feedLoadedServers = {};
+                    window.feedLoading = false;
+                } catch(err) {}
+
+                renderPostFeed(post);
+
+                setTimeout(function() {
+                    var card = document.querySelector('.post-card[data-post-id="' + postId + '"]');
+                    if (card) {
+                        card.classList.add('highlight-share');
+                        card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        setTimeout(function() {
+                            card.classList.remove('highlight-share');
+                        }, 2500);
+                    }
+                }, 500);
+            });
+            return;
+        }
+
+        // ✅ Normal Chat Link
+        var normalLink = e.target.closest('.chat-link');
+        if (normalLink) {
+            e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+
+            var href = normalLink.getAttribute('href');
+            if (!href || href === 'javascript:void(0)' || href === '#') {
+                // ✅ href မရှိရင် text ကို URL အဖြစ် ယူ
+                var text = normalLink.textContent.trim();
+                if (text && text.indexOf('http') === 0) {
+                    window.open(text, '_blank');
+                }
+                return;
+            }
+
+            if (href.indexOf('http') === 0) {
+                console.log('🔗 Opening link:', href);
+                window.open(href, '_blank');
+            }
+            return;
+        }
+
+        // ✅ Link Preview Card
+        var previewCard = e.target.closest('.link-preview-card');
+        if (previewCard) {
+            var pHref = previewCard.getAttribute('href');
+            if (pHref && pHref.indexOf('http') === 0) {
+                e.preventDefault();
+                e.stopPropagation();
+                e.stopImmediatePropagation();
+                window.open(pHref, '_blank');
+            }
+            return;
+        }
+    }, true);
+
+    // ===================================================
+    //  2. Post Fetch From Supabase
+    // ===================================================
+    function fetchPostFromSupabase(serverNo, postId) {
+        return new Promise(function(resolve) {
+            var supabaseConfigs = {
+                1: {
+                    url: 'https://agvpdmzhbltpmqovxdyy.supabase.co',
+                    key: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFndnBkbXpoYmx0cG1xb3Z4ZHl5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA1OTMwMzMsImV4cCI6MjEwNjE2OTAzM30.KBOR6qrR4zFDked0k4XyHZmxFWbefjpxe8D24QmM5Zg'
+                },
+                2: {
+                    url: 'https://rmwvknsstjfarbnduicx.supabase.co',
+                    key: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJtd3ZrbnNzdGpmYXJibmR1aWN4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA1OTMxNTksImV4cCI6MjEwNjE2OTE1OX0.AV-a7ZBY4Lbq75dDotofbD9QDLtsI8V9HdQrgajbxDM'
+                }
+            };
+
+            var srv = supabaseConfigs[serverNo];
+            if (!srv) return resolve(null);
+
+            var publicUrl = srv.url + '/storage/v1/object/public/posts/meta/' + postId + '.json';
+            console.log('📥 Fetching:', publicUrl);
+
+            fetch(publicUrl, { cache: 'no-store' })
+                .then(function(r) {
+                    if (!r.ok) throw new Error('HTTP ' + r.status);
+                    return r.json();
+                })
+                .then(function(post) {
+                    if (!post || !post.postId) return resolve(null);
+                    post._serverId = 'server' + serverNo;
+                    post._serverNo = serverNo;
+                    resolve(post);
+                })
+                .catch(function(err) {
+                    console.warn('❌ Fetch failed:', err);
+                    resolve(null);
+                });
+        });
+    }
+
+    // ===================================================
+    //  3. Render Post Feed
+    // ===================================================
+    function renderPostFeed(post) {
+        var body = document.getElementById('postFeedBody');
+        if (!body) return;
+
+        var indicator = document.getElementById('feedLoadMoreIndicator');
+        if (indicator) indicator.remove();
+
+        body.innerHTML = '';
+
+        // ✅ ရှိပြီးသား buildPostCard() ရှိရင် သုံး
+        if (typeof window.buildPostCard === 'function') {
+            try {
+                body.appendChild(window.buildPostCard(post));
+                return;
+            } catch(e) {}
+        }
+
+        // ✅ မရှိရင် Simple Version
+        body.appendChild(buildSimplePostCard(post));
+    }
+
+    // ===================================================
+    //  4. Simple Post Card (Fallback)
+    // ===================================================
+    function buildSimplePostCard(post) {
+        var card = document.createElement('div');
+        card.className = 'post-card';
+        card.dataset.postId = post.postId;
+
+        var avatar = post.userAvatar || 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 100 100"%3E%3Ccircle cx="50" cy="50" r="45" fill="%2322222e"/%3E%3C/svg%3E';
+
+        var captionHtml = '';
+        if (post.caption && post.caption.trim()) {
+            captionHtml = '<div class="post-card-caption">' + captionLinkify(post.caption) + '</div>';
+        }
+
+        var mediaHtml = '';
+        if (post.postType === 'link' && post.linkData) {
+            var lp = post.linkData;
+            var lpImg = lp.image ? '<img class="lp-img" src="' + lp.image + '" onerror="this.style.display=\'none\'" />' : '';
+            var lpUrl = (lp.url || '').replace(/'/g, '&#39;');
+            mediaHtml = '<a href="javascript:void(0)" onclick="event.stopPropagation(); window.open(\'' + lpUrl + '\', \'_blank\');" class="post-card-link-preview">' +
+                lpImg +
+                '<div class="lp-info">' +
+                    '<div class="lp-domain">' + (lp.domain || '') + '</div>' +
+                    '<div class="lp-title">' + (lp.title || 'Link') + '</div>' +
+                    '<div class="lp-desc">' + (lp.desc || lp.url || '') + '</div>' +
+                '</div>' +
+            '</a>';
+        } else if (post.mediaUrls && post.mediaUrls.length > 0) {
+            var m = post.mediaUrls[0];
+            if (m.type === 'video') {
+                mediaHtml = '<div class="post-card-media"><video src="' + m.url + '" controls playsinline preload="metadata"></video></div>';
+            } else {
+                mediaHtml = '<div class="post-card-media"><img src="' + m.url + '" /></div>';
+            }
+        }
+
+        var timeStr = formatTimeAgo(post.createdAt);
+
+        card.innerHTML =
+            '<div class="post-card-header">' +
+                '<div class="post-card-avatar-wrap"><img src="' + avatar + '" /></div>' +
+                '<div class="post-card-info">' +
+                    '<div class="post-card-name-row">' +
+                        '<span class="post-card-name">' + (post.userName || 'Player') + '</span>' +
+                        '<button class="post-card-view-btn" data-action="view">View</button>' +
+                    '</div>' +
+                    '<div class="post-card-name-row">' +
+                        '<span class="post-card-time">' + timeStr + '</span>' +
+                    '</div>' +
+                '</div>' +
+            '</div>' +
+            captionHtml + mediaHtml +
+            '<div class="post-card-actions">' +
+                '<button class="post-action-btn" data-action="like">' +
+                    '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>' +
+                    '<span class="like-count">' + (post.likeCount || 0) + '</span>' +
+                '</button>' +
+                '<button class="post-action-btn" data-action="comment">' +
+                    '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>' +
+                    '<span>' + (post.commentCount || 0) + '</span>' +
+                '</button>' +
+                '<button class="post-action-btn share" data-action="share">' +
+                    '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>' +
+                    '<span>Share</span>' +
+                '</button>' +
+            '</div>';
+
+        return card;
+    }
+
+    // ===================================================
+    //  5. Caption Linkify
+    // ===================================================
+    function captionLinkify(text) {
+        if (!text) return '';
+        var escaped = String(text).replace(/[&<>"']/g, function(c) {
+            return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c];
+        });
+        var urlRegex = /(https?:\/\/[^\s<>"']+)/gi;
+        return escaped.replace(urlRegex, function(url) {
+            var realUrl = url.replace(/&amp;/g, '&');
+            var safeUrl = realUrl.replace(/'/g, '&#39;');
+            return '<a href="javascript:void(0)" onclick="event.stopPropagation(); window.open(\'' + safeUrl + '\', \'_blank\');" class="caption-link">' + url + '</a>';
+        });
+    }
+
+    // ===================================================
+    //  6. Time Ago
+    // ===================================================
+    function formatTimeAgo(ts) {
+        if (!ts) return '';
+        var diff = Date.now() - ts;
+        var min = Math.floor(diff / 60000);
+        if (min < 1) return 'now';
+        if (min < 60) return min + 'm';
+        var hr = Math.floor(min / 60);
+        if (hr < 24) return hr + 'h';
+        var day = Math.floor(hr / 24);
+        if (day < 7) return day + 'd';
+        var d = new Date(ts);
+        return d.getDate() + '/' + (d.getMonth() + 1);
+    }
+
+    // ===================================================
+    //  7. Render ပြီးသား Message တွေကို ပြန်ပြင်
+    // ===================================================
+    function reprocessRenderedMessages() {
+        var chatMessages = document.querySelectorAll('.chat-message .msg-text');
+        chatMessages.forEach(function(el) {
+            if (el.querySelector('.post-share-link')) return;
+
+            var html = el.innerHTML;
+            var changed = false;
+
+            // Post Link
+            html = html.replace(/Post\.(\d+)\.([a-zA-Z0-9_-]+)/g, function(match, serverNo, postId) {
+                if (match.indexOf('post-share-link') !== -1) return match;
+                changed = true;
+                return '<a href="javascript:void(0)" class="chat-link post-share-link" data-server-no="' + serverNo + '" data-post-id="' + postId + '">' + match + '</a>';
+            });
+
+            // Normal Link -- ရှိပြီးသား <a class="chat-link"> မဟုတ်တာ
+            html = html.replace(/(https?:\/\/[^\s<>"']+)/gi, function(url) {
+                if (url.indexOf('class="chat-link"') !== -1) return url;
+                if (url.indexOf('post-share-link') !== -1) return url;
+                changed = true;
+                var safeUrl = url.replace(/'/g, '&#39;');
+                return '<a href="javascript:void(0)" onclick="event.stopPropagation(); window.open(\'' + safeUrl + '\', \'_blank\');" class="chat-link">' + url + '</a>';
+            });
+
+            if (changed) {
+                el.innerHTML = html;
+                console.log('✅ Reprocessed message with link');
+            }
+        });
+    }
+
+    // ===================================================
+    //  8. Mutation Observer -- Chat အသစ်ဝင်တိုင်း Process
+    // ===================================================
+    var chatRoomObserver = null;
+
+    function startChatRoomObserver() {
+        var chatRoomMessages = document.getElementById('chatRoomMessages');
+        if (!chatRoomMessages) {
+            setTimeout(startChatRoomObserver, 1000);
+            return;
+        }
+
+        if (chatRoomObserver) chatRoomObserver.disconnect();
+
+        chatRoomObserver = new MutationObserver(function(mutations) {
+            var hasNew = false;
+            mutations.forEach(function(m) {
+                if (m.addedNodes.length > 0) hasNew = true;
+            });
+            if (hasNew) {
+                setTimeout(reprocessRenderedMessages, 100);
+            }
+        });
+
+        chatRoomObserver.observe(chatRoomMessages, { childList: true, subtree: true });
+        console.log('✅ Chat Room Observer started');
+    }
+
+    // ===================================================
+    //  9. Init
+    // ===================================================
+    function init() {
+        // ✅ ရှိပြီးသား Message တွေ Process
+        reprocessRenderedMessages();
+
+        // ✅ Observer စတင်
+        startChatRoomObserver();
+
+        // ✅ Chat List ကို စောင့်ပြီး ပြန်စ
+        setTimeout(startChatRoomObserver, 2000);
+        setTimeout(startChatRoomObserver, 5000);
+
+        console.log('✅ Chat Link Fix v1.0 Ready');
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(init, 1500);
+        });
+    } else {
+        setTimeout(init, 1500);
+    }
+
+})();
+    
 </script>
 </body>
 </html>
