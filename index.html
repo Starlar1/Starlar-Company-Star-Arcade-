@@ -20324,33 +20324,23 @@ if (document.readyState === 'loading') {
 })();
 
 // ============================================================
-// ✅ POST SYSTEM v21.0 -- TURSO VERSION (FULL STANDALONE)
-//  • Turso Database ကို သုံး (Supabase မဟုတ်)
-//  • Post Card: တင်သူရဲ့ အစစ်ပုံ - Name - Add
-//  • Post Link: Chat မှာ နှိပ်ရင် Home → Post ရှာ
-//  • Like / Comment / Favourite / Report / Share (၅ ခု)
-//  • Report: Popup → Telegram Auto Send
-//  • Tab Desc Hide/Show
-//  • All / Likes / Role / Favourite -- အောက်ဆွဲရင် ထပ်
-//  • Upload Bar (အဝါရောင်)
-//  • Comment: Imbb - Name - View
-//  • Comment မှာ IndexedDB User Info + Bubble
-//  • Server အသစ် ထည့်ရလွယ် (POST_SERVERS Array ပဲ ပြင်)
-//  • ရှိပြီးသား Code ကို လုံးဝ မထိ
+// ✅ POST SYSTEM v22.0 -- TURSO ONLY (COMPLETELY NEW)
+//  • Supabase လုံးဝ မပါ
+//  • IndexedDB Key အသစ်တွေ (Conflict မဖြစ်အောင်)
+//  • localStorage အသစ်တွေ
+//  • 100% Standalone
 // ============================================================
 (function() {
     'use strict';
 
-    console.log('✅ Post System v21.0 (Turso) Loading...');
+    console.log('🚀 Post System v22.0 Loading (Turso Only)...');
 
     // ===================================================
-    //  ✅ SERVER CONFIG -- အသစ်ထည့်ရလွယ်
-    //  ⚠️ ဒီ Array မှာ Object အသစ် ထည့်ရုံပါပဲ
-    //  Turso Dashboard → Database → URL & Token ယူပါ
+    //  ✅ SERVER CONFIG
     // ===================================================
     var POST_SERVERS = [
         {
-            id: 'server1',
+            id: 'turso1',
             name: 'Server 1',
             number: 1,
             tursoUrl: 'libsql://post-1-post1.aws-ap-south-1.turso.io',
@@ -20359,18 +20349,6 @@ if (document.readyState === 'loading') {
             uploadEnabled: true,
             viewEnabled: true
         }
-
-        // ✅ Server အသစ် ထည့်ရန် -- အောက်ပါ Format အတိုင်း ထည့်ပါ
-        // ,{
-        //     id: 'server2',
-        //     name: 'Server 2',
-        //     number: 2,
-        //     tursoUrl: 'libsql://post-2-xxxxx.aws-ap-south-1.turso.io',
-        //     tursoToken: 'eyJhbGciOiJFZERTQSIs...',
-        //     enabled: true,
-        //     uploadEnabled: true,
-        //     viewEnabled: true
-        // }
     ];
 
     var POST_GLOBAL_SETTINGS = {
@@ -20381,20 +20359,20 @@ if (document.readyState === 'loading') {
         shareEnabled: true
     };
 
-    // ✅ Telegram Report Config
     var REPORT_BOT_TOKEN = '7869159797:AAEX6EbdQpo39CV6bV2pzItm6zwphh2UXbY';
     var REPORT_CHAT_ID = '@StarArcadeAdmin';
     var REPORT_TOPIC_ID = 689;
 
-    var POST_MAX_SIZE = 50 * 1024 * 1024;
     var POST_MAX_VIDEO_DURATION = 10;
     var POST_MAX_IMAGES = 6;
     var POST_LOAD_COUNT = 5;
-    var POST_LIST_KEY = 'myPostList_v21';
-    var FAVOURITE_KEY = 'favouritePosts_v21';
+
+    // ✅ IndexedDB Keys အသစ် (Conflict မဖြစ်အောင် v22)
+    var POST_LIST_KEY = 'myPostList_v22_new';
+    var FAVOURITE_KEY = 'favouritePosts_v22_new';
+
     var SHARE_LINK_PREFIX = 'Post.';
     var COMMENT_MAX_LINES = 30;
-
     var IMBB_PLACEHOLDER = 'https://i.ibb.co/r2k0J5rJ/Grid-Art-20260829-171212620.png';
 
     var POST_ROLES = [
@@ -20417,32 +20395,26 @@ if (document.readyState === 'loading') {
     var viewerIndex = 0;
     var currentFeedTab = 'all';
     var currentFeedRole = null;
-    var feedLoadedServers = {};
     var feedAllPosts = [];
     var feedLoading = false;
     var feedExhausted = false;
     var favouritePosts = [];
-
     var commentTargetPost = null;
-    var commentsList = [];
-
     var lastRenderedIds = {};
     var isInitialLoad = true;
     var hasAnyPost = false;
-
     var commentBubblePickerOpen = false;
     var commentSelectedBubbleId = '';
-
     var uploadBarElement = null;
     var isUploadInProgress = false;
-
     var likesAllPosts = [];
     var likesLoadedCount = 0;
     var favouriteAllPosts = [];
     var favouriteLoadedCount = 0;
+    var initDone = false;
 
     // ===================================================
-    //  SERVER CHECK
+    //  CHECK FUNCTIONS
     // ===================================================
     function isGlobalUploadEnabled() { return POST_GLOBAL_SETTINGS.uploadEnabled === true; }
     function isGlobalViewEnabled() { return POST_GLOBAL_SETTINGS.viewEnabled === true; }
@@ -20450,37 +20422,20 @@ if (document.readyState === 'loading') {
     function isGlobalLikeEnabled() { return POST_GLOBAL_SETTINGS.likeEnabled === true; }
     function isGlobalShareEnabled() { return POST_GLOBAL_SETTINGS.shareEnabled === true; }
 
-    function isServerEnabled(id) {
-        var s = POST_SERVERS.find(function(x) { return x.id === id; });
-        return s ? s.enabled === true : false;
-    }
-    function isServerUploadEnabled(id) {
-        var s = POST_SERVERS.find(function(x) { return x.id === id; });
-        return s ? (s.enabled === true && s.uploadEnabled === true) : false;
-    }
-    function isServerViewEnabled(id) {
-        var s = POST_SERVERS.find(function(x) { return x.id === id; });
-        return s ? (s.enabled === true && s.viewEnabled === true) : false;
-    }
     function getEnabledUploadServers() {
         if (!isGlobalUploadEnabled()) return [];
-        return POST_SERVERS.filter(function(s) { return s.enabled === true && s.uploadEnabled === true; });
+        return POST_SERVERS.filter(function(s) { return s.enabled && s.uploadEnabled; });
     }
     function getEnabledViewServers() {
         if (!isGlobalViewEnabled()) return [];
-        return POST_SERVERS.filter(function(s) { return s.enabled === true && s.viewEnabled === true; });
+        return POST_SERVERS.filter(function(s) { return s.enabled && s.viewEnabled; });
     }
 
     // ===================================================
     //  UTILS
     // ===================================================
-    function genPostId() { return Math.random().toString(36).substr(2, 15); }
-
-    function formatBytes(bytes) {
-        if (bytes < 1024) return bytes + ' B';
-        if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
-        if (bytes < 1024 * 1024 * 1024) return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
-        return (bytes / (1024 * 1024 * 1024)).toFixed(2) + ' GB';
+    function genPostId() {
+        return 'p' + Date.now().toString(36) + Math.random().toString(36).substr(2, 8);
     }
 
     function escapeHtml(s) {
@@ -20520,23 +20475,71 @@ if (document.readyState === 'loading') {
         catch(e) { return ''; }
     }
 
-    function getServerNameFromConfig(serverId) {
-        var srv = POST_SERVERS.find(function(s) { return s.id === serverId; });
-        return srv ? srv.name : 'Server 1';
-    }
-
-    function buildShareLink(post) {
-        var srv = POST_SERVERS.find(function(s) { return s.id === (post._serverId || post.serverId); });
-        var serverNo = srv ? srv.number : 1;
-        return SHARE_LINK_PREFIX + serverNo + '.' + post.postId;
-    }
-
     function getServerByNumber(no) {
         return POST_SERVERS.find(function(s) { return s.number === parseInt(no); }) || null;
     }
 
+    function buildShareLink(post) {
+        var srv = POST_SERVERS.find(function(s) { return s.id === post._serverId; });
+        var serverNo = srv ? srv.number : 1;
+        return SHARE_LINK_PREFIX + serverNo + '.' + post.postId;
+    }
+
+    function showToastSafe(msg) {
+        if (typeof window.showToast === 'function') {
+            window.showToast(msg);
+        } else {
+            console.log('Toast:', msg);
+        }
+    }
+
     // ===================================================
-    //  ✅ TURSO CLIENT (HTTP API)
+    //  INDEXEDDB (Standalone - ကိုယ်ပိုင်)
+    // ===================================================
+    var MY_DB_NAME = 'StarArcadePostV22';
+    var MY_DB_VERSION = 1;
+    var MY_STORE = 'postData';
+
+    function openMyDB() {
+        return new Promise(function(resolve, reject) {
+            var req = indexedDB.open(MY_DB_NAME, MY_DB_VERSION);
+            req.onupgradeneeded = function(e) {
+                var db = e.target.result;
+                if (!db.objectStoreNames.contains(MY_STORE)) {
+                    db.createObjectStore(MY_STORE, { keyPath: 'key' });
+                }
+            };
+            req.onsuccess = function(e) { resolve(e.target.result); };
+            req.onerror = function(e) { reject(e.target.error); };
+        });
+    }
+
+    function myDbGet(key) {
+        return new Promise(function(resolve) {
+            openMyDB().then(function(db) {
+                var tx = db.transaction(MY_STORE, 'readonly');
+                var store = tx.objectStore(MY_STORE);
+                var req = store.get(key);
+                req.onsuccess = function() { resolve(req.result ? req.result.value : null); };
+                req.onerror = function() { resolve(null); };
+            }).catch(function() { resolve(null); });
+        });
+    }
+
+    function myDbSet(key, value) {
+        return new Promise(function(resolve) {
+            openMyDB().then(function(db) {
+                var tx = db.transaction(MY_STORE, 'readwrite');
+                var store = tx.objectStore(MY_STORE);
+                var req = store.put({ key: key, value: value });
+                req.onsuccess = function() { resolve(true); };
+                req.onerror = function() { resolve(false); };
+            }).catch(function() { resolve(false); });
+        });
+    }
+
+    // ===================================================
+    //  TURSO CLIENT
     // ===================================================
     function getTursoClient(serverId) {
         if (tursoClients[serverId]) return tursoClients[serverId];
@@ -20544,9 +20547,6 @@ if (document.readyState === 'loading') {
         if (!srv) return null;
 
         var client = {
-            url: srv.tursoUrl,
-            token: srv.tursoToken,
-
             execute: function(sql, params) {
                 params = params || [];
                 var args = params.map(function(p) {
@@ -20611,7 +20611,7 @@ if (document.readyState === 'loading') {
     }
 
     // ===================================================
-    //  ✅ PARSE POST ROW
+    //  PARSE POST
     // ===================================================
     function parsePostRow(row, serverId) {
         var post = Object.assign({}, row);
@@ -20697,11 +20697,26 @@ if (document.readyState === 'loading') {
     }
 
     // ===================================================
-    //  INDEXEDDB HELPERS
+    //  USER INFO FROM GLOBAL
     // ===================================================
-    function getMyUserInfoFromIDB() {
+    function getMyUserInfo() {
         return new Promise(function(resolve) {
+            if (window.currentUser && window.currentServerId) {
+                var srv = POST_SERVERS.find(function(s) { return s.id === 'turso1'; });
+                resolve({
+                    userId: String(window.currentUser.userId || ''),
+                    userName: window.currentUser.name || 'Player',
+                    serverId: window.currentServerId || '',
+                    serverNo: srv ? srv.name : 'Server 1',
+                    avatar: window.currentUser.avatar || '',
+                    bubbleUse: window.currentUser.bubbleUse || '',
+                    bubbleOwned: window.currentUser.bubbleOwned || []
+                });
+                return;
+            }
+
             if (typeof getFromDB !== 'function') return resolve(null);
+
             getFromDB('session').then(function(session) {
                 if (!session || !session.email) return resolve(null);
                 getFromDB('users').then(function(users) {
@@ -20711,22 +20726,13 @@ if (document.readyState === 'loading') {
                         userId: u.userId || '',
                         userName: u.name || 'Player',
                         serverId: u.serverId || '',
-                        serverNo: u.serverId ? getServerNameFromConfig(u.serverId) : 'Server 1',
+                        serverNo: 'Server 1',
                         avatar: u.avatar || '',
                         bubbleUse: u.bubbleUse || '',
                         bubbleOwned: u.bubbleOwned || []
                     });
                 }).catch(function() { resolve(null); });
             }).catch(function() { resolve(null); });
-        });
-    }
-
-    function getMyBubblesFromIDB() {
-        return new Promise(function(resolve) {
-            getMyUserInfoFromIDB().then(function(info) {
-                if (!info) return resolve([]);
-                resolve(info.bubbleOwned || []);
-            }).catch(function() { resolve([]); });
         });
     }
 
@@ -20751,13 +20757,6 @@ if (document.readyState === 'loading') {
         } else {
             document.body.appendChild(uploadBarElement);
         }
-
-        uploadBarElement.addEventListener('click', function() {
-            if (isUploadInProgress) {
-                var ov = document.getElementById('postUploadPopupOverlay');
-                if (ov) ov.classList.remove('hidden');
-            }
-        });
     }
 
     function hideUploadBar() {
@@ -20795,77 +20794,17 @@ if (document.readyState === 'loading') {
     }
 
     // ===================================================
-    //  USER INFO FETCH
-    // ===================================================
-    function fetchUserInfoFromServer(serverNo, userId) {
-        return new Promise(function(resolve) {
-            if (typeof window.getDbForServer !== 'function') return resolve(null);
-            var srv = getServerByNumber(serverNo);
-            if (!srv) return resolve(null);
-            var db = window.getDbForServer(srv.id);
-            if (!db) return resolve(null);
-
-            db.ref('users/' + userId).once('value').then(function(snap) {
-                var data = snap.val();
-                if (data) {
-                    data.userId = userId;
-                    data.serverNo = 'Server ' + serverNo;
-                    data.serverId = srv.id;
-                    resolve(data);
-                } else resolve(null);
-            }).catch(function() { resolve(null); });
-        });
-    }
-
-    function openProfilePopupWithFetch(userId, serverNo) {
-        var loadingOverlay = document.createElement('div');
-        loadingOverlay.className = 'post-user-popup-overlay';
-        loadingOverlay.id = 'profileLoadingOverlay';
-        loadingOverlay.innerHTML =
-            '<div class="post-user-popup" style="max-width:220px;padding:28px;text-align:center;">' +
-                '<div class="post-upload-spinner" style="margin:0 auto 14px;width:44px;height:44px;border-width:3px;"></div>' +
-                '<div style="color:var(--text-main);font-size:14px;font-weight:700;">Profile ရှာနေသည်...</div>' +
-            '</div>';
-        document.body.appendChild(loadingOverlay);
-
-        fetchUserInfoFromServer(serverNo, userId).then(function(userData) {
-            loadingOverlay.remove();
-            if (userData) {
-                showPostUserPopup({
-                    userId: userId, serverId: userData.serverId, serverNo: userData.serverNo,
-                    name: userData.name || 'Player',
-                    avatar: userData.avatar || IMBB_PLACEHOLDER,
-                    frameUse: userData.frameUse || '',
-                    markUse: userData.markUse || '',
-                    bannerUse: userData.bannerUse || '',
-                    bio: userData.bio || '',
-                    online: userData.online === true
-                });
-            } else {
-                if (typeof showToast === 'function') showToast('User မတွေ့ပါ');
-            }
-        }).catch(function() {
-            loadingOverlay.remove();
-            if (typeof showToast === 'function') showToast('Failed to load profile');
-        });
-    }
-
-    // ===================================================
     //  FAVOURITE
     // ===================================================
     function loadFavourites() {
-        return new Promise(function(resolve) {
-            if (typeof getFromDB !== 'function') return resolve([]);
-            getFromDB(FAVOURITE_KEY).then(function(list) {
-                favouritePosts = Array.isArray(list) ? list : [];
-                resolve(favouritePosts);
-            }).catch(function() { favouritePosts = []; resolve([]); });
+        return myDbGet(FAVOURITE_KEY).then(function(list) {
+            favouritePosts = Array.isArray(list) ? list : [];
+            return favouritePosts;
         });
     }
 
     function saveFavourites() {
-        if (typeof setToDB !== 'function') return Promise.resolve();
-        return setToDB(FAVOURITE_KEY, favouritePosts).catch(function() {});
+        return myDbSet(FAVOURITE_KEY, favouritePosts);
     }
 
     function isFavourited(postId) {
@@ -20873,15 +20812,15 @@ if (document.readyState === 'loading') {
     }
 
     function toggleFavourite(post) {
-        var srv = POST_SERVERS.find(function(s) { return s.id === (post._serverId || post.serverId); });
+        var srv = POST_SERVERS.find(function(s) { return s.id === post._serverId; });
         var serverNo = srv ? srv.number : 1;
         var idx = favouritePosts.findIndex(function(f) { return f.postId === post.postId; });
         if (idx >= 0) {
             favouritePosts.splice(idx, 1);
-            if (typeof showToast === 'function') showToast('Favourite ဖျက်ပြီး');
+            showToastSafe('Favourite ဖျက်ပြီး');
         } else {
-            favouritePosts.push({ postId: post.postId, serverNo: serverNo, serverId: post._serverId || post.serverId });
-            if (typeof showToast === 'function') showToast('Favourite သိမ်းပြီး');
+            favouritePosts.push({ postId: post.postId, serverNo: serverNo, serverId: post._serverId });
+            showToastSafe('Favourite သိမ်းပြီး');
         }
         saveFavourites();
         return idx < 0;
@@ -20891,55 +20830,34 @@ if (document.readyState === 'loading') {
     //  POST LIST
     // ===================================================
     function savePostToList(serverNo, postId) {
-        if (!window.currentUser) return Promise.resolve();
         var entry = { serverNo: serverNo, postId: postId, createdAt: Date.now() };
-
-        var idbPromise = new Promise(function(resolve) {
-            if (typeof getFromDB !== 'function' || typeof setToDB !== 'function') return resolve();
-            getFromDB(POST_LIST_KEY).then(function(list) {
-                var arr = Array.isArray(list) ? list : [];
-                if (!arr.some(function(p) { return p.postId === postId; })) arr.push(entry);
-                setToDB(POST_LIST_KEY, arr).then(resolve).catch(resolve);
-            }).catch(resolve);
+        return myDbGet(POST_LIST_KEY).then(function(list) {
+            var arr = Array.isArray(list) ? list : [];
+            if (!arr.some(function(p) { return p.postId === postId; })) arr.push(entry);
+            return myDbSet(POST_LIST_KEY, arr);
         });
-
-        var fbPromise = new Promise(function(resolve) {
-            if (!window.currentUser || !window.currentServerId) return resolve();
-            if (typeof getDbForServer !== 'function') return resolve();
-            var db = getDbForServer(window.currentServerId);
-            if (!db) return resolve();
-            db.ref('users/' + window.currentUser.userId + '/postList/' + postId).set(entry).then(resolve).catch(resolve);
-        });
-
-        return Promise.all([idbPromise, fbPromise]);
     }
 
     // ===================================================
-    //  ✅ SERVER PICK (Turso)
+    //  SERVER PICK
     // ===================================================
     function pickUploadServer() {
         return new Promise(function(resolve) {
             var servers = getEnabledUploadServers();
             if (servers.length === 0) return resolve(null);
-            // ကျပန်း ရွေး
-            var picked = servers[Math.floor(Math.random() * servers.length)];
-            resolve(picked);
+            resolve(servers[0]);
         });
     }
 
     // ===================================================
-    //  ✅ FEED
+    //  FEED
     // ===================================================
     function switchFeedTab(tab) {
-        if (currentFeedTab === tab) {
-            if (typeof showToast === 'function') showToast('Reloading...');
-            if (tab === 'favourite') {
-                resetFeed(); loadFavouriteFeed();
-            } else if (tab === 'role') {
-                showRoleSelectPopup();
-            } else {
-                resetFeed(); loadFeedNext();
-            }
+        if (currentFeedTab === tab && tab !== 'role') {
+            showToastSafe('Reloading...');
+            if (tab === 'favourite') { resetFeed(); loadFavouriteFeed(); }
+            else if (tab === 'likes') { resetFeed(); loadLikesFeed(); }
+            else { resetFeed(); loadFeedNext(); }
             return;
         }
 
@@ -20961,7 +20879,6 @@ if (document.readyState === 'loading') {
 
     function resetFeed() {
         feedAllPosts = [];
-        feedLoadedServers = {};
         feedLoading = false;
         feedExhausted = false;
         lastRenderedIds = {};
@@ -20975,7 +20892,6 @@ if (document.readyState === 'loading') {
         if (body) body.innerHTML = '<div class="post-feed-loading">Loading...</div>';
     }
 
-    // ✅ All / Role Tab
     function loadFeedNext() {
         if (feedLoading || feedExhausted) return;
         if (!isGlobalViewEnabled()) {
@@ -21000,37 +20916,20 @@ if (document.readyState === 'loading') {
         if (allEnabled.length === 0) {
             feedLoading = false;
             feedExhausted = true;
-            body.innerHTML = '<div class="post-feed-empty">Server အားလုံး ပိတ်ထားသည်</div>';
+            body.innerHTML = '<div class="post-feed-empty">Server ပိတ်ထားသည်</div>';
             return;
         }
 
-        // ✅ ကျပန်း Server ရွေး
-        var notTried = allEnabled.filter(function(s) { return !feedLoadedServers[s.id]; });
-        var randomSrv = null;
-
-        if (notTried.length > 0) {
-            randomSrv = notTried[Math.floor(Math.random() * notTried.length)];
-        } else {
-            feedLoadedServers = {};
-            randomSrv = allEnabled[Math.floor(Math.random() * allEnabled.length)];
-        }
-
-        if (!randomSrv) {
-            feedLoading = false;
-            feedExhausted = true;
-            body.innerHTML = '<div class="post-feed-empty">Post မရှိပါ</div>';
-            return;
-        }
-
-        var client = getTursoClient(randomSrv.id);
+        var srv = allEnabled[0];
+        var client = getTursoClient(srv.id);
         if (!client) {
             feedLoading = false;
-            feedLoadedServers[randomSrv.id] = true;
-            loadFeedNext();
+            feedExhausted = true;
+            body.innerHTML = '<div class="post-feed-empty">Turso client error</div>';
             return;
         }
 
-        fetchPostsFromServer(client, randomSrv.id, 100).then(function(allPosts) {
+        fetchPostsFromServer(client, srv.id, 100).then(function(allPosts) {
             var filtered = allPosts;
 
             if (currentFeedTab === 'role' && currentFeedRole) {
@@ -21042,11 +20941,13 @@ if (document.readyState === 'loading') {
             filtered = filtered.filter(function(p) { return !existingIds[p.postId]; });
 
             var batch = filtered.slice(0, POST_LOAD_COUNT);
-            feedLoadedServers[randomSrv.id] = true;
 
             if (batch.length === 0) {
                 feedLoading = false;
-                loadFeedNext();
+                feedExhausted = true;
+                if (feedAllPosts.length === 0) {
+                    body.innerHTML = '<div class="post-feed-empty">Post မရှိပါ</div>';
+                }
                 return;
             }
 
@@ -21066,13 +20967,12 @@ if (document.readyState === 'loading') {
             showNext();
         }).catch(function(err) {
             console.warn('Feed fetch error:', err);
-            feedLoadedServers[randomSrv.id] = true;
             feedLoading = false;
-            loadFeedNext();
+            feedExhausted = true;
+            body.innerHTML = '<div class="post-feed-empty">Failed to load</div>';
         });
     }
 
-    // ✅ Likes Tab
     function loadLikesFeed() {
         var body = document.getElementById('postFeedBody');
         if (!body) return;
@@ -21081,22 +20981,18 @@ if (document.readyState === 'loading') {
 
         var allEnabled = getEnabledViewServers();
         if (allEnabled.length === 0) {
-            body.innerHTML = '<div class="post-feed-empty">Server အားလုံး ပိတ်ထားသည်</div>';
+            body.innerHTML = '<div class="post-feed-empty">Server ပိတ်ထားသည်</div>';
             return;
         }
 
-        var promises = allEnabled.map(function(srv) {
-            var client = getTursoClient(srv.id);
-            if (!client) return Promise.resolve([]);
-            return fetchPostsFromServer(client, srv.id, 100).catch(function() { return []; });
-        });
+        var srv = allEnabled[0];
+        var client = getTursoClient(srv.id);
+        if (!client) {
+            body.innerHTML = '<div class="post-feed-empty">Turso client error</div>';
+            return;
+        }
 
-        Promise.all(promises).then(function(results) {
-            var allPosts = [];
-            results.forEach(function(arr) {
-                arr.forEach(function(p) { allPosts.push(p); });
-            });
-
+        fetchPostsFromServer(client, srv.id, 100).then(function(allPosts) {
             allPosts.sort(function(a, b) {
                 var aLikes = a.likeCount || 0;
                 var bLikes = b.likeCount || 0;
@@ -21115,11 +21011,7 @@ if (document.readyState === 'loading') {
             body.innerHTML = '';
             appendLikesNextBatch();
 
-            if (likesAllPosts.length > 5) {
-                feedExhausted = false;
-            } else {
-                feedExhausted = true;
-            }
+            feedExhausted = (likesAllPosts.length <= 5);
             feedLoading = false;
         }).catch(function(err) {
             console.warn('Likes feed error:', err);
@@ -21141,9 +21033,7 @@ if (document.readyState === 'loading') {
             if (idx >= batch.length) {
                 hasAnyPost = true;
                 hideTabDesc();
-                if (likesLoadedCount >= likesAllPosts.length) {
-                    feedExhausted = true;
-                }
+                if (likesLoadedCount >= likesAllPosts.length) feedExhausted = true;
                 return;
             }
             var post = batch[idx];
@@ -21155,7 +21045,6 @@ if (document.readyState === 'loading') {
         showNext();
     }
 
-    // ✅ Favourite Tab
     function loadFavouriteFeed() {
         var body = document.getElementById('postFeedBody');
         if (!body) return;
@@ -21184,12 +21073,7 @@ if (document.readyState === 'loading') {
 
                 body.innerHTML = '';
                 appendFavouriteNextBatch();
-
-                if (validPosts.length > 5) {
-                    feedExhausted = false;
-                } else {
-                    feedExhausted = true;
-                }
+                feedExhausted = (validPosts.length <= 5);
                 feedLoading = false;
             });
         });
@@ -21209,9 +21093,7 @@ if (document.readyState === 'loading') {
             if (idx >= batch.length) {
                 hasAnyPost = true;
                 hideTabDesc();
-                if (favouriteLoadedCount >= favouriteAllPosts.length) {
-                    feedExhausted = true;
-                }
+                if (favouriteLoadedCount >= favouriteAllPosts.length) feedExhausted = true;
                 return;
             }
             var post = batch[idx];
@@ -21231,8 +21113,6 @@ if (document.readyState === 'loading') {
         if (loadingEl) loadingEl.remove();
         var emptyEl = body.querySelector('.post-feed-empty');
         if (emptyEl) emptyEl.remove();
-        var indicator = document.getElementById('feedLoadMoreIndicator');
-        if (indicator) indicator.remove();
 
         if (lastRenderedIds[post.postId]) return;
         lastRenderedIds[post.postId] = true;
@@ -21254,7 +21134,6 @@ if (document.readyState === 'loading') {
         }
     }
 
-    // ✅ FETCH POSTS FROM TURSO
     function fetchPostsFromServer(client, serverId, limit) {
         limit = limit || 100;
         return client.query(
@@ -21263,12 +21142,11 @@ if (document.readyState === 'loading') {
         ).then(function(rows) {
             return rows.map(function(row) { return parsePostRow(row, serverId); });
         }).catch(function(err) {
-            console.warn('Turso fetch error (' + serverId + '):', err);
+            console.warn('Turso fetch error:', err);
             return [];
         });
     }
 
-    // ✅ FETCH SINGLE POST
     function fetchSinglePost(serverNo, postId) {
         return new Promise(function(resolve) {
             var srv = getServerByNumber(serverNo);
@@ -21291,8 +21169,8 @@ if (document.readyState === 'loading') {
     function initInfiniteScroll() {
         var feedBody = document.getElementById('postFeedBody');
         if (!feedBody) { setTimeout(initInfiniteScroll, 500); return; }
-        if (feedBody._scrollAttached) return;
-        feedBody._scrollAttached = true;
+        if (feedBody._scrollV22) return;
+        feedBody._scrollV22 = true;
 
         feedBody.addEventListener('scroll', function() {
             var scrollTop = feedBody.scrollTop;
@@ -21306,30 +21184,18 @@ if (document.readyState === 'loading') {
                     loadFeedNext();
                     return;
                 }
-
                 if (currentFeedTab === 'likes') {
                     if (likesLoadedCount < likesAllPosts.length) {
                         feedLoading = true;
-                        setTimeout(function() {
-                            appendLikesNextBatch();
-                            feedLoading = false;
-                        }, 200);
-                    } else {
-                        feedExhausted = true;
-                    }
+                        setTimeout(function() { appendLikesNextBatch(); feedLoading = false; }, 200);
+                    } else feedExhausted = true;
                     return;
                 }
-
                 if (currentFeedTab === 'favourite') {
                     if (favouriteLoadedCount < favouriteAllPosts.length) {
                         feedLoading = true;
-                        setTimeout(function() {
-                            appendFavouriteNextBatch();
-                            feedLoading = false;
-                        }, 200);
-                    } else {
-                        feedExhausted = true;
-                    }
+                        setTimeout(function() { appendFavouriteNextBatch(); feedLoading = false; }, 200);
+                    } else feedExhausted = true;
                     return;
                 }
             }
@@ -21368,7 +21234,10 @@ if (document.readyState === 'loading') {
         document.getElementById('roleSelectClose').addEventListener('click', function() {
             overlay.remove();
             var allChip = document.querySelector('.post-tab-chip[data-tab="all"]');
-            if (allChip) { document.querySelectorAll('.post-tab-chip').forEach(function(c) { c.classList.remove('active'); }); allChip.classList.add('active'); }
+            if (allChip) {
+                document.querySelectorAll('.post-tab-chip').forEach(function(c) { c.classList.remove('active'); });
+                allChip.classList.add('active');
+            }
             currentFeedTab = 'all'; currentFeedRole = null;
             showTabDesc('Post အားလုံး ပြသနေသည်');
             resetFeed(); loadFeedNext();
@@ -21388,7 +21257,7 @@ if (document.readyState === 'loading') {
     }
 
     // ===================================================
-    //  PROFILE POPUP
+    //  USER PROFILE POPUP
     // ===================================================
     function showPostUserPopup(userInfo) {
         var overlay = document.getElementById('postUserPopupOverlay');
@@ -21404,58 +21273,70 @@ if (document.readyState === 'loading') {
         var bannerImg = document.getElementById('postUserPopupBannerImg');
         var actionBtn = document.getElementById('postUserPopupActionBtn');
 
-        avatarEl.src = userInfo.avatar || IMBB_PLACEHOLDER;
+        if (avatarEl) avatarEl.src = userInfo.avatar || IMBB_PLACEHOLDER;
 
-        if (userInfo.frameUse && typeof FRAME_CONFIG !== 'undefined') {
-            var frame = FRAME_CONFIG.frames.find(function(f) { return String(f.id) === String(userInfo.frameUse); });
-            frameEl.style.backgroundImage = frame ? 'url("' + frame.image + '")' : 'none';
-        } else frameEl.style.backgroundImage = 'none';
+        if (frameEl) {
+            if (userInfo.frameUse && typeof window.FRAME_CONFIG !== 'undefined') {
+                var frame = window.FRAME_CONFIG.frames.find(function(f) { return String(f.id) === String(userInfo.frameUse); });
+                frameEl.style.backgroundImage = frame ? 'url("' + frame.image + '")' : 'none';
+            } else frameEl.style.backgroundImage = 'none';
+        }
 
-        nameEl.textContent = userInfo.name || 'Player';
+        if (nameEl) nameEl.textContent = userInfo.name || 'Player';
 
-        if (userInfo.markUse && typeof MARK_CONFIG !== 'undefined') {
-            var mark = MARK_CONFIG.marks.find(function(m) { return String(m.id) === String(userInfo.markUse); });
-            if (mark) { markEl.innerHTML = '<img src="' + mark.image + '" />'; markEl.style.display = 'inline-flex'; }
-            else markEl.style.display = 'none';
-        } else markEl.style.display = 'none';
+        if (markEl) {
+            if (userInfo.markUse && typeof window.MARK_CONFIG !== 'undefined') {
+                var mark = window.MARK_CONFIG.marks.find(function(m) { return String(m.id) === String(userInfo.markUse); });
+                if (mark) { markEl.innerHTML = '<img src="' + mark.image + '" />'; markEl.style.display = 'inline-flex'; }
+                else markEl.style.display = 'none';
+            } else markEl.style.display = 'none';
+        }
 
-        serverEl.textContent = userInfo.serverNo || userInfo.userServerNo || 'Server 1';
-        if (userInfo.online) { onlineEl.textContent = 'Online'; onlineEl.classList.add('online'); }
-        else { onlineEl.textContent = 'Offline'; onlineEl.classList.remove('online'); }
+        if (serverEl) serverEl.textContent = userInfo.serverNo || 'Server 1';
+        if (onlineEl) {
+            if (userInfo.online) { onlineEl.textContent = 'Online'; onlineEl.classList.add('online'); }
+            else { onlineEl.textContent = 'Offline'; onlineEl.classList.remove('online'); }
+        }
 
-        if (userInfo.bannerUse && typeof BANNER_CONFIG !== 'undefined') {
-            var banner = BANNER_CONFIG.banners.find(function(b) { return String(b.id) === String(userInfo.bannerUse); });
-            if (banner) { bannerImg.src = banner.image; bannerImg.style.display = 'block'; }
-            else bannerImg.style.display = 'none';
-        } else bannerImg.style.display = 'none';
+        if (bannerImg) {
+            if (userInfo.bannerUse && typeof window.BANNER_CONFIG !== 'undefined') {
+                var banner = window.BANNER_CONFIG.banners.find(function(b) { return String(b.id) === String(userInfo.bannerUse); });
+                if (banner) { bannerImg.src = banner.image; bannerImg.style.display = 'block'; }
+                else bannerImg.style.display = 'none';
+            } else bannerImg.style.display = 'none';
+        }
 
-        bioEl.innerHTML = (userInfo.bio && userInfo.bio.trim())
-            ? escapeHtml(userInfo.bio).replace(/\n/g, '<br>')
-            : '<span class="bio-placeholder">No bio yet...</span>';
+        if (bioEl) {
+            bioEl.innerHTML = (userInfo.bio && userInfo.bio.trim())
+                ? escapeHtml(userInfo.bio).replace(/\n/g, '<br>')
+                : '<span class="bio-placeholder">No bio yet...</span>';
+        }
 
         var isMe = (window.currentUser &&
                     String(window.currentUser.userId) === String(userInfo.userId) &&
                     window.currentServerId === userInfo.serverId);
 
-        if (isMe) {
-            actionBtn.disabled = true;
-            actionBtn.innerHTML = '<span>This is You</span>';
-            actionBtn.onclick = null;
-        } else {
-            var already = (typeof isFriend === 'function') ? isFriend(userInfo.serverId, userInfo.userId) : false;
-            if (already) {
-                actionBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>Chat</span>';
-                actionBtn.disabled = false;
-                actionBtn.onclick = function() {
-                    closePostUserPopup();
-                    if (typeof openChatRoom === 'function') {
-                        openChatRoom({ serverId: userInfo.serverId, userId: userInfo.userId, serverNo: userInfo.serverNo });
-                    }
-                };
+        if (actionBtn) {
+            if (isMe) {
+                actionBtn.disabled = true;
+                actionBtn.innerHTML = '<span>This is You</span>';
+                actionBtn.onclick = null;
             } else {
-                actionBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg><span>Add</span>';
-                actionBtn.disabled = false;
-                actionBtn.onclick = function() { addPostUserAsFriend(userInfo); };
+                var already = (typeof window.isFriend === 'function') ? window.isFriend(userInfo.serverId, userInfo.userId) : false;
+                if (already) {
+                    actionBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>Chat</span>';
+                    actionBtn.disabled = false;
+                    actionBtn.onclick = function() {
+                        closePostUserPopup();
+                        if (typeof window.openChatRoom === 'function') {
+                            window.openChatRoom({ serverId: userInfo.serverId, userId: userInfo.userId, serverNo: userInfo.serverNo });
+                        }
+                    };
+                } else {
+                    actionBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg><span>Add</span>';
+                    actionBtn.disabled = false;
+                    actionBtn.onclick = function() { addPostUserAsFriend(userInfo); };
+                }
             }
         }
         overlay.classList.remove('hidden');
@@ -21467,66 +21348,25 @@ if (document.readyState === 'loading') {
     }
 
     function addPostUserAsFriend(userInfo) {
-        if (!window.currentUser) return;
-        var actionBtn = document.getElementById('postUserPopupActionBtn');
-        if (actionBtn) { actionBtn.disabled = true; actionBtn.innerHTML = '<span>Adding...</span>'; }
-
-        if (typeof addFriendAndSync === 'function') {
+        if (typeof window.addFriendAndSync === 'function') {
             var target = {
                 serverId: userInfo.serverId, serverNo: userInfo.serverNo,
                 userId: userInfo.userId, name: userInfo.name, avatar: userInfo.avatar
             };
             try {
-                addFriendAndSync(target);
-                setTimeout(function() { closePostUserPopup(); }, 800);
+                window.addFriendAndSync(target);
+                setTimeout(closePostUserPopup, 800);
                 return;
-            } catch(e) {}
+            } catch(e) { console.warn('addFriendAndSync error:', e); }
         }
-
-        if (typeof getDbForServer !== 'function' || !window.currentServerId) return;
-        var myDb = getDbForServer(window.currentServerId);
-        var theirDb = getDbForServer(userInfo.serverId);
-        if (!myDb || !theirDb) return;
-
-        var myServer = window.FIREBASE_SERVERS.find(function(s) { return s.id === window.currentServerId; });
-        var myServerNo = myServer ? myServer.number : 1;
-        var theirEntry = { serverId: userInfo.serverId, serverNo: userInfo.serverNo, userId: userInfo.userId };
-        var myEntry = { serverId: window.currentServerId, serverNo: myServerNo, userId: window.currentUser.userId };
-
-        var myList = (window.currentUser.friendsList || []).slice();
-        if (!myList.some(function(f) {
-            return String(f.serverId) === String(userInfo.serverId) && String(f.userId) === String(userInfo.userId);
-        })) myList.push(theirEntry);
-
-        myDb.ref('users/' + window.currentUser.userId).update({ friendsList: myList })
-        .then(function() { return theirDb.ref('users/' + userInfo.userId + '/friendsList').once('value'); })
-        .then(function(snap) {
-            var tl = snap.val() || [];
-            if (!Array.isArray(tl)) tl = Object.keys(tl).map(function(k) { return tl[k]; });
-            if (!tl.some(function(f) {
-                return String(f.serverId) === String(window.currentServerId) && String(f.userId) === String(window.currentUser.userId);
-            })) tl.push(myEntry);
-            return theirDb.ref('users/' + userInfo.userId).update({ friendsList: tl });
-        })
-        .then(function() {
-            window.currentUser.friendsList = myList;
-            if (typeof saveUserToDB === 'function') saveUserToDB(window.currentUser);
-            if (typeof showToast === 'function') showToast('Friend added');
-            closePostUserPopup();
-        })
-        .catch(function() {
-            if (actionBtn) { actionBtn.disabled = false; actionBtn.innerHTML = '<span>Add</span>'; }
-        });
+        showToastSafe('Cannot add friend');
     }
 
     // ===================================================
-    //  SHARE MODAL
+    //  SHARE
     // ===================================================
     function showShareModal(post) {
-        if (!isGlobalShareEnabled()) {
-            if (typeof showToast === 'function') showToast('Share ခွင့် ပိတ်ထားသည်');
-            return;
-        }
+        if (!isGlobalShareEnabled()) { showToastSafe('Share ခွင့် ပိတ်ထားသည်'); return; }
         var overlay = document.getElementById('shareModalOverlay');
         if (!overlay) return;
         var shareCode = buildShareLink(post);
@@ -21538,7 +21378,7 @@ if (document.readyState === 'loading') {
         copyBtn.onclick = function() {
             if (navigator.clipboard && navigator.clipboard.writeText) {
                 navigator.clipboard.writeText(shareCode).then(function() {
-                    if (typeof showToast === 'function') showToast('Code copied');
+                    showToastSafe('Code copied');
                 }).catch(function() { fallbackCopyText(shareCode); });
             } else fallbackCopyText(shareCode);
         };
@@ -21548,12 +21388,12 @@ if (document.readyState === 'loading') {
         var ta = document.createElement('textarea');
         ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
         document.body.appendChild(ta); ta.select();
-        try { document.execCommand('copy'); if (typeof showToast === 'function') showToast('Code copied'); } catch(e) {}
+        try { document.execCommand('copy'); showToastSafe('Code copied'); } catch(e) {}
         document.body.removeChild(ta);
     }
 
     // ===================================================
-    //  REPORT POPUP
+    //  REPORT
     // ===================================================
     function openReportPopup(post) {
         var existing = document.getElementById('postReportOverlay');
@@ -21564,9 +21404,8 @@ if (document.readyState === 'loading') {
         else if (post.postType === 'link') postType = 'Link';
 
         var mediaPreview = '';
-        if (post.postType === 'link' && post.linkData) {
-            var lpImg = post.linkData.image ? '<img src="' + post.linkData.image + '" style="width:60px;height:60px;border-radius:8px;object-fit:cover;" onerror="this.style.display=\'none\'" />' : '';
-            mediaPreview = lpImg;
+        if (post.postType === 'link' && post.linkData && post.linkData.image) {
+            mediaPreview = '<img src="' + post.linkData.image + '" style="width:60px;height:60px;border-radius:8px;object-fit:cover;" onerror="this.style.display=\'none\'" />';
         } else if (post.mediaUrls && post.mediaUrls.length > 0) {
             mediaPreview = '<img src="' + post.mediaUrls[0].url + '" style="width:60px;height:60px;border-radius:8px;object-fit:cover;" onerror="this.style.display=\'none\'" />';
         }
@@ -21580,10 +21419,7 @@ if (document.readyState === 'loading') {
                 '<div class="post-report-header">' +
                     '<h3>Report Post</h3>' +
                     '<button class="post-report-close" id="postReportClose">' +
-                        '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">' +
-                            '<line x1="18" y1="6" x2="6" y2="18"/>' +
-                            '<line x1="6" y1="6" x2="18" y2="18"/>' +
-                        '</svg>' +
+                        '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>' +
                     '</button>' +
                 '</div>' +
                 '<div class="post-report-body">' +
@@ -21626,28 +21462,17 @@ if (document.readyState === 'loading') {
             var reason = reasonInput.value.trim();
             var errorEl = document.getElementById('postReportError');
 
-            if (!reason) {
-                errorEl.textContent = 'အကြောင်းရင်း ရေးပါ';
-                errorEl.classList.remove('hidden');
-                return;
-            }
-            if (reason.length < 5) {
-                errorEl.textContent = 'အနည်းဆုံး ၅ လုံး ရေးပါ';
-                errorEl.classList.remove('hidden');
-                return;
-            }
+            if (!reason) { errorEl.textContent = 'အကြောင်းရင်း ရေးပါ'; errorEl.classList.remove('hidden'); return; }
+            if (reason.length < 5) { errorEl.textContent = 'အနည်းဆုံး ၅ လုံး ရေးပါ'; errorEl.classList.remove('hidden'); return; }
 
             errorEl.classList.add('hidden');
-
             var submitBtn = this;
             submitBtn.disabled = true;
             submitBtn.innerHTML = '<div class="post-report-spinner"></div><span>ပေးပို့နေသည်...</span>';
 
             sendReportToTelegram(post, reason).then(function(success) {
-                if (success) {
-                    if (typeof showToast === 'function') showToast('Report ပေးပို့ပြီးပါပြီ');
-                    close();
-                } else {
+                if (success) { showToastSafe('Report ပေးပို့ပြီးပါပြီ'); close(); }
+                else {
                     errorEl.textContent = 'Failed to send. ပြန်ကြိုးစားပါ';
                     errorEl.classList.remove('hidden');
                     submitBtn.disabled = false;
@@ -21670,19 +21495,8 @@ if (document.readyState === 'loading') {
                     if (m) postServerNo = m[0];
                 }
 
-                var reporterName = 'Unknown';
-                var reporterId = 'Unknown';
-                var reporterServerNo = 'Unknown';
-                if (window.currentUser) {
-                    reporterName = window.currentUser.name || 'Unknown';
-                    reporterId = window.currentUser.userId || 'Unknown';
-                    if (window.currentServerId) {
-                        var srv = (typeof FIREBASE_SERVERS !== 'undefined')
-                            ? FIREBASE_SERVERS.find(function(s) { return s.id === window.currentServerId; })
-                            : null;
-                        if (srv) reporterServerNo = srv.number || 'Unknown';
-                    }
-                }
+                var reporterName = (window.currentUser && window.currentUser.name) || 'Unknown';
+                var reporterId = (window.currentUser && window.currentUser.userId) || 'Unknown';
 
                 var msg = '<b>🚨 POST REPORT</b>\n\n';
                 msg += '<b>📌 Post Info</b>\n';
@@ -21694,20 +21508,14 @@ if (document.readyState === 'loading') {
                     msg += '📝 Caption: ' + escapeHtml(cap) + (post.caption.length > 100 ? '...' : '') + '\n';
                 }
                 msg += '\n';
-
                 msg += '<b>👤 တင်ထားသူ</b>\n';
                 msg += '📛 Name: ' + escapeHtml(post.userName || 'Unknown') + '\n';
-                msg += '🖥 Server No: ' + postServerNo + '\n';
                 msg += '🆔 ID: ' + (post.userId || 'Unknown') + '\n\n';
-
                 msg += '<b>📢 တိုင်ကြားသူ</b>\n';
                 msg += '📛 Name: ' + escapeHtml(reporterName) + '\n';
-                msg += '🖥 Server No: ' + reporterServerNo + '\n';
                 msg += '🆔 ID: ' + reporterId + '\n\n';
-
                 msg += '<b>📝 အကြောင်းရင်း</b>\n';
                 msg += escapeHtml(reason) + '\n\n';
-
                 msg += '📅 ' + new Date().toLocaleString('en-US', { timeZone: 'Asia/Yangon' });
 
                 fetch('https://api.telegram.org/bot' + REPORT_BOT_TOKEN + '/sendMessage', {
@@ -21722,15 +21530,9 @@ if (document.readyState === 'loading') {
                     })
                 })
                 .then(function(r) { return r.json(); })
-                .then(function(data) {
-                    if (data.ok) { console.log('✅ Report sent'); resolve(true); }
-                    else { console.warn('❌ Telegram error:', data.description); resolve(false); }
-                })
-                .catch(function(err) { console.warn('❌ Fetch error:', err); resolve(false); });
-            } catch(e) {
-                console.error('❌ Report error:', e);
-                resolve(false);
-            }
+                .then(function(data) { resolve(data.ok === true); })
+                .catch(function() { resolve(false); });
+            } catch(e) { resolve(false); }
         });
     }
 
@@ -21738,9 +21540,9 @@ if (document.readyState === 'loading') {
     //  CREATE POST
     // ===================================================
     function openPostCreate() {
-        if (!window.currentUser) { if (typeof showToast === 'function') showToast('Login first'); return; }
-        if (!isGlobalUploadEnabled()) { if (typeof showToast === 'function') showToast('Post တင်ခွင့် ပိတ်ထားသည်'); return; }
-        if (getEnabledUploadServers().length === 0) { if (typeof showToast === 'function') showToast('Post တင် Server မရှိပါ'); return; }
+        if (!window.currentUser) { showToastSafe('Login first'); return; }
+        if (!isGlobalUploadEnabled()) { showToastSafe('Post တင်ခွင့် ပိတ်ထားသည်'); return; }
+        if (getEnabledUploadServers().length === 0) { showToastSafe('Post တင် Server မရှိပါ'); return; }
 
         postImages = []; postVideo = null; postLinkData = null;
         postSelectedRole = null; postSubmitting = false;
@@ -21812,8 +21614,7 @@ if (document.readyState === 'loading') {
             lc.innerHTML = imgHtml +
                 '<div style="padding:6px 4px 0;text-align:center;">' +
                     '<div style="font-size:11px;color:var(--text-muted);margin-bottom:3px;">' + escapeHtml(postLinkData.domain) + '</div>' +
-                    '<div style="font-size:13px;font-weight:700;color:var(--text-main);margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + escapeHtml(postLinkData.title) + '</div>' +
-                    '<div style="font-size:11px;color:var(--text-sub);word-break:break-all;">' + escapeHtml(postLinkData.url.substring(0, 60)) + '</div>' +
+                    '<div style="font-size:13px;font-weight:700;color:var(--text-main);margin-bottom:4px;">' + escapeHtml(postLinkData.title) + '</div>' +
                 '</div>' +
                 '<button class="slot-remove" data-type="link"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>';
             lc.querySelector('.slot-remove').addEventListener('click', function(e) {
@@ -21839,8 +21640,7 @@ if (document.readyState === 'loading') {
             vc.style.aspectRatio = 'auto';
             vc.style.minHeight = '180px';
             vc.innerHTML = '<video src="' + postVideo.dataUrl + '" controls playsinline preload="metadata" style="width:100%;height:100%;border-radius:10px;object-fit:contain;background:#000;"></video>' +
-                '<button class="slot-remove" data-type="video"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>' +
-                '<div class="slot-badge">' + formatBytes(postVideo.size) + ' • ' + Math.round(postVideo.duration) + 's</div>';
+                '<button class="slot-remove" data-type="video"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>';
             vc.querySelector('.slot-remove').addEventListener('click', function(e) {
                 e.stopPropagation();
                 postVideo = null;
@@ -21855,8 +21655,7 @@ if (document.readyState === 'loading') {
             var slot = document.createElement('div');
             slot.className = 'post-media-slot has-media';
             slot.innerHTML = '<img src="' + imgData.dataUrl + '" />' +
-                '<button class="slot-remove" data-index="' + i + '"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>' +
-                '<div class="slot-badge">' + formatBytes(imgData.size) + '</div>';
+                '<button class="slot-remove" data-index="' + i + '"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>';
             slot.querySelector('.slot-remove').addEventListener('click', function(e) {
                 e.stopPropagation();
                 var idx = parseInt(this.dataset.index);
@@ -21889,7 +21688,6 @@ if (document.readyState === 'loading') {
             if (files.length === 0) return;
             var validFiles = files.filter(function(f) {
                 if (!f.type || f.type.indexOf('image/') !== 0) return false;
-                if (f.size > POST_MAX_SIZE) { if (typeof showToast === 'function') showToast(f.name + ' too large'); return false; }
                 return true;
             });
             if (validFiles.length === 0) return;
@@ -21915,11 +21713,10 @@ if (document.readyState === 'loading') {
             var file = e.target.files[0];
             if (!file) return;
             if (!file.type || file.type.indexOf('video/') !== 0) return;
-            if (file.size > POST_MAX_SIZE) { if (typeof showToast === 'function') showToast('Video too large'); return; }
-            if (typeof showToast === 'function') showToast('Checking video...');
+            showToastSafe('Checking video...');
             checkVideoDuration(file).then(function(duration) {
-                if (duration === -1) { if (typeof showToast === 'function') showToast('Cannot read video'); return; }
-                if (duration > POST_MAX_VIDEO_DURATION + 0.5) { if (typeof showToast === 'function') showToast('Video must be ' + POST_MAX_VIDEO_DURATION + 's or less'); return; }
+                if (duration === -1) { showToastSafe('Cannot read video'); return; }
+                if (duration > POST_MAX_VIDEO_DURATION + 0.5) { showToastSafe('Video must be ' + POST_MAX_VIDEO_DURATION + 's or less'); return; }
                 fileToDataURL(file).then(function(dataUrl) {
                     postVideo = { file: file, dataUrl: dataUrl, size: file.size, duration: duration };
                     renderPostMediaGrid(); updatePostSubmitBtn();
@@ -21969,7 +21766,6 @@ if (document.readyState === 'loading') {
                 '<div class="lp-info">' +
                     '<div class="lp-domain">' + escapeHtml(data.domain) + '</div>' +
                     '<div class="lp-title">' + escapeHtml(data.title) + '</div>' +
-                    '<div class="lp-desc">' + escapeHtml((data.desc || '').substring(0, 100)) + '</div>' +
                 '</div>' +
             '</a>';
     }
@@ -21983,7 +21779,6 @@ if (document.readyState === 'loading') {
             '<div class="lp-info">' +
                 '<div class="lp-domain">' + escapeHtml(data.domain || getDomainFromUrl(data.url)) + '</div>' +
                 '<div class="lp-title">' + escapeHtml(data.title || 'Link') + '</div>' +
-                '<div class="lp-desc">' + escapeHtml((data.desc || data.url).substring(0, 120)) + '</div>' +
                 '<div class="lp-link">' +
                     '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>' +
                     '<span>' + escapeHtml(data.url.substring(0, 45)) + (data.url.length > 45 ? '...' : '') + '</span>' +
@@ -22047,12 +21842,12 @@ if (document.readyState === 'loading') {
     }
 
     // ===================================================
-    //  ✅ SUBMIT POST (Turso)
+    //  SUBMIT POST (Turso)
     // ===================================================
     function submitPost() {
         if (postSubmitting) return;
         if (!window.currentUser) return;
-        if (!isGlobalUploadEnabled()) { if (typeof showToast === 'function') showToast('Post တင်ခွင့် ပိတ်ထားသည်'); return; }
+        if (!isGlobalUploadEnabled()) { showToastSafe('Post တင်ခွင့် ပိတ်ထားသည်'); return; }
 
         var hasMedia = (postImages.length > 0) || postVideo || postLinkData;
         if (!hasMedia) return;
@@ -22065,10 +21860,9 @@ if (document.readyState === 'loading') {
 
         pickUploadServer().then(function(srv) {
             if (!srv) throw new Error('Server မရှိပါ');
-            if (!isServerUploadEnabled(srv.id)) throw new Error('Server Upload ပိတ်ထားသည်');
 
             var client = getTursoClient(srv.id);
-            if (!client) throw new Error('Turso client မရပါ');
+            if (!client) throw new Error('Turso client error');
 
             updateUploadProgress(15, 'Processing media...');
             updateUploadBarText('Media ပြင်ဆင်နေသည်...');
@@ -22082,7 +21876,7 @@ if (document.readyState === 'loading') {
                 userId: String(window.currentUser.userId || ''),
                 userName: window.currentUser.name || 'Player',
                 serverId: window.currentServerId || '',
-                serverNo: getServerNameFromConfig(window.currentServerId),
+                serverNo: 'Server 1',
                 userAvatar: window.currentUser.avatar || '',
                 userFrame: window.currentUser.frameUse || '',
                 userMark: window.currentUser.markUse || '',
@@ -22090,15 +21884,13 @@ if (document.readyState === 'loading') {
                 userBio: window.currentUser.bio || ''
             };
 
-            var srvNumber = srv.number || 1;
-            savePostToList(srvNumber, postId);
+            savePostToList(srv.number || 1, postId);
 
             var mediaPreparePromise;
 
             if (isLink) {
                 mediaPreparePromise = Promise.resolve([]);
             } else if (isVideo) {
-                // Video Base64 (max 3MB)
                 mediaPreparePromise = new Promise(function(resolve, reject) {
                     if (postVideo.size > 3 * 1024 * 1024) {
                         reject(new Error('Video ကြီးလွန်းသည် (max 3MB)'));
@@ -22107,12 +21899,10 @@ if (document.readyState === 'loading') {
                     resolve([{
                         type: 'video',
                         url: postVideo.dataUrl,
-                        size: postVideo.size,
-                        duration: postVideo.duration
+                        size: postVideo.size
                     }]);
                 });
             } else {
-                // ပုံတွေကို compress
                 var compressPromises = postImages.map(function(item, idx) {
                     return compressImageBase64(item.dataUrl, 800, 0.7).then(function(compressedDataUrl) {
                         return {
@@ -22186,7 +21976,7 @@ if (document.readyState === 'loading') {
                 hideUploadPopup();
                 hideUploadBar();
                 postSubmitting = false;
-                if (typeof showToast === 'function') showToast('Post တင်ပြီးပါပြီ');
+                showToastSafe('Post တင်ပြီးပါပြီ');
                 resetFeed();
                 loadFeedNext();
             }, 500);
@@ -22196,7 +21986,7 @@ if (document.readyState === 'loading') {
             hideUploadBar();
             postSubmitting = false;
             updatePostSubmitBtn();
-            if (typeof showToast === 'function') showToast(err && err.message ? err.message : 'Upload failed');
+            showToastSafe(err && err.message ? err.message : 'Upload failed');
         });
     }
 
@@ -22211,8 +22001,8 @@ if (document.readyState === 'loading') {
         var avatar = post.userAvatar || IMBB_PLACEHOLDER;
 
         var frameHtml = '';
-        if (post.userFrame && typeof FRAME_CONFIG !== 'undefined') {
-            var frame = FRAME_CONFIG.frames.find(function(f) { return String(f.id) === String(post.userFrame); });
+        if (post.userFrame && typeof window.FRAME_CONFIG !== 'undefined') {
+            var frame = window.FRAME_CONFIG.frames.find(function(f) { return String(f.id) === String(post.userFrame); });
             if (frame) frameHtml = '<div class="post-card-frame" style="background-image:url(\'' + frame.image + '\')"></div>';
         }
 
@@ -22226,7 +22016,7 @@ if (document.readyState === 'loading') {
                     String(window.currentUser.userId) === String(post.userId) &&
                     window.currentServerId === post.serverId);
 
-        var alreadyFriend = (typeof isFriend === 'function') ? isFriend(post.serverId, post.userId) : false;
+        var alreadyFriend = (typeof window.isFriend === 'function') ? window.isFriend(post.serverId, post.userId) : false;
         var actionBtn = '';
         if (isMe) {
             actionBtn = '<button class="post-card-chat-btn" disabled>You</button>';
@@ -22342,8 +22132,8 @@ if (document.readyState === 'loading') {
         var chatBtn = card.querySelector('.post-card-chat-btn[data-action="chat"]');
         if (chatBtn) chatBtn.addEventListener('click', function(e) {
             e.stopPropagation();
-            if (typeof openChatRoom === 'function') {
-                openChatRoom({ serverId: post.serverId, userId: post.userId, serverNo: post.serverNo });
+            if (typeof window.openChatRoom === 'function') {
+                window.openChatRoom({ serverId: post.serverId, userId: post.userId, serverNo: post.serverNo });
             }
         });
 
@@ -22361,14 +22151,14 @@ if (document.readyState === 'loading') {
         var likeBtn = card.querySelector('.post-action-btn[data-action="like"]');
         if (likeBtn) likeBtn.addEventListener('click', function(e) {
             e.stopPropagation();
-            if (!isGlobalLikeEnabled()) { if (typeof showToast === 'function') showToast('Like ခွင့် ပိတ်ထားသည်'); return; }
+            if (!isGlobalLikeEnabled()) { showToastSafe('Like ခွင့် ပိတ်ထားသည်'); return; }
             togglePostLike(post, likeBtn);
         });
 
         var commentBtn = card.querySelector('.post-action-btn[data-action="comment"]');
         if (commentBtn) commentBtn.addEventListener('click', function(e) {
             e.stopPropagation();
-            if (!isGlobalCommentEnabled()) { if (typeof showToast === 'function') showToast('Comment ခွင့် ပိတ်ထားသည်'); return; }
+            if (!isGlobalCommentEnabled()) { showToastSafe('Comment ခွင့် ပိတ်ထားသည်'); return; }
             openCommentScreen(post);
         });
 
@@ -22421,9 +22211,7 @@ if (document.readyState === 'loading') {
         if (countEl) countEl.textContent = likes.length;
         btn.classList.toggle('liked', idx < 0);
 
-        // ✅ Turso Update
-        var targetServerId = post._serverId || post.serverId || window.currentServerId;
-        var client = getTursoClient(targetServerId);
+        var client = getTursoClient(post._serverId);
         if (!client) return;
 
         client.execute(
@@ -22436,18 +22224,11 @@ if (document.readyState === 'loading') {
     //  COMMENT
     // ===================================================
     function openCommentScreen(post) {
-        if (!isGlobalCommentEnabled()) { if (typeof showToast === 'function') showToast('Comment ခွင့် ပိတ်ထားသည်'); return; }
+        if (!isGlobalCommentEnabled()) { showToastSafe('Comment ခွင့် ပိတ်ထားသည်'); return; }
 
         commentTargetPost = post;
         var sheet = document.getElementById('commentSheet');
         if (!sheet) return;
-
-        getMyUserInfoFromIDB().then(function(myInfo) {
-            if (myInfo) {
-                var myAvatar = document.getElementById('commentMyAvatar');
-                if (myAvatar) myAvatar.src = myInfo.avatar || IMBB_PLACEHOLDER;
-            }
-        });
 
         var input = document.getElementById('commentInput');
         var sendBtn = document.getElementById('commentSendBtn');
@@ -22463,23 +22244,14 @@ if (document.readyState === 'loading') {
         setTimeout(function() { sheet.classList.add('open'); }, 20);
         document.body.style.overflow = 'hidden';
 
-        var srvObj = post._serverId ? POST_SERVERS.find(function(s){return s.id===post._serverId;}) : null;
-        if (!srvObj) {
-            var serverNo = 1;
-            if (post.serverNo) { var m = String(post.serverNo).match(/\d+/); if (m) serverNo = parseInt(m[0]); }
-            srvObj = getServerByNumber(serverNo);
-        }
-        if (!srvObj) return;
-        var client = getTursoClient(srvObj.id);
-        if (!client) return;
+        var client = getTursoClient(post._serverId);
+        if (!client) { renderComments([]); return; }
 
-        // ✅ Turso ကနေ comments ယူ
-        client.query('SELECT comments, commentCount FROM posts WHERE postId = ? LIMIT 1', [post.postId])
+        client.query('SELECT comments FROM posts WHERE postId = ? LIMIT 1', [post.postId])
             .then(function(rows) {
                 if (!rows || rows.length === 0) return renderComments([]);
                 var comments = [];
                 try { comments = JSON.parse(rows[0].comments || '[]'); } catch(e) {}
-                commentsList = comments;
                 renderComments(comments);
                 post.commentCount = comments.length;
             })
@@ -22497,7 +22269,6 @@ if (document.readyState === 'loading') {
         }, 300);
         document.body.style.overflow = '';
         commentTargetPost = null;
-        commentsList = [];
         commentBubblePickerOpen = false;
         var bp = document.getElementById('commentBubblePicker');
         if (bp) bp.remove();
@@ -22521,8 +22292,8 @@ if (document.readyState === 'loading') {
 
         var bubbleClass = '';
         var bubbleStyle = '';
-        if (c.bubbleId && typeof BUBBLE_CONFIG !== 'undefined') {
-            var bubble = BUBBLE_CONFIG.bubbles.find(function(b) { return String(b.id) === String(c.bubbleId); });
+        if (c.bubbleId && typeof window.BUBBLE_CONFIG !== 'undefined') {
+            var bubble = window.BUBBLE_CONFIG.bubbles.find(function(b) { return String(b.id) === String(c.bubbleId); });
             if (bubble) {
                 bubbleClass = ' has-bubble';
                 bubbleStyle = ' style="--bubble-image:url(\'' + bubble.image + '\');"';
@@ -22558,7 +22329,7 @@ if (document.readyState === 'loading') {
     }
 
     function sendComment() {
-        if (!isGlobalCommentEnabled()) { if (typeof showToast === 'function') showToast('Comment ခွင့် ပိတ်ထားသည်'); return; }
+        if (!isGlobalCommentEnabled()) { showToastSafe('Comment ခွင့် ပိတ်ထားသည်'); return; }
 
         var input = document.getElementById('commentInput');
         if (!input) return;
@@ -22567,17 +22338,10 @@ if (document.readyState === 'loading') {
         if (!commentTargetPost) return;
 
         var lineCount = text.split('\n').length;
-        if (lineCount > COMMENT_MAX_LINES) { if (typeof showToast === 'function') showToast('Max ' + COMMENT_MAX_LINES + ' lines'); return; }
+        if (lineCount > COMMENT_MAX_LINES) { showToastSafe('Max ' + COMMENT_MAX_LINES + ' lines'); return; }
 
         var post = commentTargetPost;
-        var srvObj = post._serverId ? POST_SERVERS.find(function(s){return s.id===post._serverId;}) : null;
-        if (!srvObj) {
-            var serverNo = 1;
-            if (post.serverNo) { var m = String(post.serverNo).match(/\d+/); if (m) serverNo = parseInt(m[0]); }
-            srvObj = getServerByNumber(serverNo);
-        }
-        if (!srvObj) return;
-        var client = getTursoClient(srvObj.id);
+        var client = getTursoClient(post._serverId);
         if (!client) return;
 
         var sendBtn = document.getElementById('commentSendBtn');
@@ -22586,9 +22350,9 @@ if (document.readyState === 'loading') {
             sendBtn.innerHTML = '<div class="spinner-mini" style="width:18px;height:18px;border-width:2px;"></div>';
         }
 
-        getMyUserInfoFromIDB().then(function(myInfo) {
+        getMyUserInfo().then(function(myInfo) {
             if (!myInfo) {
-                if (typeof showToast === 'function') showToast('User info မရပါ');
+                showToastSafe('User info မရပါ');
                 if (sendBtn) sendBtn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/></svg>';
                 return;
             }
@@ -22597,10 +22361,8 @@ if (document.readyState === 'loading') {
                 id: genPostId(),
                 userId: myInfo.userId,
                 userName: myInfo.userName,
-                userServerId: myInfo.serverId,
                 userServerNo: myInfo.serverNo,
                 userAvatar: myInfo.avatar || '',
-                userFrame: '', userMark: '', userBanner: '', userBio: '',
                 bubbleId: commentSelectedBubbleId || myInfo.bubbleUse || '',
                 text: text,
                 createdAt: Date.now()
@@ -22608,8 +22370,7 @@ if (document.readyState === 'loading') {
 
             input.value = '';
 
-            // ✅ Turso က comments ယူပြီး အသစ်ထည့်
-            client.query('SELECT comments, commentCount FROM posts WHERE postId = ? LIMIT 1', [post.postId])
+            client.query('SELECT comments FROM posts WHERE postId = ? LIMIT 1', [post.postId])
                 .then(function(rows) {
                     var comments = [];
                     if (rows && rows.length > 0) {
@@ -22622,10 +22383,9 @@ if (document.readyState === 'loading') {
                         'UPDATE posts SET comments = ?, commentCount = ? WHERE postId = ?',
                         [JSON.stringify(comments), newCount, post.postId]
                     ).then(function() {
-                        commentsList = comments;
                         post.commentCount = newCount;
                         renderComments(comments);
-                        if (typeof showToast === 'function') showToast('Comment ပို့ပြီးပါပြီ');
+                        showToastSafe('Comment ပို့ပြီးပါပြီ');
                         if (sendBtn) {
                             sendBtn.disabled = true;
                             sendBtn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/></svg>';
@@ -22634,7 +22394,7 @@ if (document.readyState === 'loading') {
                 })
                 .catch(function(err) {
                     console.warn('Comment error:', err);
-                    if (typeof showToast === 'function') showToast('Comment ပို့မရပါ');
+                    showToastSafe('Comment ပို့မရပါ');
                     if (sendBtn) {
                         sendBtn.disabled = false;
                         sendBtn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/></svg>';
@@ -22653,69 +22413,67 @@ if (document.readyState === 'loading') {
         var existing = document.getElementById('commentBubblePicker');
         if (existing) { existing.remove(); commentBubblePickerOpen = false; return; }
 
-        getMyBubblesFromIDB().then(function(ownedBubbles) {
-            getMyUserInfoFromIDB().then(function(myInfo) {
-                var owned = Array.isArray(ownedBubbles) ? ownedBubbles : [];
-                var currentUse = (myInfo && myInfo.bubbleUse) || '';
+        getMyUserInfo().then(function(myInfo) {
+            var owned = (myInfo && myInfo.bubbleOwned) ? myInfo.bubbleOwned : [];
+            var currentUse = (myInfo && myInfo.bubbleUse) || '';
 
-                var slots = [{ id: '', name: 'None', image: '', isNone: true, isUsed: currentUse === '' && !commentSelectedBubbleId }];
-                owned.forEach(function(bId) {
-                    var b = (typeof BUBBLE_CONFIG !== 'undefined') ? BUBBLE_CONFIG.bubbles.find(function(x) { return x.id === bId; }) : null;
-                    if (b) slots.push({ id: b.id, name: b.name, image: b.image, isNone: false, isUsed: (commentSelectedBubbleId || currentUse) === b.id });
-                });
+            var slots = [{ id: '', name: 'None', image: '', isNone: true, isUsed: currentUse === '' && !commentSelectedBubbleId }];
+            owned.forEach(function(bId) {
+                var b = (typeof window.BUBBLE_CONFIG !== 'undefined') ? window.BUBBLE_CONFIG.bubbles.find(function(x) { return x.id === bId; }) : null;
+                if (b) slots.push({ id: b.id, name: b.name, image: b.image, isNone: false, isUsed: (commentSelectedBubbleId || currentUse) === b.id });
+            });
 
-                var picker = document.createElement('div');
-                picker.id = 'commentBubblePicker';
-                picker.className = 'comment-bubble-picker';
+            var picker = document.createElement('div');
+            picker.id = 'commentBubblePicker';
+            picker.className = 'comment-bubble-picker';
 
-                var html = '<div class="comment-bubble-picker-header">' +
-                    '<span>Bubble ရွေးပါ</span>' +
-                    '<button class="comment-bubble-picker-close" id="commentBubblePickerClose">' +
-                        '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>' +
-                    '</button>' +
-                '</div>';
-                html += '<div class="comment-bubble-picker-grid">';
-                slots.forEach(function(s) {
-                    var cls = 'comment-bubble-slot' + (s.isUsed ? ' active' : '') + (s.isNone ? ' none-slot' : '');
-                    html += '<div class="' + cls + '" data-bubble-id="' + s.id + '" data-is-none="' + s.isNone + '">';
-                    if (s.isNone) {
-                        html += '<div class="comment-bubble-slot-none">' +
-                            '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>' +
-                            '<span>None</span>' +
-                        '</div>';
-                    } else {
-                        html += '<img src="' + s.image + '" class="comment-bubble-slot-image" />';
-                    }
-                    html += '</div>';
-                });
+            var html = '<div class="comment-bubble-picker-header">' +
+                '<span>Bubble ရွေးပါ</span>' +
+                '<button class="comment-bubble-picker-close" id="commentBubblePickerClose">' +
+                    '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>' +
+                '</button>' +
+            '</div>';
+            html += '<div class="comment-bubble-picker-grid">';
+            slots.forEach(function(s) {
+                var cls = 'comment-bubble-slot' + (s.isUsed ? ' active' : '') + (s.isNone ? ' none-slot' : '');
+                html += '<div class="' + cls + '" data-bubble-id="' + s.id + '" data-is-none="' + s.isNone + '">';
+                if (s.isNone) {
+                    html += '<div class="comment-bubble-slot-none">' +
+                        '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>' +
+                        '<span>None</span>' +
+                    '</div>';
+                } else {
+                    html += '<img src="' + s.image + '" class="comment-bubble-slot-image" />';
+                }
                 html += '</div>';
-                picker.innerHTML = html;
+            });
+            html += '</div>';
+            picker.innerHTML = html;
 
-                var inputBar = sheet.querySelector('.comment-input-bar');
-                if (inputBar) inputBar.parentNode.insertBefore(picker, inputBar);
-                else sheet.appendChild(picker);
+            var inputBar = sheet.querySelector('.comment-input-bar');
+            if (inputBar) inputBar.parentNode.insertBefore(picker, inputBar);
+            else sheet.appendChild(picker);
 
-                commentBubblePickerOpen = true;
+            commentBubblePickerOpen = true;
 
-                document.getElementById('commentBubblePickerClose').addEventListener('click', function() {
+            document.getElementById('commentBubblePickerClose').addEventListener('click', function() {
+                picker.remove();
+                commentBubblePickerOpen = false;
+            });
+
+            picker.querySelectorAll('.comment-bubble-slot').forEach(function(el) {
+                el.addEventListener('click', function() {
+                    var bId = this.dataset.bubbleId;
+                    var isNone = this.dataset.isNone === 'true';
+                    if (isNone || bId === '') {
+                        commentSelectedBubbleId = '';
+                        showToastSafe('Bubble ဖျက်ပြီး');
+                    } else {
+                        commentSelectedBubbleId = parseInt(bId);
+                        showToastSafe('Bubble ရွေးပြီး');
+                    }
                     picker.remove();
                     commentBubblePickerOpen = false;
-                });
-
-                picker.querySelectorAll('.comment-bubble-slot').forEach(function(el) {
-                    el.addEventListener('click', function() {
-                        var bId = this.dataset.bubbleId;
-                        var isNone = this.dataset.isNone === 'true';
-                        if (isNone || bId === '') {
-                            commentSelectedBubbleId = '';
-                            if (typeof showToast === 'function') showToast('Bubble ဖျက်ပြီး');
-                        } else {
-                            commentSelectedBubbleId = parseInt(bId);
-                            if (typeof showToast === 'function') showToast('Bubble ရွေးပြီး');
-                        }
-                        picker.remove();
-                        commentBubblePickerOpen = false;
-                    });
                 });
             });
         });
@@ -22763,20 +22521,24 @@ if (document.readyState === 'loading') {
         }
 
         if (viewerMedia.length > 1) {
-            counter.classList.remove('hidden');
-            counter.textContent = (viewerIndex + 1) + ' / ' + viewerMedia.length;
-            prevBtn.classList.remove('hidden'); nextBtn.classList.remove('hidden');
-            dots.classList.remove('hidden'); dots.innerHTML = '';
-            viewerMedia.forEach(function(_, i) {
-                var d = document.createElement('div');
-                d.className = 'post-viewer-dot' + (i === viewerIndex ? ' active' : '');
-                dots.appendChild(d);
-            });
-            prevBtn.onclick = function() { viewerIndex = (viewerIndex - 1 + viewerMedia.length) % viewerMedia.length; renderViewerContent(); };
-            nextBtn.onclick = function() { viewerIndex = (viewerIndex + 1) % viewerMedia.length; renderViewerContent(); };
+            if (counter) { counter.classList.remove('hidden'); counter.textContent = (viewerIndex + 1) + ' / ' + viewerMedia.length; }
+            if (prevBtn) prevBtn.classList.remove('hidden');
+            if (nextBtn) nextBtn.classList.remove('hidden');
+            if (dots) {
+                dots.classList.remove('hidden'); dots.innerHTML = '';
+                viewerMedia.forEach(function(_, i) {
+                    var d = document.createElement('div');
+                    d.className = 'post-viewer-dot' + (i === viewerIndex ? ' active' : '');
+                    dots.appendChild(d);
+                });
+            }
+            if (prevBtn) prevBtn.onclick = function() { viewerIndex = (viewerIndex - 1 + viewerMedia.length) % viewerMedia.length; renderViewerContent(); };
+            if (nextBtn) nextBtn.onclick = function() { viewerIndex = (viewerIndex + 1) % viewerMedia.length; renderViewerContent(); };
         } else {
-            counter.classList.add('hidden'); prevBtn.classList.add('hidden');
-            nextBtn.classList.add('hidden'); dots.classList.add('hidden');
+            if (counter) counter.classList.add('hidden');
+            if (prevBtn) prevBtn.classList.add('hidden');
+            if (nextBtn) nextBtn.classList.add('hidden');
+            if (dots) dots.classList.add('hidden');
         }
     }
     function downloadCurrentViewer() {
@@ -22792,7 +22554,7 @@ if (document.readyState === 'loading') {
             a.href = m.url; a.download = filename;
             document.body.appendChild(a); a.click();
             document.body.removeChild(a);
-            if (typeof showToast === 'function') showToast('Downloaded');
+            showToastSafe('Downloaded');
             return;
         }
 
@@ -22802,12 +22564,12 @@ if (document.readyState === 'loading') {
             a.href = url; a.download = filename;
             document.body.appendChild(a); a.click();
             document.body.removeChild(a); URL.revokeObjectURL(url);
-            if (typeof showToast === 'function') showToast('Downloaded');
+            showToastSafe('Downloaded');
         }).catch(function() { window.open(m.url, '_blank'); });
     }
 
     // ===================================================
-    //  POST SHARE LINK CLICK HANDLER
+    //  POST SHARE LINK HANDLER
     // ===================================================
     function initPostShareLinkHandler() {
         document.addEventListener('click', function(e) {
@@ -22821,57 +22583,44 @@ if (document.readyState === 'loading') {
             var postId = link.dataset.postId;
             if (!serverNo || !postId) return;
 
-            if (!isGlobalViewEnabled()) { if (typeof showToast === 'function') showToast('Post ကြည့်ခွင့် ပိတ်ထားသည်'); return; }
+            if (!isGlobalViewEnabled()) { showToastSafe('Post ကြည့်ခွင့် ပိတ်ထားသည်'); return; }
 
-            if (typeof switchTab === 'function') {
-                switchTab('home');
+            if (typeof window.switchTab === 'function') {
+                window.switchTab('home');
                 var homeBtn = document.querySelector('.nav-btn[data-tab="home"]');
                 if (homeBtn) {
                     document.querySelectorAll('.nav-btn').forEach(function(b) { b.classList.remove('active'); });
                     homeBtn.classList.add('active');
                 }
-                if (typeof currentTab !== 'undefined') currentTab = 'home';
             }
 
-            if (typeof closeFullscreen === 'function') closeFullscreen();
-            if (typeof showToast === 'function') showToast('Post ရှာနေသည်...');
+            if (typeof window.closeFullscreen === 'function') window.closeFullscreen();
+            showToastSafe('Post ရှာနေသည်...');
 
             fetchSinglePost(serverNo, postId).then(function(post) {
-                if (!post) { if (typeof showToast === 'function') showToast('Post မတွေ့ပါ'); return; }
+                if (!post) { showToastSafe('Post မတွေ့ပါ'); return; }
 
-                var existingCard = document.querySelector('.post-card[data-post-id="' + postId + '"]');
-                if (existingCard) {
-                    existingCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    if (typeof showToast === 'function') showToast('Post တွေ့ပြီ');
-                    return;
-                }
-
+                var body = document.getElementById('postFeedBody');
                 feedAllPosts = [post];
                 feedExhausted = true;
                 lastRenderedIds = {};
-                var body = document.getElementById('postFeedBody');
                 if (body) body.innerHTML = '';
                 lastRenderedIds[post.postId] = true;
                 if (body) body.appendChild(buildPostCard(post));
                 hideTabDesc();
-
-                setTimeout(function() {
-                    var card = document.querySelector('.post-card[data-post-id="' + postId + '"]');
-                    if (card) card.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }, 300);
             });
         }, true);
     }
 
     // ===================================================
-    //  PLUS MENU HOOK
+    //  HOOK PLUS MENU
     // ===================================================
     function hookPlusMenuPost() {
         document.addEventListener('click', function(e) {
             var btn = e.target.closest('.plus-menu-btn[data-action="post"]');
             if (!btn) return;
             e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation();
-            if (typeof closePlusMenu === 'function') closePlusMenu();
+            if (typeof window.closePlusMenu === 'function') window.closePlusMenu();
             setTimeout(function() { openPostCreate(); }, 150);
         }, true);
     }
@@ -22880,17 +22629,21 @@ if (document.readyState === 'loading') {
     //  INIT
     // ===================================================
     function init() {
-        loadFavourites().then(function() { console.log('✅ Favourites loaded:', favouritePosts.length); });
+        if (initDone) {
+            console.log('⚠️ Post System v22.0 already initialized');
+            return;
+        }
+        initDone = true;
+
+        console.log('🔧 Init Post System v22.0...');
+
+        loadFavourites().then(function() {
+            console.log('✅ Favourites loaded:', favouritePosts.length);
+        });
 
         document.querySelectorAll('.post-tab-chip').forEach(function(chip) {
             chip.addEventListener('click', function() {
                 var tab = this.dataset.tab;
-                if (currentFeedTab === tab && tab !== 'role') {
-                    document.querySelectorAll('.post-tab-chip').forEach(function(c) { c.classList.remove('active'); });
-                    this.classList.add('active');
-                    switchFeedTab(tab);
-                    return;
-                }
                 document.querySelectorAll('.post-tab-chip').forEach(function(c) { c.classList.remove('active'); });
                 this.classList.add('active');
                 switchFeedTab(tab);
@@ -22988,17 +22741,34 @@ if (document.readyState === 'loading') {
         hookPlusMenuPost();
         initPostShareLinkHandler();
 
-        console.log('✅ Post System v21.0 (Turso) Ready');
+        console.log('✅ Post System v22.0 (Turso Only) Ready');
+    }
+
+    // ===================================================
+    //  START
+    // ===================================================
+    function start() {
+        if (!document.getElementById('postFeedBody')) {
+            console.log('⏳ Waiting for HTML...');
+            setTimeout(start, 500);
+            return;
+        }
+        init();
     }
 
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', function() { setTimeout(init, 900); });
+        document.addEventListener('DOMContentLoaded', function() { setTimeout(start, 1000); });
     } else {
-        setTimeout(init, 900);
+        setTimeout(start, 1000);
     }
 
 })();
-        
+
+
+    
+
+
+            
 </script>
 </body>
 </html>
