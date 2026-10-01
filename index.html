@@ -20449,20 +20449,21 @@ if (document.readyState === 'loading') {
 })();
 
 // ============================================================
-// ✅ POST SYSTEM v36.0 -- FULL JAVA
-//  • Main DB (StarArcadeDB) ထဲ ပေါင်းထည့်
-//  • Log Out All Data လုပ်တိုင်း Post Data ပါ ပျက်
-//  • Comment Data: id, userId, userName, userServerNo, bubbleId, text (createdAt မပါ)
-//  • View နှိပ်မှ Firebase သွား -- Profile Full ပြ
-//  • Report → Telegram https://t.me/StarArcadeAdmin/736
+// ✅ POST SYSTEM + CHAT LINK HANDLER -- FULL JAVA
+//  Version: 2026-10-01
+//  • Post Data: Turso (Worker Server)
+//  • User Data: Firebase (Main App)
+//  • IndexedDB: StarArcadeDB (Main DB)
+//  • Chat Link: Post.1.p12345 → Clickable
+//  • Comment: userId, userName, userServerNo, bubbleId, text
 //  • Post: userId, userName, serverNo, userAvatar, workerNo
-//  • တစ်နေ့ 3 ခု / Like Max 10000 / Comment Max 100
+//  • Like Max 10000 / Comment Max 100 / တစ်နေ့ 3 Post
 //  • Video 10s / 10MB
 // ============================================================
 (function() {
     'use strict';
 
-    console.log('🚀 Post System v36.0 Loading...');
+    console.log('🚀 Post System + Chat Link v1.0 Loading...');
 
     // ===================================================
     //  ✅ WORKER SERVERS
@@ -20501,7 +20502,7 @@ if (document.readyState === 'loading') {
     var LIKE_MAX = 10000;
     var COMMENT_MAX = 100;
 
-    // ✅ Main DB ထဲက Key တွေ (prefix ထည့်)
+    // Main DB Keys
     var POST_LIST_KEY = 'post_myPostList';
     var FAVOURITE_KEY = 'post_favouritePosts';
     var DAILY_POST_KEY = 'post_dailyPostCount';
@@ -20645,7 +20646,7 @@ if (document.readyState === 'loading') {
     }
 
     // ===================================================
-    //  ✅ INDEXEDDB -- Main DB ကို သုံး
+    //  INDEXEDDB -- Main DB
     // ===================================================
     var DB_NAME = 'StarArcadeDB';
     var DB_VERSION = 1;
@@ -20692,7 +20693,7 @@ if (document.readyState === 'loading') {
     }
 
     // ===================================================
-    //  LIKED POSTS
+    //  LIKED / FAVOURITE / DAILY
     // ===================================================
     function loadLikedPosts() {
         return myDbGet(LIKED_POSTS_KEY).then(function(list) {
@@ -20720,9 +20721,6 @@ if (document.readyState === 'loading') {
         }
     }
 
-    // ===================================================
-    //  DAILY POST LIMIT
-    // ===================================================
     function checkDailyPostLimit() {
         return myDbGet(DAILY_POST_KEY).then(function(data) {
             var today = new Date().setHours(0, 0, 0, 0);
@@ -20740,6 +20738,34 @@ if (document.readyState === 'loading') {
         var today = new Date().setHours(0, 0, 0, 0);
         dailyPostCount++;
         return myDbSet(DAILY_POST_KEY, { date: today, count: dailyPostCount });
+    }
+
+    function loadFavourites() {
+        return myDbGet(FAVOURITE_KEY).then(function(list) {
+            favouritePosts = Array.isArray(list) ? list : [];
+            return favouritePosts;
+        });
+    }
+
+    function saveFavourites() { return myDbSet(FAVOURITE_KEY, favouritePosts); }
+
+    function isFavourited(postId) {
+        return favouritePosts.some(function(f) { return f.postId === postId; });
+    }
+
+    function toggleFavourite(post) {
+        var srv = getWorkerById(post._serverId);
+        var serverNo = srv ? srv.number : 1;
+        var idx = favouritePosts.findIndex(function(f) { return f.postId === post.postId; });
+        if (idx >= 0) {
+            favouritePosts.splice(idx, 1);
+            showToastSafe('Favourite ဖျက်ပြီး');
+        } else {
+            favouritePosts.push({ postId: post.postId, serverNo: serverNo, serverId: post._serverId });
+            showToastSafe('Favourite သိမ်းပြီး');
+        }
+        saveFavourites();
+        return idx < 0;
     }
 
     // ===================================================
@@ -21016,37 +21042,6 @@ if (document.readyState === 'loading') {
     function showTabDesc(text) {
         var d = document.getElementById('postTabDesc');
         if (d) { d.textContent = text || ''; d.style.display = ''; d.classList.remove('hidden'); }
-    }
-
-    // ===================================================
-    //  FAVOURITE
-    // ===================================================
-    function loadFavourites() {
-        return myDbGet(FAVOURITE_KEY).then(function(list) {
-            favouritePosts = Array.isArray(list) ? list : [];
-            return favouritePosts;
-        });
-    }
-
-    function saveFavourites() { return myDbSet(FAVOURITE_KEY, favouritePosts); }
-
-    function isFavourited(postId) {
-        return favouritePosts.some(function(f) { return f.postId === postId; });
-    }
-
-    function toggleFavourite(post) {
-        var srv = getWorkerById(post._serverId);
-        var serverNo = srv ? srv.number : 1;
-        var idx = favouritePosts.findIndex(function(f) { return f.postId === post.postId; });
-        if (idx >= 0) {
-            favouritePosts.splice(idx, 1);
-            showToastSafe('Favourite ဖျက်ပြီး');
-        } else {
-            favouritePosts.push({ postId: post.postId, serverNo: serverNo, serverId: post._serverId });
-            showToastSafe('Favourite သိမ်းပြီး');
-        }
-        saveFavourites();
-        return idx < 0;
     }
 
     // ===================================================
@@ -23115,6 +23110,29 @@ if (document.readyState === 'loading') {
     }
 
     // ===================================================
+    //  GLOBAL EXPORTS (Chat Link Handler က သုံးဖို့)
+    // ===================================================
+    window.buildPostCard = buildPostCard;
+    window.parsePostRow = parsePostRow;
+    window.fetchPostsFromServer = fetchPostsFromServer;
+    window.fetchSinglePost = fetchSinglePost;
+    window.getWorkerClient = getWorkerClient;
+    window.showToastSafe = showToastSafe;
+    window.attachPostCardEvents = attachPostCardEvents;
+    window.togglePostLike = togglePostLike;
+    window.toggleFavourite = toggleFavourite;
+    window.openCommentScreen = openCommentScreen;
+    window.openReportPopup = openReportPopup;
+    window.showShareModal = showShareModal;
+    window.POST_ROLES = POST_ROLES;
+    window.IMBB_PLACEHOLDER = IMBB_PLACEHOLDER;
+    window.formatPostTime = formatPostTime;
+    window.WORKER_SERVERS = WORKER_SERVERS;
+    window.escapeHtml = escapeHtml;
+    window.isPostLikedByMe = isPostLikedByMe;
+    window.isFavourited = isFavourited;
+
+    // ===================================================
     //  INIT
     // ===================================================
     function init() {
@@ -23227,7 +23245,7 @@ if (document.readyState === 'loading') {
         hookPlusMenuPost();
         initPostShareLinkHandler();
 
-        console.log('✅ Post System v36.0 Ready (Main DB)');
+        console.log('✅ Post System v36.0 Ready');
     }
 
     function start() {
@@ -23248,17 +23266,17 @@ if (document.readyState === 'loading') {
 
 
 // ============================================================
-// ✅ CHAT POST LINK HANDLER v1.0
-// Chat မှာ Post.1.p12345 Link ကို Clickable ဖြစ်အောင် လုပ်
-// အဟောင်း Code ကို လုံးဝ မထိပါ
+// ✅ CHAT POST LINK HANDLER v2.0
+// Chat မှာ Post.1.p12345 Link ကို Clickable ဖြစ်အောင်
+// Click ရင် Full Post Card (Like/Comment အားလုံး အလုပ်လုပ်)
 // ============================================================
 (function() {
     'use strict';
 
-    console.log('🔗 Chat Post Link Handler Loading...');
+    console.log('🔗 Chat Post Link Handler v2.0 Loading...');
 
     // ===================================================
-    //  CSS ထည့် (Link အသွင်အပြင်)
+    //  CSS
     // ===================================================
     var style = document.createElement('style');
     style.textContent = `
@@ -23296,31 +23314,24 @@ if (document.readyState === 'loading') {
     }
 
     // ===================================================
-    //  POST LINK DETECT + TRANSFORM
-    //  Chat message text ထဲမှာ "Post.1.p12345" ရှာပြီး
-    //  <span class="post-share-link-in-chat"> ဖြစ်အောင် ပြောင်း
+    //  POST LINK TRANSFORM
     // ===================================================
     function transformPostLinks(text) {
         if (!text) return '';
 
-        // Post.1.p12345 pattern (Server No + Post ID)
         var postLinkRegex = /Post\.(\d+)\.([a-zA-Z0-9_]+)/g;
-
         var result = '';
         var lastIndex = 0;
         var match;
 
-        // Escape မလုပ်ခင် raw text ထဲမှာ ရှာ
         postLinkRegex.lastIndex = 0;
 
         while ((match = postLinkRegex.exec(text)) !== null) {
-            // Link ရှေ့က စာကို escape
             result += escapeHtmlSafe(text.substring(lastIndex, match.index));
 
-            // Link ကို span အဖြစ် ပြောင်း
-            var fullMatch = match[0];       // "Post.1.p12345"
-            var serverNo = match[1];         // "1"
-            var postId = match[2];           // "p12345"
+            var fullMatch = match[0];
+            var serverNo = match[1];
+            var postId = match[2];
 
             result += '<span class="post-share-link-in-chat" ' +
                       'data-server-no="' + serverNo + '" ' +
@@ -23331,27 +23342,21 @@ if (document.readyState === 'loading') {
             lastIndex = match.index + fullMatch.length;
         }
 
-        // ကျန်တဲ့ စာကို escape
         result += escapeHtmlSafe(text.substring(lastIndex));
-
         return result;
     }
 
     // ===================================================
-    //  MUTATION OBSERVER
-    //  Chat Messages Container ထဲမှာ Message အသစ် ရောက်တိုင်း
-    //  Auto စစ်ပြီး Link ပြောင်း
+    //  MESSAGE PROCESS
     // ===================================================
     function processMessageElement(msgEl) {
         if (!msgEl) return;
         if (msgEl._postLinkProcessed) return;
 
-        // Message Text Span ကို ရှာ
         var textSpans = msgEl.querySelectorAll('.msg-text');
         textSpans.forEach(function(span) {
             var rawText = span.textContent || span.innerText || '';
             if (rawText && rawText.indexOf('Post.') !== -1) {
-                // Link ပါရင် ပြောင်း
                 span.innerHTML = transformPostLinks(rawText);
             }
         });
@@ -23370,7 +23375,7 @@ if (document.readyState === 'loading') {
     }
 
     // ===================================================
-    //  CLICK HANDLER (Event Delegation)
+    //  CLICK HANDLER
     // ===================================================
     function handlePostLinkClick(e) {
         var link = e.target.closest('.post-share-link-in-chat');
@@ -23387,7 +23392,6 @@ if (document.readyState === 'loading') {
 
         console.log('📎 Post Link Clicked:', serverNo, postId);
 
-        // Home Screen ကို ရောက်
         if (typeof window.switchTab === 'function') {
             window.switchTab('home');
         }
@@ -23397,144 +23401,51 @@ if (document.readyState === 'loading') {
             homeBtn.classList.add('active');
         }
 
-        // Fullscreen ပိတ်
         if (typeof window.closeFullscreen === 'function') {
             window.closeFullscreen();
         }
 
-        // Post ရှာပြီး ပြ
         showPostFromLink(serverNo, postId);
     }
 
+    // ===================================================
+    //  SHOW POST FROM LINK
+    // ===================================================
     function showPostFromLink(serverNo, postId) {
         var feedBody = document.getElementById('postFeedBody');
         if (!feedBody) return;
 
-        // Loading ပြ
         feedBody.innerHTML = '<div class="post-feed-loading">Post ရှာနေသည်...</div>';
 
-        // Worker Server URL
-        var workerUrl = 'https://billowing-mountain-0156.pkarspkarsps.workers.dev';
-
-        fetch(workerUrl + '/api/query', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                sql: 'SELECT * FROM posts WHERE postId = ? LIMIT 1',
-                params: [postId]
-            })
-        })
-        .then(function(r) { return r.json(); })
-        .then(function(data) {
-            if (!data.ok || !data.data || data.data.length === 0) {
-                feedBody.innerHTML = '<div class="post-feed-empty">Post မတွေ့ပါ</div>';
-                return;
-            }
-
-            var row = data.data[0];
-
-            // ✅ Post Card တည်ဆောက် (Post System v36 ရဲ့ buildPostCard ကို ခေါ်)
-            var card = null;
-
-            // Global buildPostCard ရှိရင် သုံး
-            if (typeof window.buildPostCard === 'function') {
-                try {
-                    var post = parsePostRowSafe(row, 'worker1');
-                    card = window.buildPostCard(post);
-                } catch(e) {
-                    console.warn('Global buildPostCard fail:', e);
-                    card = null;
+        // ✅ Global fetchSinglePost ကို သုံး (Post System v36 ရဲ့ Function)
+        if (typeof window.fetchSinglePost === 'function') {
+            window.fetchSinglePost(serverNo, postId).then(function(post) {
+                if (!post) {
+                    feedBody.innerHTML = '<div class="post-feed-empty">Post မတွေ့ပါ</div>';
+                    return;
                 }
-            }
 
-            // Fallback -- ကိုယ်တိုင် ဆောက်
-            if (!card) {
-                card = buildSimplePostCard(row);
-            }
-
-            feedBody.innerHTML = '';
-            feedBody.appendChild(card);
-        })
-        .catch(function(err) {
-            console.error('Post link error:', err);
-            feedBody.innerHTML = '<div class="post-feed-empty">Failed to load</div>';
-        });
-    }
-
-    // ===================================================
-    //  PARSE POST ROW (Fallback)
-    // ===================================================
-    function parsePostRowSafe(row, serverId) {
-        var post = Object.assign({}, row);
-        post._serverId = serverId;
-        try { post.mediaUrls = JSON.parse(row.mediaUrls || '[]'); } catch(e) { post.mediaUrls = []; }
-        try { post.comments = JSON.parse(row.comments || '[]'); } catch(e) { post.comments = []; }
-        try { post.linkData = row.linkData ? JSON.parse(row.linkData) : null; } catch(e) { post.linkData = null; }
-        post.createdAt = parseInt(row.createdAt) || 0;
-        post.likeCount = parseInt(row.likeCount) || 0;
-        post.commentCount = parseInt(row.commentCount) || 0;
-        post.roleId = row.roleId || '';
-        post.serverNo = row.serverNo || 'Server 1';
-        post.workerNo = parseInt(row.workerNo) || 1;
-        return post;
-    }
-
-    // ===================================================
-    //  SIMPLE POST CARD (Fallback)
-    // ===================================================
-    function buildSimplePostCard(row) {
-        var card = document.createElement('div');
-        card.className = 'post-card';
-        card.dataset.postId = row.postId;
-
-        var avatar = row.userAvatar || 'https://i.ibb.co/r2k0J5rJ/Grid-Art-20260829-171212620.png';
-        var name = escapeHtmlSafe(row.userName || 'Player');
-        var caption = escapeHtmlSafe(row.caption || '');
-        var likeCount = parseInt(row.likeCount) || 0;
-        var commentCount = parseInt(row.commentCount) || 0;
-
-        var mediaHtml = '';
-        try {
-            var media = JSON.parse(row.mediaUrls || '[]');
-            if (media.length > 0 && media[0].url) {
-                if (media[0].type === 'video') {
-                    mediaHtml = '<div class="post-card-media"><video src="' + media[0].url + '" controls playsinline preload="metadata" style="width:100%;border-radius:12px;"></video></div>';
-                } else {
-                    mediaHtml = '<div class="post-card-media"><img src="' + media[0].url + '" style="width:100%;border-radius:12px;" /></div>';
+                if (typeof window.buildPostCard !== 'function') {
+                    feedBody.innerHTML = '<div class="post-feed-empty">System error</div>';
+                    return;
                 }
-            }
-        } catch(e) {}
 
-        card.innerHTML =
-            '<div class="post-card-header">' +
-                '<div class="post-card-avatar-wrap">' +
-                    '<img src="' + avatar + '" />' +
-                '</div>' +
-                '<div class="post-card-info">' +
-                    '<div class="post-card-name-row">' +
-                        '<span class="post-card-name">' + name + '</span>' +
-                    '</div>' +
-                '</div>' +
-            '</div>' +
-            (caption ? '<div class="post-card-caption">' + caption + '</div>' : '') +
-            mediaHtml +
-            '<div class="post-card-actions">' +
-                '<button class="post-action-btn">' +
-                    '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>' +
-                    '<span>' + likeCount + '</span>' +
-                '</button>' +
-                '<button class="post-action-btn">' +
-                    '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>' +
-                    '<span>' + commentCount + '</span>' +
-                '</button>' +
-            '</div>';
+                var card = window.buildPostCard(post);
+                feedBody.innerHTML = '';
+                feedBody.appendChild(card);
 
-        return card;
+                console.log('✅ Post card built from link');
+            }).catch(function(err) {
+                console.error('Post link error:', err);
+                feedBody.innerHTML = '<div class="post-feed-empty">Failed to load</div>';
+            });
+        } else {
+            feedBody.innerHTML = '<div class="post-feed-empty">Post system not ready</div>';
+        }
     }
 
     // ===================================================
-    //  MUTATION OBSERVER SETUP
-    //  Chat Room ထဲ Message အသစ် ရောက်တိုင်း Auto စစ်
+    //  MUTATION OBSERVER
     // ===================================================
     var observer = null;
 
@@ -23545,31 +23456,23 @@ if (document.readyState === 'loading') {
             return;
         }
 
-        // ရှိပြီးသား Message တွေ စစ်
         processAllMessages();
 
-        // Observer ဖျက်
         if (observer) {
             try { observer.disconnect(); } catch(e) {}
         }
 
-        // Observer အသစ်
         observer = new MutationObserver(function(mutations) {
             mutations.forEach(function(mutation) {
                 if (mutation.type === 'childList') {
                     mutation.addedNodes.forEach(function(node) {
                         if (node.nodeType === 1) {
-                            // Chat Message ဖြစ်ရင်
                             if (node.classList && node.classList.contains('chat-message')) {
                                 processMessageElement(node);
-                            }
-                            // Chat Message Wrapper ဖြစ်ရင်
-                            else if (node.classList && node.classList.contains('chat-message-wrapper')) {
+                            } else if (node.classList && node.classList.contains('chat-message-wrapper')) {
                                 var innerMsg = node.querySelector('.chat-message');
                                 if (innerMsg) processMessageElement(innerMsg);
-                            }
-                            // တခြား Element ဖြစ်ရင် Query ရှာ
-                            else {
+                            } else {
                                 var innerMsgs = node.querySelectorAll ? node.querySelectorAll('.chat-message') : [];
                                 innerMsgs.forEach(function(m) { processMessageElement(m); });
                             }
@@ -23584,12 +23487,11 @@ if (document.readyState === 'loading') {
             subtree: true
         });
 
-        console.log('👀 Observer started on #chatRoomMessages');
+        console.log('👀 Observer started');
     }
 
     // ===================================================
-    //  EVENT DELEGATION (Document Level)
-    //  Chat Room ဘယ်တော့ ဖွင့်ဖွင့် Click အလုပ်လုပ်
+    //  EVENT DELEGATION
     // ===================================================
     document.addEventListener('click', function(e) {
         var link = e.target.closest('.post-share-link-in-chat');
@@ -23599,7 +23501,7 @@ if (document.readyState === 'loading') {
     }, true);
 
     // ===================================================
-    //  AUTO SCAN -- Chat Room ဖွင့်တိုင်း စစ်
+    //  AUTO WATCH
     // ===================================================
     function watchChatRoom() {
         var messagesEl = document.getElementById('chatRoomMessages');
@@ -23610,15 +23512,16 @@ if (document.readyState === 'loading') {
         setTimeout(watchChatRoom, 1500);
     }
 
-    // ===================================================
-    //  START
-    // ===================================================
     setTimeout(function() {
         watchChatRoom();
-        console.log('✅ Chat Post Link Handler Ready');
+        console.log('✅ Chat Post Link Handler v2.0 Ready');
     }, 2000);
 
 })();
+
+
+    
+
 
             
 </script>
