@@ -20324,27 +20324,30 @@ if (document.readyState === 'loading') {
 })();
 
 // ============================================================
-// ✅ POST SYSTEM v22.0 -- TURSO ONLY (COMPLETELY NEW)
-//  • Supabase လုံးဝ မပါ
-//  • IndexedDB Key အသစ်တွေ (Conflict မဖြစ်အောင်)
-//  • localStorage အသစ်တွေ
-//  • 100% Standalone
+// ✅ POST SYSTEM v22.2 -- CLOUDFLARE WORKER + TURSO
+//  • Cloudflare Worker မှတစ်ဆင့် Turso ကို ချိတ်
+//  • CORS ပြဿနာ လုံးဝ မရှိ
+//  • Web + APK နှစ်မျိုးလုံး အလုပ်လုပ်
+//  • Standalone (Supabase လုံးဝ မပါ)
 // ============================================================
 (function() {
     'use strict';
 
-    console.log('🚀 Post System v22.0 Loading (Turso Only)...');
+    console.log('🚀 Post System v22.2 (Cloudflare Worker) Loading...');
+
+    // ===================================================
+    //  ✅ WORKER URL
+    // ===================================================
+    var WORKER_URL = 'https://billowing-mountain-0156.pkarspkarsps.workers.dev';
 
     // ===================================================
     //  ✅ SERVER CONFIG
     // ===================================================
     var POST_SERVERS = [
         {
-            id: 'turso1',
+            id: 'worker1',
             name: 'Server 1',
             number: 1,
-            tursoUrl: 'libsql://post-1-post1.aws-ap-south-1.turso.io',
-            tursoToken: 'eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJncm91cF91dWlkIjoiYTUwOWEyNTgtZTczOC00MDkzLWFhOGYtZGY4NjM3OThiM2JiIiwianRpIjoiOFg5bk5MelFFZkdwZzY0b3dLOHhjdyIsIm9yZ19pZCI6MTAwMDI1OTA3Nywic2NvcGVzIjp7InNjb3BlcyI6WyJkYjpjb25maWd1cmUiLCJkYjpjcmVhdGUiLCJkYjpkZWxldGUiLCJkYjptaW50LXRva2VuIiwiZGI6cm90YXRlLWNyZWRzIiwiZ3JvdXA6Y29uZmlndXJlIiwiZ3JvdXA6bWludC10b2tlbiIsImdyb3VwOnJvdGF0ZS1jcmVkcyIsInJlYWQiXX19.BGpsOPiC1a36HfcA7ZuS2C03JHOXYxl4rqK5SfRjj0VdUd6OSGHXE9oGbSzP5nVKumJ8iW4xy_ts-6XLYgIZBg',
             enabled: true,
             uploadEnabled: true,
             viewEnabled: true
@@ -20367,9 +20370,8 @@ if (document.readyState === 'loading') {
     var POST_MAX_IMAGES = 6;
     var POST_LOAD_COUNT = 5;
 
-    // ✅ IndexedDB Keys အသစ် (Conflict မဖြစ်အောင် v22)
-    var POST_LIST_KEY = 'myPostList_v22_new';
-    var FAVOURITE_KEY = 'favouritePosts_v22_new';
+    var POST_LIST_KEY = 'myPostList_v22_worker';
+    var FAVOURITE_KEY = 'favouritePosts_v22_worker';
 
     var SHARE_LINK_PREFIX = 'Post.';
     var COMMENT_MAX_LINES = 30;
@@ -20385,7 +20387,6 @@ if (document.readyState === 'loading') {
     // ===================================================
     //  STATE
     // ===================================================
-    var tursoClients = {};
     var postImages = [];
     var postVideo = null;
     var postLinkData = null;
@@ -20414,7 +20415,7 @@ if (document.readyState === 'loading') {
     var initDone = false;
 
     // ===================================================
-    //  CHECK FUNCTIONS
+    //  CHECK
     // ===================================================
     function isGlobalUploadEnabled() { return POST_GLOBAL_SETTINGS.uploadEnabled === true; }
     function isGlobalViewEnabled() { return POST_GLOBAL_SETTINGS.viewEnabled === true; }
@@ -20486,17 +20487,14 @@ if (document.readyState === 'loading') {
     }
 
     function showToastSafe(msg) {
-        if (typeof window.showToast === 'function') {
-            window.showToast(msg);
-        } else {
-            console.log('Toast:', msg);
-        }
+        if (typeof window.showToast === 'function') window.showToast(msg);
+        else console.log('Toast:', msg);
     }
 
     // ===================================================
-    //  INDEXEDDB (Standalone - ကိုယ်ပိုင်)
+    //  INDEXEDDB
     // ===================================================
-    var MY_DB_NAME = 'StarArcadePostV22';
+    var MY_DB_NAME = 'StarArcadePostV22W';
     var MY_DB_VERSION = 1;
     var MY_STORE = 'postData';
 
@@ -20539,74 +20537,54 @@ if (document.readyState === 'loading') {
     }
 
     // ===================================================
-    //  TURSO CLIENT
+    //  ✅ CLOUDFLARE WORKER CLIENT
     // ===================================================
     function getTursoClient(serverId) {
-        if (tursoClients[serverId]) return tursoClients[serverId];
-        var srv = POST_SERVERS.find(function(s) { return s.id === serverId; });
-        if (!srv) return null;
+        if (window.__workerClient) return window.__workerClient;
 
         var client = {
             execute: function(sql, params) {
-                params = params || [];
-                var args = params.map(function(p) {
-                    if (p === null || p === undefined) return { type: 'null' };
-                    if (typeof p === 'number') {
-                        return Number.isInteger(p)
-                            ? { type: 'integer', value: String(p) }
-                            : { type: 'float', value: String(p) };
-                    }
-                    if (typeof p === 'boolean') return { type: 'integer', value: p ? '1' : '0' };
-                    return { type: 'text', value: String(p) };
-                });
-
-                return fetch(srv.tursoUrl + '/v2/pipeline', {
+                return fetch(WORKER_URL + '/api/execute', {
                     method: 'POST',
-                    headers: {
-                        'Authorization': 'Bearer ' + srv.tursoToken,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        requests: [
-                            { type: 'execute', stmt: { sql: sql, args: args, want_rows: true } },
-                            { type: 'close' }
-                        ]
-                    })
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ sql: sql, params: params || [] })
                 })
                 .then(function(r) {
                     if (!r.ok) {
                         return r.text().then(function(t) {
-                            throw new Error('Turso HTTP ' + r.status + ': ' + t);
+                            throw new Error('Worker HTTP ' + r.status + ': ' + t);
                         });
                     }
                     return r.json();
                 })
                 .then(function(data) {
-                    var result = data.results && data.results[0];
-                    if (!result) throw new Error('No result');
-                    if (result.type === 'error') {
-                        throw new Error(result.error && result.error.message ? result.error.message : 'Turso error');
-                    }
-                    return result.response ? result.response.result : null;
+                    if (!data.ok) throw new Error(data.error || 'Worker error');
+                    return data.data;
                 });
             },
 
             query: function(sql, params) {
-                return client.execute(sql, params).then(function(result) {
-                    if (!result || !result.rows) return [];
-                    var cols = result.cols.map(function(c) { return c.name; });
-                    return result.rows.map(function(row) {
-                        var obj = {};
-                        row.forEach(function(cell, i) {
-                            obj[cols[i]] = (cell && cell.value !== undefined) ? cell.value : null;
+                return fetch(WORKER_URL + '/api/query', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ sql: sql, params: params || [] })
+                })
+                .then(function(r) {
+                    if (!r.ok) {
+                        return r.text().then(function(t) {
+                            throw new Error('Worker HTTP ' + r.status + ': ' + t);
                         });
-                        return obj;
-                    });
+                    }
+                    return r.json();
+                })
+                .then(function(data) {
+                    if (!data.ok) throw new Error(data.error || 'Worker error');
+                    return data.data || [];
                 });
             }
         };
 
-        tursoClients[serverId] = client;
+        window.__workerClient = client;
         return client;
     }
 
@@ -20697,26 +20675,23 @@ if (document.readyState === 'loading') {
     }
 
     // ===================================================
-    //  USER INFO FROM GLOBAL
+    //  USER INFO
     // ===================================================
     function getMyUserInfo() {
         return new Promise(function(resolve) {
             if (window.currentUser && window.currentServerId) {
-                var srv = POST_SERVERS.find(function(s) { return s.id === 'turso1'; });
                 resolve({
                     userId: String(window.currentUser.userId || ''),
                     userName: window.currentUser.name || 'Player',
                     serverId: window.currentServerId || '',
-                    serverNo: srv ? srv.name : 'Server 1',
+                    serverNo: 'Server 1',
                     avatar: window.currentUser.avatar || '',
                     bubbleUse: window.currentUser.bubbleUse || '',
                     bubbleOwned: window.currentUser.bubbleOwned || []
                 });
                 return;
             }
-
             if (typeof getFromDB !== 'function') return resolve(null);
-
             getFromDB('session').then(function(session) {
                 if (!session || !session.email) return resolve(null);
                 getFromDB('users').then(function(users) {
@@ -20742,7 +20717,6 @@ if (document.readyState === 'loading') {
     function showUploadBar(text) {
         hideUploadBar();
         isUploadInProgress = true;
-
         uploadBarElement = document.createElement('div');
         uploadBarElement.id = 'postUploadBar';
         uploadBarElement.className = 'post-upload-bar';
@@ -20752,24 +20726,21 @@ if (document.readyState === 'loading') {
             '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9,18 15,12 9,6"/></svg>';
 
         var feedBody = document.getElementById('postFeedBody');
-        if (feedBody && feedBody.parentNode) {
-            feedBody.parentNode.insertBefore(uploadBarElement, feedBody);
-        } else {
-            document.body.appendChild(uploadBarElement);
-        }
+        if (feedBody && feedBody.parentNode) feedBody.parentNode.insertBefore(uploadBarElement, feedBody);
+        else document.body.appendChild(uploadBarElement);
     }
 
     function hideUploadBar() {
-        var existing = document.getElementById('postUploadBar');
-        if (existing) existing.remove();
+        var ex = document.getElementById('postUploadBar');
+        if (ex) ex.remove();
         uploadBarElement = null;
         isUploadInProgress = false;
     }
 
     function updateUploadBarText(text) {
         if (uploadBarElement) {
-            var textEl = uploadBarElement.querySelector('.post-upload-bar-text');
-            if (textEl) textEl.textContent = text;
+            var t = uploadBarElement.querySelector('.post-upload-bar-text');
+            if (t) t.textContent = text;
         }
     }
 
@@ -20777,20 +20748,13 @@ if (document.readyState === 'loading') {
     //  TAB DESC
     // ===================================================
     function hideTabDesc() {
-        var descEl = document.getElementById('postTabDesc');
-        if (descEl) {
-            descEl.style.display = 'none';
-            descEl.classList.add('hidden');
-        }
+        var d = document.getElementById('postTabDesc');
+        if (d) { d.style.display = 'none'; d.classList.add('hidden'); }
     }
 
     function showTabDesc(text) {
-        var descEl = document.getElementById('postTabDesc');
-        if (descEl) {
-            descEl.textContent = text || '';
-            descEl.style.display = '';
-            descEl.classList.remove('hidden');
-        }
+        var d = document.getElementById('postTabDesc');
+        if (d) { d.textContent = text || ''; d.style.display = ''; d.classList.remove('hidden'); }
     }
 
     // ===================================================
@@ -20803,9 +20767,7 @@ if (document.readyState === 'loading') {
         });
     }
 
-    function saveFavourites() {
-        return myDbSet(FAVOURITE_KEY, favouritePosts);
-    }
+    function saveFavourites() { return myDbSet(FAVOURITE_KEY, favouritePosts); }
 
     function isFavourited(postId) {
         return favouritePosts.some(function(f) { return f.postId === postId; });
@@ -20922,12 +20884,6 @@ if (document.readyState === 'loading') {
 
         var srv = allEnabled[0];
         var client = getTursoClient(srv.id);
-        if (!client) {
-            feedLoading = false;
-            feedExhausted = true;
-            body.innerHTML = '<div class="post-feed-empty">Turso client error</div>';
-            return;
-        }
 
         fetchPostsFromServer(client, srv.id, 100).then(function(allPosts) {
             var filtered = allPosts;
@@ -20969,7 +20925,7 @@ if (document.readyState === 'loading') {
             console.warn('Feed fetch error:', err);
             feedLoading = false;
             feedExhausted = true;
-            body.innerHTML = '<div class="post-feed-empty">Failed to load</div>';
+            body.innerHTML = '<div class="post-feed-empty">Failed to load: ' + escapeHtml(err.message || 'Error') + '</div>';
         });
     }
 
@@ -20987,10 +20943,6 @@ if (document.readyState === 'loading') {
 
         var srv = allEnabled[0];
         var client = getTursoClient(srv.id);
-        if (!client) {
-            body.innerHTML = '<div class="post-feed-empty">Turso client error</div>';
-            return;
-        }
 
         fetchPostsFromServer(client, srv.id, 100).then(function(allPosts) {
             allPosts.sort(function(a, b) {
@@ -21010,7 +20962,6 @@ if (document.readyState === 'loading') {
 
             body.innerHTML = '';
             appendLikesNextBatch();
-
             feedExhausted = (likesAllPosts.length <= 5);
             feedLoading = false;
         }).catch(function(err) {
@@ -21142,7 +21093,7 @@ if (document.readyState === 'loading') {
         ).then(function(rows) {
             return rows.map(function(row) { return parsePostRow(row, serverId); });
         }).catch(function(err) {
-            console.warn('Turso fetch error:', err);
+            console.warn('Fetch error:', err);
             return [];
         });
     }
@@ -21152,7 +21103,6 @@ if (document.readyState === 'loading') {
             var srv = getServerByNumber(serverNo);
             if (!srv) return resolve(null);
             var client = getTursoClient(srv.id);
-            if (!client) return resolve(null);
 
             client.query('SELECT * FROM posts WHERE postId = ? LIMIT 1', [postId])
                 .then(function(rows) {
@@ -21169,8 +21119,8 @@ if (document.readyState === 'loading') {
     function initInfiniteScroll() {
         var feedBody = document.getElementById('postFeedBody');
         if (!feedBody) { setTimeout(initInfiniteScroll, 500); return; }
-        if (feedBody._scrollV22) return;
-        feedBody._scrollV22 = true;
+        if (feedBody._scrollV22W) return;
+        feedBody._scrollV22W = true;
 
         feedBody.addEventListener('scroll', function() {
             var scrollTop = feedBody.scrollTop;
@@ -21180,10 +21130,7 @@ if (document.readyState === 'loading') {
             if (scrollTop + clientHeight >= scrollHeight - 200) {
                 if (feedLoading || feedExhausted) return;
 
-                if (currentFeedTab === 'all' || currentFeedTab === 'role') {
-                    loadFeedNext();
-                    return;
-                }
+                if (currentFeedTab === 'all' || currentFeedTab === 'role') { loadFeedNext(); return; }
                 if (currentFeedTab === 'likes') {
                     if (likesLoadedCount < likesAllPosts.length) {
                         feedLoading = true;
@@ -21842,7 +21789,7 @@ if (document.readyState === 'loading') {
     }
 
     // ===================================================
-    //  SUBMIT POST (Turso)
+    //  SUBMIT POST (Cloudflare Worker)
     // ===================================================
     function submitPost() {
         if (postSubmitting) return;
@@ -21862,7 +21809,6 @@ if (document.readyState === 'loading') {
             if (!srv) throw new Error('Server မရှိပါ');
 
             var client = getTursoClient(srv.id);
-            if (!client) throw new Error('Turso client error');
 
             updateUploadProgress(15, 'Processing media...');
             updateUploadBarText('Media ပြင်ဆင်နေသည်...');
@@ -22480,6 +22426,60 @@ if (document.readyState === 'loading') {
     }
 
     // ===================================================
+    //  PROFILE FETCH
+    // ===================================================
+    function fetchUserInfoFromServer(serverNo, userId) {
+        return new Promise(function(resolve) {
+            if (window.currentUser && String(window.currentUser.userId) === String(userId)) {
+                resolve({
+                    name: window.currentUser.name || 'Player',
+                    avatar: window.currentUser.avatar || '',
+                    frameUse: window.currentUser.frameUse || '',
+                    markUse: window.currentUser.markUse || '',
+                    bannerUse: window.currentUser.bannerUse || '',
+                    bio: window.currentUser.bio || '',
+                    online: true
+                });
+                return;
+            }
+            resolve(null);
+        });
+    }
+
+    function openProfilePopupWithFetch(userId, serverNo) {
+        var loadingOverlay = document.createElement('div');
+        loadingOverlay.className = 'post-user-popup-overlay';
+        loadingOverlay.id = 'profileLoadingOverlay';
+        loadingOverlay.innerHTML =
+            '<div class="post-user-popup" style="max-width:220px;padding:28px;text-align:center;">' +
+                '<div class="post-upload-spinner" style="margin:0 auto 14px;width:44px;height:44px;border-width:3px;"></div>' +
+                '<div style="color:var(--text-main);font-size:14px;font-weight:700;">Profile ရှာနေသည်...</div>' +
+            '</div>';
+        document.body.appendChild(loadingOverlay);
+
+        fetchUserInfoFromServer(serverNo, userId).then(function(userData) {
+            loadingOverlay.remove();
+            if (userData) {
+                showPostUserPopup({
+                    userId: userId, serverId: window.currentServerId, serverNo: 'Server ' + serverNo,
+                    name: userData.name || 'Player',
+                    avatar: userData.avatar || IMBB_PLACEHOLDER,
+                    frameUse: userData.frameUse || '',
+                    markUse: userData.markUse || '',
+                    bannerUse: userData.bannerUse || '',
+                    bio: userData.bio || '',
+                    online: userData.online === true
+                });
+            } else {
+                showToastSafe('User မတွေ့ပါ');
+            }
+        }).catch(function() {
+            loadingOverlay.remove();
+            showToastSafe('Failed to load profile');
+        });
+    }
+
+    // ===================================================
     //  VIEWER
     // ===================================================
     function openPostViewer(post, startIndex) {
@@ -22569,7 +22569,7 @@ if (document.readyState === 'loading') {
     }
 
     // ===================================================
-    //  POST SHARE LINK HANDLER
+    //  SHARE LINK HANDLER
     // ===================================================
     function initPostShareLinkHandler() {
         document.addEventListener('click', function(e) {
@@ -22630,12 +22630,12 @@ if (document.readyState === 'loading') {
     // ===================================================
     function init() {
         if (initDone) {
-            console.log('⚠️ Post System v22.0 already initialized');
+            console.log('⚠️ v22.2 already initialized');
             return;
         }
         initDone = true;
 
-        console.log('🔧 Init Post System v22.0...');
+        console.log('🔧 Init Post System v22.2...');
 
         loadFavourites().then(function() {
             console.log('✅ Favourites loaded:', favouritePosts.length);
@@ -22741,7 +22741,7 @@ if (document.readyState === 'loading') {
         hookPlusMenuPost();
         initPostShareLinkHandler();
 
-        console.log('✅ Post System v22.0 (Turso Only) Ready');
+        console.log('✅ Post System v22.2 (Cloudflare Worker) Ready');
     }
 
     // ===================================================
