@@ -20449,10 +20449,11 @@ if (document.readyState === 'loading') {
 })();
 
 // ============================================================
-// ✅ POST SYSTEM v35.0 -- FULL JAVA
-//  • Comment ရေးရင်: IndexedDB ကနေ Name, ID, ServerNo, BubbleID ယူပြီး သိမ်း
-//  • createdAt မသိမ်း
-//  • View နှိပ်မှ Firebase သွား -- Full Profile ပြ
+// ✅ POST SYSTEM v36.0 -- FULL JAVA
+//  • Main DB (StarArcadeDB) ထဲ ပေါင်းထည့်
+//  • Log Out All Data လုပ်တိုင်း Post Data ပါ ပျက်
+//  • Comment Data: id, userId, userName, userServerNo, bubbleId, text (createdAt မပါ)
+//  • View နှိပ်မှ Firebase သွား -- Profile Full ပြ
 //  • Report → Telegram https://t.me/StarArcadeAdmin/736
 //  • Post: userId, userName, serverNo, userAvatar, workerNo
 //  • တစ်နေ့ 3 ခု / Like Max 10000 / Comment Max 100
@@ -20461,7 +20462,7 @@ if (document.readyState === 'loading') {
 (function() {
     'use strict';
 
-    console.log('🚀 Post System v35.0 Loading...');
+    console.log('🚀 Post System v36.0 Loading...');
 
     // ===================================================
     //  ✅ WORKER SERVERS
@@ -20500,10 +20501,11 @@ if (document.readyState === 'loading') {
     var LIKE_MAX = 10000;
     var COMMENT_MAX = 100;
 
-    var POST_LIST_KEY = 'myPostList_v35';
-    var FAVOURITE_KEY = 'favouritePosts_v35';
-    var DAILY_POST_KEY = 'dailyPostCount_v35';
-    var LIKED_POSTS_KEY = 'likedPosts_v35';
+    // ✅ Main DB ထဲက Key တွေ (prefix ထည့်)
+    var POST_LIST_KEY = 'post_myPostList';
+    var FAVOURITE_KEY = 'post_favouritePosts';
+    var DAILY_POST_KEY = 'post_dailyPostCount';
+    var LIKED_POSTS_KEY = 'post_likedPosts';
 
     var SHARE_LINK_PREFIX = 'Post.';
     var COMMENT_MAX_LINES = 30;
@@ -20643,19 +20645,21 @@ if (document.readyState === 'loading') {
     }
 
     // ===================================================
-    //  INDEXEDDB
+    //  ✅ INDEXEDDB -- Main DB ကို သုံး
     // ===================================================
-    var MY_DB_NAME = 'StarArcadePostV35';
-    var MY_DB_VERSION = 1;
-    var MY_STORE = 'postData';
+    var DB_NAME = 'StarArcadeDB';
+    var DB_VERSION = 1;
+    var STORE_NAME = 'userData';
 
     function openMyDB() {
         return new Promise(function(resolve, reject) {
-            var req = indexedDB.open(MY_DB_NAME, MY_DB_VERSION);
+            var req = indexedDB.open(DB_NAME, DB_VERSION);
             req.onupgradeneeded = function(e) {
                 var db = e.target.result;
-                if (!db.objectStoreNames.contains(MY_STORE)) {
-                    db.createObjectStore(MY_STORE, { keyPath: 'key' });
+                if (!db.objectStoreNames.contains(STORE_NAME)) {
+                    var store = db.createObjectStore(STORE_NAME, { keyPath: 'key' });
+                    store.createIndex('email', 'email', { unique: true });
+                    store.createIndex('userId', 'userId', { unique: true });
                 }
             };
             req.onsuccess = function(e) { resolve(e.target.result); };
@@ -20666,8 +20670,8 @@ if (document.readyState === 'loading') {
     function myDbGet(key) {
         return new Promise(function(resolve) {
             openMyDB().then(function(db) {
-                var tx = db.transaction(MY_STORE, 'readonly');
-                var store = tx.objectStore(MY_STORE);
+                var tx = db.transaction(STORE_NAME, 'readonly');
+                var store = tx.objectStore(STORE_NAME);
                 var req = store.get(key);
                 req.onsuccess = function() { resolve(req.result ? req.result.value : null); };
                 req.onerror = function() { resolve(null); };
@@ -20678,8 +20682,8 @@ if (document.readyState === 'loading') {
     function myDbSet(key, value) {
         return new Promise(function(resolve) {
             openMyDB().then(function(db) {
-                var tx = db.transaction(MY_STORE, 'readwrite');
-                var store = tx.objectStore(MY_STORE);
+                var tx = db.transaction(STORE_NAME, 'readwrite');
+                var store = tx.objectStore(STORE_NAME);
                 var req = store.put({ key: key, value: value });
                 req.onsuccess = function() { resolve(true); };
                 req.onerror = function() { resolve(false); };
@@ -20742,7 +20746,7 @@ if (document.readyState === 'loading') {
     //  WORKER CLIENT
     // ===================================================
     function getWorkerClient(workerId) {
-        var cacheKey = '__workerClientV35_' + workerId;
+        var cacheKey = '__workerClientV36_' + workerId;
         if (window[cacheKey]) return window[cacheKey];
 
         var worker = getWorkerById(workerId);
@@ -20883,7 +20887,7 @@ if (document.readyState === 'loading') {
     }
 
     // ===================================================
-    //  ✅ USER INFO (IndexedDB ကနေ ယူ)
+    //  USER INFO
     // ===================================================
     function getMyUserInfo() {
         return new Promise(function(resolve) {
@@ -21333,8 +21337,8 @@ if (document.readyState === 'loading') {
     function initInfiniteScroll() {
         var feedBody = document.getElementById('postFeedBody');
         if (!feedBody) { setTimeout(initInfiniteScroll, 500); return; }
-        if (feedBody._scrollV35) return;
-        feedBody._scrollV35 = true;
+        if (feedBody._scrollV36) return;
+        feedBody._scrollV36 = true;
 
         feedBody.addEventListener('scroll', function() {
             var scrollTop = feedBody.scrollTop;
@@ -21695,7 +21699,7 @@ if (document.readyState === 'loading') {
     }
 
     // ===================================================
-    //  ✅ SUBMIT POST
+    //  SUBMIT POST
     // ===================================================
     function submitPost() {
         if (postSubmitting) return;
@@ -22237,7 +22241,6 @@ if (document.readyState === 'loading') {
         comments.forEach(function(c) { list.appendChild(buildCommentItem(c)); });
     }
 
-    // ✅ Comment Item -- userServerNo က Firebase Server No
     function buildCommentItem(c) {
         var item = document.createElement('div');
         item.className = 'comment-item';
@@ -22443,7 +22446,6 @@ if (document.readyState === 'loading') {
         });
     }
 
-    // ✅ Send Comment -- IndexedDB ကနေ Name, ID, ServerNo, BubbleID ယူ
     function sendComment() {
         if (!isGlobalCommentEnabled()) { showToastSafe('Comment ခွင့် ပိတ်ထားသည်'); return; }
 
@@ -22471,7 +22473,6 @@ if (document.readyState === 'loading') {
             sendBtn.innerHTML = '<div class="spinner-mini" style="width:18px;height:18px;border-width:2px;"></div>';
         }
 
-        // ✅ IndexedDB ကနေ User Info ယူ
         getMyUserInfo().then(function(myInfo) {
             if (!myInfo) {
                 showToastSafe('User info မရပါ');
@@ -22479,7 +22480,6 @@ if (document.readyState === 'loading') {
                 return;
             }
 
-            // ✅ Comment Data -- User Info ပါသိမ်း၊ createdAt မပါ
             var comment = {
                 id: genCommentId(),
                 userId: myInfo.userId,
@@ -22487,7 +22487,6 @@ if (document.readyState === 'loading') {
                 userServerNo: myInfo.serverNo,
                 bubbleId: commentSelectedBubbleId || myInfo.bubbleUse || '',
                 text: text
-                // ✅ createdAt မပါ
             };
 
             input.value = '';
@@ -23122,10 +23121,10 @@ if (document.readyState === 'loading') {
         if (initDone) return;
         initDone = true;
 
-        console.log('🔧 Init Post System v35.0...');
+        console.log('🔧 Init Post System v36.0...');
 
         Promise.all([loadLikedPosts(), loadFavourites()]).then(function() {
-            console.log('✅ Loaded');
+            console.log('✅ Loaded likedPosts:', likedPosts.length, 'favourites:', favouritePosts.length);
         });
 
         document.querySelectorAll('.post-tab-chip').forEach(function(chip) {
@@ -23228,7 +23227,7 @@ if (document.readyState === 'loading') {
         hookPlusMenuPost();
         initPostShareLinkHandler();
 
-        console.log('✅ Post System v35.0 Ready');
+        console.log('✅ Post System v36.0 Ready (Main DB)');
     }
 
     function start() {
