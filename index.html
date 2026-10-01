@@ -20449,12 +20449,12 @@ if (document.readyState === 'loading') {
 })();
 
 // ============================================================
-// ✅ POST SYSTEM + CHAT LINK HANDLER -- FULL JAVA
-//  Version: 2026-10-01
-//  • Post Data: Turso (Worker Server)
-//  • User Data: Firebase (Main App)
-//  • IndexedDB: StarArcadeDB (Main DB)
-//  • Chat Link: Post.1.p12345 → Clickable
+// ✅ POST SYSTEM + CHAT LINK HANDLER v3.0
+//  Full Java -- Version: 2026-10-01
+//  • Post: Turso (Worker Server)
+//  • User: Firebase (Main App)
+//  • IndexedDB: StarArcadeDB
+//  • Chat Link: Post.1.p12345 → Clickable + Nav Reset
 //  • Comment: userId, userName, userServerNo, bubbleId, text
 //  • Post: userId, userName, serverNo, userAvatar, workerNo
 //  • Like Max 10000 / Comment Max 100 / တစ်နေ့ 3 Post
@@ -20463,7 +20463,7 @@ if (document.readyState === 'loading') {
 (function() {
     'use strict';
 
-    console.log('🚀 Post System + Chat Link v1.0 Loading...');
+    console.log('🚀 Post System + Chat Link v3.0 Loading...');
 
     // ===================================================
     //  ✅ WORKER SERVERS
@@ -20502,7 +20502,6 @@ if (document.readyState === 'loading') {
     var LIKE_MAX = 10000;
     var COMMENT_MAX = 100;
 
-    // Main DB Keys
     var POST_LIST_KEY = 'post_myPostList';
     var FAVOURITE_KEY = 'post_favouritePosts';
     var DAILY_POST_KEY = 'post_dailyPostCount';
@@ -23053,50 +23052,6 @@ if (document.readyState === 'loading') {
     }
 
     // ===================================================
-    //  SHARE LINK HANDLER
-    // ===================================================
-    function initPostShareLinkHandler() {
-        document.addEventListener('click', function(e) {
-            var link = e.target.closest('.post-share-link');
-            if (!link) return;
-            e.preventDefault();
-            e.stopPropagation();
-            e.stopImmediatePropagation();
-
-            var serverNo = parseInt(link.dataset.serverNo);
-            var postId = link.dataset.postId;
-            if (!serverNo || !postId) return;
-
-            if (!isGlobalViewEnabled()) { showToastSafe('Post ကြည့်ခွင့် ပိတ်ထားသည်'); return; }
-
-            if (typeof window.switchTab === 'function') {
-                window.switchTab('home');
-                var homeBtn = document.querySelector('.nav-btn[data-tab="home"]');
-                if (homeBtn) {
-                    document.querySelectorAll('.nav-btn').forEach(function(b) { b.classList.remove('active'); });
-                    homeBtn.classList.add('active');
-                }
-            }
-
-            if (typeof window.closeFullscreen === 'function') window.closeFullscreen();
-            showToastSafe('Post ရှာနေသည်...');
-
-            fetchSinglePost(serverNo, postId).then(function(post) {
-                if (!post) { showToastSafe('Post မတွေ့ပါ'); return; }
-
-                var body = document.getElementById('postFeedBody');
-                feedAllPosts = [post];
-                feedExhausted = true;
-                lastRenderedIds = {};
-                if (body) body.innerHTML = '';
-                lastRenderedIds[post.postId] = true;
-                if (body) body.appendChild(buildPostCard(post));
-                hideTabDesc();
-            });
-        }, true);
-    }
-
-    // ===================================================
     //  HOOK PLUS MENU
     // ===================================================
     function hookPlusMenuPost() {
@@ -23110,7 +23065,7 @@ if (document.readyState === 'loading') {
     }
 
     // ===================================================
-    //  GLOBAL EXPORTS (Chat Link Handler က သုံးဖို့)
+    //  GLOBAL EXPORTS
     // ===================================================
     window.buildPostCard = buildPostCard;
     window.parsePostRow = parsePostRow;
@@ -23243,7 +23198,6 @@ if (document.readyState === 'loading') {
         }
 
         hookPlusMenuPost();
-        initPostShareLinkHandler();
 
         console.log('✅ Post System v36.0 Ready');
     }
@@ -23266,14 +23220,15 @@ if (document.readyState === 'loading') {
 
 
 // ============================================================
-// ✅ CHAT POST LINK HANDLER v2.0
-// Chat မှာ Post.1.p12345 Link ကို Clickable ဖြစ်အောင်
-// Click ရင် Full Post Card (Like/Comment အားလုံး အလုပ်လုပ်)
+// ✅ CHAT POST LINK HANDLER v3.0
+//  • Link နှိပ်ရင် Home ရောက်
+//  • Chat Tab ပြန်နှိပ်လို့ ရ (Nav Bar Auto Reset)
+//  • Full Post Card (Like/Comment အားလုံး အလုပ်လုပ်)
 // ============================================================
 (function() {
     'use strict';
 
-    console.log('🔗 Chat Post Link Handler v2.0 Loading...');
+    console.log('🔗 Chat Post Link Handler v3.0 Loading...');
 
     // ===================================================
     //  CSS
@@ -23375,6 +23330,57 @@ if (document.readyState === 'loading') {
     }
 
     // ===================================================
+    //  ✅ NAV BAR RESET (BUG FIX)
+    // ===================================================
+    function resetNavBar() {
+        console.log('🔄 Resetting Nav Bar...');
+
+        var allNavBtns = document.querySelectorAll('.nav-btn');
+        allNavBtns.forEach(function(btn) {
+            btn.classList.remove('active');
+            btn.style.pointerEvents = 'auto';
+            btn.style.opacity = '1';
+            btn.disabled = false;
+        });
+
+        var homeBtn = document.querySelector('.nav-btn[data-tab="home"]');
+        if (homeBtn) homeBtn.classList.add('active');
+
+        document.querySelectorAll('.screen').forEach(function(s) {
+            s.classList.add('hidden');
+        });
+
+        var homeScreen = document.getElementById('screen-home');
+        if (homeScreen) homeScreen.classList.remove('hidden');
+
+        if (typeof window.closePlusMenu === 'function') {
+            try { window.closePlusMenu(); } catch(e) {}
+        }
+
+        var fsOverlay = document.getElementById('fullscreenOverlay');
+        if (fsOverlay) {
+            fsOverlay.classList.remove('active');
+            fsOverlay.classList.remove('chat-room-active');
+            fsOverlay.classList.remove('profile-active');
+        }
+
+        var sidebar = document.getElementById('sidebar');
+        if (sidebar) sidebar.classList.remove('open');
+        var sidebarOverlay = document.getElementById('sidebarOverlay');
+        if (sidebarOverlay) sidebarOverlay.classList.remove('active');
+
+        document.body.style.overflow = '';
+
+        try {
+            if (typeof window.currentTab !== 'undefined') {
+                window.currentTab = 'home';
+            }
+        } catch(e) {}
+
+        console.log('✅ Nav Bar Reset Done');
+    }
+
+    // ===================================================
     //  CLICK HANDLER
     // ===================================================
     function handlePostLinkClick(e) {
@@ -23392,20 +23398,17 @@ if (document.readyState === 'loading') {
 
         console.log('📎 Post Link Clicked:', serverNo, postId);
 
-        if (typeof window.switchTab === 'function') {
-            window.switchTab('home');
-        }
-        var homeBtn = document.querySelector('.nav-btn[data-tab="home"]');
-        if (homeBtn) {
-            document.querySelectorAll('.nav-btn').forEach(function(b) { b.classList.remove('active'); });
-            homeBtn.classList.add('active');
-        }
-
-        if (typeof window.closeFullscreen === 'function') {
-            window.closeFullscreen();
-        }
-
+        resetNavBar();
         showPostFromLink(serverNo, postId);
+
+        setTimeout(function() { resetNavBar(); }, 200);
+        setTimeout(function() {
+            document.querySelectorAll('.nav-btn').forEach(function(btn) {
+                btn.style.pointerEvents = 'auto';
+                btn.style.opacity = '1';
+                btn.disabled = false;
+            });
+        }, 500);
     }
 
     // ===================================================
@@ -23417,7 +23420,6 @@ if (document.readyState === 'loading') {
 
         feedBody.innerHTML = '<div class="post-feed-loading">Post ရှာနေသည်...</div>';
 
-        // ✅ Global fetchSinglePost ကို သုံး (Post System v36 ရဲ့ Function)
         if (typeof window.fetchSinglePost === 'function') {
             window.fetchSinglePost(serverNo, postId).then(function(post) {
                 if (!post) {
@@ -23501,7 +23503,26 @@ if (document.readyState === 'loading') {
     }, true);
 
     // ===================================================
-    //  AUTO WATCH
+    //  NAV BUTTON WATCHER (BUG FIX)
+    // ===================================================
+    function watchNavBar() {
+        document.querySelectorAll('.nav-btn').forEach(function(btn) {
+            if (btn.style.pointerEvents === 'none') {
+                btn.style.pointerEvents = 'auto';
+            }
+            if (btn.disabled) {
+                btn.disabled = false;
+            }
+            if (btn.style.opacity === '0') {
+                btn.style.opacity = '1';
+            }
+        });
+
+        setTimeout(watchNavBar, 1000);
+    }
+
+    // ===================================================
+    //  AUTO WATCH CHAT ROOM
     // ===================================================
     function watchChatRoom() {
         var messagesEl = document.getElementById('chatRoomMessages');
@@ -23512,9 +23533,13 @@ if (document.readyState === 'loading') {
         setTimeout(watchChatRoom, 1500);
     }
 
+    // ===================================================
+    //  START
+    // ===================================================
     setTimeout(function() {
         watchChatRoom();
-        console.log('✅ Chat Post Link Handler v2.0 Ready');
+        watchNavBar();
+        console.log('✅ Chat Post Link Handler v3.0 Ready');
     }, 2000);
 
 })();
