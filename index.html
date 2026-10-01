@@ -20404,22 +20404,19 @@ if (document.readyState === 'loading') {
 })();
 
 // ============================================================
-// ✅ POST SYSTEM v27.0 -- FULL JAVA
-//  • Comment: IndexedDB ကနေ ID/ServerNo/BubbleID ယူ
-//  • Comment View: Firebase သွားရှာ
-//  • Action Buttons: Icon + Count (စာတွေ ဖြတ်)
-//  • Post တင်ရင် Firebase Post List ထဲ postId + workerNo ထည့်
-//  • Video: 10s / 10MB
-//  • Auto Server Switch (Fail ဖြစ်ရင် နောက် Server ကို ပြောင်း)
-//  • တင်တိုင်း ကျပန်း Server ရွေး
+// ✅ POST SYSTEM v28.0 -- FULL JAVA
+//  • Profile Circle / Comment View ပြဿနာ ပြင်
+//  • Post တင်တိုင်း Home Loading မခေါ
+//  • Role Optional (မရွေးလည်း ရ)
+//  • Upload လုပ်နေစဉ် Worker Server မပြ
 // ============================================================
 (function() {
     'use strict';
 
-    console.log('🚀 Post System v27.0 Loading...');
+    console.log('🚀 Post System v28.0 Loading...');
 
     // ===================================================
-    //  ✅ WORKER SERVERS -- အသစ်ထည့်ရလွယ်
+    //  ✅ WORKER SERVERS
     // ===================================================
     var WORKER_SERVERS = [
         {
@@ -20431,17 +20428,6 @@ if (document.readyState === 'loading') {
             uploadEnabled: true,
             viewEnabled: true
         }
-
-        // ✅ Worker အသစ်ထည့်ရန်
-        // ,{
-        //     id: 'worker2',
-        //     name: 'Server 2',
-        //     number: 2,
-        //     url: 'https://your-worker-2.workers.dev',
-        //     enabled: true,
-        //     uploadEnabled: true,
-        //     viewEnabled: true
-        // }
     ];
 
     var POST_GLOBAL_SETTINGS = {
@@ -20457,21 +20443,20 @@ if (document.readyState === 'loading') {
     var REPORT_TOPIC_ID = 689;
 
     var POST_MAX_VIDEO_DURATION = 10;
-    var POST_MAX_VIDEO_SIZE = 10 * 1024 * 1024; // 10MB
+    var POST_MAX_VIDEO_SIZE = 10 * 1024 * 1024;
     var POST_MAX_IMAGES = 6;
     var POST_LOAD_COUNT = 5;
     var DAILY_POST_LIMIT = 3;
 
-    var POST_LIST_KEY = 'myPostList_v27';
-    var FAVOURITE_KEY = 'favouritePosts_v27';
-    var DAILY_POST_KEY = 'dailyPostCount_v27';
-    var LIKED_POSTS_KEY = 'likedPosts_v27';
+    var POST_LIST_KEY = 'myPostList_v28';
+    var FAVOURITE_KEY = 'favouritePosts_v28';
+    var DAILY_POST_KEY = 'dailyPostCount_v28';
+    var LIKED_POSTS_KEY = 'likedPosts_v28';
 
     var SHARE_LINK_PREFIX = 'Post.';
     var COMMENT_MAX_LINES = 30;
     var IMBB_PLACEHOLDER = 'https://i.ibb.co/r2k0J5rJ/Grid-Art-20260829-171212620.png';
 
-    // ✅ Post Roles -- ID နဲ့သိမ်း
     var POST_ROLES = [
         { id: 'role_gamer', name: 'Gamer', image: 'https://i.ibb.co/r2k0J5rJ/Grid-Art-20260829-171212620.png', desc: 'Pro Gamer' },
         { id: 'role_artist', name: 'Artist', image: 'https://i.ibb.co/r2k0J5rJ/Grid-Art-20260829-171212620.png', desc: 'Content Creator' },
@@ -20604,7 +20589,7 @@ if (document.readyState === 'loading') {
     // ===================================================
     //  INDEXEDDB
     // ===================================================
-    var MY_DB_NAME = 'StarArcadePostV27';
+    var MY_DB_NAME = 'StarArcadePostV28';
     var MY_DB_VERSION = 1;
     var MY_STORE = 'postData';
 
@@ -20701,7 +20686,7 @@ if (document.readyState === 'loading') {
     //  WORKER CLIENT
     // ===================================================
     function getWorkerClient(workerId) {
-        var cacheKey = '__workerClientV27_' + workerId;
+        var cacheKey = '__workerClientV28_' + workerId;
         if (window[cacheKey]) return window[cacheKey];
 
         var worker = getWorkerById(workerId);
@@ -20840,19 +20825,25 @@ if (document.readyState === 'loading') {
     }
 
     // ===================================================
-    //  ✅ USER INFO (ID, ServerNo, BubbleID ယူ)
+    //  USER INFO
     // ===================================================
     function getMyUserInfo() {
         return new Promise(function(resolve) {
             if (window.currentUser && window.currentServerId) {
-                var srv = getWorkerById(window.currentServerId);
+                // ✅ Firebase Server No ကို FIREBASE_SERVERS ထဲကနေ ရှာ
+                var firebaseServerNo = 1;
+                if (typeof window.FIREBASE_SERVERS !== 'undefined') {
+                    var fbSrv = window.FIREBASE_SERVERS.find(function(s) {
+                        return s.id === window.currentServerId;
+                    });
+                    if (fbSrv) firebaseServerNo = fbSrv.number;
+                }
                 resolve({
                     userId: String(window.currentUser.userId || ''),
                     userName: window.currentUser.name || 'Player',
                     serverId: window.currentServerId || '',
-                    serverNo: srv ? srv.number : 1,
+                    serverNo: firebaseServerNo,
                     avatar: window.currentUser.avatar || '',
-                    // ✅ သုံးနေတဲ့ Bubble ID ပါယူ
                     bubbleUse: window.currentUser.bubbleUse || '',
                     bubbleOwned: window.currentUser.bubbleOwned || []
                 });
@@ -20863,7 +20854,7 @@ if (document.readyState === 'loading') {
     }
 
     // ===================================================
-    //  ✅ POST LIST -- Firebase User Data ထဲ ထည့် (postId + workerNo)
+    //  POST LIST (Firebase User Data)
     // ===================================================
     function addPostToFirebaseUserList(postId, workerNo) {
         return new Promise(function(resolve) {
@@ -20889,7 +20880,6 @@ if (document.readyState === 'loading') {
                     console.warn('PostList transaction error:', error);
                     resolve(false);
                 } else if (committed) {
-                    console.log('✅ Post added to Firebase user list:', entry);
                     resolve(true);
                 } else {
                     resolve(false);
@@ -20899,7 +20889,7 @@ if (document.readyState === 'loading') {
     }
 
     // ===================================================
-    //  UPLOAD BAR / POPUP
+    //  UPLOAD BAR
     // ===================================================
     function showUploadBar(text) {
         hideUploadBar();
@@ -21118,7 +21108,7 @@ if (document.readyState === 'loading') {
             console.warn('Feed fetch error:', err);
             feedLoading = false;
             feedExhausted = true;
-            body.innerHTML = '<div class="post-feed-empty">Failed to load: ' + escapeHtml(err.message || 'Error') + '</div>';
+            body.innerHTML = '<div class="post-feed-empty">Failed to load</div>';
         });
     }
 
@@ -21176,8 +21166,7 @@ if (document.readyState === 'loading') {
                 setTimeout(showNext, 150);
             }
             showNext();
-        }).catch(function(err) {
-            console.warn('Likes feed error:', err);
+        }).catch(function() {
             body.innerHTML = '<div class="post-feed-empty">Failed to load</div>';
         });
     }
@@ -21292,8 +21281,8 @@ if (document.readyState === 'loading') {
     function initInfiniteScroll() {
         var feedBody = document.getElementById('postFeedBody');
         if (!feedBody) { setTimeout(initInfiniteScroll, 500); return; }
-        if (feedBody._scrollV27) return;
-        feedBody._scrollV27 = true;
+        if (feedBody._scrollV28) return;
+        feedBody._scrollV28 = true;
 
         feedBody.addEventListener('scroll', function() {
             var scrollTop = feedBody.scrollTop;
@@ -21646,16 +21635,16 @@ if (document.readyState === 'loading') {
         });
     }
 
+    // ✅ Role Optional -- Media ရှိရင် တင်လို့ရ
     function updatePostSubmitBtn() {
         var btn = document.getElementById('postSubmitBtn');
         if (!btn) return;
         var hasMedia = (postImages.length > 0) || postVideo || postLinkData;
-        var hasRole = !!postSelectedRoleId;
-        btn.disabled = !hasMedia || !hasRole || postSubmitting;
+        btn.disabled = !hasMedia || postSubmitting;
     }
 
     // ===================================================
-    //  ✅ SUBMIT POST -- Auto Server Switch
+    //  SUBMIT POST -- Home Loading မခေါ
     // ===================================================
     function submitPost() {
         if (postSubmitting) return;
@@ -21664,7 +21653,6 @@ if (document.readyState === 'loading') {
 
         var hasMedia = (postImages.length > 0) || postVideo || postLinkData;
         if (!hasMedia) return;
-        if (!postSelectedRoleId) { showToastSafe('Role ရွေးပါ'); return; }
 
         checkDailyPostLimit().then(function(limitResult) {
             if (!limitResult.canPost) {
@@ -21678,7 +21666,6 @@ if (document.readyState === 'loading') {
             showUploadPopup('Preparing...', 'Processing media...', 5);
             showUploadBar('Post တင်နေသည်...');
 
-            // ✅ တင်တိုင်း ကျပန်း Server ရွေး
             var enabledWorkers = getEnabledUploadWorkers();
             if (enabledWorkers.length === 0) {
                 hideUploadPopup(); hideUploadBar();
@@ -21686,7 +21673,6 @@ if (document.readyState === 'loading') {
                 showToastSafe('Upload Server မရှိပါ');
                 return;
             }
-            // Shuffle servers for failover
             var serverQueue = enabledWorkers.slice().sort(function() { return Math.random() - 0.5; });
 
             updateUploadProgress(15, 'Processing media...');
@@ -21767,14 +21753,13 @@ if (document.readyState === 'loading') {
                     postType,
                     mediaUrlsJson,
                     linkDataJson,
-                    postSelectedRoleId,
+                    postSelectedRoleId || '',
                     0,
                     0,
                     '[]',
                     Date.now()
                 ];
 
-                // ✅ Auto Server Switch -- Fail ဖြစ်ရင် နောက် Server ကို ပြောင်း
                 return tryUploadWithFailover(serverQueue, sql, params, postId);
             }).then(function(result) {
                 if (!result || !result.success) {
@@ -21786,18 +21771,66 @@ if (document.readyState === 'loading') {
                 updateUploadProgress(100, 'Done!');
                 updateUploadBarText('Done!');
 
-                // ✅ Firebase User List ထဲ postId + workerNo ထည့်
-                addPostToFirebaseUserList(result.postId, result.workerNo).then(function(ok) {
-                    console.log('Firebase postList update:', ok);
-                });
+                addPostToFirebaseUserList(result.postId, result.workerNo).then(function() {});
+
+                // ✅ Post ကို Feed ရဲ့ အပေါ်ဆုံးမှာ ချက်ချင်း ထည့် -- Loading မခေါ
+                var newPost = {
+                    postId: postId,
+                    userId: userInfo.userId,
+                    userName: userInfo.userName,
+                    serverId: userInfo.serverId,
+                    serverNo: userInfo.serverNo,
+                    userAvatar: userInfo.userAvatar,
+                    caption: caption,
+                    postType: postType,
+                    mediaUrls: mediaItems,
+                    linkData: postLinkData,
+                    roleId: postSelectedRoleId || '',
+                    likeCount: 0,
+                    commentCount: 0,
+                    comments: [],
+                    createdAt: Date.now(),
+                    _serverId: result.workerId
+                };
+
+                var feedBody = document.getElementById('postFeedBody');
+                if (feedBody) {
+                    // Loading / Empty Element တွေ ရှိရင် ဖျက်
+                    var loadingEl = feedBody.querySelector('.post-feed-loading');
+                    if (loadingEl) loadingEl.remove();
+                    var emptyEl = feedBody.querySelector('.post-feed-empty');
+                    if (emptyEl) emptyEl.remove();
+
+                    // Feed Array ထဲ ထည့်
+                    feedAllPosts.unshift(newPost);
+                    lastRenderedIds[postId] = true;
+
+                    // Card ကို အပေါ်ဆုံးမှာ ထည့်
+                    var card = buildPostCard(newPost);
+                    card.style.opacity = '0';
+                    card.style.transform = 'translateY(-10px)';
+                    card.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+
+                    if (feedBody.firstChild) {
+                        feedBody.insertBefore(card, feedBody.firstChild);
+                    } else {
+                        feedBody.appendChild(card);
+                    }
+
+                    requestAnimationFrame(function() {
+                        card.style.opacity = '1';
+                        card.style.transform = 'translateY(0)';
+                    });
+
+                    // Feed အပေါ်ဆုံးကို Scroll
+                    feedBody.scrollTop = 0;
+                }
 
                 setTimeout(function() {
                     hideUploadPopup();
                     hideUploadBar();
                     postSubmitting = false;
                     showToastSafe('Post တင်ပြီးပါပြီ');
-                    resetFeed();
-                    loadFeedNext();
                 }, 500);
             }).catch(function(err) {
                 console.error('Post upload error:', err);
@@ -21810,7 +21843,7 @@ if (document.readyState === 'loading') {
         });
     }
 
-    // ✅ Auto Server Switch Logic
+    // ✅ Auto Server Switch -- Server နာမည် မပြ
     function tryUploadWithFailover(serverQueue, sql, params, postId) {
         var idx = 0;
 
@@ -21824,15 +21857,14 @@ if (document.readyState === 'loading') {
 
             var client = getWorkerClient(srv.id);
             if (!client) {
-                console.warn('Client null for ' + srv.id + ', trying next...');
                 return tryNext();
             }
 
-            updateUploadBarText(srv.name + ' မှာ တင်နေသည်...');
-            updateUploadProgress(50 + (idx * 10), 'Server ' + srv.number + ' -- Saving...');
+            // ✅ Server နာမည် မပြ -- ယေဘုယျ စာသားပဲ
+            updateUploadBarText('Post တင်နေသည်...');
+            updateUploadProgress(50 + (idx * 10), 'Saving...');
 
             return client.execute(sql, params).then(function() {
-                console.log('✅ Post uploaded to ' + srv.name);
                 return {
                     success: true,
                     postId: postId,
@@ -21840,9 +21872,8 @@ if (document.readyState === 'loading') {
                     workerId: srv.id
                 };
             }).catch(function(err) {
-                console.warn('Server ' + srv.number + ' failed:', err.message);
-                updateUploadBarText(srv.name + ' Fail -- နောက် Server ပြောင်းနေသည်...');
-                // နောက် Server ကို ဆက်စမ်း
+                console.warn('Upload failed, trying next server...', err.message);
+                updateUploadBarText('နောက် Server ပြောင်းနေသည်...');
                 return tryNext();
             });
         }
@@ -21851,7 +21882,7 @@ if (document.readyState === 'loading') {
     }
 
     // ===================================================
-    //  ✅ BUILD POST CARD -- Icon + Count (စာတွေ ဖြတ်)
+    //  BUILD POST CARD
     // ===================================================
     function buildPostCard(post) {
         var card = document.createElement('div');
@@ -21894,7 +21925,6 @@ if (document.readyState === 'loading') {
         var likeCount = post.likeCount || 0;
         var commentCount = post.commentCount || 0;
 
-        // ✅ Icon Only + Count ပဲ ပြ
         card.innerHTML =
             '<div class="post-card-header">' +
                 '<div class="post-card-avatar-wrap" data-action="profile">' +
@@ -21993,12 +22023,13 @@ if (document.readyState === 'loading') {
             }
         });
 
-        // ✅ Profile Avatar Click -- နှိပ်မှ Firebase ရှာ
+        // ✅ Profile Circle Click -- Firebase Server No ကို ယုံကြည်စွာ ရှာ
         var profileWrap = card.querySelector('.post-card-avatar-wrap[data-action="profile"]');
         if (profileWrap) {
             profileWrap.style.cursor = 'pointer';
             profileWrap.addEventListener('click', function(e) {
                 e.stopPropagation();
+                // ✅ serverNo ကို String အနေနဲ့ ယူပြီး Number ပြောင်း
                 var serverNo = 1;
                 if (post.serverNo) {
                     var m = String(post.serverNo).match(/\d+/);
@@ -22134,7 +22165,6 @@ if (document.readyState === 'loading') {
         comments.forEach(function(c) { list.appendChild(buildCommentItem(c)); });
     }
 
-    // ✅ Comment Item -- BubbleID + View
     function buildCommentItem(c) {
         var item = document.createElement('div');
         item.className = 'comment-item';
@@ -22164,7 +22194,7 @@ if (document.readyState === 'loading') {
                 '</div>' +
             '</div>';
 
-        // ✅ View နှိပ်မှ Firebase ရှာ
+        // ✅ View နှိပ်မှ Firebase ရှာ -- userServerNo ကို ယုံကြည်စွာ ရှာ
         var viewBtn = item.querySelector('.comment-item-view-btn[data-action="view"]');
         if (viewBtn) {
             viewBtn.addEventListener('click', function(e) {
@@ -22181,7 +22211,6 @@ if (document.readyState === 'loading') {
         return item;
     }
 
-    // ✅ Send Comment -- ID, ServerNo, BubbleID ပါယူ
     function sendComment() {
         if (!isGlobalCommentEnabled()) { showToastSafe('Comment ခွင့် ပိတ်ထားသည်'); return; }
 
@@ -22204,7 +22233,6 @@ if (document.readyState === 'loading') {
             sendBtn.innerHTML = '<div class="spinner-mini" style="width:18px;height:18px;border-width:2px;"></div>';
         }
 
-        // ✅ User Info ကို IndexedDB ကနေ ယူ (ID, ServerNo, BubbleID ပါ)
         getMyUserInfo().then(function(myInfo) {
             if (!myInfo) {
                 showToastSafe('User info မရပါ');
@@ -22212,14 +22240,12 @@ if (document.readyState === 'loading') {
                 return;
             }
 
-            // ✅ Comment ထဲ ရေးသူရဲ့ ID, ServerNo, BubbleID ထည့်
             var comment = {
                 id: genPostId(),
                 userId: myInfo.userId,
                 userName: myInfo.userName,
                 userServerNo: myInfo.serverNo,
                 userAvatar: myInfo.avatar || '',
-                // ✅ သုံးနေတဲ့ Bubble ID (ရွေးထားတာ ရှိရင် ပြောင်း)
                 bubbleId: commentSelectedBubbleId || myInfo.bubbleUse || '',
                 text: text,
                 createdAt: Date.now()
@@ -22345,9 +22371,10 @@ if (document.readyState === 'loading') {
     }
 
     // ===================================================
-    //  PROFILE FETCH (နှိပ်မှ Firebase ရှာ)
+    //  ✅ PROFILE FETCH -- သေချာစွာ ရှာ
     // ===================================================
     function openProfilePopupWithFetch(userId, serverNo) {
+        // ✅ Loading ပြ
         var loadingOverlay = document.createElement('div');
         loadingOverlay.className = 'post-user-popup-overlay';
         loadingOverlay.id = 'profileLoadingOverlay';
@@ -22363,7 +22390,7 @@ if (document.readyState === 'loading') {
             if (userData) {
                 showPostUserPopup({
                     userId: userId,
-                    serverId: 'server' + serverNo,
+                    serverId: getFirebaseServerIdByNumber(serverNo),
                     serverNo: 'Server ' + serverNo,
                     name: userData.name || 'Player',
                     avatar: userData.avatar || IMBB_PLACEHOLDER,
@@ -22376,22 +22403,43 @@ if (document.readyState === 'loading') {
             } else {
                 showToastSafe('User မတွေ့ပါ');
             }
-        }).catch(function() {
+        }).catch(function(err) {
+            console.warn('Profile fetch error:', err);
             loadingOverlay.remove();
-            showToastSafe('Failed to load profile');
+            showToastSafe('User မတွေ့ပါ');
         });
     }
 
+    // ✅ serverNo ကနေ Firebase Server ID ရှာ
+    function getFirebaseServerIdByNumber(serverNo) {
+        if (typeof window.FIREBASE_SERVERS === 'undefined') return null;
+        var fbSrv = window.FIREBASE_SERVERS.find(function(s) { return s.number === parseInt(serverNo); });
+        return fbSrv ? fbSrv.id : null;
+    }
+
+    // ✅ Firebase Server ကနေ User Data ရှာ -- Fallback ထည့်
     function fetchUserInfoFromFirebase(serverNo, userId) {
         return new Promise(function(resolve) {
-            if (typeof window.getDbForServer !== 'function') return resolve(null);
-            if (typeof window.FIREBASE_SERVERS === 'undefined') return resolve(null);
+            if (typeof window.getDbForServer !== 'function') {
+                console.warn('getDbForServer not available');
+                return resolve(null);
+            }
+            if (typeof window.FIREBASE_SERVERS === 'undefined') {
+                console.warn('FIREBASE_SERVERS not available');
+                return resolve(null);
+            }
 
             var srv = window.FIREBASE_SERVERS.find(function(s) { return s.number === parseInt(serverNo); });
-            if (!srv) return resolve(null);
+            if (!srv) {
+                console.warn('Server No ' + serverNo + ' not found in FIREBASE_SERVERS');
+                return resolve(null);
+            }
 
             var db = window.getDbForServer(srv.id);
-            if (!db) return resolve(null);
+            if (!db) {
+                console.warn('DB not available for ' + srv.id);
+                return resolve(null);
+            }
 
             db.ref('users/' + userId).once('value').then(function(snap) {
                 var data = snap.val();
@@ -22399,8 +22447,14 @@ if (document.readyState === 'loading') {
                     data.userId = userId;
                     data.serverNo = 'Server ' + serverNo;
                     resolve(data);
-                } else resolve(null);
-            }).catch(function() { resolve(null); });
+                } else {
+                    console.warn('User ' + userId + ' not found in ' + srv.id);
+                    resolve(null);
+                }
+            }).catch(function(err) {
+                console.warn('Firebase fetch error:', err);
+                resolve(null);
+            });
         });
     }
 
@@ -22618,7 +22672,7 @@ if (document.readyState === 'loading') {
             sendReportToTelegram(post, reason).then(function(success) {
                 if (success) { showToastSafe('Report ပေးပို့ပြီးပါပြီ'); close(); }
                 else {
-                    errorEl.textContent = 'Failed to send. ပြန်ကြိုးစားပါ';
+                    errorEl.textContent = 'Failed to send';
                     errorEl.classList.remove('hidden');
                     submitBtn.disabled = false;
                     submitBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/></svg><span>ပေးပို့မည်</span>';
@@ -22835,10 +22889,10 @@ if (document.readyState === 'loading') {
         if (initDone) return;
         initDone = true;
 
-        console.log('🔧 Init Post System v27.0...');
+        console.log('🔧 Init Post System v28.0...');
 
         Promise.all([loadLikedPosts(), loadFavourites()]).then(function() {
-            console.log('✅ Loaded likedPosts:', likedPosts.length, 'favourites:', favouritePosts.length);
+            console.log('✅ Loaded');
         });
 
         document.querySelectorAll('.post-tab-chip').forEach(function(chip) {
@@ -22941,12 +22995,9 @@ if (document.readyState === 'loading') {
         hookPlusMenuPost();
         initPostShareLinkHandler();
 
-        console.log('✅ Post System v27.0 Ready (Comment BubbleID + Auto Server Switch)');
+        console.log('✅ Post System v28.0 Ready');
     }
 
-    // ===================================================
-    //  START
-    // ===================================================
     function start() {
         if (!document.getElementById('postFeedBody')) {
             setTimeout(start, 500);
