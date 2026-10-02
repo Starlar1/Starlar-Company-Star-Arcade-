@@ -733,7 +733,7 @@ body {
 .fs-screen.hidden { display: none !important; }
 
 /* ============================================================
-   ✅ PROFILE FULLSCREEN -- SCROLL FIX
+   ✅ PROFILE FULLSCREEN
    ============================================================ */
 
 .profile-fullscreen {
@@ -749,7 +749,7 @@ body {
 }
 
 /* ============================================================
-   BANNER
+   BANNER -- ပိုမြင့်
    ============================================================ */
 
 .profile-banner {
@@ -760,8 +760,8 @@ body {
     flex-shrink: 0;
     background-size: cover;
     background-position: center;
-    min-height: 200px;
-    max-height: 320px;
+    min-height: 240px;
+    max-height: 380px;
     overflow: visible !important;
 }
 
@@ -776,7 +776,7 @@ body {
 }
 
 /* ============================================================
-   ✅ PROFILE INFO -- သေးသေး
+   PROFILE INFO
    ============================================================ */
 
 .profile-info-container {
@@ -934,7 +934,7 @@ body {
 .friends-count:active { transform: scale(0.95); opacity: 0.8; }
 
 /* ============================================================
-   ✅ PROFILE TAB BAR -- သေးသေး (About / Post / Gift)
+   TAB BAR -- သေးသေး
    ============================================================ */
 
 .profile-tab-bar {
@@ -943,7 +943,7 @@ body {
     border-top: 1px solid rgba(255, 255, 255, 0.06);
     border-bottom: 1px solid rgba(255, 255, 255, 0.06);
     flex-shrink: 0;
-    margin-top: 55px;              /* ✅ Avatar အောက်ကို ရောက်အောင် */
+    margin-top: 55px;
     position: relative;
     z-index: 3;
 }
@@ -990,7 +990,7 @@ body {
 .profile-tab-btn:active { background: rgba(255, 255, 255, 0.03); }
 
 /* ============================================================
-   ✅ PROFILE TAB CONTENT
+   TAB CONTENT
    ============================================================ */
 
 .profile-tab-content {
@@ -1003,7 +1003,7 @@ body {
 .profile-tab-content.hidden { display: none !important; }
 
 /* ============================================================
-   ✅ BACKGROUND SECTION (About Tab)
+   BACKGROUND SECTION (About Tab)
    ============================================================ */
 
 .profile-background-section {
@@ -1026,7 +1026,7 @@ body {
 }
 
 /* ============================================================
-   ✅ BIO CARD -- LEFT ALIGN
+   BIO CARD
    ============================================================ */
 
 .profile-bio-wrapper {
@@ -1068,7 +1068,7 @@ body {
 }
 
 /* ============================================================
-   ROLE SECTION -- CENTER (၆ ကွက်)
+   ROLE SECTION
    ============================================================ */
 
 .profile-role-section {
@@ -1210,7 +1210,7 @@ body {
 .profile-edit-btn svg { width: 16px; height: 16px; }
 
 /* ============================================================
-   ✅ PROFILE POST LIST
+   PROFILE POST LIST
    ============================================================ */
 
 .profile-post-list {
@@ -1304,7 +1304,7 @@ body {
     line-height: 1.6;
 }
 
-/* ✅ Post Link Preview */
+/* Link Preview */
 .profile-post-link-preview {
     display: flex;
     flex-direction: column;
@@ -1383,7 +1383,7 @@ body {
 .profile-post-view-btn svg { width: 16px; height: 16px; }
 
 /* ============================================================
-   ✅ PROFILE GIFT LIST
+   PROFILE GIFT LIST
    ============================================================ */
 
 .profile-gift-list {
@@ -1401,7 +1401,7 @@ body {
 }
 
 /* ============================================================
-   ✅ POST INFO SCREEN
+   POST INFO SCREEN
    ============================================================ */
 
 .post-info-screen {
@@ -1419,7 +1419,7 @@ body {
     gap: 10px;
 }
 
-/* ✅ Post Info -- All Comments */
+/* All Comments */
 .post-info-comments-section {
     padding: 14px;
     background: var(--bg-body);
@@ -1456,7 +1456,11 @@ body {
     flex-shrink: 0;
     background: var(--bg-input);
     overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.2s ease;
 }
+
+.post-info-comment-avatar:active { transform: scale(0.92); }
 
 .post-info-comment-avatar img {
     width: 100%;
@@ -1496,6 +1500,51 @@ body {
     min-height: 45px;
 }
 
+/* ✅ Comment View/Report Actions */
+.post-info-comment-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 6px;
+    padding-top: 6px;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.post-info-comment-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--text-sub);
+    font-size: 10px;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.post-info-comment-action:active {
+    transform: scale(0.92);
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.post-info-comment-action.view-btn {
+    color: var(--accent);
+    border-color: rgba(255, 109, 31, 0.3);
+    background: rgba(255, 109, 31, 0.08);
+}
+
+.post-info-comment-action.report-btn {
+    color: var(--text-sub);
+}
+
+.post-info-comment-action.report-btn:active {
+    background: rgba(255, 68, 68, 0.1);
+    color: #ff6b6b;
+}
+
 .post-info-comments-empty {
     text-align: center;
     color: var(--text-muted);
@@ -1504,13 +1553,13 @@ body {
 }
 
 /* ============================================================
-   ✅ RESPONSIVE (Mobile)
+   RESPONSIVE (Mobile)
    ============================================================ */
 
 @media (max-width: 480px) {
     .profile-banner {
-        min-height: 150px;
-        max-height: 220px;
+        min-height: 180px;
+        max-height: 260px;
     }
 
     .profile-info-container {
@@ -1534,12 +1583,10 @@ body {
     .profile-friends { margin-top: 4px; }
     .friends-count { font-size: 10px; padding: 2px 10px; }
 
-    /* ✅ Tab Bar -- mobile */
     .profile-tab-bar { margin-top: 50px; }
     .profile-tab-btn { font-size: 10px; padding: 7px 4px; gap: 4px; }
     .profile-tab-btn svg { width: 13px; height: 13px; }
 
-    /* ✅ About */
     .profile-background-section {
         padding: 14px 14px 20px !important;
         gap: 10px;
@@ -1568,16 +1615,13 @@ body {
     .profile-role-header span::before,
     .profile-role-header span::after { width: 18px; }
 
-    /* ✅ Post List */
     .profile-post-list { padding: 10px; gap: 10px; }
     .profile-post-media img,
     .profile-post-media video { max-height: 250px; }
     .profile-post-item { padding: 10px; }
 
-    /* ✅ Gift */
     .profile-gift-list { padding: 10px; }
 
-    /* ✅ Post Info */
     .post-info-comments-section { padding: 10px; }
     .post-info-comment-avatar { width: 32px; height: 32px; }
     .post-info-comment-name { font-size: 11px; }
@@ -23439,21 +23483,22 @@ if (document.readyState === 'loading') {
 })();
 
 // ============================================================
-// ✅ PROFILE TAB SYSTEM v3.0 + POST INFO
+// ✅ PROFILE TAB SYSTEM v4.0 + POST INFO
 //  • Post Delete → Firebase + Worker နှစ်ခုလုံး ဖျက်
-//  • Post Info → View/Report ပါ (အရင်အတိုင်း)
-//  • Post Delete → Post Tab ပဲ ပြန် (Sidebar မရောက်)
+//  • Post Info → Delete ပဲ ထား (View/Report ဖျောက်)
+//  • Comment တစ်ခုချင်းရဲ့ အောက်မှာ View/Report
+//  • Post Delete → Post Tab ပဲ ပြန်
 //  • Tab ပြောင်းရင် UI မလှုပ်
 // ============================================================
 (function() {
     'use strict';
 
-    console.log('📱 Profile Tab System v3.0 Loading...');
+    console.log('📱 Profile Tab System v4.0 Loading...');
 
     var POST_CACHE_KEY_PREFIX = 'profilePostCache_';
 
     // ===================================================
-    //  TAB SWITCH -- UI မလှုပ်အောင်
+    //  TAB SWITCH -- UI မလှုပ်
     // ===================================================
     function initProfileTabs() {
         var tabBar = document.getElementById('profileTabBar');
@@ -23478,7 +23523,6 @@ if (document.readyState === 'loading') {
         var postEl = document.getElementById('profileTabPost');
         var giftEl = document.getElementById('profileTabGift');
 
-        // ✅ UI မလှုပ်အောင် -- display ပဲ ပြောင်း၊ scrollTop မထိ
         if (aboutEl) aboutEl.classList.add('hidden');
         if (postEl) postEl.classList.add('hidden');
         if (giftEl) giftEl.classList.add('hidden');
@@ -23498,7 +23542,6 @@ if (document.readyState === 'loading') {
         var tabBar = document.getElementById('profileTabBar');
         if (fullscreen && tabBar) {
             var tabBarTop = tabBar.offsetTop;
-            // ✅ Scroll က tabBar အောက်မှာ ရှိရင် ပြန်မချ
             if (fullscreen.scrollTop > tabBarTop) {
                 fullscreen.scrollTop = tabBarTop;
             }
@@ -23744,7 +23787,7 @@ if (document.readyState === 'loading') {
         });
     }
 
-    // ✅ Post Info Render -- View/Report ပါ (အရင်အတိုင်း), Delete ပေါင်းထည့်
+    // ✅ Post Info Render -- View/Report ဖျောက်, Delete ပဲ ထား
     function renderPostInfo(container, post, postId, workerNo) {
         container.innerHTML = '';
 
@@ -23753,10 +23796,18 @@ if (document.readyState === 'loading') {
             return;
         }
 
-        // ✅ Card ကို build (View/Report ပါပြီးသား)
+        // ✅ Card ကို build
         var card = window.buildPostCard(post);
 
-        // ✅ Delete ခလုတ် ပေါင်းထည့် (Report ဘေးမှာ)
+        // ✅ Report ခလုတ် ဖျောက် (Post Info Screen မှာ မလိုဘူး)
+        var reportBtn = card.querySelector('.post-action-btn[data-action="report"]');
+        if (reportBtn) reportBtn.remove();
+
+        // ✅ Comment ခလုတ် ဖျောက် (All Comments အောက်မှာ ရှိပြီးသား)
+        var commentBtn = card.querySelector('.post-action-btn[data-action="comment"]');
+        if (commentBtn) commentBtn.remove();
+
+        // ✅ Delete ခလုတ် ထည့် (Report နေရာမှာ)
         var actionsBar = card.querySelector('.post-card-actions');
         if (actionsBar) {
             var deleteBtn = document.createElement('button');
@@ -23808,6 +23859,7 @@ if (document.readyState === 'loading') {
         container.appendChild(commentsSection);
     }
 
+    // ✅ Comment Item -- View/Report ပါ
     function buildInfoCommentItem(c) {
         var item = document.createElement('div');
         item.className = 'post-info-comment-item';
@@ -23822,16 +23874,62 @@ if (document.readyState === 'loading') {
             }
         }
 
+        var avatarSrc = c.userAvatar || (window.IMBB_PLACEHOLDER || '');
+
         item.innerHTML =
-            '<div class="post-info-comment-avatar">' +
-                '<img src="' + (window.IMBB_PLACEHOLDER || '') + '" />' +
+            '<div class="post-info-comment-avatar" data-action="view">' +
+                '<img src="' + avatarSrc + '" />' +
             '</div>' +
             '<div class="post-info-comment-body">' +
                 '<div class="post-info-comment-name">' + escapeProfileHtml(c.userName || 'Player') + '</div>' +
                 '<div class="post-info-comment-text' + bubbleClass + '"' + bubbleStyle + '>' +
                     escapeProfileHtml(c.text || '') +
                 '</div>' +
+                '<div class="post-info-comment-actions">' +
+                    '<button class="post-info-comment-action view-btn" data-action="view">' +
+                        '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
+                            '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>' +
+                            '<circle cx="12" cy="12" r="3"/>' +
+                        '</svg>' +
+                        '<span>View</span>' +
+                    '</button>' +
+                    '<button class="post-info-comment-action report-btn" data-action="report">' +
+                        '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
+                            '<path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>' +
+                            '<line x1="12" y1="9" x2="12" y2="13"/>' +
+                            '<line x1="12" y1="17" x2="12.01" y2="17"/>' +
+                        '</svg>' +
+                        '<span>Report</span>' +
+                    '</button>' +
+                '</div>' +
             '</div>';
+
+        // ✅ View -- Profile Popup
+        var viewEls = item.querySelectorAll('[data-action="view"]');
+        viewEls.forEach(function(el) {
+            el.addEventListener('click', function(e) {
+                e.stopPropagation();
+                var serverNo = 1;
+                if (c.userServerNo) {
+                    var m = String(c.userServerNo).match(/\d+/);
+                    if (m && m[0]) serverNo = parseInt(m[0]);
+                }
+                if (typeof window.openProfilePopupWithFetch === 'function') {
+                    window.openProfilePopupWithFetch(c.userId, serverNo);
+                }
+            });
+        });
+
+        // ✅ Report -- Comment Report Popup
+        var reportBtn = item.querySelector('.post-info-comment-action.report-btn');
+        if (reportBtn) {
+            reportBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                if (typeof window.openCommentReportPopup === 'function') {
+                    window.openCommentReportPopup(c);
+                }
+            });
+        }
 
         return item;
     }
@@ -23888,7 +23986,7 @@ if (document.readyState === 'loading') {
     }
 
     // ===================================================
-    //  ✅ DELETE POST -- Firebase + Worker နှစ်ခုလုံး ဖျက်
+    //  ✅ DELETE POST -- Firebase + Worker နှစ်ခုလုံး
     // ===================================================
     function deleteMyPost(item) {
         if (!item || !item.postId) return;
@@ -23917,16 +24015,14 @@ if (document.readyState === 'loading') {
                 if (!list) return [];
                 if (!Array.isArray(list)) list = Object.keys(list).map(function(k) { return list[k]; });
 
-                // ✅ ဖျက်မယ့် post ကို filter
                 var newList = list.filter(function(p) {
                     return String(p.postId) !== String(postId);
                 });
 
-                // ✅ Firebase update
                 return db.ref('users/' + window.currentUser.userId).update({ postList: newList });
             })
             .then(function() {
-                // ✅ Step 2: Worker မှ Post ဖျက်
+                // ✅ Step 2: Worker မှ Post ဖျက် (Like Comment အားလုံးပါ)
                 return deletePostFromWorker(postId, workerNo);
             })
             .then(function() {
@@ -23946,11 +24042,9 @@ if (document.readyState === 'loading') {
                 var el = document.querySelector('.profile-post-item[data-post-id="' + postId + '"]');
                 if (el) el.remove();
 
-                // ✅ Step 6: Post Info မှာ ဖျက်ရင် → Post Tab ပဲ ပြန် (Sidebar မရောက်)
+                // ✅ Step 6: Post Info မှာ ဖျက်ရင် → Post Tab ပဲ ပြန်
                 var currentScreen = document.querySelector('.fs-screen:not(.hidden)');
                 if (currentScreen && currentScreen.id === 'fs-post-info') {
-                    // ✅ goBackFullscreen ကို မသုံးဘူး (Sidebar မရောက်အောင်)
-                    // ✅ ကိုယ်တိုင် Post Info ကို ဖျောက်ပြီး Profile ပြန်
                     currentScreen.classList.add('hidden');
 
                     var profileScreen = document.getElementById('fs-profile');
@@ -23982,7 +24076,7 @@ if (document.readyState === 'loading') {
                             fsOverlay.classList.add('profile-active');
                         }
 
-                        // ✅ fullscreenStack ကို reset (Post Info ကို ဖျက်)
+                        // ✅ fullscreenStack ကို reset
                         if (typeof fullscreenStack !== 'undefined' && Array.isArray(fullscreenStack)) {
                             fullscreenStack = fullscreenStack.filter(function(s) {
                                 return s.screenId !== 'fs-post-info';
@@ -24013,9 +24107,9 @@ if (document.readyState === 'loading') {
             });
     }
 
-    // ✅ Worker မှ Post ဖျက် (Like Comment အားလုံးပါ တစ်ခါတည်း ဖျက်)
+    // ✅ Worker မှ Post ဖျက် (Like Comment အားလုံးပါ)
     function deletePostFromWorker(postId, workerNo) {
-        return new Promise(function(resolve, reject) {
+        return new Promise(function(resolve) {
             if (typeof window.WORKER_SERVERS === 'undefined') return resolve();
             var srv = window.WORKER_SERVERS.find(function(s) { return s.number === parseInt(workerNo); });
             if (!srv) return resolve();
@@ -24023,8 +24117,6 @@ if (document.readyState === 'loading') {
             var client = window.getWorkerClient ? window.getWorkerClient(srv.id) : null;
             if (!client) return resolve();
 
-            // ✅ DELETE FROM posts WHERE postId = ?
-            // ဒီ Query က Post တစ်ခုလုံး (Like, Comment အားလုံးပါ) ဖျက်မယ်
             client.execute('DELETE FROM posts WHERE postId = ?', [postId])
                 .then(function() {
                     console.log('✅ Deleted from Worker ' + workerNo + ': ' + postId);
@@ -24032,7 +24124,6 @@ if (document.readyState === 'loading') {
                 })
                 .catch(function(err) {
                     console.warn('Worker delete error:', err);
-                    // ✅ Error ဖြစ်လည်း resolve (Firebase ကတော့ ဖျက်ပြီးသား)
                     resolve();
                 });
         });
@@ -24062,7 +24153,6 @@ if (document.readyState === 'loading') {
                         aboutBtn.classList.add('active');
                         switchProfileTab('about');
                     }
-                    // ✅ Scroll အပေါ်ပြန်
                     var fs = document.getElementById('profileFullscreen');
                     if (fs) fs.scrollTop = 0;
                 }, 200);
@@ -24087,7 +24177,7 @@ if (document.readyState === 'loading') {
     window.loadMyProfilePosts = loadMyProfilePosts;
     window.openPostInfoScreen = openPostInfoScreen;
 
-    console.log('✅ Profile Tab System v3.0 Ready');
+    console.log('✅ Profile Tab System v4.0 Ready');
 
 })();
 </script>
