@@ -731,22 +731,39 @@ body {
 
 .fs-screen.hidden { display: none !important; }
 
+
 /* ============================================================
-   ✅ PROFILE FULLSCREEN
+   ✅ FS-PROFILE OVERRIDE -- Profile တစ်ခုလုံး Scroll
+   ============================================================ */
+
+#fs-profile {
+    display: block !important;
+    align-items: stretch !important;
+    justify-content: flex-start !important;
+    padding: 0 !important;
+    height: 100% !important;
+    width: 100% !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* ============================================================
+   ✅ PROFILE FULLSCREEN -- တစ်ခုလုံး Scroll ဆွဲ
    ============================================================ */
 
 .profile-fullscreen {
     display: flex;
     flex-direction: column;
-    height: 100%;
     width: 100%;
+    min-height: 100%;
     background: var(--bg-body);
     position: relative;
-    overflow: hidden;
+    overflow: visible;
 }
 
 /* ============================================================
-   ✅ BANNER -- Friends + Tab Bar အောက်ထိ
+   ✅ BANNER
    ============================================================ */
 
 .profile-banner {
@@ -774,7 +791,7 @@ body {
 }
 
 /* ============================================================
-   ✅ PROFILE INFO -- Banner ပေါ်မှာ ရပ် (absolute)
+   ✅ PROFILE INFO -- Banner ပေါ်မှာ ရပ်
    ============================================================ */
 
 .profile-info-container {
@@ -943,7 +960,7 @@ body {
 .friends-count:active { transform: scale(0.95); opacity: 0.85; }
 
 /* ============================================================
-   ✅ TAB BAR -- Banner အောက်မှာ ရပ်
+   ✅ TAB BAR
    ============================================================ */
 
 .profile-tab-bar {
@@ -999,14 +1016,11 @@ body {
 .profile-tab-btn:active { background: rgba(255, 255, 255, 0.03); }
 
 /* ============================================================
-   ✅ TAB CONTENTS -- Scroll ဒီထဲမှာ
+   ✅ TAB CONTENTS
    ============================================================ */
 
 .profile-tab-contents {
-    flex: 1;
-    overflow-y: auto;
-    overflow-x: hidden;
-    -webkit-overflow-scrolling: touch;
+    width: 100%;
     position: relative;
     z-index: 2;
 }
@@ -1030,7 +1044,6 @@ body {
     flex-direction: column !important;
     align-items: center !important;
     gap: 14px;
-    min-height: 100%;
     background-size: cover;
     background-position: center;
 }
@@ -1346,7 +1359,7 @@ body {
 .profile-gift-empty { text-align: center; color: var(--text-muted); font-size: 13px; padding: 40px 20px; }
 
 /* ============================================================
-   ✅ POST INFO SCREEN
+   ✅ POST INFO SCREEN -- Full Post Info
    ============================================================ */
 
 .post-info-screen {
@@ -1357,18 +1370,37 @@ body {
     padding: 12px 0 30px;
 }
 
-.post-info-header { padding: 0 14px 12px; }
+.post-info-header {
+    padding: 0 14px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
 
-.post-info-comments-section { padding: 14px; background: var(--bg-body); }
+/* ============================================================
+   ✅ POST INFO -- ALL COMMENTS SECTION
+   ============================================================ */
+
+.post-info-comments-section {
+    padding: 14px;
+    background: var(--bg-body);
+}
 
 .post-info-comments-title {
     font-size: 14px;
     font-weight: 700;
     color: var(--text-main);
     margin-bottom: 12px;
+    padding: 0 4px;
     display: flex;
     align-items: center;
     gap: 6px;
+}
+
+.post-info-comments-title svg {
+    width: 16px;
+    height: 16px;
+    opacity: 0.7;
 }
 
 .post-info-comment-item {
@@ -1386,11 +1418,21 @@ body {
     background: var(--bg-input);
     overflow: hidden;
     cursor: pointer;
+    transition: transform 0.2s ease;
 }
 
-.post-info-comment-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.post-info-comment-avatar:active { transform: scale(0.92); }
 
-.post-info-comment-body { flex: 1; min-width: 0; }
+.post-info-comment-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.post-info-comment-body {
+    flex: 1;
+    min-width: 0;
+}
 
 .post-info-comment-name {
     font-size: 12px;
@@ -1404,8 +1446,22 @@ body {
     color: var(--text-main);
     line-height: 1.5;
     word-break: break-word;
+    white-space: pre-wrap;
 }
 
+.post-info-comment-text.has-bubble {
+    border-image-source: var(--bubble-image);
+    border-image-slice: 30% 20% 30% 20% fill;
+    border-image-width: 25px 16px 25px 16px;
+    border-image-repeat: stretch;
+    border-style: solid;
+    border-color: transparent;
+    background: transparent;
+    padding: 12px 16px;
+    min-height: 45px;
+}
+
+/* ✅ Comment View/Report Actions */
 .post-info-comment-actions {
     display: flex;
     gap: 8px;
@@ -1427,15 +1483,42 @@ body {
     font-weight: 700;
     font-family: inherit;
     cursor: pointer;
+    transition: all 0.2s ease;
 }
 
-.post-info-comment-action.view-btn { color: var(--accent); border-color: rgba(255, 109, 31, 0.3); background: rgba(255, 109, 31, 0.08); }
-.post-info-comment-action.report-btn:active { background: rgba(255, 68, 68, 0.1); color: #ff6b6b; }
+.post-info-comment-action:active {
+    transform: scale(0.92);
+    background: rgba(255, 255, 255, 0.08);
+}
 
-.post-info-comments-empty { text-align: center; color: var(--text-muted); font-size: 13px; padding: 30px 20px; }
+.post-info-comment-action.view-btn {
+    color: var(--accent);
+    border-color: rgba(255, 109, 31, 0.3);
+    background: rgba(255, 109, 31, 0.08);
+}
+
+.post-info-comment-action.view-btn:active {
+    background: rgba(255, 109, 31, 0.18);
+}
+
+.post-info-comment-action.report-btn {
+    color: var(--text-sub);
+}
+
+.post-info-comment-action.report-btn:active {
+    background: rgba(255, 68, 68, 0.1);
+    color: #ff6b6b;
+}
+
+.post-info-comments-empty {
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 13px;
+    padding: 30px 20px;
+}
 
 /* ============================================================
-   ✅ Post Item Menu
+   ✅ POST ITEM MENU (Dots Popup)
    ============================================================ */
 
 .post-item-menu {
@@ -1447,6 +1530,12 @@ body {
     padding: 6px;
     z-index: 10002;
     min-width: 180px;
+    animation: postMenuPop 0.15s ease;
+}
+
+@keyframes postMenuPop {
+    from { opacity: 0; transform: scale(0.9) translateY(-4px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
 }
 
 .post-item-menu .msg-menu-item {
@@ -1464,10 +1553,20 @@ body {
     font-family: inherit;
     cursor: pointer;
     text-align: left;
+    transition: background 0.15s ease;
 }
 
-.post-item-menu .msg-menu-item:active { background: var(--bg-hover); }
+.post-item-menu .msg-menu-item:hover,
+.post-item-menu .msg-menu-item:active {
+    background: var(--bg-hover);
+}
+
 .post-item-menu .msg-menu-item.danger { color: #ff4444; }
+
+.post-item-menu .msg-menu-item.danger:hover,
+.post-item-menu .msg-menu-item.danger:active {
+    background: rgba(255, 68, 68, 0.15);
+}
 
 /* ============================================================
    ✅ RESPONSIVE (Mobile)
@@ -1515,8 +1614,14 @@ body {
     .profile-post-list { padding: 10px; gap: 10px; }
     .profile-post-media img,
     .profile-post-media video { max-height: 350px; }
-}
+    .profile-post-caption { font-size: 12.5px; }
 
+    .post-info-comments-section { padding: 10px; }
+    .post-info-comment-avatar { width: 32px; height: 32px; }
+    .post-info-comment-name { font-size: 11px; }
+    .post-info-comment-text { font-size: 12px; }
+    .post-info-comment-action { font-size: 9px; padding: 3px 8px; }
+}
 
 
     
@@ -11016,11 +11121,9 @@ body {
                 <div class="fs-screen hidden" id="fs-profile">
                     <div class="profile-fullscreen" id="profileFullscreen">
 
-                        <!-- Banner -- Friends + Tab Bar အောက်ထိ -->
+                        <!-- Banner + Profile Info -->
                         <div class="profile-banner" id="profileBanner">
                             <div class="profile-banner-overlay"></div>
-
-                            <!-- Profile Info -- Banner ပေါ်မှာ ရပ် -->
                             <div class="profile-info-container" id="profileInfoContainer">
                                 <div class="profile-avatar-wrapper" id="profileAvatarWrapper">
                                     <img id="fsProfileAvatar" src="" alt="avatar" />
