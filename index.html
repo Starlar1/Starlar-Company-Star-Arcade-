@@ -20448,22 +20448,18 @@ if (document.readyState === 'loading') {
 
 })();
 
+
 // ============================================================
-// ✅ POST SYSTEM + CHAT LINK HANDLER v3.0
-//  Full Java -- Version: 2026-10-01
-//  • Post: Turso (Worker Server)
-//  • User: Firebase (Main App)
-//  • IndexedDB: StarArcadeDB
-//  • Chat Link: Post.1.p12345 → Clickable + Nav Reset
-//  • Comment: userId, userName, userServerNo, bubbleId, text
-//  • Post: userId, userName, serverNo, userAvatar, workerNo
-//  • Like Max 10000 / Comment Max 100 / တစ်နေ့ 3 Post
-//  • Video 10s / 10MB
+// ✅ POST SYSTEM + CHAT LINK HANDLER v4.0 -- FULL JAVA
+//  • Link နှိပ်ရင် Chat Screen လုံးဝ ပိတ် + Auto Home
+//  • အဲဒီ Post ကို အပေါ်ဆုံးမှာ ပြ + အောက်မှာ တခြား Post ဆက်
+//  • Nav Bar ကို လုံးဝ မထိ
+//  • Like / Comment / Favorite / Report / Share အလုပ်လုပ်
 // ============================================================
 (function() {
     'use strict';
 
-    console.log('🚀 Post System + Chat Link v3.0 Loading...');
+    console.log('🚀 Post System + Chat Link v4.0 Loading...');
 
     // ===================================================
     //  ✅ WORKER SERVERS
@@ -21349,7 +21345,7 @@ if (document.readyState === 'loading') {
     }
 
     // ===================================================
-    //  ROLE POPUP (Filter)
+    //  ROLE POPUP
     // ===================================================
     function showRoleSelectPopup() {
         var ex = document.querySelector('.role-select-overlay');
@@ -23065,7 +23061,7 @@ if (document.readyState === 'loading') {
     }
 
     // ===================================================
-    //  GLOBAL EXPORTS
+    //  ✅ GLOBAL EXPORTS
     // ===================================================
     window.buildPostCard = buildPostCard;
     window.parsePostRow = parsePostRow;
@@ -23086,6 +23082,9 @@ if (document.readyState === 'loading') {
     window.escapeHtml = escapeHtml;
     window.isPostLikedByMe = isPostLikedByMe;
     window.isFavourited = isFavourited;
+    window.resetFeed = resetFeed;
+    window.loadFeedNext = loadFeedNext;
+    window.appendSinglePost = appendSinglePost;
 
     // ===================================================
     //  INIT
@@ -23220,15 +23219,15 @@ if (document.readyState === 'loading') {
 
 
 // ============================================================
-// ✅ CHAT POST LINK HANDLER v3.0
-//  • Link နှိပ်ရင် Home ရောက်
-//  • Chat Tab ပြန်နှိပ်လို့ ရ (Nav Bar Auto Reset)
-//  • Full Post Card (Like/Comment အားလုံး အလုပ်လုပ်)
+// ✅ CHAT POST LINK HANDLER v4.0
+//  • Link နှိပ်ရင် Chat Screen လုံးဝ ပိတ် + Auto Home
+//  • အဲဒီ Post ကို အပေါ်ဆုံးမှာ ပြ + အောက်မှာ တခြား Post ဆက်
+//  • Nav Bar ကို လုံးဝ မထိ
 // ============================================================
 (function() {
     'use strict';
 
-    console.log('🔗 Chat Post Link Handler v3.0 Loading...');
+    console.log('🔗 Chat Post Link Handler v4.0 Loading...');
 
     // ===================================================
     //  CSS
@@ -23330,33 +23329,13 @@ if (document.readyState === 'loading') {
     }
 
     // ===================================================
-    //  ✅ NAV BAR RESET (BUG FIX)
+    //  ✅ CLOSE CHAT + GO HOME
+    //  Chat Screen ကို လုံးဝ ပိတ်ပြီး Home ကို သွား
     // ===================================================
-    function resetNavBar() {
-        console.log('🔄 Resetting Nav Bar...');
+    function closeChatAndGoHome() {
+        console.log('🔄 Closing Chat + Going Home...');
 
-        var allNavBtns = document.querySelectorAll('.nav-btn');
-        allNavBtns.forEach(function(btn) {
-            btn.classList.remove('active');
-            btn.style.pointerEvents = 'auto';
-            btn.style.opacity = '1';
-            btn.disabled = false;
-        });
-
-        var homeBtn = document.querySelector('.nav-btn[data-tab="home"]');
-        if (homeBtn) homeBtn.classList.add('active');
-
-        document.querySelectorAll('.screen').forEach(function(s) {
-            s.classList.add('hidden');
-        });
-
-        var homeScreen = document.getElementById('screen-home');
-        if (homeScreen) homeScreen.classList.remove('hidden');
-
-        if (typeof window.closePlusMenu === 'function') {
-            try { window.closePlusMenu(); } catch(e) {}
-        }
-
+        // ၁။ Fullscreen Overlay ပိတ် (Chat Room ပါ ပါတယ်)
         var fsOverlay = document.getElementById('fullscreenOverlay');
         if (fsOverlay) {
             fsOverlay.classList.remove('active');
@@ -23364,20 +23343,39 @@ if (document.readyState === 'loading') {
             fsOverlay.classList.remove('profile-active');
         }
 
+        // ၂။ Chat Room Screen ဖျောက်
+        var chatRoomScreen = document.getElementById('fs-chat-room');
+        if (chatRoomScreen) chatRoomScreen.classList.add('hidden');
+
+        // ၃။ Screen တွေ အားလုံး ဖျောက်ပြီး Home ပြ
+        document.querySelectorAll('.screen').forEach(function(s) {
+            s.classList.add('hidden');
+        });
+        var homeScreen = document.getElementById('screen-home');
+        if (homeScreen) homeScreen.classList.remove('hidden');
+
+        // ၄။ Nav Bar မှာ Home Active လုပ်
+        document.querySelectorAll('.nav-btn').forEach(function(b) {
+            b.classList.remove('active');
+        });
+        var homeBtn = document.querySelector('.nav-btn[data-tab="home"]');
+        if (homeBtn) homeBtn.classList.add('active');
+
+        // ၅။ Sidebar ပိတ်
         var sidebar = document.getElementById('sidebar');
         if (sidebar) sidebar.classList.remove('open');
         var sidebarOverlay = document.getElementById('sidebarOverlay');
         if (sidebarOverlay) sidebarOverlay.classList.remove('active');
 
+        // ၆။ Plus Menu ပိတ်
+        if (typeof window.closePlusMenu === 'function') {
+            try { window.closePlusMenu(); } catch(e) {}
+        }
+
+        // ၇။ Body Overflow ပြန်
         document.body.style.overflow = '';
 
-        try {
-            if (typeof window.currentTab !== 'undefined') {
-                window.currentTab = 'home';
-            }
-        } catch(e) {}
-
-        console.log('✅ Nav Bar Reset Done');
+        console.log('✅ Chat Closed + Home Reached');
     }
 
     // ===================================================
@@ -23398,52 +23396,119 @@ if (document.readyState === 'loading') {
 
         console.log('📎 Post Link Clicked:', serverNo, postId);
 
-        resetNavBar();
-        showPostFromLink(serverNo, postId);
+        // ✅ Chat ကို ပိတ်ပြီး Home ကို သွား
+        closeChatAndGoHome();
 
-        setTimeout(function() { resetNavBar(); }, 200);
-        setTimeout(function() {
-            document.querySelectorAll('.nav-btn').forEach(function(btn) {
-                btn.style.pointerEvents = 'auto';
-                btn.style.opacity = '1';
-                btn.disabled = false;
-            });
-        }, 500);
+        // ✅ Post ရှာ
+        showPostFromLink(serverNo, postId);
     }
 
     // ===================================================
-    //  SHOW POST FROM LINK
+    //  ✅ SHOW POST FROM LINK
+    //  • အဲဒီ Post ကို အပေါ်ဆုံးမှာ ပြ
+    //  • အောက်မှာ တခြား Post တွေ ဆက်ရှိနေ
     // ===================================================
     function showPostFromLink(serverNo, postId) {
         var feedBody = document.getElementById('postFeedBody');
         if (!feedBody) return;
 
+        // Loading ပြ
         feedBody.innerHTML = '<div class="post-feed-loading">Post ရှာနေသည်...</div>';
 
-        if (typeof window.fetchSinglePost === 'function') {
-            window.fetchSinglePost(serverNo, postId).then(function(post) {
-                if (!post) {
-                    feedBody.innerHTML = '<div class="post-feed-empty">Post မတွေ့ပါ</div>';
-                    return;
-                }
-
-                if (typeof window.buildPostCard !== 'function') {
-                    feedBody.innerHTML = '<div class="post-feed-empty">System error</div>';
-                    return;
-                }
-
-                var card = window.buildPostCard(post);
-                feedBody.innerHTML = '';
-                feedBody.appendChild(card);
-
-                console.log('✅ Post card built from link');
-            }).catch(function(err) {
-                console.error('Post link error:', err);
-                feedBody.innerHTML = '<div class="post-feed-empty">Failed to load</div>';
-            });
-        } else {
+        if (typeof window.fetchSinglePost !== 'function' || typeof window.buildPostCard !== 'function') {
             feedBody.innerHTML = '<div class="post-feed-empty">Post system not ready</div>';
+            return;
         }
+
+        // Post ရှာ
+        window.fetchSinglePost(serverNo, postId).then(function(post) {
+            if (!post) {
+                feedBody.innerHTML = '<div class="post-feed-empty">Post မတွေ့ပါ</div>';
+                // Post မရှိရင် Feed ပြန် Load
+                if (typeof window.resetFeed === 'function' && typeof window.loadFeedNext === 'function') {
+                    window.resetFeed();
+                    window.loadFeedNext();
+                }
+                return;
+            }
+
+            // ✅ Feed ကို ရှင်းပြီး အပေါ်ဆုံးမှာ Post ထည့်
+            feedBody.innerHTML = '';
+
+            // ၁။ အဲဒီ Post ကို အပေါ်ဆုံးမှာ ထည့်
+            var card = window.buildPostCard(post);
+            card.style.border = '2px solid var(--accent)';
+            card.style.boxShadow = '0 0 20px rgba(255, 109, 31, 0.3)';
+            feedBody.appendChild(card);
+
+            console.log('✅ Post card built from link');
+
+            // ၂။ အောက်မှာ တခြား Post တွေ ဆက် Load
+            setTimeout(function() {
+                // Feed Reset (Post ကို ထည့်ထားတဲ့အတွက် ထပ်မထည့်အောင်)
+                if (typeof window.resetFeed === 'function') {
+                    try { window.resetFeed(); } catch(e) {}
+                }
+
+                // Feed ပြန် Load (Post ကို အပေါ်မှာ ထားပြီး တခြား Post တွေ အောက်မှာ)
+                loadOtherPostsBelow();
+            }, 100);
+
+        }).catch(function(err) {
+            console.error('Post link error:', err);
+            feedBody.innerHTML = '<div class="post-feed-empty">Failed to load</div>';
+        });
+    }
+
+    // ===================================================
+    //  ✅ LOAD OTHER POSTS BELOW
+    //  အောက်မှာ တခြား Post တွေ ဆက် Load
+    // ===================================================
+    function loadOtherPostsBelow() {
+        var feedBody = document.getElementById('postFeedBody');
+        if (!feedBody) return;
+
+        // Worker Server ရှာ
+        var workers = (window.WORKER_SERVERS && Array.isArray(window.WORKER_SERVERS)) ? window.WORKER_SERVERS : [];
+        var enabled = workers.filter(function(s) { return s.enabled && s.viewEnabled; });
+
+        if (enabled.length === 0) {
+            console.warn('⚠️ No worker available');
+            return;
+        }
+
+        var srv = enabled[0];
+        var client = window.getWorkerClient(srv.id);
+        if (!client) return;
+
+        // Turso ကနေ Posts တွေ ယူ
+        client.query('SELECT * FROM posts ORDER BY createdAt DESC LIMIT ?', [10])
+            .then(function(rows) {
+                if (!rows || rows.length === 0) return;
+
+                var posts = rows.map(function(row) {
+                    return window.parsePostRow(row, srv.id);
+                });
+
+                // Post တွေကို အောက်မှာ ဆက် ထည့်
+                posts.forEach(function(post) {
+                    try {
+                        var card = window.buildPostCard(post);
+                        // အပေါ်မှာ ရှိပြီးသား Post နဲ့ Duplicate မဖြစ်အောင်
+                        var existing = feedBody.querySelector('.post-card[data-post-id="' + post.postId + '"]');
+                        if (!existing) {
+                            feedBody.appendChild(card);
+                        }
+                    } catch(e) {
+                        console.warn('Build card error:', e);
+                    }
+                });
+
+                console.log('✅ Loaded ' + posts.length + ' other posts below');
+            })
+            .catch(function(err) {
+                console.warn('Load other posts error:', err);
+            });
     }
 
     // ===================================================
@@ -23503,25 +23568,6 @@ if (document.readyState === 'loading') {
     }, true);
 
     // ===================================================
-    //  NAV BUTTON WATCHER (BUG FIX)
-    // ===================================================
-    function watchNavBar() {
-        document.querySelectorAll('.nav-btn').forEach(function(btn) {
-            if (btn.style.pointerEvents === 'none') {
-                btn.style.pointerEvents = 'auto';
-            }
-            if (btn.disabled) {
-                btn.disabled = false;
-            }
-            if (btn.style.opacity === '0') {
-                btn.style.opacity = '1';
-            }
-        });
-
-        setTimeout(watchNavBar, 1000);
-    }
-
-    // ===================================================
     //  AUTO WATCH CHAT ROOM
     // ===================================================
     function watchChatRoom() {
@@ -23538,12 +23584,10 @@ if (document.readyState === 'loading') {
     // ===================================================
     setTimeout(function() {
         watchChatRoom();
-        watchNavBar();
-        console.log('✅ Chat Post Link Handler v3.0 Ready');
+        console.log('✅ Chat Post Link Handler v4.0 Ready');
     }, 2000);
 
 })();
-
 
     
 
