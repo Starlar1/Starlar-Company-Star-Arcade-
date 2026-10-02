@@ -9516,48 +9516,6 @@ body {
 }
 
 /* ============================================================
-   POST SHARE LINK / CHAT LINK
-   ============================================================ */
-.post-share-link {
-    color: #ff6d1f !important;
-    font-weight: 700 !important;
-    text-decoration: underline !important;
-    cursor: pointer !important;
-    word-break: break-all;
-    padding: 2px 6px;
-    border-radius: 6px;
-    background: rgba(255, 109, 31, 0.12);
-    display: inline-block;
-    pointer-events: auto !important;
-    position: relative;
-    z-index: 10;
-    transition: all 0.15s ease;
-}
-
-.post-share-link:active {
-    background: rgba(255, 109, 31, 0.25);
-    transform: scale(0.98);
-}
-
-.chat-link {
-    color: #ff6d1f !important;
-    text-decoration: underline;
-    text-decoration-color: rgba(255, 109, 31, 0.5);
-    text-underline-offset: 2px;
-    word-break: break-all;
-    font-weight: 700;
-    cursor: pointer;
-    pointer-events: auto !important;
-    position: relative;
-    z-index: 5;
-}
-
-.chat-link:visited { color: #ff6d1f !important; }
-
-.chat-message.sent .chat-link { color: #ffcc99 !important; }
-.chat-message.has-bubble .chat-link { position: relative; z-index: 10; pointer-events: auto !important; }
-
-/* ============================================================
    LINK PREVIEW (Chat)
    ============================================================ */
 .link-preview-container { margin-top: 8px; max-width: 100%; }
@@ -9990,6 +9948,129 @@ body {
     background: rgba(255, 68, 68, 0.1);
     color: #ff6b6b;
 }
+
+/* ============================================================
+   ✅ POST SEARCH BAR + ICON (အသစ်)
+   ============================================================ */
+.post-tab-search-btn {
+    flex-shrink: 0;
+    margin-left: auto;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 1.5px solid var(--border-light);
+    background: transparent;
+    color: var(--text-sub);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    align-self: center;
+}
+
+.post-tab-search-btn:active {
+    transform: scale(0.9);
+    background: rgba(255, 109, 31, 0.15);
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+.post-search-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    background: transparent;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+    animation: postSearchSlide 0.25s ease;
+}
+
+.post-search-bar.hidden { display: none !important; }
+
+@keyframes postSearchSlide {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.post-search-back-btn {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: none;
+    background: var(--bg-input);
+    color: var(--accent);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+}
+
+.post-search-back-btn:active {
+    transform: scale(0.9);
+    background: var(--bg-hover);
+}
+
+.post-search-input {
+    flex: 1;
+    padding: 10px 14px;
+    border: 1.5px solid var(--border-light);
+    border-radius: 20px;
+    background: var(--bg-input);
+    color: var(--text-main);
+    font-size: 14px;
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.2s ease;
+    min-width: 0;
+}
+
+.post-search-input:focus { border-color: var(--accent); }
+.post-search-input::placeholder { color: var(--text-muted); }
+
+.post-search-go-btn {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: none;
+    background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+    color: #fff;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 3px 12px rgba(255, 109, 31, 0.4);
+    transition: all 0.2s ease;
+}
+
+.post-search-go-btn:active {
+    transform: scale(0.9);
+    opacity: 0.9;
+}
+
+/* ✅ Searched Post -- Highlight */
+.post-card.post-search-highlight {
+    border: 2px solid var(--accent) !important;
+    box-shadow: 0 0 24px rgba(255, 109, 31, 0.35) !important;
+    padding: 12px !important;
+    border-radius: 14px !important;
+}
+
+/* ✅ Mobile */
+@media (max-width: 480px) {
+    .post-tab-search-btn {
+        width: 30px;
+        height: 30px;
+    }
+    .post-search-bar { padding: 8px 10px; gap: 6px; }
+    .post-search-back-btn,
+    .post-search-go-btn { width: 32px; height: 32px; }
+    .post-search-input { font-size: 13px; padding: 9px 12px; }
+}
 </style>
 </head>
 <body>
@@ -10230,7 +10311,8 @@ body {
                         <!-- HOME SCREEN -->
                         <div class="screen hidden" id="screen-home">
                             <div class="post-feed-embedded">
-                                <div class="post-tabs-bar">
+                                <!-- ✅ TAB BAR + SEARCH ICON -->
+                                <div class="post-tabs-bar" id="postTabsBar">
                                     <button class="post-tab-chip active" data-tab="all">
                                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                             <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
@@ -10253,7 +10335,31 @@ body {
                                             <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
                                         </svg>Favourite
                                     </button>
+                                    <!-- ✅ SEARCH ICON -->
+                                    <button class="post-tab-search-btn" id="postSearchIconBtn" title="Search">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                            <circle cx="11" cy="11" r="8"/>
+                                            <path d="m21 21-4.35-4.35"/>
+                                        </svg>
+                                    </button>
                                 </div>
+                                
+                                <!-- ✅ SEARCH BAR (Tab အတန်း ပျောက်ရင် ဒါပေါ်) -->
+                                <div class="post-search-bar hidden" id="postSearchBar">
+                                    <button class="post-search-back-btn" id="postSearchBackBtn">
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                            <polyline points="15,18 9,12 15,6"/>
+                                        </svg>
+                                    </button>
+                                    <input type="text" id="postSearchInput" class="post-search-input" placeholder="Post ID ထည့်ပါ..." />
+                                    <button class="post-search-go-btn" id="postSearchGoBtn">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                            <circle cx="11" cy="11" r="8"/>
+                                            <path d="m21 21-4.35-4.35"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                                
                                 <div class="post-tab-desc" id="postTabDesc">Post အားလုံး ပြသနေသည်</div>
                                 <div class="post-feed-body" id="postFeedBody"></div>
                             </div>
@@ -11396,10 +11502,6 @@ body {
         </div>
     </div>
 
-    <!-- ============================================================
-         POST SYSTEM v27.0 HTML
-         ============================================================ -->
-
     <!-- CREATE POST -->
     <div class="post-create-screen hidden" id="postCreateScreen">
         <div class="post-create-header">
@@ -11449,7 +11551,6 @@ body {
                 <textarea id="postCaptionInput" class="post-textarea" placeholder="ရေးပါ..." rows="3" maxlength="500"></textarea>
                 <div class="post-char-count" id="postCaptionCount">0 / 500</div>
             </div>
-            <!-- ✅ POST ROLE -- ရွေးရမယ် -->
             <div class="post-input-group">
                 <label>Post Role <span style="color:#ff4444;">*</span></label>
                 <div class="post-role-list" id="postRoleList"></div>
@@ -20448,21 +20549,21 @@ if (document.readyState === 'loading') {
 
 })();
 
-
 // ============================================================
-// ✅ POST SYSTEM + CHAT LINK HANDLER v4.0 -- FULL JAVA
-//  • Link နှိပ်ရင် Chat Screen လုံးဝ ပိတ် + Auto Home
-//  • အဲဒီ Post ကို အပေါ်ဆုံးမှာ ပြ + အောက်မှာ တခြား Post ဆက်
-//  • Nav Bar ကို လုံးဝ မထိ
-//  • Like / Comment / Favorite / Report / Share အလုပ်လုပ်
+// ✅ POST SYSTEM v5.0 -- FULL JAVA
+//  • Tab: All / Like / Role / Fav + Search Icon (ညာဘက်)
+//  • Search Icon နှိပ်ရင် Tab အတန်း ပျောက် + Search Bar ပေါ်
+//  • Post ID ထည့်ရှာရင် အဲ့ Post 1 ခုတည်း ပြ
+//  • ရှာပြီးရင် Tab အတန်း ပြန်ပေါ်
+//  • Chat Post Link စနစ် လုံးဝဖြတ်
 // ============================================================
 (function() {
     'use strict';
 
-    console.log('🚀 Post System + Chat Link v4.0 Loading...');
+    console.log('🚀 Post System v5.0 Loading...');
 
     // ===================================================
-    //  ✅ WORKER SERVERS
+    //  WORKER SERVERS
     // ===================================================
     var WORKER_SERVERS = [
         {
@@ -20498,7 +20599,6 @@ if (document.readyState === 'loading') {
     var LIKE_MAX = 10000;
     var COMMENT_MAX = 100;
 
-    var POST_LIST_KEY = 'post_myPostList';
     var FAVOURITE_KEY = 'post_favouritePosts';
     var DAILY_POST_KEY = 'post_dailyPostCount';
     var LIKED_POSTS_KEY = 'post_likedPosts';
@@ -20541,6 +20641,9 @@ if (document.readyState === 'loading') {
     var isUploadInProgress = false;
     var dailyPostCount = 0;
     var initDone = false;
+
+    // ✅ Search Mode
+    var isSearchMode = false;
 
     // ===================================================
     //  CHECK
@@ -20641,7 +20744,7 @@ if (document.readyState === 'loading') {
     }
 
     // ===================================================
-    //  INDEXEDDB -- Main DB
+    //  INDEXEDDB
     // ===================================================
     var DB_NAME = 'StarArcadeDB';
     var DB_VERSION = 1;
@@ -20767,7 +20870,7 @@ if (document.readyState === 'loading') {
     //  WORKER CLIENT
     // ===================================================
     function getWorkerClient(workerId) {
-        var cacheKey = '__workerClientV36_' + workerId;
+        var cacheKey = '__workerClientV50_' + workerId;
         if (window[cacheKey]) return window[cacheKey];
 
         var worker = getWorkerById(workerId);
@@ -21040,9 +21143,124 @@ if (document.readyState === 'loading') {
     }
 
     // ===================================================
+    //  ✅ SEARCH SYSTEM
+    // ===================================================
+    function openPostSearch() {
+        isSearchMode = true;
+        var tabsBar = document.getElementById('postTabsBar');
+        var searchBar = document.getElementById('postSearchBar');
+        var tabDesc = document.getElementById('postTabDesc');
+
+        if (tabsBar) tabsBar.classList.add('hidden');
+        if (tabDesc) tabDesc.classList.add('hidden');
+        if (searchBar) {
+            searchBar.classList.remove('hidden');
+            setTimeout(function() {
+                var input = document.getElementById('postSearchInput');
+                if (input) input.focus();
+            }, 100);
+        }
+    }
+
+    function closePostSearch() {
+        isSearchMode = false;
+        var tabsBar = document.getElementById('postTabsBar');
+        var searchBar = document.getElementById('postSearchBar');
+        var input = document.getElementById('postSearchInput');
+
+        if (tabsBar) tabsBar.classList.remove('hidden');
+        if (searchBar) searchBar.classList.add('hidden');
+        if (input) input.value = '';
+
+        // Tab အတန်း ပြန်ပေါ် + Feed ပြန် Load
+        showTabDesc('Post အားလုံး ပြသနေသည်');
+        resetFeed();
+        loadFeedNext();
+    }
+
+    function performPostSearch() {
+        var input = document.getElementById('postSearchInput');
+        if (!input) return;
+        var postId = input.value.trim();
+        if (!postId) {
+            showToastSafe('Post ID ထည့်ပါ');
+            return;
+        }
+
+        var feedBody = document.getElementById('postFeedBody');
+        if (!feedBody) return;
+
+        feedBody.innerHTML = '<div class="post-feed-loading">Post ရှာနေသည်...</div>';
+
+        // Worker အားလုံးမှာ ရှာ
+        var workers = getEnabledViewWorkers();
+        if (workers.length === 0) {
+            feedBody.innerHTML = '<div class="post-feed-empty">Server ပိတ်ထားသည်</div>';
+            return;
+        }
+
+        var foundPost = null;
+        var tried = 0;
+
+        function tryNextWorker() {
+            if (tried >= workers.length) {
+                if (!foundPost) {
+                    feedBody.innerHTML = '<div class="post-feed-empty">Post မတွေ့ပါ<br><span style="font-size:11px;opacity:0.7;">ID: ' + escapeHtml(postId) + '</span></div>';
+                }
+                return;
+            }
+
+            var srv = workers[tried];
+            tried++;
+            var client = getWorkerClient(srv.id);
+            if (!client) { tryNextWorker(); return; }
+
+            client.query('SELECT * FROM posts WHERE postId = ? LIMIT 1', [postId])
+                .then(function(rows) {
+                    if (rows && rows.length > 0) {
+                        foundPost = parsePostRow(rows[0], srv.id);
+                        renderSearchResult(foundPost);
+                    } else {
+                        tryNextWorker();
+                    }
+                })
+                .catch(function() {
+                    tryNextWorker();
+                });
+        }
+
+        tryNextWorker();
+    }
+
+    function renderSearchResult(post) {
+        var feedBody = document.getElementById('postFeedBody');
+        if (!feedBody) return;
+
+        feedBody.innerHTML = '';
+
+        var card = buildPostCard(post);
+        card.classList.add('post-search-highlight');
+
+        // Highlight animation
+        card.style.opacity = '0';
+        card.style.transform = 'scale(0.95)';
+        card.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+        feedBody.appendChild(card);
+
+        requestAnimationFrame(function() {
+            card.style.opacity = '1';
+            card.style.transform = 'scale(1)';
+        });
+
+        showToastSafe('Post တွေ့ပါပြီ');
+    }
+
+    // ===================================================
     //  FEED
     // ===================================================
     function switchFeedTab(tab) {
+        if (isSearchMode) return;
+
         if (currentFeedTab === tab && tab !== 'role') {
             showToastSafe('Reloading...');
             if (tab === 'favourite') { resetFeed(); loadFavouriteFeed(); }
@@ -21079,6 +21297,7 @@ if (document.readyState === 'loading') {
     }
 
     function loadFeedNext() {
+        if (isSearchMode) return;
         if (feedLoading || feedExhausted) return;
         if (!isGlobalViewEnabled()) {
             var body = document.getElementById('postFeedBody');
@@ -21115,6 +21334,8 @@ if (document.readyState === 'loading') {
         }
 
         fetchPostsFromServer(client, srv.id, 100).then(function(allPosts) {
+            if (isSearchMode) { feedLoading = false; return; }
+
             var filtered = allPosts;
 
             if (currentFeedTab === 'role' && currentFeedRole) {
@@ -21138,6 +21359,7 @@ if (document.readyState === 'loading') {
 
             var idx = 0;
             function showNext() {
+                if (isSearchMode) { feedLoading = false; return; }
                 if (idx >= batch.length) {
                     feedLoading = false;
                     isInitialLoad = false;
@@ -21177,6 +21399,7 @@ if (document.readyState === 'loading') {
         });
 
         Promise.all(promises).then(function(results) {
+            if (isSearchMode) return;
             var allPosts = [];
             results.forEach(function(arr) { arr.forEach(function(p) { allPosts.push(p); }); });
 
@@ -21198,6 +21421,7 @@ if (document.readyState === 'loading') {
             body.innerHTML = '';
             var idx = 0;
             function showNext() {
+                if (isSearchMode) return;
                 if (idx >= likesPosts.length) {
                     feedLoading = false;
                     feedExhausted = true;
@@ -21224,6 +21448,7 @@ if (document.readyState === 'loading') {
         body.innerHTML = '<div class="post-feed-loading">Loading Favourites...</div>';
 
         loadFavourites().then(function() {
+            if (isSearchMode) return;
             if (favouritePosts.length === 0) {
                 body.innerHTML = '<div class="post-feed-empty"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>Favourite Post မရှိပါ</div>';
                 return;
@@ -21234,6 +21459,7 @@ if (document.readyState === 'loading') {
             });
 
             Promise.all(promises).then(function(posts) {
+                if (isSearchMode) return;
                 var validPosts = posts.filter(function(p) { return p !== null; });
                 feedAllPosts = [];
 
@@ -21245,6 +21471,7 @@ if (document.readyState === 'loading') {
                 body.innerHTML = '';
                 var idx = 0;
                 function showNext() {
+                    if (isSearchMode) return;
                     if (idx >= validPosts.length) {
                         feedLoading = false;
                         feedExhausted = true;
@@ -21264,6 +21491,7 @@ if (document.readyState === 'loading') {
     }
 
     function appendSinglePost(post) {
+        if (isSearchMode) return;
         var body = document.getElementById('postFeedBody');
         if (!body) return;
 
@@ -21327,10 +21555,11 @@ if (document.readyState === 'loading') {
     function initInfiniteScroll() {
         var feedBody = document.getElementById('postFeedBody');
         if (!feedBody) { setTimeout(initInfiniteScroll, 500); return; }
-        if (feedBody._scrollV36) return;
-        feedBody._scrollV36 = true;
+        if (feedBody._scrollV50) return;
+        feedBody._scrollV50 = true;
 
         feedBody.addEventListener('scroll', function() {
+            if (isSearchMode) return;
             var scrollTop = feedBody.scrollTop;
             var scrollHeight = feedBody.scrollHeight;
             var clientHeight = feedBody.clientHeight;
@@ -21859,7 +22088,7 @@ if (document.readyState === 'loading') {
                 };
 
                 var feedBody = document.getElementById('postFeedBody');
-                if (feedBody) {
+                if (feedBody && !isSearchMode) {
                     var loadingEl = feedBody.querySelector('.post-feed-loading');
                     if (loadingEl) loadingEl.remove();
                     var emptyEl = feedBody.querySelector('.post-feed-empty');
@@ -23061,7 +23290,7 @@ if (document.readyState === 'loading') {
     }
 
     // ===================================================
-    //  ✅ GLOBAL EXPORTS
+    //  GLOBAL EXPORTS
     // ===================================================
     window.buildPostCard = buildPostCard;
     window.parsePostRow = parsePostRow;
@@ -23093,20 +23322,57 @@ if (document.readyState === 'loading') {
         if (initDone) return;
         initDone = true;
 
-        console.log('🔧 Init Post System v36.0...');
+        console.log('🔧 Init Post System v5.0...');
 
         Promise.all([loadLikedPosts(), loadFavourites()]).then(function() {
             console.log('✅ Loaded likedPosts:', likedPosts.length, 'favourites:', favouritePosts.length);
         });
 
+        // ✅ Tab Chip
         document.querySelectorAll('.post-tab-chip').forEach(function(chip) {
             chip.addEventListener('click', function() {
+                if (isSearchMode) return;
                 var tab = this.dataset.tab;
                 document.querySelectorAll('.post-tab-chip').forEach(function(c) { c.classList.remove('active'); });
                 this.classList.add('active');
                 switchFeedTab(tab);
             });
         });
+
+        // ✅ Search Icon
+        var searchIconBtn = document.getElementById('postSearchIconBtn');
+        if (searchIconBtn) {
+            searchIconBtn.addEventListener('click', function() {
+                openPostSearch();
+            });
+        }
+
+        // ✅ Search Back Button
+        var searchBackBtn = document.getElementById('postSearchBackBtn');
+        if (searchBackBtn) {
+            searchBackBtn.addEventListener('click', function() {
+                closePostSearch();
+            });
+        }
+
+        // ✅ Search Go Button
+        var searchGoBtn = document.getElementById('postSearchGoBtn');
+        if (searchGoBtn) {
+            searchGoBtn.addEventListener('click', function() {
+                performPostSearch();
+            });
+        }
+
+        // ✅ Search Input -- Enter key
+        var searchInput = document.getElementById('postSearchInput');
+        if (searchInput) {
+            searchInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    performPostSearch();
+                }
+            });
+        }
 
         showTabDesc('Post အားလုံး ပြသနေသည်');
 
@@ -23116,6 +23382,7 @@ if (document.readyState === 'loading') {
             initInfiniteScroll();
         }, 800);
 
+        // ✅ Create Post
         var backBtn = document.getElementById('postCreateBackBtn');
         if (backBtn) backBtn.addEventListener('click', closePostCreate);
 
@@ -23155,6 +23422,7 @@ if (document.readyState === 'loading') {
         var upClose = document.getElementById('postUploadPopupClose');
         if (upClose) upClose.addEventListener('click', hideUploadPopup);
 
+        // ✅ Viewer
         var viewerClose = document.getElementById('postViewerClose');
         if (viewerClose) viewerClose.addEventListener('click', closePostViewer);
         var viewerOverlay = document.getElementById('postViewerOverlay');
@@ -23162,16 +23430,19 @@ if (document.readyState === 'loading') {
         var dlBtn = document.getElementById('postViewerDownload');
         if (dlBtn) dlBtn.addEventListener('click', downloadCurrentViewer);
 
+        // ✅ User Popup
         var popupClose = document.getElementById('postUserPopupClose');
         if (popupClose) popupClose.addEventListener('click', closePostUserPopup);
         var popupOverlay = document.getElementById('postUserPopupOverlay');
         if (popupOverlay) popupOverlay.addEventListener('click', function(e) { if (e.target === popupOverlay) closePostUserPopup(); });
 
+        // ✅ Share Modal
         var shareClose = document.getElementById('shareModalClose');
         if (shareClose) shareClose.addEventListener('click', function() { var ov = document.getElementById('shareModalOverlay'); if (ov) ov.classList.add('hidden'); });
         var shareOverlay = document.getElementById('shareModalOverlay');
         if (shareOverlay) shareOverlay.addEventListener('click', function(e) { if (e.target === shareOverlay) shareOverlay.classList.add('hidden'); });
 
+        // ✅ Comment Sheet
         var commentBack = document.getElementById('commentBackBtn');
         if (commentBack) commentBack.addEventListener('click', closeCommentScreen);
         var commentSheetOverlay = document.getElementById('commentSheetOverlay');
@@ -23198,7 +23469,7 @@ if (document.readyState === 'loading') {
 
         hookPlusMenuPost();
 
-        console.log('✅ Post System v36.0 Ready');
+        console.log('✅ Post System v5.0 Ready');
     }
 
     function start() {
@@ -23217,382 +23488,6 @@ if (document.readyState === 'loading') {
 
 })();
 
-
-// ============================================================
-// ✅ CHAT POST LINK HANDLER v4.0
-//  • Link နှိပ်ရင် Chat Screen လုံးဝ ပိတ် + Auto Home
-//  • အဲဒီ Post ကို အပေါ်ဆုံးမှာ ပြ + အောက်မှာ တခြား Post ဆက်
-//  • Nav Bar ကို လုံးဝ မထိ
-// ============================================================
-(function() {
-    'use strict';
-
-    console.log('🔗 Chat Post Link Handler v4.0 Loading...');
-
-    // ===================================================
-    //  CSS
-    // ===================================================
-    var style = document.createElement('style');
-    style.textContent = `
-        .post-share-link-in-chat {
-            color: #ff6d1f !important;
-            font-weight: 700 !important;
-            text-decoration: underline !important;
-            text-decoration-color: rgba(255, 109, 31, 0.5) !important;
-            text-underline-offset: 2px !important;
-            cursor: pointer !important;
-            padding: 2px 6px !important;
-            border-radius: 6px !important;
-            background: rgba(255, 109, 31, 0.12) !important;
-            display: inline-block !important;
-            transition: all 0.15s ease !important;
-            pointer-events: auto !important;
-            position: relative !important;
-            z-index: 10 !important;
-        }
-        .post-share-link-in-chat:active {
-            background: rgba(255, 109, 31, 0.25) !important;
-            transform: scale(0.98) !important;
-        }
-    `;
-    document.head.appendChild(style);
-
-    // ===================================================
-    //  UTILS
-    // ===================================================
-    function escapeHtmlSafe(s) {
-        if (!s) return '';
-        return String(s).replace(/[&<>"']/g, function(c) {
-            return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c];
-        });
-    }
-
-    // ===================================================
-    //  POST LINK TRANSFORM
-    // ===================================================
-    function transformPostLinks(text) {
-        if (!text) return '';
-
-        var postLinkRegex = /Post\.(\d+)\.([a-zA-Z0-9_]+)/g;
-        var result = '';
-        var lastIndex = 0;
-        var match;
-
-        postLinkRegex.lastIndex = 0;
-
-        while ((match = postLinkRegex.exec(text)) !== null) {
-            result += escapeHtmlSafe(text.substring(lastIndex, match.index));
-
-            var fullMatch = match[0];
-            var serverNo = match[1];
-            var postId = match[2];
-
-            result += '<span class="post-share-link-in-chat" ' +
-                      'data-server-no="' + serverNo + '" ' +
-                      'data-post-id="' + postId + '">' +
-                      escapeHtmlSafe(fullMatch) +
-                      '</span>';
-
-            lastIndex = match.index + fullMatch.length;
-        }
-
-        result += escapeHtmlSafe(text.substring(lastIndex));
-        return result;
-    }
-
-    // ===================================================
-    //  MESSAGE PROCESS
-    // ===================================================
-    function processMessageElement(msgEl) {
-        if (!msgEl) return;
-        if (msgEl._postLinkProcessed) return;
-
-        var textSpans = msgEl.querySelectorAll('.msg-text');
-        textSpans.forEach(function(span) {
-            var rawText = span.textContent || span.innerText || '';
-            if (rawText && rawText.indexOf('Post.') !== -1) {
-                span.innerHTML = transformPostLinks(rawText);
-            }
-        });
-
-        msgEl._postLinkProcessed = true;
-    }
-
-    function processAllMessages() {
-        var messagesEl = document.getElementById('chatRoomMessages');
-        if (!messagesEl) return;
-
-        var allMsgs = messagesEl.querySelectorAll('.chat-message');
-        allMsgs.forEach(function(msg) {
-            processMessageElement(msg);
-        });
-    }
-
-    // ===================================================
-    //  ✅ CLOSE CHAT + GO HOME
-    //  Chat Screen ကို လုံးဝ ပိတ်ပြီး Home ကို သွား
-    // ===================================================
-    function closeChatAndGoHome() {
-        console.log('🔄 Closing Chat + Going Home...');
-
-        // ၁။ Fullscreen Overlay ပိတ် (Chat Room ပါ ပါတယ်)
-        var fsOverlay = document.getElementById('fullscreenOverlay');
-        if (fsOverlay) {
-            fsOverlay.classList.remove('active');
-            fsOverlay.classList.remove('chat-room-active');
-            fsOverlay.classList.remove('profile-active');
-        }
-
-        // ၂။ Chat Room Screen ဖျောက်
-        var chatRoomScreen = document.getElementById('fs-chat-room');
-        if (chatRoomScreen) chatRoomScreen.classList.add('hidden');
-
-        // ၃။ Screen တွေ အားလုံး ဖျောက်ပြီး Home ပြ
-        document.querySelectorAll('.screen').forEach(function(s) {
-            s.classList.add('hidden');
-        });
-        var homeScreen = document.getElementById('screen-home');
-        if (homeScreen) homeScreen.classList.remove('hidden');
-
-        // ၄။ Nav Bar မှာ Home Active လုပ်
-        document.querySelectorAll('.nav-btn').forEach(function(b) {
-            b.classList.remove('active');
-        });
-        var homeBtn = document.querySelector('.nav-btn[data-tab="home"]');
-        if (homeBtn) homeBtn.classList.add('active');
-
-        // ၅။ Sidebar ပိတ်
-        var sidebar = document.getElementById('sidebar');
-        if (sidebar) sidebar.classList.remove('open');
-        var sidebarOverlay = document.getElementById('sidebarOverlay');
-        if (sidebarOverlay) sidebarOverlay.classList.remove('active');
-
-        // ၆။ Plus Menu ပိတ်
-        if (typeof window.closePlusMenu === 'function') {
-            try { window.closePlusMenu(); } catch(e) {}
-        }
-
-        // ၇။ Body Overflow ပြန်
-        document.body.style.overflow = '';
-
-        console.log('✅ Chat Closed + Home Reached');
-    }
-
-    // ===================================================
-    //  CLICK HANDLER
-    // ===================================================
-    function handlePostLinkClick(e) {
-        var link = e.target.closest('.post-share-link-in-chat');
-        if (!link) return;
-
-        e.preventDefault();
-        e.stopPropagation();
-        e.stopImmediatePropagation();
-
-        var serverNo = parseInt(link.dataset.serverNo);
-        var postId = link.dataset.postId;
-
-        if (!serverNo || !postId) return;
-
-        console.log('📎 Post Link Clicked:', serverNo, postId);
-
-        // ✅ Chat ကို ပိတ်ပြီး Home ကို သွား
-        closeChatAndGoHome();
-
-        // ✅ Post ရှာ
-        showPostFromLink(serverNo, postId);
-    }
-
-    // ===================================================
-    //  ✅ SHOW POST FROM LINK
-    //  • အဲဒီ Post ကို အပေါ်ဆုံးမှာ ပြ
-    //  • အောက်မှာ တခြား Post တွေ ဆက်ရှိနေ
-    // ===================================================
-    function showPostFromLink(serverNo, postId) {
-        var feedBody = document.getElementById('postFeedBody');
-        if (!feedBody) return;
-
-        // Loading ပြ
-        feedBody.innerHTML = '<div class="post-feed-loading">Post ရှာနေသည်...</div>';
-
-        if (typeof window.fetchSinglePost !== 'function' || typeof window.buildPostCard !== 'function') {
-            feedBody.innerHTML = '<div class="post-feed-empty">Post system not ready</div>';
-            return;
-        }
-
-        // Post ရှာ
-        window.fetchSinglePost(serverNo, postId).then(function(post) {
-            if (!post) {
-                feedBody.innerHTML = '<div class="post-feed-empty">Post မတွေ့ပါ</div>';
-                // Post မရှိရင် Feed ပြန် Load
-                if (typeof window.resetFeed === 'function' && typeof window.loadFeedNext === 'function') {
-                    window.resetFeed();
-                    window.loadFeedNext();
-                }
-                return;
-            }
-
-            // ✅ Feed ကို ရှင်းပြီး အပေါ်ဆုံးမှာ Post ထည့်
-            feedBody.innerHTML = '';
-
-            // ၁။ အဲဒီ Post ကို အပေါ်ဆုံးမှာ ထည့်
-            var card = window.buildPostCard(post);
-            card.style.border = '2px solid var(--accent)';
-            card.style.boxShadow = '0 0 20px rgba(255, 109, 31, 0.3)';
-            feedBody.appendChild(card);
-
-            console.log('✅ Post card built from link');
-
-            // ၂။ အောက်မှာ တခြား Post တွေ ဆက် Load
-            setTimeout(function() {
-                // Feed Reset (Post ကို ထည့်ထားတဲ့အတွက် ထပ်မထည့်အောင်)
-                if (typeof window.resetFeed === 'function') {
-                    try { window.resetFeed(); } catch(e) {}
-                }
-
-                // Feed ပြန် Load (Post ကို အပေါ်မှာ ထားပြီး တခြား Post တွေ အောက်မှာ)
-                loadOtherPostsBelow();
-            }, 100);
-
-        }).catch(function(err) {
-            console.error('Post link error:', err);
-            feedBody.innerHTML = '<div class="post-feed-empty">Failed to load</div>';
-        });
-    }
-
-    // ===================================================
-    //  ✅ LOAD OTHER POSTS BELOW
-    //  အောက်မှာ တခြား Post တွေ ဆက် Load
-    // ===================================================
-    function loadOtherPostsBelow() {
-        var feedBody = document.getElementById('postFeedBody');
-        if (!feedBody) return;
-
-        // Worker Server ရှာ
-        var workers = (window.WORKER_SERVERS && Array.isArray(window.WORKER_SERVERS)) ? window.WORKER_SERVERS : [];
-        var enabled = workers.filter(function(s) { return s.enabled && s.viewEnabled; });
-
-        if (enabled.length === 0) {
-            console.warn('⚠️ No worker available');
-            return;
-        }
-
-        var srv = enabled[0];
-        var client = window.getWorkerClient(srv.id);
-        if (!client) return;
-
-        // Turso ကနေ Posts တွေ ယူ
-        client.query('SELECT * FROM posts ORDER BY createdAt DESC LIMIT ?', [10])
-            .then(function(rows) {
-                if (!rows || rows.length === 0) return;
-
-                var posts = rows.map(function(row) {
-                    return window.parsePostRow(row, srv.id);
-                });
-
-                // Post တွေကို အောက်မှာ ဆက် ထည့်
-                posts.forEach(function(post) {
-                    try {
-                        var card = window.buildPostCard(post);
-                        // အပေါ်မှာ ရှိပြီးသား Post နဲ့ Duplicate မဖြစ်အောင်
-                        var existing = feedBody.querySelector('.post-card[data-post-id="' + post.postId + '"]');
-                        if (!existing) {
-                            feedBody.appendChild(card);
-                        }
-                    } catch(e) {
-                        console.warn('Build card error:', e);
-                    }
-                });
-
-                console.log('✅ Loaded ' + posts.length + ' other posts below');
-            })
-            .catch(function(err) {
-                console.warn('Load other posts error:', err);
-            });
-    }
-
-    // ===================================================
-    //  MUTATION OBSERVER
-    // ===================================================
-    var observer = null;
-
-    function startObserver() {
-        var messagesEl = document.getElementById('chatRoomMessages');
-        if (!messagesEl) {
-            setTimeout(startObserver, 1000);
-            return;
-        }
-
-        processAllMessages();
-
-        if (observer) {
-            try { observer.disconnect(); } catch(e) {}
-        }
-
-        observer = new MutationObserver(function(mutations) {
-            mutations.forEach(function(mutation) {
-                if (mutation.type === 'childList') {
-                    mutation.addedNodes.forEach(function(node) {
-                        if (node.nodeType === 1) {
-                            if (node.classList && node.classList.contains('chat-message')) {
-                                processMessageElement(node);
-                            } else if (node.classList && node.classList.contains('chat-message-wrapper')) {
-                                var innerMsg = node.querySelector('.chat-message');
-                                if (innerMsg) processMessageElement(innerMsg);
-                            } else {
-                                var innerMsgs = node.querySelectorAll ? node.querySelectorAll('.chat-message') : [];
-                                innerMsgs.forEach(function(m) { processMessageElement(m); });
-                            }
-                        }
-                    });
-                }
-            });
-        });
-
-        observer.observe(messagesEl, {
-            childList: true,
-            subtree: true
-        });
-
-        console.log('👀 Observer started');
-    }
-
-    // ===================================================
-    //  EVENT DELEGATION
-    // ===================================================
-    document.addEventListener('click', function(e) {
-        var link = e.target.closest('.post-share-link-in-chat');
-        if (link) {
-            handlePostLinkClick(e);
-        }
-    }, true);
-
-    // ===================================================
-    //  AUTO WATCH CHAT ROOM
-    // ===================================================
-    function watchChatRoom() {
-        var messagesEl = document.getElementById('chatRoomMessages');
-        if (messagesEl && !messagesEl._postLinkWatched) {
-            messagesEl._postLinkWatched = true;
-            startObserver();
-        }
-        setTimeout(watchChatRoom, 1500);
-    }
-
-    // ===================================================
-    //  START
-    // ===================================================
-    setTimeout(function() {
-        watchChatRoom();
-        console.log('✅ Chat Post Link Handler v4.0 Ready');
-    }, 2000);
-
-})();
-
-    
-
-
-            
 </script>
 </body>
 </html>
