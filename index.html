@@ -23439,20 +23439,21 @@ if (document.readyState === 'loading') {
 })();
 
 // ============================================================
-// ✅ PROFILE TAB SYSTEM v2.0 + POST INFO
-//  • Profile တစ်ခုလုံး Scroll
-//  • Post Link -- Preview ပြ
-//  • Post Info -- Delete (Report အစား), Comment ဖျောက်, All Comments ပြ
+// ✅ PROFILE TAB SYSTEM v3.0 + POST INFO
+//  • Post Delete → Firebase + Worker နှစ်ခုလုံး ဖျက်
+//  • Post Info → View/Report ပါ (အရင်အတိုင်း)
+//  • Post Delete → Post Tab ပဲ ပြန် (Sidebar မရောက်)
+//  • Tab ပြောင်းရင် UI မလှုပ်
 // ============================================================
 (function() {
     'use strict';
 
-    console.log('📱 Profile Tab System v2.0 Loading...');
+    console.log('📱 Profile Tab System v3.0 Loading...');
 
     var POST_CACHE_KEY_PREFIX = 'profilePostCache_';
 
     // ===================================================
-    //  TAB SWITCH
+    //  TAB SWITCH -- UI မလှုပ်အောင်
     // ===================================================
     function initProfileTabs() {
         var tabBar = document.getElementById('profileTabBar');
@@ -23461,7 +23462,9 @@ if (document.readyState === 'loading') {
         tabBar._inited = true;
 
         tabBar.querySelectorAll('.profile-tab-btn').forEach(function(btn) {
-            btn.addEventListener('click', function() {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
                 var tab = this.dataset.ptab;
                 tabBar.querySelectorAll('.profile-tab-btn').forEach(function(b) { b.classList.remove('active'); });
                 this.classList.add('active');
@@ -23474,8 +23477,8 @@ if (document.readyState === 'loading') {
         var aboutEl = document.getElementById('profileTabAbout');
         var postEl = document.getElementById('profileTabPost');
         var giftEl = document.getElementById('profileTabGift');
-        var fullscreen = document.getElementById('profileFullscreen');
 
+        // ✅ UI မလှုပ်အောင် -- display ပဲ ပြောင်း၊ scrollTop မထိ
         if (aboutEl) aboutEl.classList.add('hidden');
         if (postEl) postEl.classList.add('hidden');
         if (giftEl) giftEl.classList.add('hidden');
@@ -23490,11 +23493,15 @@ if (document.readyState === 'loading') {
             loadMyProfileGifts();
         }
 
-        // ✅ Scroll ကို အပေါ်ပြန်
-        if (fullscreen) {
-            setTimeout(function() {
-                fullscreen.scrollTop = 0;
-            }, 50);
+        // ✅ Scroll ကို Tab Bar ဆီမှာ ထား (UI မလှုပ်)
+        var fullscreen = document.getElementById('profileFullscreen');
+        var tabBar = document.getElementById('profileTabBar');
+        if (fullscreen && tabBar) {
+            var tabBarTop = tabBar.offsetTop;
+            // ✅ Scroll က tabBar အောက်မှာ ရှိရင် ပြန်မချ
+            if (fullscreen.scrollTop > tabBarTop) {
+                fullscreen.scrollTop = tabBarTop;
+            }
         }
     }
 
@@ -23517,8 +23524,15 @@ if (document.readyState === 'loading') {
         });
     }
 
+    function deletePostDetailFromIDB(postId) {
+        return new Promise(function(resolve) {
+            if (typeof deleteFromDB !== 'function') return resolve();
+            deleteFromDB(POST_CACHE_KEY_PREFIX + postId).then(resolve).catch(resolve);
+        });
+    }
+
     // ===================================================
-    //  MAIN LOADER -- IDB Cache Lookup
+    //  MAIN LOADER
     // ===================================================
     function loadMyProfilePosts() {
         var listEl = document.getElementById('profilePostList');
@@ -23616,9 +23630,7 @@ if (document.readyState === 'loading') {
         return el;
     }
 
-    // ✅ Post Media Builder -- Link Preview ပါ
     function buildProfilePostMedia(post) {
-        // ✅ Link ဆိုရင် Preview ပြ
         if (post.postType === 'link' && post.linkData) {
             var ld = post.linkData;
             var imgHtml = ld.image ? '<img class="lp-img" src="' + escapeProfileHtml(ld.image) + '" onerror="this.style.display=\'none\'" />' : '';
@@ -23732,7 +23744,7 @@ if (document.readyState === 'loading') {
         });
     }
 
-    // ✅ Post Info Render -- Delete (Report အစား), Comment ဖျောက်, All Comments ပြ
+    // ✅ Post Info Render -- View/Report ပါ (အရင်အတိုင်း), Delete ပေါင်းထည့်
     function renderPostInfo(container, post, postId, workerNo) {
         container.innerHTML = '';
 
@@ -23741,18 +23753,10 @@ if (document.readyState === 'loading') {
             return;
         }
 
-        // ✅ Card ကို build လုပ်ပြီး button တွေ ပြင်ဆင်
+        // ✅ Card ကို build (View/Report ပါပြီးသား)
         var card = window.buildPostCard(post);
 
-        // ✅ Report ခလုတ်ကို ဖျောက်
-        var reportBtn = card.querySelector('.post-action-btn[data-action="report"]');
-        if (reportBtn) reportBtn.remove();
-
-        // ✅ Comment ခလုတ်ကို ဖျောက်
-        var commentBtn = card.querySelector('.post-action-btn[data-action="comment"]');
-        if (commentBtn) commentBtn.remove();
-
-        // ✅ Delete ခလုတ် ထည့် (Report နေရာမှာ)
+        // ✅ Delete ခလုတ် ပေါင်းထည့် (Report ဘေးမှာ)
         var actionsBar = card.querySelector('.post-card-actions');
         if (actionsBar) {
             var deleteBtn = document.createElement('button');
@@ -23766,7 +23770,7 @@ if (document.readyState === 'loading') {
                 '</svg>';
             deleteBtn.addEventListener('click', function(e) {
                 e.stopPropagation();
-                deleteMyPostFromInfo({ postId: postId, workerNo: workerNo });
+                deleteMyPost({ postId: postId, workerNo: workerNo });
             });
             actionsBar.appendChild(deleteBtn);
         }
@@ -23870,7 +23874,7 @@ if (document.readyState === 'loading') {
                     });
                 }
             }
-            else if (action === 'delete') deleteMyPostFromInfo(item);
+            else if (action === 'delete') deleteMyPost(item);
         });
 
         setTimeout(function() {
@@ -23883,29 +23887,154 @@ if (document.readyState === 'loading') {
         }, 10);
     }
 
-    function deleteMyPostFromInfo(item) {
-        if (!confirm('Delete this post?')) return;
+    // ===================================================
+    //  ✅ DELETE POST -- Firebase + Worker နှစ်ခုလုံး ဖျက်
+    // ===================================================
+    function deleteMyPost(item) {
+        if (!item || !item.postId) return;
+        if (!confirm('Delete this post?\n\n(Firebase + Worker နှစ်ခုလုံးမှာ ဖျက်မယ်)')) return;
+
         if (typeof window.getDbForServer !== 'function') return;
         if (!window.currentServerId || !window.currentUser) return;
+
+        var postId = item.postId;
+        var workerNo = parseInt(item.workerNo) || 1;
+
+        if (typeof window.showLoading === 'function') {
+            window.showLoading('Deleting...');
+        }
+
+        // ✅ Step 1: Firebase မှ postList ဖျက်
         var db = window.getDbForServer(window.currentServerId);
-        if (!db) return;
-        db.ref('users/' + window.currentUser.userId + '/postList').once('value').then(function(snap) {
-            var list = snap.val();
-            if (!list) return;
-            if (!Array.isArray(list)) list = Object.keys(list).map(function(k) { return list[k]; });
-            list = list.filter(function(p) { return p.postId !== item.postId; });
-            return db.ref('users/' + window.currentUser.userId).update({ postList: list }).then(function() {
-                if (typeof deleteFromDB === 'function') {
-                    deleteFromDB(POST_CACHE_KEY_PREFIX + item.postId).catch(function() {});
+        if (!db) {
+            if (typeof window.hideLoading === 'function') window.hideLoading();
+            return;
+        }
+
+        db.ref('users/' + window.currentUser.userId + '/postList').once('value')
+            .then(function(snap) {
+                var list = snap.val();
+                if (!list) return [];
+                if (!Array.isArray(list)) list = Object.keys(list).map(function(k) { return list[k]; });
+
+                // ✅ ဖျက်မယ့် post ကို filter
+                var newList = list.filter(function(p) {
+                    return String(p.postId) !== String(postId);
+                });
+
+                // ✅ Firebase update
+                return db.ref('users/' + window.currentUser.userId).update({ postList: newList });
+            })
+            .then(function() {
+                // ✅ Step 2: Worker မှ Post ဖျက်
+                return deletePostFromWorker(postId, workerNo);
+            })
+            .then(function() {
+                // ✅ Step 3: IDB Cache ဖျက်
+                return deletePostDetailFromIDB(postId);
+            })
+            .then(function() {
+                // ✅ Step 4: currentUser.postList ကို update
+                if (window.currentUser && Array.isArray(window.currentUser.postList)) {
+                    window.currentUser.postList = window.currentUser.postList.filter(function(p) {
+                        return String(p.postId) !== String(postId);
+                    });
+                    if (typeof saveUserToDB === 'function') saveUserToDB(window.currentUser);
                 }
-                var el = document.querySelector('.profile-post-item[data-post-id="' + item.postId + '"]');
+
+                // ✅ Step 5: UI ဖျက်
+                var el = document.querySelector('.profile-post-item[data-post-id="' + postId + '"]');
                 if (el) el.remove();
-                if (typeof window.showToast === 'function') window.showToast('Deleted');
-                // ✅ Post Info မှာဆို ပြန် back
-                if (typeof window.goBackFullscreen === 'function') {
-                    setTimeout(function() { window.goBackFullscreen(); }, 300);
+
+                // ✅ Step 6: Post Info မှာ ဖျက်ရင် → Post Tab ပဲ ပြန် (Sidebar မရောက်)
+                var currentScreen = document.querySelector('.fs-screen:not(.hidden)');
+                if (currentScreen && currentScreen.id === 'fs-post-info') {
+                    // ✅ goBackFullscreen ကို မသုံးဘူး (Sidebar မရောက်အောင်)
+                    // ✅ ကိုယ်တိုင် Post Info ကို ဖျောက်ပြီး Profile ပြန်
+                    currentScreen.classList.add('hidden');
+
+                    var profileScreen = document.getElementById('fs-profile');
+                    if (profileScreen) {
+                        profileScreen.classList.remove('hidden');
+
+                        // ✅ Post Tab ကို ပြန်ဖွင့်
+                        var postTabBtn = document.querySelector('.profile-tab-btn[data-ptab="post"]');
+                        if (postTabBtn) {
+                            document.querySelectorAll('.profile-tab-btn').forEach(function(b) { b.classList.remove('active'); });
+                            postTabBtn.classList.add('active');
+                        }
+
+                        var aboutEl = document.getElementById('profileTabAbout');
+                        var postEl = document.getElementById('profileTabPost');
+                        var giftEl = document.getElementById('profileTabGift');
+                        if (aboutEl) aboutEl.classList.add('hidden');
+                        if (postEl) postEl.classList.remove('hidden');
+                        if (giftEl) giftEl.classList.add('hidden');
+
+                        // ✅ Title ပြန်
+                        var titleEl = document.getElementById('fullscreenTitle');
+                        if (titleEl) titleEl.textContent = 'Profile';
+
+                        // ✅ Fullscreen ကို ပြန် active
+                        var fsOverlay = document.getElementById('fullscreenOverlay');
+                        if (fsOverlay) {
+                            fsOverlay.classList.add('active');
+                            fsOverlay.classList.add('profile-active');
+                        }
+
+                        // ✅ fullscreenStack ကို reset (Post Info ကို ဖျက်)
+                        if (typeof fullscreenStack !== 'undefined' && Array.isArray(fullscreenStack)) {
+                            fullscreenStack = fullscreenStack.filter(function(s) {
+                                return s.screenId !== 'fs-post-info';
+                            });
+                        }
+
+                        // ✅ Post List ပြန် load
+                        loadMyProfilePosts();
+
+                        // ✅ Scroll ကို Tab Bar ဆီမှာ ထား
+                        var fullscreen = document.getElementById('profileFullscreen');
+                        var tabBar = document.getElementById('profileTabBar');
+                        if (fullscreen && tabBar) {
+                            setTimeout(function() {
+                                fullscreen.scrollTop = tabBar.offsetTop;
+                            }, 50);
+                        }
+                    }
                 }
+
+                if (typeof window.hideLoading === 'function') window.hideLoading();
+                if (typeof window.showToast === 'function') window.showToast('Post ဖျက်ပြီးပါပြီ');
+            })
+            .catch(function(err) {
+                console.warn('Delete post error:', err);
+                if (typeof window.hideLoading === 'function') window.hideLoading();
+                if (typeof window.showToast === 'function') window.showToast('Delete failed');
             });
+    }
+
+    // ✅ Worker မှ Post ဖျက် (Like Comment အားလုံးပါ တစ်ခါတည်း ဖျက်)
+    function deletePostFromWorker(postId, workerNo) {
+        return new Promise(function(resolve, reject) {
+            if (typeof window.WORKER_SERVERS === 'undefined') return resolve();
+            var srv = window.WORKER_SERVERS.find(function(s) { return s.number === parseInt(workerNo); });
+            if (!srv) return resolve();
+
+            var client = window.getWorkerClient ? window.getWorkerClient(srv.id) : null;
+            if (!client) return resolve();
+
+            // ✅ DELETE FROM posts WHERE postId = ?
+            // ဒီ Query က Post တစ်ခုလုံး (Like, Comment အားလုံးပါ) ဖျက်မယ်
+            client.execute('DELETE FROM posts WHERE postId = ?', [postId])
+                .then(function() {
+                    console.log('✅ Deleted from Worker ' + workerNo + ': ' + postId);
+                    resolve();
+                })
+                .catch(function(err) {
+                    console.warn('Worker delete error:', err);
+                    // ✅ Error ဖြစ်လည်း resolve (Firebase ကတော့ ဖျက်ပြီးသား)
+                    resolve();
+                });
         });
     }
 
@@ -23958,7 +24087,7 @@ if (document.readyState === 'loading') {
     window.loadMyProfilePosts = loadMyProfilePosts;
     window.openPostInfoScreen = openPostInfoScreen;
 
-    console.log('✅ Profile Tab System v2.0 Ready');
+    console.log('✅ Profile Tab System v3.0 Ready');
 
 })();
 </script>
