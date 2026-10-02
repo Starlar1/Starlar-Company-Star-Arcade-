@@ -20550,17 +20550,18 @@ if (document.readyState === 'loading') {
 })();
 
 // ============================================================
-// ✅ POST SYSTEM v5.0 -- FULL JAVA
-//  • Tab: All / Like / Role / Fav + Search Icon (ညာဘက်)
-//  • Search Icon နှိပ်ရင် Tab အတန်း ပျောက် + Search Bar ပေါ်
-//  • Post ID ထည့်ရှာရင် အဲ့ Post 1 ခုတည်း ပြ
-//  • ရှာပြီးရင် Tab အတန်း ပြန်ပေါ်
-//  • Chat Post Link စနစ် လုံးဝဖြတ်
+// ✅ POST SYSTEM v6.0 -- FULL JAVA
+//  • Search: Post.[WorkerNo].[PostID] format
+//  • Search Logic: Worker No auto extract → only that worker search
+//  • Feed: Random Worker + Random 3 Posts
+//  • Infinite Scroll: Random Worker + Random 3 Posts
+//  • Post Create: Random Worker
+//  • No new/old sorting (random only)
 // ============================================================
 (function() {
     'use strict';
 
-    console.log('🚀 Post System v5.0 Loading...');
+    console.log('🚀 Post System v6.0 Loading...');
 
     // ===================================================
     //  WORKER SERVERS
@@ -20575,6 +20576,8 @@ if (document.readyState === 'loading') {
             uploadEnabled: true,
             viewEnabled: true
         }
+        // ✅ အနာဂတ်မှာ Worker များလာရင် ဒီမှာ ထည့်ပါ
+        // { id: 'worker2', name: 'Server 2', number: 2, url: '...', enabled: true, uploadEnabled: true, viewEnabled: true }
     ];
 
     var POST_GLOBAL_SETTINGS = {
@@ -20593,7 +20596,7 @@ if (document.readyState === 'loading') {
     var POST_MAX_VIDEO_DURATION = 10;
     var POST_MAX_VIDEO_SIZE = 10 * 1024 * 1024;
     var POST_MAX_IMAGES = 6;
-    var POST_LOAD_COUNT = 5;
+    var POST_LOAD_COUNT = 3;           // ✅ 3 Posts သာ ဆွဲ
     var DAILY_POST_LIMIT = 3;
 
     var LIKE_MAX = 10000;
@@ -20603,7 +20606,6 @@ if (document.readyState === 'loading') {
     var DAILY_POST_KEY = 'post_dailyPostCount';
     var LIKED_POSTS_KEY = 'post_likedPosts';
 
-    var SHARE_LINK_PREFIX = 'Post.';
     var COMMENT_MAX_LINES = 30;
     var IMBB_PLACEHOLDER = 'https://i.ibb.co/r2k0J5rJ/Grid-Art-20260829-171212620.png';
 
@@ -20641,9 +20643,12 @@ if (document.readyState === 'loading') {
     var isUploadInProgress = false;
     var dailyPostCount = 0;
     var initDone = false;
-
-    // ✅ Search Mode
     var isSearchMode = false;
+
+    // ✅ Feed အတွက် ကျပန်း tracking
+    var usedWorkerIndexes = [];      // ဒီ session မှာ သုံးပြီးသား worker index တွေ
+    var currentWorkerRotation = [];  // shuffle လုပ်ထားတဲ့ worker index list
+    var rotationPointer = 0;
 
     // ===================================================
     //  CHECK
@@ -20672,16 +20677,37 @@ if (document.readyState === 'loading') {
         return WORKER_SERVERS.find(function(s) { return s.number === parseInt(no); }) || null;
     }
 
+    // ✅ ကျပန်း Worker 1 ခုရွေး (rotation သုံး -- အားလုံးကို တစ်ကြိမ်စီ ရောက်အောင်)
+    function pickRandomViewWorker() {
+        var enabled = getEnabledViewWorkers();
+        if (enabled.length === 0) return null;
+        if (enabled.length === 1) return enabled[0];
+
+        // rotation ပြန်စ
+        if (rotationPointer >= currentWorkerRotation.length) {
+            currentWorkerRotation = enabled.slice().sort(function() { return Math.random() - 0.5; });
+            rotationPointer = 0;
+        }
+
+        var srv = currentWorkerRotation[rotationPointer];
+        rotationPointer++;
+        return srv;
+    }
+
     function pickRandomUploadWorker() {
         var enabled = getEnabledUploadWorkers();
         if (enabled.length === 0) return null;
         return enabled[Math.floor(Math.random() * enabled.length)];
     }
 
-    function pickRandomViewWorker() {
-        var enabled = getEnabledViewWorkers();
-        if (enabled.length === 0) return null;
-        return enabled[Math.floor(Math.random() * enabled.length)];
+    // ✅ Array ကို ကျပန်း shuffle
+    function shuffleArray(arr) {
+        var a = arr.slice();
+        for (var i = a.length - 1; i > 0; i--) {
+            var j = Math.floor(Math.random() * (i + 1));
+            var tmp = a[i]; a[i] = a[j]; a[j] = tmp;
+        }
+        return a;
     }
 
     // ===================================================
@@ -20690,18 +20716,15 @@ if (document.readyState === 'loading') {
     function genPostId() {
         return 'p' + Date.now().toString(36) + Math.random().toString(36).substr(2, 8);
     }
-
     function genCommentId() {
         return 'c' + Date.now().toString(36) + Math.random().toString(36).substr(2, 6);
     }
-
     function escapeHtml(s) {
         if (!s) return '';
         return String(s).replace(/[&<>"']/g, function(c) {
             return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c];
         });
     }
-
     function linkifyCaption(text) {
         if (!text) return '';
         var escaped = escapeHtml(text);
@@ -20712,7 +20735,6 @@ if (document.readyState === 'loading') {
             return '<a href="javascript:void(0)" onclick="event.stopPropagation(); window.open(\'' + safeUrl + '\', \'_blank\');" class="caption-link">' + url + '</a>';
         });
     }
-
     function formatPostTime(ts) {
         if (!ts) return '';
         var diff = Date.now() - ts;
@@ -20726,18 +20748,16 @@ if (document.readyState === 'loading') {
         var d = new Date(ts);
         return d.getDate() + '/' + (d.getMonth() + 1);
     }
-
     function getDomainFromUrl(url) {
         try { var u = new URL(url); return u.hostname.replace('www.', ''); }
         catch(e) { return ''; }
     }
-
     function buildShareLink(post) {
         var srv = getWorkerById(post._serverId);
         var serverNo = srv ? srv.number : 1;
-        return SHARE_LINK_PREFIX + serverNo + '.' + post.postId;
+        // ✅ Post.[WorkerNo].[PostID] format
+        return 'Post.' + serverNo + '.' + post.postId;
     }
-
     function showToastSafe(msg) {
         if (typeof window.showToast === 'function') window.showToast(msg);
         else console.log('Toast:', msg);
@@ -20765,7 +20785,6 @@ if (document.readyState === 'loading') {
             req.onerror = function(e) { reject(e.target.error); };
         });
     }
-
     function myDbGet(key) {
         return new Promise(function(resolve) {
             openMyDB().then(function(db) {
@@ -20777,7 +20796,6 @@ if (document.readyState === 'loading') {
             }).catch(function() { resolve(null); });
         });
     }
-
     function myDbSet(key, value) {
         return new Promise(function(resolve) {
             openMyDB().then(function(db) {
@@ -20799,26 +20817,13 @@ if (document.readyState === 'loading') {
             return likedPosts;
         });
     }
-
     function saveLikedPosts() { return myDbSet(LIKED_POSTS_KEY, likedPosts); }
-
-    function isPostLikedByMe(postId) {
-        return likedPosts.indexOf(postId) !== -1;
-    }
-
+    function isPostLikedByMe(postId) { return likedPosts.indexOf(postId) !== -1; }
     function togglePostLikeLocal(postId) {
         var idx = likedPosts.indexOf(postId);
-        if (idx >= 0) {
-            likedPosts.splice(idx, 1);
-            saveLikedPosts();
-            return false;
-        } else {
-            likedPosts.push(postId);
-            saveLikedPosts();
-            return true;
-        }
+        if (idx >= 0) { likedPosts.splice(idx, 1); saveLikedPosts(); return false; }
+        else { likedPosts.push(postId); saveLikedPosts(); return true; }
     }
-
     function checkDailyPostLimit() {
         return myDbGet(DAILY_POST_KEY).then(function(data) {
             var today = new Date().setHours(0, 0, 0, 0);
@@ -20831,37 +20836,27 @@ if (document.readyState === 'loading') {
             return { canPost: remaining > 0, count: dailyPostCount, remaining: remaining };
         });
     }
-
     function incrementDailyPost() {
         var today = new Date().setHours(0, 0, 0, 0);
         dailyPostCount++;
         return myDbSet(DAILY_POST_KEY, { date: today, count: dailyPostCount });
     }
-
     function loadFavourites() {
         return myDbGet(FAVOURITE_KEY).then(function(list) {
             favouritePosts = Array.isArray(list) ? list : [];
             return favouritePosts;
         });
     }
-
     function saveFavourites() { return myDbSet(FAVOURITE_KEY, favouritePosts); }
-
     function isFavourited(postId) {
         return favouritePosts.some(function(f) { return f.postId === postId; });
     }
-
     function toggleFavourite(post) {
         var srv = getWorkerById(post._serverId);
         var serverNo = srv ? srv.number : 1;
         var idx = favouritePosts.findIndex(function(f) { return f.postId === post.postId; });
-        if (idx >= 0) {
-            favouritePosts.splice(idx, 1);
-            showToastSafe('Favourite ဖျက်ပြီး');
-        } else {
-            favouritePosts.push({ postId: post.postId, serverNo: serverNo, serverId: post._serverId });
-            showToastSafe('Favourite သိမ်းပြီး');
-        }
+        if (idx >= 0) { favouritePosts.splice(idx, 1); showToastSafe('Favourite ဖျက်ပြီး'); }
+        else { favouritePosts.push({ postId: post.postId, serverNo: serverNo, serverId: post._serverId }); showToastSafe('Favourite သိမ်းပြီး'); }
         saveFavourites();
         return idx < 0;
     }
@@ -20870,12 +20865,10 @@ if (document.readyState === 'loading') {
     //  WORKER CLIENT
     // ===================================================
     function getWorkerClient(workerId) {
-        var cacheKey = '__workerClientV50_' + workerId;
+        var cacheKey = '__workerClientV60_' + workerId;
         if (window[cacheKey]) return window[cacheKey];
-
         var worker = getWorkerById(workerId);
         if (!worker) return null;
-
         var client = {
             execute: function(sql, params) {
                 return fetch(worker.url + '/api/execute', {
@@ -20884,11 +20877,7 @@ if (document.readyState === 'loading') {
                     body: JSON.stringify({ sql: sql, params: params || [] })
                 })
                 .then(function(r) {
-                    if (!r.ok) {
-                        return r.text().then(function(t) {
-                            throw new Error('Worker HTTP ' + r.status + ': ' + t);
-                        });
-                    }
+                    if (!r.ok) return r.text().then(function(t) { throw new Error('Worker HTTP ' + r.status + ': ' + t); });
                     return r.json();
                 })
                 .then(function(data) {
@@ -20896,7 +20885,6 @@ if (document.readyState === 'loading') {
                     return data.data;
                 });
             },
-
             query: function(sql, params) {
                 return fetch(worker.url + '/api/query', {
                     method: 'POST',
@@ -20904,11 +20892,7 @@ if (document.readyState === 'loading') {
                     body: JSON.stringify({ sql: sql, params: params || [] })
                 })
                 .then(function(r) {
-                    if (!r.ok) {
-                        return r.text().then(function(t) {
-                            throw new Error('Worker HTTP ' + r.status + ': ' + t);
-                        });
-                    }
+                    if (!r.ok) return r.text().then(function(t) { throw new Error('Worker HTTP ' + r.status + ': ' + t); });
                     return r.json();
                 })
                 .then(function(data) {
@@ -20917,7 +20901,6 @@ if (document.readyState === 'loading') {
                 });
             }
         };
-
         window[cacheKey] = client;
         return client;
     }
@@ -20951,7 +20934,6 @@ if (document.readyState === 'loading') {
             reader.readAsDataURL(file);
         });
     }
-
     function compressImageBase64(dataUrl, maxWidth, quality) {
         return new Promise(function(resolve) {
             var img = new Image();
@@ -20969,7 +20951,6 @@ if (document.readyState === 'loading') {
             img.src = dataUrl;
         });
     }
-
     function checkVideoDuration(file) {
         return new Promise(function(resolve) {
             var video = document.createElement('video');
@@ -20986,7 +20967,6 @@ if (document.readyState === 'loading') {
             video.src = URL.createObjectURL(file);
         });
     }
-
     function fetchLinkPreview(url) {
         return new Promise(function(resolve) {
             var domain = getDomainFromUrl(url);
@@ -21018,9 +20998,7 @@ if (document.readyState === 'loading') {
             if (window.currentUser && window.currentServerId) {
                 var firebaseServerNo = 1;
                 if (typeof window.FIREBASE_SERVERS !== 'undefined') {
-                    var fbSrv = window.FIREBASE_SERVERS.find(function(s) {
-                        return s.id === window.currentServerId;
-                    });
+                    var fbSrv = window.FIREBASE_SERVERS.find(function(s) { return s.id === window.currentServerId; });
                     if (fbSrv) firebaseServerNo = fbSrv.number;
                 }
                 resolve({
@@ -21046,18 +21024,13 @@ if (document.readyState === 'loading') {
             if (typeof window.getDbForServer !== 'function') return resolve(false);
             if (typeof window.currentServerId === 'undefined' || !window.currentServerId) return resolve(false);
             if (typeof window.currentUser === 'undefined' || !window.currentUser) return resolve(false);
-
             var db = window.getDbForServer(window.currentServerId);
             if (!db) return resolve(false);
-
             var userId = window.currentUser.userId;
             var entry = { postId: postId, workerNo: workerNo };
-
             db.ref('users/' + userId + '/postList').transaction(function(currentList) {
                 var list = Array.isArray(currentList) ? currentList : (currentList ? Object.values(currentList) : []);
-                var exists = list.some(function(p) {
-                    return (p && p.postId === postId);
-                });
+                var exists = list.some(function(p) { return (p && p.postId === postId); });
                 if (!exists) list.push(entry);
                 return list;
             }, function(error, committed) {
@@ -21081,31 +21054,26 @@ if (document.readyState === 'loading') {
             '<div class="post-upload-bar-spinner"></div>' +
             '<span class="post-upload-bar-text">' + escapeHtml(text || 'Post တင်နေသည်...') + '</span>' +
             '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9,18 15,12 9,6"/></svg>';
-
         var feedBody = document.getElementById('postFeedBody');
         if (feedBody && feedBody.parentNode) feedBody.parentNode.insertBefore(uploadBarElement, feedBody);
         else document.body.appendChild(uploadBarElement);
-
         uploadBarElement.addEventListener('click', function() {
             var ov = document.getElementById('postUploadPopupOverlay');
             if (ov) ov.classList.remove('hidden');
         });
     }
-
     function hideUploadBar() {
         var ex = document.getElementById('postUploadBar');
         if (ex) ex.remove();
         uploadBarElement = null;
         isUploadInProgress = false;
     }
-
     function updateUploadBarText(text) {
         if (uploadBarElement) {
             var t = uploadBarElement.querySelector('.post-upload-bar-text');
             if (t) t.textContent = text;
         }
     }
-
     function showUploadPopup(text, sub, percent) {
         var ov = document.getElementById('postUploadPopupOverlay');
         var t = document.getElementById('postUploadText');
@@ -21116,14 +21084,12 @@ if (document.readyState === 'loading') {
         if (s) s.textContent = sub || '';
         if (p) p.style.width = (percent || 0) + '%';
     }
-
     function updateUploadProgress(percent, sub) {
         var p = document.getElementById('postUploadProgress');
         var s = document.getElementById('postUploadSub');
         if (p) p.style.width = percent + '%';
         if (s && sub) s.textContent = sub;
     }
-
     function hideUploadPopup() {
         var ov = document.getElementById('postUploadPopupOverlay');
         if (ov) ov.classList.add('hidden');
@@ -21136,21 +21102,19 @@ if (document.readyState === 'loading') {
         var d = document.getElementById('postTabDesc');
         if (d) { d.style.display = 'none'; d.classList.add('hidden'); }
     }
-
     function showTabDesc(text) {
         var d = document.getElementById('postTabDesc');
         if (d) { d.textContent = text || ''; d.style.display = ''; d.classList.remove('hidden'); }
     }
 
     // ===================================================
-    //  ✅ SEARCH SYSTEM
+    //  ✅ SEARCH -- Post.[WorkerNo].[PostID] format
     // ===================================================
     function openPostSearch() {
         isSearchMode = true;
         var tabsBar = document.getElementById('postTabsBar');
         var searchBar = document.getElementById('postSearchBar');
         var tabDesc = document.getElementById('postTabDesc');
-
         if (tabsBar) tabsBar.classList.add('hidden');
         if (tabDesc) tabDesc.classList.add('hidden');
         if (searchBar) {
@@ -21167,91 +21131,84 @@ if (document.readyState === 'loading') {
         var tabsBar = document.getElementById('postTabsBar');
         var searchBar = document.getElementById('postSearchBar');
         var input = document.getElementById('postSearchInput');
-
         if (tabsBar) tabsBar.classList.remove('hidden');
         if (searchBar) searchBar.classList.add('hidden');
         if (input) input.value = '';
-
-        // Tab အတန်း ပြန်ပေါ် + Feed ပြန် Load
         showTabDesc('Post အားလုံး ပြသနေသည်');
         resetFeed();
         loadFeedNext();
     }
 
+    // ✅ Post.1.xxxxx ဖြေရှင်းပြီး အဲ Worker ထဲသာ ရှာ
     function performPostSearch() {
         var input = document.getElementById('postSearchInput');
         if (!input) return;
-        var postId = input.value.trim();
-        if (!postId) {
-            showToastSafe('Post ID ထည့်ပါ');
+        var rawText = input.value.trim();
+        if (!rawText) { showToastSafe('Post ID ထည့်ပါ'); return; }
+
+        // ✅ "Post.1.pmupksgemtof2ugn9" format စစ်
+        var match = rawText.match(/^Post\.(\d+)\.([a-zA-Z0-9_]+)$/i);
+
+        var workerNo, postId;
+
+        if (match) {
+            // ✅ Post.[WorkerNo].[PostID]
+            workerNo = parseInt(match[1]);
+            postId = match[2];
+        } else {
+            // ✅ Format မှားရင် သတိပေး
+            showToastSafe('Format: Post.1.xxxxx ဖြစ်ရမည်');
+            return;
+        }
+
+        // ✅ Worker ရှာ
+        var targetWorker = getWorkerByNumber(workerNo);
+        if (!targetWorker || !targetWorker.enabled || !targetWorker.viewEnabled) {
+            var feedBody = document.getElementById('postFeedBody');
+            if (feedBody) feedBody.innerHTML = '<div class="post-feed-empty">Worker Server ' + workerNo + ' မရှိပါ</div>';
             return;
         }
 
         var feedBody = document.getElementById('postFeedBody');
         if (!feedBody) return;
-
         feedBody.innerHTML = '<div class="post-feed-loading">Post ရှာနေသည်...</div>';
 
-        // Worker အားလုံးမှာ ရှာ
-        var workers = getEnabledViewWorkers();
-        if (workers.length === 0) {
-            feedBody.innerHTML = '<div class="post-feed-empty">Server ပိတ်ထားသည်</div>';
+        // ✅ အဲ Worker ထဲသာ ရှာ
+        var client = getWorkerClient(targetWorker.id);
+        if (!client) {
+            feedBody.innerHTML = '<div class="post-feed-empty">Worker Client error</div>';
             return;
         }
 
-        var foundPost = null;
-        var tried = 0;
-
-        function tryNextWorker() {
-            if (tried >= workers.length) {
-                if (!foundPost) {
-                    feedBody.innerHTML = '<div class="post-feed-empty">Post မတွေ့ပါ<br><span style="font-size:11px;opacity:0.7;">ID: ' + escapeHtml(postId) + '</span></div>';
+        client.query('SELECT * FROM posts WHERE postId = ? LIMIT 1', [postId])
+            .then(function(rows) {
+                if (!rows || rows.length === 0) {
+                    feedBody.innerHTML = '<div class="post-feed-empty">Post မတွေ့ပါ<br><span style="font-size:11px;opacity:0.7;">' + escapeHtml(rawText) + '</span></div>';
+                    return;
                 }
-                return;
-            }
-
-            var srv = workers[tried];
-            tried++;
-            var client = getWorkerClient(srv.id);
-            if (!client) { tryNextWorker(); return; }
-
-            client.query('SELECT * FROM posts WHERE postId = ? LIMIT 1', [postId])
-                .then(function(rows) {
-                    if (rows && rows.length > 0) {
-                        foundPost = parsePostRow(rows[0], srv.id);
-                        renderSearchResult(foundPost);
-                    } else {
-                        tryNextWorker();
-                    }
-                })
-                .catch(function() {
-                    tryNextWorker();
-                });
-        }
-
-        tryNextWorker();
+                var post = parsePostRow(rows[0], targetWorker.id);
+                renderSearchResult(post);
+            })
+            .catch(function(err) {
+                console.warn('Search error:', err);
+                feedBody.innerHTML = '<div class="post-feed-empty">Search မအောင်မြင်ပါ</div>';
+            });
     }
 
     function renderSearchResult(post) {
         var feedBody = document.getElementById('postFeedBody');
         if (!feedBody) return;
-
         feedBody.innerHTML = '';
-
         var card = buildPostCard(post);
         card.classList.add('post-search-highlight');
-
-        // Highlight animation
         card.style.opacity = '0';
         card.style.transform = 'scale(0.95)';
         card.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
         feedBody.appendChild(card);
-
         requestAnimationFrame(function() {
             card.style.opacity = '1';
             card.style.transform = 'scale(1)';
         });
-
         showToastSafe('Post တွေ့ပါပြီ');
     }
 
@@ -21260,7 +21217,6 @@ if (document.readyState === 'loading') {
     // ===================================================
     function switchFeedTab(tab) {
         if (isSearchMode) return;
-
         if (currentFeedTab === tab && tab !== 'role') {
             showToastSafe('Reloading...');
             if (tab === 'favourite') { resetFeed(); loadFavouriteFeed(); }
@@ -21268,9 +21224,7 @@ if (document.readyState === 'loading') {
             else { resetFeed(); loadFeedNext(); }
             return;
         }
-
         currentFeedTab = tab;
-
         if (tab === 'all') {
             showTabDesc('Post အားလုံး ပြသနေသည်');
             resetFeed(); loadFeedNext();
@@ -21292,10 +21246,14 @@ if (document.readyState === 'loading') {
         lastRenderedIds = {};
         isInitialLoad = true;
         hasAnyPost = false;
+        // ✅ Rotation ပြန်စ
+        rotationPointer = 0;
+        currentWorkerRotation = [];
         var body = document.getElementById('postFeedBody');
         if (body) body.innerHTML = '<div class="post-feed-loading">Loading...</div>';
     }
 
+    // ✅ ကျပန်း Worker 1 ခုရွေး + ကျပန်း 3 Posts ဆွဲ
     function loadFeedNext() {
         if (isSearchMode) return;
         if (feedLoading || feedExhausted) return;
@@ -21305,18 +21263,15 @@ if (document.readyState === 'loading') {
             feedExhausted = true;
             return;
         }
-
         feedLoading = true;
-
         if (currentFeedTab === 'role' && !currentFeedRole) { feedLoading = false; return; }
-
         var body = document.getElementById('postFeedBody');
         if (!body) { feedLoading = false; return; }
-
         if (isInitialLoad && feedAllPosts.length === 0) {
             body.innerHTML = '<div class="post-feed-loading">Loading...</div>';
         }
 
+        // ✅ ကျပန်း Worker 1 ခု
         var srv = pickRandomViewWorker();
         if (!srv) {
             feedLoading = false;
@@ -21324,7 +21279,6 @@ if (document.readyState === 'loading') {
             body.innerHTML = '<div class="post-feed-empty">Server ပိတ်ထားသည်</div>';
             return;
         }
-
         var client = getWorkerClient(srv.id);
         if (!client) {
             feedLoading = false;
@@ -21333,23 +21287,30 @@ if (document.readyState === 'loading') {
             return;
         }
 
-        fetchPostsFromServer(client, srv.id, 100).then(function(allPosts) {
+        // ✅ Worker ထဲက Post အားလုံး ဆွဲပြီး ကျပန်း 3 ခုယူ
+        fetchPostsFromServer(client, srv.id, 200).then(function(allPosts) {
             if (isSearchMode) { feedLoading = false; return; }
-
             var filtered = allPosts;
-
             if (currentFeedTab === 'role' && currentFeedRole) {
                 filtered = allPosts.filter(function(p) { return p.roleId === currentFeedRole; });
             }
-
+            // ပြီးသား ID တွေ ဖယ်
             var existingIds = {};
             feedAllPosts.forEach(function(p) { existingIds[p.postId] = true; });
             filtered = filtered.filter(function(p) { return !existingIds[p.postId]; });
 
-            var batch = filtered.slice(0, POST_LOAD_COUNT);
+            // ✅ ကျပန်း shuffle
+            var shuffled = shuffleArray(filtered);
+            var batch = shuffled.slice(0, POST_LOAD_COUNT);
 
             if (batch.length === 0) {
                 feedLoading = false;
+                // ✅ ဒီ worker ထဲ Post မရှိရင် နောက် worker ကို ဆက်
+                var enabledCount = getEnabledViewWorkers().length;
+                if (enabledCount > 1) {
+                    setTimeout(loadFeedNext, 100);
+                    return;
+                }
                 feedExhausted = true;
                 if (feedAllPosts.length === 0) {
                     body.innerHTML = '<div class="post-feed-empty">Post မရှိပါ</div>';
@@ -21383,41 +21344,33 @@ if (document.readyState === 'loading') {
     function loadLikesFeed() {
         var body = document.getElementById('postFeedBody');
         if (!body) return;
-
         body.innerHTML = '<div class="post-feed-loading">Loading top likes...</div>';
-
         var allEnabled = getEnabledViewWorkers();
         if (allEnabled.length === 0) {
             body.innerHTML = '<div class="post-feed-empty">Server ပိတ်ထားသည်</div>';
             return;
         }
-
         var promises = allEnabled.map(function(srv) {
             var client = getWorkerClient(srv.id);
             if (!client) return Promise.resolve([]);
-            return fetchPostsFromServer(client, srv.id, 100).catch(function() { return []; });
+            return fetchPostsFromServer(client, srv.id, 200).catch(function() { return []; });
         });
-
         Promise.all(promises).then(function(results) {
             if (isSearchMode) return;
             var allPosts = [];
             results.forEach(function(arr) { arr.forEach(function(p) { allPosts.push(p); }); });
-
             allPosts.sort(function(a, b) {
                 var aLikes = a.likeCount || 0;
                 var bLikes = b.likeCount || 0;
                 if (bLikes !== aLikes) return bLikes - aLikes;
                 return (b.createdAt || 0) - (a.createdAt || 0);
             });
-
             var likesPosts = allPosts.filter(function(p) { return (p.likeCount || 0) > 0; });
             feedAllPosts = [];
-
             if (likesPosts.length === 0) {
                 body.innerHTML = '<div class="post-feed-empty">Like ရှိတဲ့ Post မရှိပါ</div>';
                 return;
             }
-
             body.innerHTML = '';
             var idx = 0;
             function showNext() {
@@ -21444,30 +21397,24 @@ if (document.readyState === 'loading') {
     function loadFavouriteFeed() {
         var body = document.getElementById('postFeedBody');
         if (!body) return;
-
         body.innerHTML = '<div class="post-feed-loading">Loading Favourites...</div>';
-
         loadFavourites().then(function() {
             if (isSearchMode) return;
             if (favouritePosts.length === 0) {
                 body.innerHTML = '<div class="post-feed-empty"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>Favourite Post မရှိပါ</div>';
                 return;
             }
-
             var promises = favouritePosts.map(function(fav) {
                 return fetchSinglePost(fav.serverNo, fav.postId).catch(function() { return null; });
             });
-
             Promise.all(promises).then(function(posts) {
                 if (isSearchMode) return;
                 var validPosts = posts.filter(function(p) { return p !== null; });
                 feedAllPosts = [];
-
                 if (validPosts.length === 0) {
                     body.innerHTML = '<div class="post-feed-empty">Favourite Post မရှိပါ</div>';
                     return;
                 }
-
                 body.innerHTML = '';
                 var idx = 0;
                 function showNext() {
@@ -21494,26 +21441,21 @@ if (document.readyState === 'loading') {
         if (isSearchMode) return;
         var body = document.getElementById('postFeedBody');
         if (!body) return;
-
         var loadingEl = body.querySelector('.post-feed-loading');
         if (loadingEl) loadingEl.remove();
         var emptyEl = body.querySelector('.post-feed-empty');
         if (emptyEl) emptyEl.remove();
-
         if (lastRenderedIds[post.postId]) return;
         lastRenderedIds[post.postId] = true;
-
         var card = buildPostCard(post);
         card.style.opacity = '0';
         card.style.transform = 'translateY(10px)';
         card.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
         body.appendChild(card);
-
         requestAnimationFrame(function() {
             card.style.opacity = '1';
             card.style.transform = 'translateY(0)';
         });
-
         if (!hasAnyPost) {
             hasAnyPost = true;
             setTimeout(hideTabDesc, 300);
@@ -21521,9 +21463,9 @@ if (document.readyState === 'loading') {
     }
 
     function fetchPostsFromServer(client, serverId, limit) {
-        limit = limit || 100;
+        limit = limit || 200;
         return client.query(
-            'SELECT * FROM posts ORDER BY createdAt DESC LIMIT ?',
+            'SELECT * FROM posts LIMIT ?',
             [limit]
         ).then(function(rows) {
             return rows.map(function(row) { return parsePostRow(row, serverId); });
@@ -21539,7 +21481,6 @@ if (document.readyState === 'loading') {
             if (!srv) return resolve(null);
             var client = getWorkerClient(srv.id);
             if (!client) return resolve(null);
-
             client.query('SELECT * FROM posts WHERE postId = ? LIMIT 1', [postId])
                 .then(function(rows) {
                     if (!rows || rows.length === 0) return resolve(null);
@@ -21555,15 +21496,13 @@ if (document.readyState === 'loading') {
     function initInfiniteScroll() {
         var feedBody = document.getElementById('postFeedBody');
         if (!feedBody) { setTimeout(initInfiniteScroll, 500); return; }
-        if (feedBody._scrollV50) return;
-        feedBody._scrollV50 = true;
-
+        if (feedBody._scrollV60) return;
+        feedBody._scrollV60 = true;
         feedBody.addEventListener('scroll', function() {
             if (isSearchMode) return;
             var scrollTop = feedBody.scrollTop;
             var scrollHeight = feedBody.scrollHeight;
             var clientHeight = feedBody.clientHeight;
-
             if (scrollTop + clientHeight >= scrollHeight - 200) {
                 if (feedLoading || feedExhausted) return;
                 if (currentFeedTab === 'all' || currentFeedTab === 'role') {
@@ -21579,15 +21518,12 @@ if (document.readyState === 'loading') {
     function showRoleSelectPopup() {
         var ex = document.querySelector('.role-select-overlay');
         if (ex) ex.remove();
-
         var overlay = document.createElement('div');
         overlay.className = 'post-user-popup-overlay role-select-overlay';
-
         var btnHTML = '';
         POST_ROLES.forEach(function(role) {
             btnHTML += '<div class="post-role-item" data-rid="' + role.id + '" style="margin-bottom:8px;"><img src="' + role.image + '" /><div class="role-info"><div class="role-name">' + escapeHtml(role.name) + '</div><div class="role-desc">' + escapeHtml(role.desc) + '</div></div></div>';
         });
-
         overlay.innerHTML =
             '<div class="post-user-popup" style="max-width:340px;">' +
                 '<div class="post-user-popup-banner" style="background:linear-gradient(135deg,#1a1a2e,#16213e,#0f3460);min-height:80px;max-height:100px;">' +
@@ -21599,9 +21535,7 @@ if (document.readyState === 'loading') {
                     '<div style="max-height:300px;overflow-y:auto;">' + btnHTML + '</div>' +
                 '</div>' +
             '</div>';
-
         document.body.appendChild(overlay);
-
         document.getElementById('roleSelectClose').addEventListener('click', function() {
             overlay.remove();
             var allChip = document.querySelector('.post-tab-chip[data-tab="all"]');
@@ -21613,7 +21547,6 @@ if (document.readyState === 'loading') {
             showTabDesc('Post အားလုံး ပြသနေသည်');
             resetFeed(); loadFeedNext();
         });
-
         overlay.querySelectorAll('.post-role-item').forEach(function(el) {
             el.addEventListener('click', function() {
                 var rid = this.dataset.rid;
@@ -21634,52 +21567,38 @@ if (document.readyState === 'loading') {
         if (!window.currentUser) { showToastSafe('Login first'); return; }
         if (!isGlobalUploadEnabled()) { showToastSafe('Post တင်ခွင့် ပိတ်ထားသည်'); return; }
         if (getEnabledUploadWorkers().length === 0) { showToastSafe('Post တင် Server မရှိပါ'); return; }
-
         checkDailyPostLimit().then(function(result) {
-            if (!result.canPost) {
-                showToastSafe('ယနေ့ Post ' + DAILY_POST_LIMIT + ' ခု ပြည့်သွားပါပြီ');
-                return;
-            }
-
+            if (!result.canPost) { showToastSafe('ယနေ့ Post ' + DAILY_POST_LIMIT + ' ခု ပြည့်သွားပါပြီ'); return; }
             postImages = []; postVideo = null; postLinkData = null;
             postSelectedRoleId = ''; postSubmitting = false;
-
-            var captionEl = document.getElementById('postCaptionInput');
-            if (captionEl) captionEl.value = '';
+            var captionEl = document.getElementById('postCaptionInput'); if (captionEl) captionEl.value = '';
             var countEl = document.getElementById('postCaptionCount');
             if (countEl) { countEl.textContent = '0 / 500'; countEl.className = 'post-char-count'; }
-
             var linkInput = document.getElementById('postLinkInput'); if (linkInput) linkInput.value = '';
             var linkPreview = document.getElementById('postLinkPreview'); if (linkPreview) linkPreview.innerHTML = '';
             var linkGroup = document.getElementById('postLinkInputGroup'); if (linkGroup) linkGroup.classList.add('hidden');
-
             renderPostMediaGrid();
             renderPostRoleList();
             updatePostSubmitBtn();
             updateMediaButtonsState();
-
             var screen = document.getElementById('postCreateScreen');
             if (screen) { screen.classList.remove('hidden'); document.body.style.overflow = 'hidden'; }
         });
     }
-
     function closePostCreate() {
         var screen = document.getElementById('postCreateScreen');
         if (screen) screen.classList.add('hidden');
         document.body.style.overflow = '';
     }
-
     function updateMediaButtonsState() {
         var imgBtn = document.getElementById('postAddImageBtn');
         var vidBtn = document.getElementById('postAddVideoBtn');
         var linkBtn = document.getElementById('postAddLinkBtn');
         if (!imgBtn || !vidBtn || !linkBtn) return;
-
         var hasVideo = !!postVideo;
         var hasImages = postImages.length > 0;
         var hasLink = !!postLinkData;
         var maxImages = postImages.length >= POST_MAX_IMAGES;
-
         function setBtn(btn, disabled) {
             if (!btn) return;
             btn.disabled = disabled;
@@ -21690,19 +21609,15 @@ if (document.readyState === 'loading') {
         setBtn(vidBtn, hasVideo || hasImages || hasLink);
         setBtn(linkBtn, hasVideo || hasImages || hasLink);
     }
-
     function renderPostMediaGrid() {
         var grid = document.getElementById('postMediaGrid');
         if (!grid) return;
         grid.innerHTML = '';
-
         var actionsBar = document.getElementById('postMediaActions');
         var linkGroup = document.getElementById('postLinkInputGroup');
-
         if (postLinkData) {
             if (actionsBar) actionsBar.style.display = 'none';
             if (linkGroup) linkGroup.classList.remove('hidden');
-
             var lc = document.createElement('div');
             lc.className = 'post-media-slot has-media';
             lc.style.gridColumn = 'span 3';
@@ -21727,10 +21642,8 @@ if (document.readyState === 'loading') {
             updateMediaButtonsState();
             return;
         }
-
         if (linkGroup) linkGroup.classList.add('hidden');
         if (actionsBar) actionsBar.style.display = '';
-
         if (postVideo) {
             var vc = document.createElement('div');
             vc.className = 'post-media-slot has-media';
@@ -21748,7 +21661,6 @@ if (document.readyState === 'loading') {
             updateMediaButtonsState();
             return;
         }
-
         postImages.forEach(function(imgData, i) {
             var slot = document.createElement('div');
             slot.className = 'post-media-slot has-media';
@@ -21762,7 +21674,6 @@ if (document.readyState === 'loading') {
             });
             grid.appendChild(slot);
         });
-
         if (postImages.length < POST_MAX_IMAGES) {
             var addSlot = document.createElement('div');
             addSlot.className = 'post-media-slot';
@@ -21772,10 +21683,8 @@ if (document.readyState === 'loading') {
             addSlot.addEventListener('click', function() { pickPostImage(); });
             grid.appendChild(addSlot);
         }
-
         updateMediaButtonsState();
     }
-
     function pickPostImage() {
         if (postVideo || postLinkData) return;
         if (postImages.length >= POST_MAX_IMAGES) return;
@@ -21801,7 +21710,6 @@ if (document.readyState === 'loading') {
         };
         input.click();
     }
-
     function pickPostVideo() {
         if (postImages.length > 0 || postLinkData) return;
         if (postVideo) return;
@@ -21824,7 +21732,6 @@ if (document.readyState === 'loading') {
         };
         input.click();
     }
-
     function openPostLinkInput() {
         if (postImages.length > 0 || postVideo) return;
         var lg = document.getElementById('postLinkInputGroup');
@@ -21833,7 +21740,6 @@ if (document.readyState === 'loading') {
         var li = document.getElementById('postLinkInput');
         if (li) li.focus();
     }
-
     function handlePostLinkInput() {
         var li = document.getElementById('postLinkInput');
         var lp = document.getElementById('postLinkPreview');
@@ -21852,7 +21758,6 @@ if (document.readyState === 'loading') {
             renderPostMediaGrid(); updatePostSubmitBtn(); updateMediaButtonsState();
         });
     }
-
     function renderLinkPreviewInCreate(data) {
         var el = document.getElementById('postLinkPreview');
         if (!el) return;
@@ -21868,7 +21773,6 @@ if (document.readyState === 'loading') {
                 '</div>' +
             '</a>';
     }
-
     function buildLinkPreviewHtml(data) {
         if (!data || !data.url) return '';
         var imgHtml = data.image ? '<img class="lp-img" src="' + escapeHtml(data.image) + '" onerror="this.style.display=\'none\'" />' : '';
@@ -21885,7 +21789,6 @@ if (document.readyState === 'loading') {
             '</div>' +
         '</a>';
     }
-
     function renderPostRoleList() {
         var list = document.getElementById('postRoleList');
         if (!list) return;
@@ -21909,7 +21812,6 @@ if (document.readyState === 'loading') {
             list.appendChild(item);
         });
     }
-
     function updatePostSubmitBtn() {
         var btn = document.getElementById('postSubmitBtn');
         if (!btn) return;
@@ -21918,28 +21820,21 @@ if (document.readyState === 'loading') {
     }
 
     // ===================================================
-    //  SUBMIT POST
+    //  SUBMIT POST -- ကျပန်း Worker ထဲ Add
     // ===================================================
     function submitPost() {
         if (postSubmitting) return;
         if (!window.currentUser) return;
         if (!isGlobalUploadEnabled()) { showToastSafe('Post တင်ခွင့် ပိတ်ထားသည်'); return; }
-
         var hasMedia = (postImages.length > 0) || postVideo || postLinkData;
         if (!hasMedia) return;
-
         checkDailyPostLimit().then(function(limitResult) {
-            if (!limitResult.canPost) {
-                showToastSafe('ယနေ့ Post ' + DAILY_POST_LIMIT + ' ခု ပြည့်သွားပါပြီ');
-                return;
-            }
-
+            if (!limitResult.canPost) { showToastSafe('ယနေ့ Post ' + DAILY_POST_LIMIT + ' ခု ပြည့်သွားပါပြီ'); return; }
             postSubmitting = true;
             updatePostSubmitBtn();
             closePostCreate();
             showUploadPopup('Preparing...', 'Processing media...', 5);
             showUploadBar('Post တင်နေသည်...');
-
             var enabledWorkers = getEnabledUploadWorkers();
             if (enabledWorkers.length === 0) {
                 hideUploadPopup(); hideUploadBar();
@@ -21947,16 +21842,15 @@ if (document.readyState === 'loading') {
                 showToastSafe('Upload Server မရှိပါ');
                 return;
             }
-            var serverQueue = enabledWorkers.slice().sort(function() { return Math.random() - 0.5; });
-
+            // ✅ ကျပန်း Worker ရွေး
+            var randomSrv = enabledWorkers[Math.floor(Math.random() * enabledWorkers.length)];
+            var serverQueue = [randomSrv].concat(enabledWorkers.filter(function(s) { return s.id !== randomSrv.id; }));
             updateUploadProgress(15, 'Processing media...');
             updateUploadBarText('Media ပြင်ဆင်နေသည်...');
-
             var postId = genPostId();
             var isVideo = !!postVideo;
             var isLink = !!postLinkData;
             var caption = (document.getElementById('postCaptionInput') || {}).value || '';
-
             getMyUserInfo().then(function(myInfo) {
                 if (!myInfo) {
                     hideUploadPopup(); hideUploadBar();
@@ -21964,7 +21858,6 @@ if (document.readyState === 'loading') {
                     showToastSafe('User info မရပါ');
                     return;
                 }
-
                 var userInfo = {
                     userId: myInfo.userId,
                     userName: myInfo.userName,
@@ -21972,77 +21865,43 @@ if (document.readyState === 'loading') {
                     serverNo: 'Server ' + myInfo.serverNo,
                     userAvatar: myInfo.avatar || ''
                 };
-
                 var mediaPreparePromise;
-
                 if (isLink) {
                     mediaPreparePromise = Promise.resolve([]);
                 } else if (isVideo) {
                     mediaPreparePromise = new Promise(function(resolve, reject) {
-                        if (postVideo.size > POST_MAX_VIDEO_SIZE) {
-                            reject(new Error('Video ကြီးလွန်းသည် (max 10MB)'));
-                            return;
-                        }
-                        resolve([{
-                            type: 'video',
-                            url: postVideo.dataUrl,
-                            size: postVideo.size
-                        }]);
+                        if (postVideo.size > POST_MAX_VIDEO_SIZE) { reject(new Error('Video ကြီးလွန်းသည် (max 10MB)')); return; }
+                        resolve([{ type: 'video', url: postVideo.dataUrl, size: postVideo.size }]);
                     });
                 } else {
                     var compressPromises = postImages.map(function(item, idx) {
                         return compressImageBase64(item.dataUrl, 800, 0.7).then(function(compressedDataUrl) {
-                            return {
-                                type: 'image',
-                                url: compressedDataUrl,
-                                size: Math.round(compressedDataUrl.length * 0.75),
-                                index: idx
-                            };
+                            return { type: 'image', url: compressedDataUrl, size: Math.round(compressedDataUrl.length * 0.75), index: idx };
                         });
                     });
                     mediaPreparePromise = Promise.all(compressPromises);
                 }
-
                 return mediaPreparePromise.then(function(mediaItems) {
                     updateUploadProgress(40, 'Saving to database...');
                     updateUploadBarText('Database မှာ သိမ်းနေသည်...');
-
                     var mediaUrlsJson = JSON.stringify(mediaItems);
                     var linkDataJson = postLinkData ? JSON.stringify({
-                        url: postLinkData.url,
-                        domain: postLinkData.domain || '',
-                        title: postLinkData.title || '',
-                        desc: postLinkData.desc || '',
+                        url: postLinkData.url, domain: postLinkData.domain || '',
+                        title: postLinkData.title || '', desc: postLinkData.desc || '',
                         image: postLinkData.image || ''
                     }) : null;
-
                     var postType = isLink ? 'link' : (isVideo ? 'video' : 'image');
-
                     var sql = 'INSERT INTO posts (' +
                         'postId, userId, userName, serverId, serverNo, userAvatar, ' +
                         'caption, postType, mediaUrls, linkData, roleId, ' +
                         'likeCount, commentCount, comments, workerNo, createdAt' +
                         ') VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
-
                     var params = [
-                        postId,
-                        userInfo.userId,
-                        userInfo.userName,
-                        userInfo.serverId,
-                        userInfo.serverNo,
-                        userInfo.userAvatar,
-                        caption,
-                        postType,
-                        mediaUrlsJson,
-                        linkDataJson,
-                        postSelectedRoleId || '',
-                        0,
-                        0,
-                        '[]',
-                        0,
-                        Date.now()
+                        postId, userInfo.userId, userInfo.userName, userInfo.serverId,
+                        userInfo.serverNo, userInfo.userAvatar, caption, postType,
+                        mediaUrlsJson, linkDataJson, postSelectedRoleId || '',
+                        0, 0, '[]', 0, Date.now()
                     ];
-
                     return tryUploadWithFailover(serverQueue, sql, params, postId).then(function(result) {
                         return { result: result, mediaItems: mediaItems, userInfo: userInfo };
                     });
@@ -22051,7 +21910,6 @@ if (document.readyState === 'loading') {
                 if (!data || !data.result || !data.result.success) {
                     throw new Error(data && data.result && data.result.error ? data.result.error : 'Upload failed');
                 }
-
                 var result = data.result;
                 var mediaItems = data.mediaItems;
                 var userInfo = data.userInfo;
@@ -22059,73 +21917,46 @@ if (document.readyState === 'loading') {
                 var isVideo2 = !!postVideo;
                 var isLink2 = !!postLinkData;
                 var postType2 = isLink2 ? 'link' : (isVideo2 ? 'video' : 'image');
-
                 incrementDailyPost();
-
                 updateUploadProgress(100, 'Done!');
                 updateUploadBarText('Done!');
-
                 addPostToFirebaseUserList(result.postId, result.workerNo).then(function() {});
-
                 var newPost = {
-                    postId: postId,
-                    userId: userInfo.userId,
-                    userName: userInfo.userName,
-                    serverId: userInfo.serverId,
-                    serverNo: userInfo.serverNo,
-                    userAvatar: userInfo.userAvatar,
-                    caption: caption,
-                    postType: postType2,
-                    mediaUrls: mediaItems,
-                    linkData: postLinkData,
-                    roleId: postSelectedRoleId || '',
-                    likeCount: 0,
-                    commentCount: 0,
-                    comments: [],
-                    workerNo: result.workerNo,
-                    createdAt: Date.now(),
-                    _serverId: result.workerId
+                    postId: postId, userId: userInfo.userId, userName: userInfo.userName,
+                    serverId: userInfo.serverId, serverNo: userInfo.serverNo,
+                    userAvatar: userInfo.userAvatar, caption: caption, postType: postType2,
+                    mediaUrls: mediaItems, linkData: postLinkData, roleId: postSelectedRoleId || '',
+                    likeCount: 0, commentCount: 0, comments: [],
+                    workerNo: result.workerNo, createdAt: Date.now(), _serverId: result.workerId
                 };
-
                 var feedBody = document.getElementById('postFeedBody');
                 if (feedBody && !isSearchMode) {
                     var loadingEl = feedBody.querySelector('.post-feed-loading');
                     if (loadingEl) loadingEl.remove();
                     var emptyEl = feedBody.querySelector('.post-feed-empty');
                     if (emptyEl) emptyEl.remove();
-
                     feedAllPosts.unshift(newPost);
                     lastRenderedIds[postId] = true;
-
                     var card = buildPostCard(newPost);
                     card.style.opacity = '0';
                     card.style.transform = 'translateY(-10px)';
                     card.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
-
-                    if (feedBody.firstChild) {
-                        feedBody.insertBefore(card, feedBody.firstChild);
-                    } else {
-                        feedBody.appendChild(card);
-                    }
-
+                    if (feedBody.firstChild) feedBody.insertBefore(card, feedBody.firstChild);
+                    else feedBody.appendChild(card);
                     requestAnimationFrame(function() {
                         card.style.opacity = '1';
                         card.style.transform = 'translateY(0)';
                     });
-
                     feedBody.scrollTop = 0;
                 }
-
                 setTimeout(function() {
-                    hideUploadPopup();
-                    hideUploadBar();
+                    hideUploadPopup(); hideUploadBar();
                     postSubmitting = false;
                     showToastSafe('Post တင်ပြီးပါပြီ');
                 }, 500);
             }).catch(function(err) {
                 console.error('Post upload error:', err);
-                hideUploadPopup();
-                hideUploadBar();
+                hideUploadPopup(); hideUploadBar();
                 postSubmitting = false;
                 updatePostSubmitBtn();
                 showToastSafe(err && err.message ? err.message : 'Upload failed');
@@ -22135,40 +21966,24 @@ if (document.readyState === 'loading') {
 
     function tryUploadWithFailover(serverQueue, sql, params, postId) {
         var idx = 0;
-
         function tryNext() {
-            if (idx >= serverQueue.length) {
-                return { success: false, error: 'All servers failed' };
-            }
-
+            if (idx >= serverQueue.length) return { success: false, error: 'All servers failed' };
             var srv = serverQueue[idx];
             idx++;
-
             var client = getWorkerClient(srv.id);
-            if (!client) {
-                return tryNext();
-            }
-
+            if (!client) return tryNext();
             updateUploadBarText('Post တင်နေသည်...');
             updateUploadProgress(50 + (idx * 10), 'Saving...');
-
             var newParams = params.slice();
             newParams[14] = srv.number;
-
             return client.execute(sql, newParams).then(function() {
-                return {
-                    success: true,
-                    postId: postId,
-                    workerNo: srv.number,
-                    workerId: srv.id
-                };
+                return { success: true, postId: postId, workerNo: srv.number, workerId: srv.id };
             }).catch(function(err) {
                 console.warn('Upload failed, trying next server...', err.message);
                 updateUploadBarText('နောက် Server ပြောင်းနေသည်...');
                 return tryNext();
             });
         }
-
         return tryNext();
     }
 
@@ -22179,56 +21994,36 @@ if (document.readyState === 'loading') {
         var card = document.createElement('div');
         card.className = 'post-card';
         card.dataset.postId = post.postId;
-
         var avatar = post.userAvatar || IMBB_PLACEHOLDER;
         var timeStr = formatPostTime(post.createdAt);
-
         var isMe = (window.currentUser &&
                     String(window.currentUser.userId) === String(post.userId) &&
                     window.currentServerId === post.serverId);
-
         var alreadyFriend = (typeof window.isFriend === 'function') ? window.isFriend(post.serverId, post.userId) : false;
         var actionBtn = '';
-        if (isMe) {
-            actionBtn = '<button class="post-card-chat-btn" disabled>You</button>';
-        } else if (alreadyFriend) {
-            actionBtn = '<button class="post-card-chat-btn" data-action="chat">Chat</button>';
-        } else {
-            actionBtn = '<button class="post-card-chat-btn" data-action="add">Add</button>';
-        }
-
+        if (isMe) actionBtn = '<button class="post-card-chat-btn" disabled>You</button>';
+        else if (alreadyFriend) actionBtn = '<button class="post-card-chat-btn" data-action="chat">Chat</button>';
+        else actionBtn = '<button class="post-card-chat-btn" data-action="add">Add</button>';
         var captionHtml = '';
         if (post.caption && post.caption.trim()) {
             captionHtml = '<div class="post-card-caption">' + linkifyCaption(post.caption) + '</div>';
         }
-
         var roleBadge = '';
         if (post.roleId) {
             var role = POST_ROLES.find(function(r) { return r.id === post.roleId; });
-            if (role) {
-                roleBadge = '<span class="post-card-role-badge"><img src="' + role.image + '" />' + escapeHtml(role.name) + '</span>';
-            }
+            if (role) roleBadge = '<span class="post-card-role-badge"><img src="' + role.image + '" />' + escapeHtml(role.name) + '</span>';
         }
-
         var mediaHtml = buildPostMediaHtml(post);
         var liked = isPostLikedByMe(post.postId);
         var faved = isFavourited(post.postId);
         var likeCount = post.likeCount || 0;
         var commentCount = post.commentCount || 0;
-
         card.innerHTML =
             '<div class="post-card-header">' +
-                '<div class="post-card-avatar-wrap" data-action="profile">' +
-                    '<img src="' + avatar + '" />' +
-                '</div>' +
+                '<div class="post-card-avatar-wrap" data-action="profile"><img src="' + avatar + '" /></div>' +
                 '<div class="post-card-info">' +
-                    '<div class="post-card-name-row">' +
-                        '<span class="post-card-name">' + escapeHtml(post.userName) + '</span>' +
-                        roleBadge +
-                    '</div>' +
-                    '<div class="post-card-name-row">' +
-                        '<span class="post-card-time">' + timeStr + '</span>' +
-                    '</div>' +
+                    '<div class="post-card-name-row"><span class="post-card-name">' + escapeHtml(post.userName) + '</span>' + roleBadge + '</div>' +
+                    '<div class="post-card-name-row"><span class="post-card-time">' + timeStr + '</span></div>' +
                 '</div>' + actionBtn +
             '</div>' +
             captionHtml + mediaHtml +
@@ -22255,7 +22050,6 @@ if (document.readyState === 'loading') {
                     '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>' +
                 '</button>' +
             '</div>';
-
         attachPostCardEvents(card, post);
         return card;
     }
@@ -22264,18 +22058,13 @@ if (document.readyState === 'loading') {
         if (post.postType === 'link' && post.linkData) return buildLinkPreviewHtml(post.linkData);
         var media = post.mediaUrls || [];
         if (media.length === 0) return '';
-
         if (post.postType === 'video') {
             return '<div class="post-card-media"><div class="post-card-video-badge">Video</div><video src="' + media[0].url + '" controls playsinline preload="metadata"></video></div>';
         }
-        if (media.length === 1) {
-            return '<div class="post-card-media"><img src="' + media[0].url + '" data-index="0" /></div>';
-        }
+        if (media.length === 1) return '<div class="post-card-media"><img src="' + media[0].url + '" data-index="0" /></div>';
         if (media.length === 2) {
             return '<div class="post-card-media"><div class="post-card-media-grid" style="grid-template-columns:1fr 1fr;">' +
-                media.slice(0, 2).map(function(m, i) {
-                    return '<div class="media-cell"><img src="' + m.url + '" data-index="' + i + '" /></div>';
-                }).join('') + '</div></div>';
+                media.slice(0, 2).map(function(m, i) { return '<div class="media-cell"><img src="' + m.url + '" data-index="' + i + '" /></div>'; }).join('') + '</div></div>';
         }
         var display = media.slice(0, 6);
         var extra = media.length - 6;
@@ -22296,16 +22085,11 @@ if (document.readyState === 'loading') {
                 openPostViewer(post, idx);
             });
         });
-
         var addBtn = card.querySelector('.post-card-chat-btn[data-action="add"]');
         if (addBtn) addBtn.addEventListener('click', function(e) {
             e.stopPropagation();
-            addPostUserAsFriend({
-                userId: post.userId, serverId: post.serverId, serverNo: post.serverNo,
-                name: post.userName, avatar: post.userAvatar
-            });
+            addPostUserAsFriend({ userId: post.userId, serverId: post.serverId, serverNo: post.serverNo, name: post.userName, avatar: post.userAvatar });
         });
-
         var chatBtn = card.querySelector('.post-card-chat-btn[data-action="chat"]');
         if (chatBtn) chatBtn.addEventListener('click', function(e) {
             e.stopPropagation();
@@ -22313,35 +22097,28 @@ if (document.readyState === 'loading') {
                 window.openChatRoom({ serverId: post.serverId, userId: post.userId, serverNo: post.serverNo });
             }
         });
-
         var profileWrap = card.querySelector('.post-card-avatar-wrap[data-action="profile"]');
         if (profileWrap) {
             profileWrap.style.cursor = 'pointer';
             profileWrap.addEventListener('click', function(e) {
                 e.stopPropagation();
                 var serverNo = 1;
-                if (post.serverNo) {
-                    var m = String(post.serverNo).match(/\d+/);
-                    if (m && m[0]) serverNo = parseInt(m[0]);
-                }
+                if (post.serverNo) { var m = String(post.serverNo).match(/\d+/); if (m && m[0]) serverNo = parseInt(m[0]); }
                 openProfilePopupWithFetch(post.userId, serverNo);
             });
         }
-
         var likeBtn = card.querySelector('.post-action-btn[data-action="like"]');
         if (likeBtn) likeBtn.addEventListener('click', function(e) {
             e.stopPropagation();
             if (!isGlobalLikeEnabled()) { showToastSafe('Like ခွင့် ပိတ်ထားသည်'); return; }
             togglePostLike(post, likeBtn);
         });
-
         var commentBtn = card.querySelector('.post-action-btn[data-action="comment"]');
         if (commentBtn) commentBtn.addEventListener('click', function(e) {
             e.stopPropagation();
             if (!isGlobalCommentEnabled()) { showToastSafe('Comment ခွင့် ပိတ်ထားသည်'); return; }
             openCommentScreen(post);
         });
-
         var favBtn = card.querySelector('.post-action-btn[data-action="favourite"]');
         if (favBtn) favBtn.addEventListener('click', function(e) {
             e.stopPropagation();
@@ -22350,18 +22127,10 @@ if (document.readyState === 'loading') {
             var svg = favBtn.querySelector('svg');
             if (svg) svg.setAttribute('fill', isFav ? 'currentColor' : 'none');
         });
-
         var reportBtn = card.querySelector('.post-action-btn[data-action="report"]');
-        if (reportBtn) reportBtn.addEventListener('click', function(e) {
-            e.stopPropagation();
-            openReportPopup(post);
-        });
-
+        if (reportBtn) reportBtn.addEventListener('click', function(e) { e.stopPropagation(); openReportPopup(post); });
         var shareBtn = card.querySelector('.post-action-btn[data-action="share"]');
-        if (shareBtn) shareBtn.addEventListener('click', function(e) {
-            e.stopPropagation();
-            showShareModal(post);
-        });
+        if (shareBtn) shareBtn.addEventListener('click', function(e) { e.stopPropagation(); showShareModal(post); });
     }
 
     // ===================================================
@@ -22369,30 +22138,18 @@ if (document.readyState === 'loading') {
     // ===================================================
     function togglePostLike(post, btn) {
         if (!window.currentUser) return;
-
         var isLiking = !isPostLikedByMe(post.postId);
-
-        if (isLiking && post.likeCount >= LIKE_MAX) {
-            showToastSafe('Like အများဆုံး ရောက်နေပါပြီ');
-            return;
-        }
-
+        if (isLiking && post.likeCount >= LIKE_MAX) { showToastSafe('Like အများဆုံး ရောက်နေပါပြီ'); return; }
         togglePostLikeLocal(post.postId);
-
         post.likeCount = isLiking ? (post.likeCount + 1) : Math.max(0, post.likeCount - 1);
         if (post.likeCount > LIKE_MAX) post.likeCount = LIKE_MAX;
-
         var countEl = btn.querySelector('span');
         if (countEl) countEl.textContent = post.likeCount;
         btn.classList.toggle('liked', isLiking);
-
         var client = getWorkerClient(post._serverId);
         if (!client) return;
-
-        client.execute(
-            'UPDATE posts SET likeCount = ? WHERE postId = ?',
-            [post.likeCount, post.postId]
-        ).catch(function(err) { console.warn('Like update error:', err); });
+        client.execute('UPDATE posts SET likeCount = ? WHERE postId = ?', [post.likeCount, post.postId])
+            .catch(function(err) { console.warn('Like update error:', err); });
     }
 
     // ===================================================
@@ -22400,28 +22157,22 @@ if (document.readyState === 'loading') {
     // ===================================================
     function openCommentScreen(post) {
         if (!isGlobalCommentEnabled()) { showToastSafe('Comment ခွင့် ပိတ်ထားသည်'); return; }
-
         commentTargetPost = post;
         var sheet = document.getElementById('commentSheet');
         if (!sheet) return;
-
         var input = document.getElementById('commentInput');
         var sendBtn = document.getElementById('commentSendBtn');
         if (input) input.value = '';
         if (sendBtn) sendBtn.disabled = true;
-
         var list = document.getElementById('commentList');
         if (list) list.innerHTML = '<div class="comment-empty"><span>Loading...</span></div>';
-
         sheet.classList.remove('hidden');
         var overlay = document.getElementById('commentSheetOverlay');
         if (overlay) { overlay.classList.remove('hidden'); setTimeout(function() { overlay.classList.add('active'); }, 20); }
         setTimeout(function() { sheet.classList.add('open'); }, 20);
         document.body.style.overflow = 'hidden';
-
         var client = getWorkerClient(post._serverId);
         if (!client) { renderComments([]); return; }
-
         client.query('SELECT comments FROM posts WHERE postId = ? LIMIT 1', [post.postId])
             .then(function(rows) {
                 if (!rows || rows.length === 0) return renderComments([]);
@@ -22464,61 +22215,31 @@ if (document.readyState === 'loading') {
         var item = document.createElement('div');
         item.className = 'comment-item';
         item.dataset.commentId = c.id;
-
         var bubbleClass = '';
         var bubbleStyle = '';
         if (c.bubbleId && typeof window.BUBBLE_CONFIG !== 'undefined') {
             var bubble = window.BUBBLE_CONFIG.bubbles.find(function(b) { return String(b.id) === String(c.bubbleId); });
-            if (bubble) {
-                bubbleClass = ' has-bubble';
-                bubbleStyle = ' style="--bubble-image:url(\'' + bubble.image + '\');"';
-            }
+            if (bubble) { bubbleClass = ' has-bubble'; bubbleStyle = ' style="--bubble-image:url(\'' + bubble.image + '\');"'; }
         }
-
         item.innerHTML =
-            '<div class="comment-item-avatar">' +
-                '<img src="' + IMBB_PLACEHOLDER + '" />' +
-            '</div>' +
+            '<div class="comment-item-avatar"><img src="' + IMBB_PLACEHOLDER + '" /></div>' +
             '<div class="comment-item-body">' +
-                '<div class="comment-item-header">' +
-                    '<span class="comment-item-name">' + escapeHtml(c.userName || 'Player') + '</span>' +
-                '</div>' +
-                '<div class="comment-item-text' + bubbleClass + '"' + bubbleStyle + '>' +
-                    escapeHtml(c.text || '') +
-                '</div>' +
+                '<div class="comment-item-header"><span class="comment-item-name">' + escapeHtml(c.userName || 'Player') + '</span></div>' +
+                '<div class="comment-item-text' + bubbleClass + '"' + bubbleStyle + '>' + escapeHtml(c.text || '') + '</div>' +
                 '<div class="comment-item-actions">' +
-                    '<button class="comment-action-btn view-btn" data-action="view">' +
-                        '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>' +
-                        '<span>View</span>' +
-                    '</button>' +
-                    '<button class="comment-action-btn report-btn" data-action="report">' +
-                        '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>' +
-                        '<span>Report</span>' +
-                    '</button>' +
+                    '<button class="comment-action-btn view-btn" data-action="view"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg><span>View</span></button>' +
+                    '<button class="comment-action-btn report-btn" data-action="report"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg><span>Report</span></button>' +
                 '</div>' +
             '</div>';
-
         var viewBtn = item.querySelector('.comment-action-btn[data-action="view"]');
-        if (viewBtn) {
-            viewBtn.addEventListener('click', function(e) {
-                e.stopPropagation();
-                var serverNo = 1;
-                if (c.userServerNo) {
-                    var m = String(c.userServerNo).match(/\d+/);
-                    if (m && m[0]) serverNo = parseInt(m[0]);
-                }
-                openProfilePopupWithFetch(c.userId, serverNo);
-            });
-        }
-
+        if (viewBtn) viewBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            var serverNo = 1;
+            if (c.userServerNo) { var m = String(c.userServerNo).match(/\d+/); if (m && m[0]) serverNo = parseInt(m[0]); }
+            openProfilePopupWithFetch(c.userId, serverNo);
+        });
         var reportBtn = item.querySelector('.comment-action-btn[data-action="report"]');
-        if (reportBtn) {
-            reportBtn.addEventListener('click', function(e) {
-                e.stopPropagation();
-                openCommentReportPopup(c);
-            });
-        }
-
+        if (reportBtn) reportBtn.addEventListener('click', function(e) { e.stopPropagation(); openCommentReportPopup(c); });
         return item;
     }
 
@@ -22527,74 +22248,48 @@ if (document.readyState === 'loading') {
     // ===================================================
     function openCommentReportPopup(comment) {
         if (!commentTargetPost) return;
-
         var existing = document.getElementById('commentReportOverlay');
         if (existing) existing.remove();
-
         var overlay = document.createElement('div');
         overlay.id = 'commentReportOverlay';
         overlay.className = 'post-report-overlay';
-
         overlay.innerHTML =
             '<div class="post-report-popup">' +
-                '<div class="post-report-header">' +
-                    '<h3>Report Comment</h3>' +
-                    '<button class="post-report-close" id="commentReportClose">' +
-                        '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>' +
-                    '</button>' +
+                '<div class="post-report-header"><h3>Report Comment</h3>' +
+                    '<button class="post-report-close" id="commentReportClose"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>' +
                 '</div>' +
                 '<div class="post-report-body">' +
-                    '<div class="post-report-preview">' +
-                        '<div class="post-report-preview-info">' +
-                            '<div class="post-report-preview-label">Comment</div>' +
-                            '<div class="post-report-preview-detail">' +
-                                '<span>By: ' + escapeHtml(comment.userName || 'Player') + '</span>' +
-                                '<span>ID: ' + (comment.userId || '') + '</span>' +
-                            '</div>' +
-                        '</div>' +
-                    '</div>' +
+                    '<div class="post-report-preview"><div class="post-report-preview-info"><div class="post-report-preview-label">Comment</div>' +
+                        '<div class="post-report-preview-detail"><span>By: ' + escapeHtml(comment.userName || 'Player') + '</span><span>ID: ' + (comment.userId || '') + '</span></div>' +
+                    '</div></div>' +
                     '<div class="post-report-preview" style="background: rgba(255,255,255,0.05); padding: 12px; border-radius: 8px;">' +
-                        '<div style="font-size: 13px; color: var(--text-main); line-height: 1.5; word-break: break-word;">' +
-                            escapeHtml(comment.text || '') +
-                        '</div>' +
+                        '<div style="font-size: 13px; color: var(--text-main); line-height: 1.5; word-break: break-word;">' + escapeHtml(comment.text || '') + '</div>' +
                     '</div>' +
-                    '<div class="post-report-input-group">' +
-                        '<label>အကြောင်းရင်း <span class="required">*</span></label>' +
+                    '<div class="post-report-input-group"><label>အကြောင်းရင်း <span class="required">*</span></label>' +
                         '<textarea id="commentReportReason" class="post-report-textarea" rows="4" placeholder="ဘာကြောင့် Report လုပ်တာလဲ ရေးပါ..."></textarea>' +
                     '</div>' +
                     '<div id="commentReportError" class="post-report-error hidden"></div>' +
                 '</div>' +
-                '<div class="post-report-footer">' +
-                    '<button class="post-report-cancel" id="commentReportCancel">Cancel</button>' +
-                    '<button class="post-report-submit" id="commentReportSubmit">' +
-                        '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/></svg>' +
-                        '<span>ပေးပို့မည်</span>' +
-                    '</button>' +
+                '<div class="post-report-footer"><button class="post-report-cancel" id="commentReportCancel">Cancel</button>' +
+                    '<button class="post-report-submit" id="commentReportSubmit"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/></svg><span>ပေးပို့မည်</span></button>' +
                 '</div>' +
             '</div>';
-
         document.body.appendChild(overlay);
-
         function close() { overlay.remove(); }
         document.getElementById('commentReportClose').addEventListener('click', close);
         document.getElementById('commentReportCancel').addEventListener('click', close);
         overlay.addEventListener('click', function(e) { if (e.target === overlay) close(); });
-
         var reasonInput = document.getElementById('commentReportReason');
         setTimeout(function() { if (reasonInput) reasonInput.focus(); }, 100);
-
         document.getElementById('commentReportSubmit').addEventListener('click', function() {
             var reason = reasonInput.value.trim();
             var errorEl = document.getElementById('commentReportError');
-
             if (!reason) { errorEl.textContent = 'အကြောင်းရင်း ရေးပါ'; errorEl.classList.remove('hidden'); return; }
             if (reason.length < 5) { errorEl.textContent = 'အနည်းဆုံး ၅ လုံး ရေးပါ'; errorEl.classList.remove('hidden'); return; }
-
             errorEl.classList.add('hidden');
             var submitBtn = this;
             submitBtn.disabled = true;
             submitBtn.innerHTML = '<div class="post-report-spinner"></div><span>ပေးပို့နေသည်...</span>';
-
             sendCommentReportToTelegram(commentTargetPost, comment, reason).then(function(success) {
                 if (success) { showToastSafe('Report ပေးပို့ပြီးပါပြီ'); close(); }
                 else {
@@ -22613,7 +22308,6 @@ if (document.readyState === 'loading') {
                 var postType = 'Image';
                 if (post.postType === 'video') postType = 'Video';
                 else if (post.postType === 'link') postType = 'Link';
-
                 var reporterName = (window.currentUser && window.currentUser.name) || 'Unknown';
                 var reporterId = (window.currentUser && window.currentUser.userId) || 'Unknown';
                 var reporterServerNo = 1;
@@ -22621,42 +22315,19 @@ if (document.readyState === 'loading') {
                     var fbSrv = window.FIREBASE_SERVERS.find(function(s) { return s.id === window.currentServerId; });
                     if (fbSrv) reporterServerNo = fbSrv.number;
                 }
-
                 var workerNo = post.workerNo || 1;
-
                 var msg = '<b>🚨 COMMENT REPORT</b>\n\n';
-                msg += '<b>📌 Post Info</b>\n';
-                msg += '📛 Type: ' + postType + '\n';
-                msg += '🖥 Worker Server No: ' + workerNo + '\n';
-                msg += '🆔 Post ID: ' + (post.postId || 'Unknown') + '\n\n';
-                msg += '<b>👤 တင်ထားသူ</b>\n';
-                msg += '📛 Name: ' + escapeHtml(post.userName || 'Unknown') + '\n';
-                msg += '🖥 Server No: ' + (post.serverNo || 'Unknown') + '\n';
-                msg += '🆔 ID: ' + (post.userId || 'Unknown') + '\n\n';
-                msg += '<b>📢 တိုင်ကြားသူ</b>\n';
-                msg += '📛 Name: ' + escapeHtml(reporterName) + '\n';
-                msg += '🖥 Server No: Server ' + reporterServerNo + '\n';
-                msg += '🆔 ID: ' + reporterId + '\n\n';
-                msg += '<b>💬 တိုင်ခံရသူ</b>\n';
-                msg += '📛 Name: ' + escapeHtml(comment.userName || 'Unknown') + '\n';
-                msg += '🖥 Server No: ' + (comment.userServerNo || 'Unknown') + '\n';
-                msg += '🆔 ID: ' + (comment.userId || 'Unknown') + '\n\n';
-                msg += '<b>📝 Comment စာ</b>\n';
-                msg += escapeHtml(comment.text || '') + '\n\n';
-                msg += '<b>⚠️ အကြောင်းရင်း</b>\n';
-                msg += escapeHtml(reason) + '\n\n';
+                msg += '<b>📌 Post Info</b>\n📛 Type: ' + postType + '\n🖥 Worker Server No: ' + workerNo + '\n🆔 Post ID: ' + (post.postId || 'Unknown') + '\n\n';
+                msg += '<b>👤 တင်ထားသူ</b>\n📛 Name: ' + escapeHtml(post.userName || 'Unknown') + '\n🖥 Server No: ' + (post.serverNo || 'Unknown') + '\n🆔 ID: ' + (post.userId || 'Unknown') + '\n\n';
+                msg += '<b>📢 တိုင်ကြားသူ</b>\n📛 Name: ' + escapeHtml(reporterName) + '\n🖥 Server No: Server ' + reporterServerNo + '\n🆔 ID: ' + reporterId + '\n\n';
+                msg += '<b>💬 တိုင်ခံရသူ</b>\n📛 Name: ' + escapeHtml(comment.userName || 'Unknown') + '\n🖥 Server No: ' + (comment.userServerNo || 'Unknown') + '\n🆔 ID: ' + (comment.userId || 'Unknown') + '\n\n';
+                msg += '<b>📝 Comment စာ</b>\n' + escapeHtml(comment.text || '') + '\n\n';
+                msg += '<b>⚠️ အကြောင်းရင်း</b>\n' + escapeHtml(reason) + '\n\n';
                 msg += '📅 ' + new Date().toLocaleString('en-US', { timeZone: 'Asia/Yangon' });
-
                 fetch('https://api.telegram.org/bot' + REPORT_BOT_TOKEN + '/sendMessage', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        chat_id: REPORT_CHAT_ID,
-                        message_thread_id: REPORT_TOPIC_COMMENT,
-                        text: msg,
-                        parse_mode: 'HTML',
-                        disable_web_page_preview: true
-                    })
+                    body: JSON.stringify({ chat_id: REPORT_CHAT_ID, message_thread_id: REPORT_TOPIC_COMMENT, text: msg, parse_mode: 'HTML', disable_web_page_preview: true })
                 })
                 .then(function(r) { return r.json(); })
                 .then(function(data) { resolve(data.ok === true); })
@@ -22667,87 +22338,51 @@ if (document.readyState === 'loading') {
 
     function sendComment() {
         if (!isGlobalCommentEnabled()) { showToastSafe('Comment ခွင့် ပိတ်ထားသည်'); return; }
-
         var input = document.getElementById('commentInput');
         if (!input) return;
         var text = input.value.trim();
         if (!text) return;
         if (!commentTargetPost) return;
-
-        if ((commentTargetPost.commentCount || 0) >= COMMENT_MAX) {
-            showToastSafe('Comment အများဆုံး ရောက်နေပါပြီ (' + COMMENT_MAX + ')');
-            return;
-        }
-
+        if ((commentTargetPost.commentCount || 0) >= COMMENT_MAX) { showToastSafe('Comment အများဆုံး ရောက်နေပါပြီ (' + COMMENT_MAX + ')'); return; }
         var lineCount = text.split('\n').length;
         if (lineCount > COMMENT_MAX_LINES) { showToastSafe('Max ' + COMMENT_MAX_LINES + ' lines'); return; }
-
         var post = commentTargetPost;
         var client = getWorkerClient(post._serverId);
         if (!client) return;
-
         var sendBtn = document.getElementById('commentSendBtn');
-        if (sendBtn) {
-            sendBtn.disabled = true;
-            sendBtn.innerHTML = '<div class="spinner-mini" style="width:18px;height:18px;border-width:2px;"></div>';
-        }
-
+        if (sendBtn) { sendBtn.disabled = true; sendBtn.innerHTML = '<div class="spinner-mini" style="width:18px;height:18px;border-width:2px;"></div>'; }
         getMyUserInfo().then(function(myInfo) {
             if (!myInfo) {
                 showToastSafe('User info မရပါ');
                 if (sendBtn) sendBtn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/></svg>';
                 return;
             }
-
-            var comment = {
-                id: genCommentId(),
-                userId: myInfo.userId,
-                userName: myInfo.userName,
-                userServerNo: myInfo.serverNo,
-                bubbleId: commentSelectedBubbleId || myInfo.bubbleUse || '',
-                text: text
-            };
-
+            var comment = { id: genCommentId(), userId: myInfo.userId, userName: myInfo.userName, userServerNo: myInfo.serverNo, bubbleId: commentSelectedBubbleId || myInfo.bubbleUse || '', text: text };
             input.value = '';
-
             client.query('SELECT comments FROM posts WHERE postId = ? LIMIT 1', [post.postId])
                 .then(function(rows) {
                     var comments = [];
-                    if (rows && rows.length > 0) {
-                        try { comments = JSON.parse(rows[0].comments || '[]'); } catch(e) {}
-                    }
+                    if (rows && rows.length > 0) { try { comments = JSON.parse(rows[0].comments || '[]'); } catch(e) {} }
                     if (comments.length >= COMMENT_MAX) {
                         showToastSafe('Comment အများဆုံး ရောက်နေပါပြီ');
-                        if (sendBtn) {
-                            sendBtn.disabled = true;
-                            sendBtn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/></svg>';
-                        }
+                        if (sendBtn) { sendBtn.disabled = true; sendBtn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/></svg>'; }
                         return;
                     }
                     comments.push(comment);
                     var newCount = comments.length;
-
-                    return client.execute(
-                        'UPDATE posts SET comments = ?, commentCount = ? WHERE postId = ?',
-                        [JSON.stringify(comments), newCount, post.postId]
-                    ).then(function() {
-                        post.commentCount = newCount;
-                        renderComments(comments);
-                        updateCommentCountOnCard(post.postId, newCount);
-                        showToastSafe('Comment ပို့ပြီးပါပြီ');
-                        if (sendBtn) {
-                            sendBtn.disabled = true;
-                            sendBtn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/></svg>';
-                        }
-                    });
+                    return client.execute('UPDATE posts SET comments = ?, commentCount = ? WHERE postId = ?', [JSON.stringify(comments), newCount, post.postId])
+                        .then(function() {
+                            post.commentCount = newCount;
+                            renderComments(comments);
+                            updateCommentCountOnCard(post.postId, newCount);
+                            showToastSafe('Comment ပို့ပြီးပါပြီ');
+                            if (sendBtn) { sendBtn.disabled = true; sendBtn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/></svg>'; }
+                        });
                 })
                 .catch(function(err) {
                     console.warn('Comment error:', err);
                     showToastSafe('Comment ပို့မရပါ');
-                    if (sendBtn) {
-                        sendBtn.disabled = false;
-                        sendBtn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/></svg>';
-                    }
+                    if (sendBtn) { sendBtn.disabled = false; sendBtn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/></svg>'; }
                 });
         });
     }
@@ -22765,69 +22400,42 @@ if (document.readyState === 'loading') {
     function toggleCommentBubblePicker() {
         var sheet = document.getElementById('commentSheet');
         if (!sheet) return;
-
         var existing = document.getElementById('commentBubblePicker');
         if (existing) { existing.remove(); commentBubblePickerOpen = false; return; }
-
         getMyUserInfo().then(function(myInfo) {
             var owned = (myInfo && myInfo.bubbleOwned) ? myInfo.bubbleOwned : [];
             var currentUse = (myInfo && myInfo.bubbleUse) || '';
-
             var slots = [{ id: '', name: 'None', image: '', isNone: true, isUsed: currentUse === '' && !commentSelectedBubbleId }];
             owned.forEach(function(bId) {
                 var b = (typeof window.BUBBLE_CONFIG !== 'undefined') ? window.BUBBLE_CONFIG.bubbles.find(function(x) { return x.id === bId; }) : null;
                 if (b) slots.push({ id: b.id, name: b.name, image: b.image, isNone: false, isUsed: (commentSelectedBubbleId || currentUse) === b.id });
             });
-
             var picker = document.createElement('div');
             picker.id = 'commentBubblePicker';
             picker.className = 'comment-bubble-picker';
-
-            var html = '<div class="comment-bubble-picker-header">' +
-                '<span>Bubble ရွေးပါ</span>' +
-                '<button class="comment-bubble-picker-close" id="commentBubblePickerClose">' +
-                    '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>' +
-                '</button>' +
-            '</div>';
+            var html = '<div class="comment-bubble-picker-header"><span>Bubble ရွေးပါ</span>' +
+                '<button class="comment-bubble-picker-close" id="commentBubblePickerClose"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>';
             html += '<div class="comment-bubble-picker-grid">';
             slots.forEach(function(s) {
                 var cls = 'comment-bubble-slot' + (s.isUsed ? ' active' : '') + (s.isNone ? ' none-slot' : '');
                 html += '<div class="' + cls + '" data-bubble-id="' + s.id + '" data-is-none="' + s.isNone + '">';
-                if (s.isNone) {
-                    html += '<div class="comment-bubble-slot-none">' +
-                        '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>' +
-                        '<span>None</span>' +
-                    '</div>';
-                } else {
-                    html += '<img src="' + s.image + '" class="comment-bubble-slot-image" />';
-                }
+                if (s.isNone) html += '<div class="comment-bubble-slot-none"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg><span>None</span></div>';
+                else html += '<img src="' + s.image + '" class="comment-bubble-slot-image" />';
                 html += '</div>';
             });
             html += '</div>';
             picker.innerHTML = html;
-
             var inputBar = sheet.querySelector('.comment-input-bar');
             if (inputBar) inputBar.parentNode.insertBefore(picker, inputBar);
             else sheet.appendChild(picker);
-
             commentBubblePickerOpen = true;
-
-            document.getElementById('commentBubblePickerClose').addEventListener('click', function() {
-                picker.remove();
-                commentBubblePickerOpen = false;
-            });
-
+            document.getElementById('commentBubblePickerClose').addEventListener('click', function() { picker.remove(); commentBubblePickerOpen = false; });
             picker.querySelectorAll('.comment-bubble-slot').forEach(function(el) {
                 el.addEventListener('click', function() {
                     var bId = this.dataset.bubbleId;
                     var isNone = this.dataset.isNone === 'true';
-                    if (isNone || bId === '') {
-                        commentSelectedBubbleId = '';
-                        showToastSafe('Bubble ဖျက်ပြီး');
-                    } else {
-                        commentSelectedBubbleId = parseInt(bId);
-                        showToastSafe('Bubble ရွေးပြီး');
-                    }
+                    if (isNone || bId === '') { commentSelectedBubbleId = ''; showToastSafe('Bubble ဖျက်ပြီး'); }
+                    else { commentSelectedBubbleId = parseInt(bId); showToastSafe('Bubble ရွေးပြီး'); }
                     picker.remove();
                     commentBubblePickerOpen = false;
                 });
@@ -22842,35 +22450,20 @@ if (document.readyState === 'loading') {
         var loadingOverlay = document.createElement('div');
         loadingOverlay.className = 'post-user-popup-overlay';
         loadingOverlay.id = 'profileLoadingOverlay';
-        loadingOverlay.innerHTML =
-            '<div class="post-user-popup" style="max-width:220px;padding:28px;text-align:center;">' +
-                '<div class="post-upload-spinner" style="margin:0 auto 14px;width:44px;height:44px;border-width:3px;"></div>' +
-                '<div style="color:var(--text-main);font-size:14px;font-weight:700;">Profile ရှာနေသည်...</div>' +
-            '</div>';
+        loadingOverlay.innerHTML = '<div class="post-user-popup" style="max-width:220px;padding:28px;text-align:center;"><div class="post-upload-spinner" style="margin:0 auto 14px;width:44px;height:44px;border-width:3px;"></div><div style="color:var(--text-main);font-size:14px;font-weight:700;">Profile ရှာနေသည်...</div></div>';
         document.body.appendChild(loadingOverlay);
-
         fetchUserInfoFromFirebase(serverNo, userId).then(function(userData) {
             loadingOverlay.remove();
             if (userData) {
                 showPostUserPopup({
-                    userId: userId,
-                    serverId: getFirebaseServerIdByNumber(serverNo),
-                    serverNo: 'Server ' + serverNo,
-                    name: userData.name || 'Player',
-                    avatar: userData.avatar || IMBB_PLACEHOLDER,
-                    frameUse: userData.frameUse || '',
-                    markUse: userData.markUse || '',
-                    bannerUse: userData.bannerUse || '',
-                    bio: userData.bio || '',
+                    userId: userId, serverId: getFirebaseServerIdByNumber(serverNo), serverNo: 'Server ' + serverNo,
+                    name: userData.name || 'Player', avatar: userData.avatar || IMBB_PLACEHOLDER,
+                    frameUse: userData.frameUse || '', markUse: userData.markUse || '',
+                    bannerUse: userData.bannerUse || '', bio: userData.bio || '',
                     online: userData.online === true
                 });
-            } else {
-                showToastSafe('User မတွေ့ပါ');
-            }
-        }).catch(function() {
-            loadingOverlay.remove();
-            showToastSafe('User မတွေ့ပါ');
-        });
+            } else showToastSafe('User မတွေ့ပါ');
+        }).catch(function() { loadingOverlay.remove(); showToastSafe('User မတွေ့ပါ'); });
     }
 
     function getFirebaseServerIdByNumber(serverNo) {
@@ -22883,23 +22476,16 @@ if (document.readyState === 'loading') {
         return new Promise(function(resolve) {
             if (typeof window.getDbForServer !== 'function') return resolve(null);
             if (typeof window.FIREBASE_SERVERS === 'undefined') return resolve(null);
-
             var parsedServerNo = parseInt(serverNo);
             if (isNaN(parsedServerNo)) parsedServerNo = 1;
-
             var srv = window.FIREBASE_SERVERS.find(function(s) { return s.number === parsedServerNo; });
             if (!srv) return resolve(null);
-
             var db = window.getDbForServer(srv.id);
             if (!db) return resolve(null);
-
             db.ref('users/' + userId).once('value').then(function(snap) {
                 var data = snap.val();
-                if (data) {
-                    data.userId = userId;
-                    data.serverNo = 'Server ' + parsedServerNo;
-                    resolve(data);
-                } else resolve(null);
+                if (data) { data.userId = userId; data.serverNo = 'Server ' + parsedServerNo; resolve(data); }
+                else resolve(null);
             }).catch(function() { resolve(null); });
         });
     }
@@ -22907,7 +22493,6 @@ if (document.readyState === 'loading') {
     function showPostUserPopup(userInfo) {
         var overlay = document.getElementById('postUserPopupOverlay');
         if (!overlay) return;
-
         var avatarEl = document.getElementById('postUserPopupAvatar');
         var frameEl = document.getElementById('postUserPopupFrame');
         var nameEl = document.getElementById('postUserPopupName');
@@ -22917,18 +22502,14 @@ if (document.readyState === 'loading') {
         var bioEl = document.getElementById('postUserPopupBio');
         var bannerImg = document.getElementById('postUserPopupBannerImg');
         var actionBtn = document.getElementById('postUserPopupActionBtn');
-
         if (avatarEl) avatarEl.src = userInfo.avatar || IMBB_PLACEHOLDER;
-
         if (frameEl) {
             if (userInfo.frameUse && typeof window.FRAME_CONFIG !== 'undefined') {
                 var frame = window.FRAME_CONFIG.frames.find(function(f) { return String(f.id) === String(userInfo.frameUse); });
                 frameEl.style.backgroundImage = frame ? 'url("' + frame.image + '")' : 'none';
             } else frameEl.style.backgroundImage = 'none';
         }
-
         if (nameEl) nameEl.textContent = userInfo.name || 'Player';
-
         if (markEl) {
             if (userInfo.markUse && typeof window.MARK_CONFIG !== 'undefined') {
                 var mark = window.MARK_CONFIG.marks.find(function(m) { return String(m.id) === String(userInfo.markUse); });
@@ -22936,13 +22517,11 @@ if (document.readyState === 'loading') {
                 else markEl.style.display = 'none';
             } else markEl.style.display = 'none';
         }
-
         if (serverEl) serverEl.textContent = userInfo.serverNo || 'Server 1';
         if (onlineEl) {
             if (userInfo.online) { onlineEl.textContent = 'Online'; onlineEl.classList.add('online'); }
             else { onlineEl.textContent = 'Offline'; onlineEl.classList.remove('online'); }
         }
-
         if (bannerImg) {
             if (userInfo.bannerUse && typeof window.BANNER_CONFIG !== 'undefined') {
                 var banner = window.BANNER_CONFIG.banners.find(function(b) { return String(b.id) === String(userInfo.bannerUse); });
@@ -22950,23 +22529,17 @@ if (document.readyState === 'loading') {
                 else bannerImg.style.display = 'none';
             } else bannerImg.style.display = 'none';
         }
-
         if (bioEl) {
             bioEl.innerHTML = (userInfo.bio && userInfo.bio.trim())
                 ? escapeHtml(userInfo.bio).replace(/\n/g, '<br>')
                 : '<span class="bio-placeholder">No bio yet...</span>';
         }
-
         var isMe = (window.currentUser &&
                     String(window.currentUser.userId) === String(userInfo.userId) &&
                     window.currentServerId === userInfo.serverId);
-
         if (actionBtn) {
-            if (isMe) {
-                actionBtn.disabled = true;
-                actionBtn.innerHTML = '<span>This is You</span>';
-                actionBtn.onclick = null;
-            } else {
+            if (isMe) { actionBtn.disabled = true; actionBtn.innerHTML = '<span>This is You</span>'; actionBtn.onclick = null; }
+            else {
                 var already = (typeof window.isFriend === 'function') ? window.isFriend(userInfo.serverId, userInfo.userId) : false;
                 if (already) {
                     actionBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>Chat</span>';
@@ -22986,23 +22559,14 @@ if (document.readyState === 'loading') {
         }
         overlay.classList.remove('hidden');
     }
-
     function closePostUserPopup() {
         var overlay = document.getElementById('postUserPopupOverlay');
         if (overlay) overlay.classList.add('hidden');
     }
-
     function addPostUserAsFriend(userInfo) {
         if (typeof window.addFriendAndSync === 'function') {
-            var target = {
-                serverId: userInfo.serverId, serverNo: userInfo.serverNo,
-                userId: userInfo.userId, name: userInfo.name, avatar: userInfo.avatar
-            };
-            try {
-                window.addFriendAndSync(target);
-                setTimeout(closePostUserPopup, 800);
-                return;
-            } catch(e) {}
+            var target = { serverId: userInfo.serverId, serverNo: userInfo.serverNo, userId: userInfo.userId, name: userInfo.name, avatar: userInfo.avatar };
+            try { window.addFriendAndSync(target); setTimeout(closePostUserPopup, 800); return; } catch(e) {}
         }
         showToastSafe('Cannot add friend');
     }
@@ -23018,17 +22582,13 @@ if (document.readyState === 'loading') {
         var codeEl = document.getElementById('shareLinkText');
         if (codeEl) codeEl.textContent = shareCode;
         overlay.classList.remove('hidden');
-
         var copyBtn = document.getElementById('shareCopyBtn');
         copyBtn.onclick = function() {
             if (navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(shareCode).then(function() {
-                    showToastSafe('Code copied');
-                }).catch(function() { fallbackCopyText(shareCode); });
+                navigator.clipboard.writeText(shareCode).then(function() { showToastSafe('Code copied'); }).catch(function() { fallbackCopyText(shareCode); });
             } else fallbackCopyText(shareCode);
         };
     }
-
     function fallbackCopyText(text) {
         var ta = document.createElement('textarea');
         ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
@@ -23043,78 +22603,54 @@ if (document.readyState === 'loading') {
     function openReportPopup(post) {
         var existing = document.getElementById('postReportOverlay');
         if (existing) existing.remove();
-
         var postType = 'Image';
         if (post.postType === 'video') postType = 'Video';
         else if (post.postType === 'link') postType = 'Link';
-
         var mediaPreview = '';
         if (post.postType === 'link' && post.linkData && post.linkData.image) {
             mediaPreview = '<img src="' + post.linkData.image + '" style="width:60px;height:60px;border-radius:8px;object-fit:cover;" onerror="this.style.display=\'none\'" />';
         } else if (post.mediaUrls && post.mediaUrls.length > 0) {
             mediaPreview = '<img src="' + post.mediaUrls[0].url + '" style="width:60px;height:60px;border-radius:8px;object-fit:cover;" onerror="this.style.display=\'none\'" />';
         }
-
         var overlay = document.createElement('div');
         overlay.id = 'postReportOverlay';
         overlay.className = 'post-report-overlay';
-
         overlay.innerHTML =
             '<div class="post-report-popup">' +
-                '<div class="post-report-header">' +
-                    '<h3>Report Post</h3>' +
-                    '<button class="post-report-close" id="postReportClose">' +
-                        '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>' +
-                    '</button>' +
+                '<div class="post-report-header"><h3>Report Post</h3>' +
+                    '<button class="post-report-close" id="postReportClose"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>' +
                 '</div>' +
                 '<div class="post-report-body">' +
-                    '<div class="post-report-preview">' +
-                        mediaPreview +
-                        '<div class="post-report-preview-info">' +
-                            '<div class="post-report-preview-label">Post Info</div>' +
-                            '<div class="post-report-preview-detail">' +
-                                '<span>Type: ' + postType + '</span>' +
-                                '<span>ID: ' + (post.postId || '') + '</span>' +
-                            '</div>' +
+                    '<div class="post-report-preview">' + mediaPreview +
+                        '<div class="post-report-preview-info"><div class="post-report-preview-label">Post Info</div>' +
+                            '<div class="post-report-preview-detail"><span>Type: ' + postType + '</span><span>ID: ' + (post.postId || '') + '</span></div>' +
                         '</div>' +
                     '</div>' +
-                    '<div class="post-report-input-group">' +
-                        '<label>အကြောင်းရင်း <span class="required">*</span></label>' +
+                    '<div class="post-report-input-group"><label>အကြောင်းရင်း <span class="required">*</span></label>' +
                         '<textarea id="postReportReason" class="post-report-textarea" rows="4" placeholder="ဘာကြောင့် Report လုပ်တာလဲ ရေးပါ..."></textarea>' +
                     '</div>' +
                     '<div id="postReportError" class="post-report-error hidden"></div>' +
                 '</div>' +
-                '<div class="post-report-footer">' +
-                    '<button class="post-report-cancel" id="postReportCancel">Cancel</button>' +
-                    '<button class="post-report-submit" id="postReportSubmit">' +
-                        '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/></svg>' +
-                        '<span>ပေးပို့မည်</span>' +
-                    '</button>' +
+                '<div class="post-report-footer"><button class="post-report-cancel" id="postReportCancel">Cancel</button>' +
+                    '<button class="post-report-submit" id="postReportSubmit"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/></svg><span>ပေးပို့မည်</span></button>' +
                 '</div>' +
             '</div>';
-
         document.body.appendChild(overlay);
-
         function close() { overlay.remove(); }
         document.getElementById('postReportClose').addEventListener('click', close);
         document.getElementById('postReportCancel').addEventListener('click', close);
         overlay.addEventListener('click', function(e) { if (e.target === overlay) close(); });
-
         var reasonInput = document.getElementById('postReportReason');
         setTimeout(function() { if (reasonInput) reasonInput.focus(); }, 100);
-
         document.getElementById('postReportSubmit').addEventListener('click', function() {
             var reason = reasonInput.value.trim();
             var errorEl = document.getElementById('postReportError');
-
             if (!reason) { errorEl.textContent = 'အကြောင်းရင်း ရေးပါ'; errorEl.classList.remove('hidden'); return; }
             if (reason.length < 5) { errorEl.textContent = 'အနည်းဆုံး ၅ လုံး ရေးပါ'; errorEl.classList.remove('hidden'); return; }
-
             errorEl.classList.add('hidden');
             var submitBtn = this;
             submitBtn.disabled = true;
             submitBtn.innerHTML = '<div class="post-report-spinner"></div><span>ပေးပို့နေသည်...</span>';
-
             sendReportToTelegram(post, reason).then(function(success) {
                 if (success) { showToastSafe('Report ပေးပို့ပြီးပါပြီ'); close(); }
                 else {
@@ -23126,16 +22662,13 @@ if (document.readyState === 'loading') {
             });
         });
     }
-
     function sendReportToTelegram(post, reason) {
         return new Promise(function(resolve) {
             try {
                 var postType = 'Image';
                 if (post.postType === 'video') postType = 'Video';
                 else if (post.postType === 'link') postType = 'Link';
-
                 var workerNo = post.workerNo || 1;
-
                 var reporterName = (window.currentUser && window.currentUser.name) || 'Unknown';
                 var reporterId = (window.currentUser && window.currentUser.userId) || 'Unknown';
                 var reporterServerNo = 1;
@@ -23143,39 +22676,20 @@ if (document.readyState === 'loading') {
                     var fbSrv = window.FIREBASE_SERVERS.find(function(s) { return s.id === window.currentServerId; });
                     if (fbSrv) reporterServerNo = fbSrv.number;
                 }
-
                 var msg = '<b>🚨 POST REPORT</b>\n\n';
-                msg += '<b>📌 Post Info</b>\n';
-                msg += '📛 Type: ' + postType + '\n';
-                msg += '🖥 Worker Server No: ' + workerNo + '\n';
-                msg += '🆔 Post ID: ' + (post.postId || 'Unknown') + '\n';
+                msg += '<b>📌 Post Info</b>\n📛 Type: ' + postType + '\n🖥 Worker Server No: ' + workerNo + '\n🆔 Post ID: ' + (post.postId || 'Unknown') + '\n';
                 if (post.caption && post.caption.trim()) {
                     var cap = post.caption.substring(0, 100);
                     msg += '📝 Caption: ' + escapeHtml(cap) + (post.caption.length > 100 ? '...' : '') + '\n';
                 }
-                msg += '\n';
-                msg += '<b>👤 တင်ထားသူ</b>\n';
-                msg += '📛 Name: ' + escapeHtml(post.userName || 'Unknown') + '\n';
-                msg += '🖥 Server No: ' + (post.serverNo || 'Unknown') + '\n';
-                msg += '🆔 ID: ' + (post.userId || 'Unknown') + '\n\n';
-                msg += '<b>📢 တိုင်ကြားသူ</b>\n';
-                msg += '📛 Name: ' + escapeHtml(reporterName) + '\n';
-                msg += '🖥 Server No: Server ' + reporterServerNo + '\n';
-                msg += '🆔 ID: ' + reporterId + '\n\n';
-                msg += '<b>📝 အကြောင်းရင်း</b>\n';
-                msg += escapeHtml(reason) + '\n\n';
+                msg += '\n<b>👤 တင်ထားသူ</b>\n📛 Name: ' + escapeHtml(post.userName || 'Unknown') + '\n🖥 Server No: ' + (post.serverNo || 'Unknown') + '\n🆔 ID: ' + (post.userId || 'Unknown') + '\n\n';
+                msg += '<b>📢 တိုင်ကြားသူ</b>\n📛 Name: ' + escapeHtml(reporterName) + '\n🖥 Server No: Server ' + reporterServerNo + '\n🆔 ID: ' + reporterId + '\n\n';
+                msg += '<b>📝 အကြောင်းရင်း</b>\n' + escapeHtml(reason) + '\n\n';
                 msg += '📅 ' + new Date().toLocaleString('en-US', { timeZone: 'Asia/Yangon' });
-
                 fetch('https://api.telegram.org/bot' + REPORT_BOT_TOKEN + '/sendMessage', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        chat_id: REPORT_CHAT_ID,
-                        message_thread_id: REPORT_TOPIC_POST,
-                        text: msg,
-                        parse_mode: 'HTML',
-                        disable_web_page_preview: true
-                    })
+                    body: JSON.stringify({ chat_id: REPORT_CHAT_ID, message_thread_id: REPORT_TOPIC_POST, text: msg, parse_mode: 'HTML', disable_web_page_preview: true })
                 })
                 .then(function(r) { return r.json(); })
                 .then(function(data) { resolve(data.ok === true); })
@@ -23195,7 +22709,6 @@ if (document.readyState === 'loading') {
         overlay.classList.remove('hidden');
         renderViewerContent();
     }
-
     function closePostViewer() {
         var overlay = document.getElementById('postViewerOverlay');
         if (overlay) overlay.classList.add('hidden');
@@ -23203,7 +22716,6 @@ if (document.readyState === 'loading') {
         if (body) body.innerHTML = '';
         viewerMedia = []; viewerIndex = 0;
     }
-
     function renderViewerContent() {
         var body = document.getElementById('postViewerBody');
         var counter = document.getElementById('postViewerCounter');
@@ -23215,7 +22727,6 @@ if (document.readyState === 'loading') {
         if (viewerMedia.length === 0) return;
         var m = viewerMedia[viewerIndex];
         if (!m) return;
-
         if (m.type === 'video') {
             var vid = document.createElement('video');
             vid.src = m.url; vid.controls = true; vid.playsInline = true;
@@ -23226,7 +22737,6 @@ if (document.readyState === 'loading') {
             img.src = m.url; img.alt = 'media';
             body.appendChild(img);
         }
-
         if (viewerMedia.length > 1) {
             if (counter) { counter.classList.remove('hidden'); counter.textContent = (viewerIndex + 1) + ' / ' + viewerMedia.length; }
             if (prevBtn) prevBtn.classList.remove('hidden');
@@ -23248,7 +22758,6 @@ if (document.readyState === 'loading') {
             if (dots) dots.classList.add('hidden');
         }
     }
-
     function downloadCurrentViewer() {
         if (viewerMedia.length === 0) return;
         var m = viewerMedia[viewerIndex];
@@ -23256,22 +22765,19 @@ if (document.readyState === 'loading') {
         var isVideo = m.type === 'video';
         var ext = isVideo ? '.mp4' : '.jpg';
         var filename = 'star_arcade_' + Date.now() + ext;
-
         if (m.url.indexOf('data:') === 0) {
             var a = document.createElement('a');
             a.href = m.url; a.download = filename;
-            document.body.appendChild(a); a.click();
-            document.body.removeChild(a);
+            document.body.appendChild(a); a.click(); document.body.removeChild(a);
             showToastSafe('Downloaded');
             return;
         }
-
         fetch(m.url).then(function(res) { return res.blob(); }).then(function(blob) {
             var url = URL.createObjectURL(blob);
             var a = document.createElement('a');
             a.href = url; a.download = filename;
-            document.body.appendChild(a); a.click();
-            document.body.removeChild(a); URL.revokeObjectURL(url);
+            document.body.appendChild(a); a.click(); document.body.removeChild(a);
+            URL.revokeObjectURL(url);
             showToastSafe('Downloaded');
         }).catch(function() { window.open(m.url, '_blank'); });
     }
@@ -23321,14 +22827,10 @@ if (document.readyState === 'loading') {
     function init() {
         if (initDone) return;
         initDone = true;
-
-        console.log('🔧 Init Post System v5.0...');
-
+        console.log('🔧 Init Post System v6.0...');
         Promise.all([loadLikedPosts(), loadFavourites()]).then(function() {
             console.log('✅ Loaded likedPosts:', likedPosts.length, 'favourites:', favouritePosts.length);
         });
-
-        // ✅ Tab Chip
         document.querySelectorAll('.post-tab-chip').forEach(function(chip) {
             chip.addEventListener('click', function() {
                 if (isSearchMode) return;
@@ -23338,61 +22840,32 @@ if (document.readyState === 'loading') {
                 switchFeedTab(tab);
             });
         });
-
-        // ✅ Search Icon
         var searchIconBtn = document.getElementById('postSearchIconBtn');
-        if (searchIconBtn) {
-            searchIconBtn.addEventListener('click', function() {
-                openPostSearch();
-            });
-        }
-
-        // ✅ Search Back Button
+        if (searchIconBtn) searchIconBtn.addEventListener('click', function() { openPostSearch(); });
         var searchBackBtn = document.getElementById('postSearchBackBtn');
-        if (searchBackBtn) {
-            searchBackBtn.addEventListener('click', function() {
-                closePostSearch();
-            });
-        }
-
-        // ✅ Search Go Button
+        if (searchBackBtn) searchBackBtn.addEventListener('click', function() { closePostSearch(); });
         var searchGoBtn = document.getElementById('postSearchGoBtn');
-        if (searchGoBtn) {
-            searchGoBtn.addEventListener('click', function() {
-                performPostSearch();
-            });
-        }
-
-        // ✅ Search Input -- Enter key
+        if (searchGoBtn) searchGoBtn.addEventListener('click', function() { performPostSearch(); });
         var searchInput = document.getElementById('postSearchInput');
         if (searchInput) {
             searchInput.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    performPostSearch();
-                }
+                if (e.key === 'Enter') { e.preventDefault(); performPostSearch(); }
             });
         }
-
         showTabDesc('Post အားလုံး ပြသနေသည်');
-
         setTimeout(function() {
             resetFeed();
             loadFeedNext();
             initInfiniteScroll();
         }, 800);
-
-        // ✅ Create Post
         var backBtn = document.getElementById('postCreateBackBtn');
         if (backBtn) backBtn.addEventListener('click', closePostCreate);
-
         var addImgBtn = document.getElementById('postAddImageBtn');
         if (addImgBtn) addImgBtn.addEventListener('click', function() { if (!this.disabled) pickPostImage(); });
         var addVidBtn = document.getElementById('postAddVideoBtn');
         if (addVidBtn) addVidBtn.addEventListener('click', function() { if (!this.disabled) pickPostVideo(); });
         var addLinkBtn = document.getElementById('postAddLinkBtn');
         if (addLinkBtn) addLinkBtn.addEventListener('click', function() { if (!this.disabled) openPostLinkInput(); });
-
         var linkInput = document.getElementById('postLinkInput');
         var linkTimeout = null;
         if (linkInput) {
@@ -23401,7 +22874,6 @@ if (document.readyState === 'loading') {
                 linkTimeout = setTimeout(handlePostLinkInput, 600);
             });
         }
-
         var captionInput = document.getElementById('postCaptionInput');
         if (captionInput) {
             captionInput.addEventListener('input', function() {
@@ -23415,39 +22887,28 @@ if (document.readyState === 'loading') {
                 }
             });
         }
-
         var submitBtn = document.getElementById('postSubmitBtn');
         if (submitBtn) submitBtn.addEventListener('click', submitPost);
-
         var upClose = document.getElementById('postUploadPopupClose');
         if (upClose) upClose.addEventListener('click', hideUploadPopup);
-
-        // ✅ Viewer
         var viewerClose = document.getElementById('postViewerClose');
         if (viewerClose) viewerClose.addEventListener('click', closePostViewer);
         var viewerOverlay = document.getElementById('postViewerOverlay');
         if (viewerOverlay) viewerOverlay.addEventListener('click', function(e) { if (e.target === viewerOverlay) closePostViewer(); });
         var dlBtn = document.getElementById('postViewerDownload');
         if (dlBtn) dlBtn.addEventListener('click', downloadCurrentViewer);
-
-        // ✅ User Popup
         var popupClose = document.getElementById('postUserPopupClose');
         if (popupClose) popupClose.addEventListener('click', closePostUserPopup);
         var popupOverlay = document.getElementById('postUserPopupOverlay');
         if (popupOverlay) popupOverlay.addEventListener('click', function(e) { if (e.target === popupOverlay) closePostUserPopup(); });
-
-        // ✅ Share Modal
         var shareClose = document.getElementById('shareModalClose');
         if (shareClose) shareClose.addEventListener('click', function() { var ov = document.getElementById('shareModalOverlay'); if (ov) ov.classList.add('hidden'); });
         var shareOverlay = document.getElementById('shareModalOverlay');
         if (shareOverlay) shareOverlay.addEventListener('click', function(e) { if (e.target === shareOverlay) shareOverlay.classList.add('hidden'); });
-
-        // ✅ Comment Sheet
         var commentBack = document.getElementById('commentBackBtn');
         if (commentBack) commentBack.addEventListener('click', closeCommentScreen);
         var commentSheetOverlay = document.getElementById('commentSheetOverlay');
         if (commentSheetOverlay) commentSheetOverlay.addEventListener('click', closeCommentScreen);
-
         var commentInput = document.getElementById('commentInput');
         var commentSendBtn = document.getElementById('commentSendBtn');
         if (commentInput && commentSendBtn) {
@@ -23458,28 +22919,16 @@ if (document.readyState === 'loading') {
             });
             commentSendBtn.addEventListener('click', sendComment);
         }
-
         var bubbleBtn = document.getElementById('commentBubbleBtn');
-        if (bubbleBtn) {
-            bubbleBtn.addEventListener('click', function(e) {
-                e.stopPropagation();
-                toggleCommentBubblePicker();
-            });
-        }
-
+        if (bubbleBtn) bubbleBtn.addEventListener('click', function(e) { e.stopPropagation(); toggleCommentBubblePicker(); });
         hookPlusMenuPost();
-
-        console.log('✅ Post System v5.0 Ready');
+        console.log('✅ Post System v6.0 Ready');
     }
 
     function start() {
-        if (!document.getElementById('postFeedBody')) {
-            setTimeout(start, 500);
-            return;
-        }
+        if (!document.getElementById('postFeedBody')) { setTimeout(start, 500); return; }
         init();
     }
-
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', function() { setTimeout(start, 1000); });
     } else {
