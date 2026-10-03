@@ -732,7 +732,6 @@ body {
 
 .fs-screen.hidden { display: none !important; }
 
-
 /* ============================================================
    ✅ PROFILE FULLSCREEN
    ============================================================ */
@@ -935,33 +934,32 @@ body {
 .friends-count:active { transform: scale(0.95); opacity: 0.8; }
 
 /* ============================================================
-   ✅ PROFILE STATS ROW (Friends / Likes / Post) -- အသစ်
-   ✅ သုံးကွက် ဘယ်ညာ ရှည် (flex: 1 + max-width)
+   ✅ PROFILE STATS ROW -- သေးသေး
    ============================================================ */
 
 .profile-stats-row {
     display: flex;
     align-items: stretch;
     justify-content: center;
-    gap: 10px;
-    margin-top: 8px;
-    padding: 0 8px;
+    gap: 6px;
+    margin-top: 6px;
+    padding: 0 6px;
     width: 100%;
-    max-width: 480px;
+    max-width: 340px;
 }
 
 .profile-stat-btn {
     flex: 1 1 0;
-    min-width: 90px;
-    max-width: 160px;
+    min-width: 60px;
+    max-width: 110px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 3px;
-    padding: 9px 18px;
+    gap: 1px;
+    padding: 5px 10px;
     border: 1px solid rgba(255, 109, 31, 0.25);
-    border-radius: 14px;
+    border-radius: 10px;
     background: rgba(255, 109, 31, 0.08);
     color: rgba(255, 255, 255, 0.85);
     font-family: inherit;
@@ -978,22 +976,22 @@ body {
 }
 
 .profile-stat-btn .stat-value {
-    font-size: 16px;
+    font-size: 13px;
     font-weight: 800;
     color: var(--accent);
     line-height: 1.1;
 }
 
 .profile-stat-btn .stat-label {
-    font-size: 11px;
+    font-size: 9px;
     font-weight: 600;
-    letter-spacing: 0.4px;
+    letter-spacing: 0.3px;
     color: rgba(255, 255, 255, 0.7);
     text-transform: uppercase;
 }
 
 /* ============================================================
-   ✅ PROFILE STAT POPUP (Like/Post) -- နံပါတ်ပဲ ပြ
+   ✅ PROFILE STAT POPUP -- နံပါတ်ပဲ ပြ
    ============================================================ */
 
 .profile-stat-popup-overlay {
@@ -1017,7 +1015,7 @@ body {
     border: 1px solid var(--border);
     border-radius: 20px;
     width: 100%;
-    max-width: 300px;
+    max-width: 280px;
     overflow: hidden;
     display: flex;
     flex-direction: column;
@@ -1029,7 +1027,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 18px 18px 6px;
+    padding: 16px 18px 6px;
     flex-shrink: 0;
     border-bottom: none;
 }
@@ -1047,7 +1045,7 @@ body {
 
 .profile-stat-popup-close {
     position: absolute;
-    top: 12px;
+    top: 10px;
     right: 12px;
     width: 32px;
     height: 32px;
@@ -1065,7 +1063,7 @@ body {
 .profile-stat-popup-close:active { transform: scale(0.9); }
 
 .profile-stat-popup-body {
-    padding: 8px 24px 28px;
+    padding: 8px 20px 24px;
     text-align: center;
 }
 
@@ -1083,23 +1081,7 @@ body {
     color: var(--accent);
     line-height: 1;
     letter-spacing: -1.5px;
-    margin-bottom: 10px;
     text-shadow: 0 4px 20px rgba(255, 109, 31, 0.3);
-}
-
-.profile-stat-popup-status {
-    font-size: 12px;
-    color: var(--text-muted);
-    margin-top: 12px;
-    min-height: 16px;
-}
-
-.profile-stat-popup-status.success {
-    color: #44ff88;
-}
-
-.profile-stat-popup-status.error {
-    color: #ff6b6b;
 }
 
 .profile-stat-popup-loading,
@@ -1111,15 +1093,15 @@ body {
 }
 
 /* ============================================================
-   ✅ FRIEND LIST ROW (Friends Popup အတွက်)
+   ✅ FRIEND LIST ROW -- Profile Circle + Name + 3စက် ပဲ
    ============================================================ */
 
 .friends-list-row {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 8px;
-    padding: 10px 18px;
+    gap: 10px;
+    padding: 10px 16px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.04);
     transition: background 0.15s ease;
 }
@@ -1130,29 +1112,24 @@ body {
 .friends-list-row-left {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
     flex: 1;
     min-width: 0;
 }
 
 .friends-list-row-avatar {
-    width: 46px;
-    height: 46px;
+    width: 44px;
+    height: 44px;
     border-radius: 50%;
     object-fit: cover;
     flex-shrink: 0;
     background: var(--bg-input);
-}
-
-.friends-list-row-info {
-    flex: 1;
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
+    border: 2px solid rgba(255, 109, 31, 0.25);
 }
 
 .friends-list-row-name {
+    flex: 1;
+    min-width: 0;
     font-size: 14px;
     font-weight: 700;
     color: var(--text-main);
@@ -1161,30 +1138,9 @@ body {
     text-overflow: ellipsis;
 }
 
-.friends-list-row-meta {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 10px;
-}
-
-.friends-list-row-server {
-    color: var(--accent);
-    font-weight: 700;
-    background: var(--accent-bg);
-    padding: 1px 7px;
-    border-radius: 6px;
-}
-
-.friends-list-row-id {
-    color: var(--text-muted);
-    font-family: monospace;
-    font-size: 10px;
-}
-
 .friends-list-row-menu {
-    width: 34px;
-    height: 34px;
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
     border: none;
     background: transparent;
@@ -1226,10 +1182,7 @@ body {
 }
 
 .friend-action-btn:last-child { margin-bottom: 0; }
-
-.friend-action-btn:active {
-    transform: scale(0.97);
-}
+.friend-action-btn:active { transform: scale(0.97); }
 
 .friend-action-btn.danger {
     background: rgba(255, 68, 68, 0.1);
@@ -1905,28 +1858,25 @@ body {
     .profile-friends { margin-top: 4px; }
     .friends-count { font-size: 10px; padding: 2px 10px; }
 
-    /* ✅ Stats Row -- Mobile */
-    .profile-stats-row { gap: 6px; margin-top: 6px; padding: 0 4px; max-width: 100%; }
-    .profile-stat-btn { min-width: 0; max-width: none; padding: 7px 8px; border-radius: 11px; }
-    .profile-stat-btn .stat-value { font-size: 14px; }
-    .profile-stat-btn .stat-label { font-size: 9px; letter-spacing: 0.2px; }
+    /* ✅ Stats Row -- Mobile (သေးသေး) */
+    .profile-stats-row { gap: 5px; margin-top: 5px; padding: 0 4px; max-width: 100%; }
+    .profile-stat-btn { padding: 5px 8px; border-radius: 9px; min-width: 0; }
+    .profile-stat-btn .stat-value { font-size: 12px; }
+    .profile-stat-btn .stat-label { font-size: 8px; letter-spacing: 0.2px; }
 
     /* ✅ Stat Popup -- Mobile */
-    .profile-stat-popup { max-width: 280px; }
+    .profile-stat-popup { max-width: 260px; }
     .profile-stat-popup-header { padding: 16px 16px 4px; }
     .profile-stat-popup-header h3 { font-size: 14px; }
-    .profile-stat-popup-body { padding: 6px 20px 24px; }
+    .profile-stat-popup-body { padding: 6px 20px 22px; }
     .profile-stat-popup-big-number { font-size: 42px; }
     .profile-stat-popup-subtitle { font-size: 11px; }
-    .profile-stat-popup-status { font-size: 11px; }
 
     /* ✅ Friend List Row -- Mobile */
-    .friends-list-row { padding: 9px 14px; gap: 6px; }
-    .friends-list-row-avatar { width: 42px; height: 42px; }
+    .friends-list-row { padding: 9px 12px; gap: 8px; }
+    .friends-list-row-avatar { width: 40px; height: 40px; }
     .friends-list-row-name { font-size: 13px; }
-    .friends-list-row-server { font-size: 9px; padding: 1px 6px; }
-    .friends-list-row-id { font-size: 9px; }
-    .friends-list-row-menu { width: 30px; height: 30px; }
+    .friends-list-row-menu { width: 32px; height: 32px; }
 
     .friend-action-btn { padding: 12px 14px; font-size: 13px; gap: 12px; }
     .friend-action-btn svg { width: 18px; height: 18px; }
@@ -1975,6 +1925,7 @@ body {
     .post-info-comment-name { font-size: 11px; }
     .post-info-comment-text { font-size: 12px; }
 }
+
 
     
 /* ============================================================
@@ -25028,16 +24979,15 @@ if (document.readyState === 'loading') {
 })();
 
 // ============================================================
-// ✅ PROFILE STATS SYSTEM v3.0 (Friends / Likes / Post)
-//  • Friends → IDB cache ကနေ ပြ + ၃ စက် ခလုတ် (Delete / Block)
-//  • Likes → နှိပ်တိုင်း Server ကနေ စစ် → နံပါတ်ပဲ ပြ → IDB Update
-//  • Post → နှိပ်တိုင်း Server ကနေ စစ် → နံပါတ်ပဲ ပြ → IDB Update
-//  • Delete/Block → Firebase ကို လုပ်
+// ✅ PROFILE STATS SYSTEM v4.0 (Friends / Likes / Post)
+//  • Stats Row -- သေးသေး
+//  • Friends Popup -- Profile Circle + Name + 3စက် ပဲ
+//  • Like/Post Popup -- နံပါတ်ပဲ ပြ (Status မပြ)
 // ============================================================
 (function() {
     'use strict';
 
-    console.log('🚀 Profile Stats System v3.0 Loading...');
+    console.log('🚀 Profile Stats System v4.0 Loading...');
 
     var PROFILE_STATS_KEY = 'profileStats_';
     var STATS_INITED = false;
@@ -25067,6 +25017,16 @@ if (document.readyState === 'loading') {
     }
 
     // ===================================================
+    //  SAFE ESCAPE
+    // ===================================================
+    function safeEscapeHtml(s) {
+        if (!s) return '';
+        return String(s).replace(/[&<>"']/g, function(c) {
+            return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c];
+        });
+    }
+
+    // ===================================================
     //  CURRENT PROFILE TARGET
     // ===================================================
     function getCurrentProfileTarget() {
@@ -25092,17 +25052,7 @@ if (document.readyState === 'loading') {
     }
 
     // ===================================================
-    //  SAFE ESCAPE
-    // ===================================================
-    function safeEscapeHtml(s) {
-        if (!s) return '';
-        return String(s).replace(/[&<>"']/g, function(c) {
-            return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c];
-        });
-    }
-
-    // ===================================================
-    //  GET FRIENDS LIST (IDB / currentUser / friendData)
+    //  GET FRIENDS LIST
     // ===================================================
     function getFriendsFromIDB(serverId, userId) {
         return new Promise(function(resolve) {
@@ -25122,7 +25072,6 @@ if (document.readyState === 'loading') {
         });
     }
 
-    // ✅ Cache ကနေ friend data ဆွဲ
     function getFriendsCacheList(list) {
         return new Promise(function(resolve) {
             if (typeof getFriendsCache !== 'function') {
@@ -25215,7 +25164,7 @@ if (document.readyState === 'loading') {
     }
 
     // ===================================================
-    //  ✅ FRIEND ACTION POPUP -- Delete / Block
+    //  FRIEND ACTION POPUP (Delete / Block)
     // ===================================================
     function showFriendActionPopup(friendEntry, friendData, onUpdate) {
         var existing = document.getElementById('friendActionPopup');
@@ -25230,19 +25179,16 @@ if (document.readyState === 'loading') {
 
         overlay.innerHTML =
             '<div class="profile-stat-popup" style="max-width:340px;">' +
-                '<div class="profile-stat-popup-header" style="justify-content:flex-start;padding:16px 18px 14px;border-bottom:1px solid var(--border);">' +
-                    '<div style="display:flex;align-items:center;gap:12px;flex:1;min-width:0;">' +
-                        '<img src="' + avatar + '" style="width:44px;height:44px;border-radius:50%;object-fit:cover;flex-shrink:0;" onerror="this.style.display=\'none\'" />' +
-                        '<div style="flex:1;min-width:0;">' +
-                            '<div style="font-size:15px;font-weight:700;color:var(--text-main);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + safeEscapeHtml(name) + '</div>' +
-                            '<div style="font-size:11px;color:var(--text-muted);font-family:monospace;">ID ' + safeEscapeHtml(String(friendEntry.userId)) + '</div>' +
-                        '</div>' +
+                '<div style="display:flex;align-items:center;gap:12px;padding:16px 18px 14px;border-bottom:1px solid var(--border);position:relative;">' +
+                    '<img src="' + avatar + '" style="width:44px;height:44px;border-radius:50%;object-fit:cover;flex-shrink:0;" onerror="this.style.display=\'none\'" />' +
+                    '<div style="flex:1;min-width:0;">' +
+                        '<div style="font-size:15px;font-weight:700;color:var(--text-main);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + safeEscapeHtml(name) + '</div>' +
                     '</div>' +
                     '<button class="profile-stat-popup-close" id="friendActionClose" style="position:static;width:30px;height:30px;">' +
                         '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>' +
                     '</button>' +
                 '</div>' +
-                '<div class="profile-stat-popup-body" style="padding:12px;">' +
+                '<div style="padding:12px;">' +
                     '<button class="friend-action-btn danger" id="friendActionDelete">' +
                         '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="17" y1="8" x2="23" y2="14"/><line x1="23" y1="8" x2="17" y2="14"/></svg>' +
                         '<span>Delete Friend</span>' +
@@ -25262,7 +25208,6 @@ if (document.readyState === 'loading') {
             if (e.target === overlay) close();
         });
 
-        // ✅ Delete
         document.getElementById('friendActionDelete').addEventListener('click', function() {
             if (!confirm('Delete friend?\n\n"' + name + '" ကို ဖျက်မှာ သေချာလား?')) return;
             close();
@@ -25279,7 +25224,6 @@ if (document.readyState === 'loading') {
             });
         });
 
-        // ✅ Block
         document.getElementById('friendActionBlock').addEventListener('click', function() {
             if (!confirm('Block "' + name + '"?\n\nသူက သင့်ကို ဆက်သွယ်လို့မရတော့ပါ။')) return;
             close();
@@ -25298,7 +25242,7 @@ if (document.readyState === 'loading') {
     }
 
     // ===================================================
-    //  ✅ FRIEND LIST POPUP -- IDB ကနေ ပြ + ၃ စက် ခလုတ်
+    //  ✅ FRIENDS LIST POPUP -- Profile Circle + Name + 3စက် ပဲ
     // ===================================================
     function showFriendsListPopup() {
         var profile = getCurrentProfileTarget();
@@ -25352,28 +25296,21 @@ if (document.readyState === 'loading') {
                     enriched.forEach(function(item) {
                         var entry = item.entry;
                         var data = item.data || {};
-                        var avatar = data.avatar || 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="46" height="46" viewBox="0 0 100 100"%3E%3Ccircle cx="50" cy="50" r="45" fill="%2322222e"/%3E%3C/svg%3E';
+                        var avatar = data.avatar || 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 100 100"%3E%3Ccircle cx="50" cy="50" r="45" fill="%2322222e"/%3E%3C/svg%3E';
                         var name = data.name || 'Loading...';
-                        var serverNo = entry.serverNo || (data.serverNo || 1);
 
+                        // ✅ Profile Circle + Name + 3စက် ပဲ
                         var row = document.createElement('div');
                         row.className = 'friends-list-row';
                         row.innerHTML =
                             '<div class="friends-list-row-left">' +
                                 '<img src="' + avatar + '" class="friends-list-row-avatar" onerror="this.style.display=\'none\'" />' +
-                                '<div class="friends-list-row-info">' +
-                                    '<div class="friends-list-row-name">' + safeEscapeHtml(name) + '</div>' +
-                                    '<div class="friends-list-row-meta">' +
-                                        '<span class="friends-list-row-server">Server ' + safeEscapeHtml(String(serverNo)) + '</span>' +
-                                        '<span class="friends-list-row-id">ID ' + safeEscapeHtml(String(entry.userId)) + '</span>' +
-                                    '</div>' +
-                                '</div>' +
+                                '<div class="friends-list-row-name">' + safeEscapeHtml(name) + '</div>' +
                             '</div>' +
                             '<button class="friends-list-row-menu" title="Options">' +
                                 '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>' +
                             '</button>';
 
-                        // ✅ ၃ စက် ခလုတ် နှိပ်
                         row.querySelector('.friends-list-row-menu').addEventListener('click', function(e) {
                             e.stopPropagation();
                             showFriendActionPopup(entry, data, function() {
@@ -25451,7 +25388,7 @@ if (document.readyState === 'loading') {
     }
 
     // ===================================================
-    //  ✅ STAT POPUP (Like / Post) -- နံပါတ်ပဲ ပြ
+    //  ✅ STAT POPUP (Like / Post) -- နံပါတ်ပဲ ပြ (Status မပြ)
     // ===================================================
     function showStatPopup(type, serverId, userId, userName) {
         var existing = document.getElementById('profileStatPopup');
@@ -25468,6 +25405,7 @@ if (document.readyState === 'loading') {
 
         var subtitleText = type === 'likes' ? 'သင့်ရရှိထားသည်' : 'သင့် Post အရေတွက်';
 
+        // ✅ Status Text မပါ
         overlay.innerHTML =
             '<div class="profile-stat-popup" style="max-width:280px;">' +
                 '<div class="profile-stat-popup-header" style="justify-content:center;padding:16px 18px 8px;border-bottom:none;">' +
@@ -25479,7 +25417,6 @@ if (document.readyState === 'loading') {
                 '<div class="profile-stat-popup-body" style="text-align:center;padding:8px 20px 24px;">' +
                     '<div class="profile-stat-popup-subtitle">' + subtitleText + '</div>' +
                     '<div class="profile-stat-popup-big-number" id="statBigNumber">—</div>' +
-                    '<div class="profile-stat-popup-status" id="statLoadingText">Server ကနေ စစ်နေသည်...</div>' +
                 '</div>' +
             '</div>';
 
@@ -25493,24 +25430,20 @@ if (document.readyState === 'loading') {
         overlay.addEventListener('click', function(e) { if (e.target === overlay) close(); });
 
         var bigNumEl = document.getElementById('statBigNumber');
-        var loadingEl = document.getElementById('statLoadingText');
 
         // ✅ အရင် IDB ကနေ ပြ
         idbGet(getStatsKey(serverId, userId)).then(function(cached) {
             if (cached) {
                 var cachedValue = type === 'likes' ? (parseInt(cached.likes) || 0) : (parseInt(cached.posts) || 0);
                 bigNumEl.textContent = cachedValue;
-                loadingEl.textContent = 'Server ကနေ ပြန်စစ်နေသည်...';
             }
         });
 
-        // ✅ Server ကနေ စစ်
+        // ✅ Server ကနေ စစ် -- နံပါတ်ပဲ Update
         fetchStatsFromServer(serverId, userId).then(function(stats) {
             var finalValue = type === 'likes' ? stats.likes : stats.posts;
 
             bigNumEl.textContent = finalValue;
-            loadingEl.textContent = '✓ အောင်မြင်သည်';
-            loadingEl.classList.add('success');
 
             idbSet(getStatsKey(serverId, userId), {
                 posts: stats.posts || 0,
@@ -25526,8 +25459,7 @@ if (document.readyState === 'loading') {
                 if (postsCountEl) postsCountEl.textContent = stats.posts;
             }
         }).catch(function() {
-            loadingEl.textContent = 'Server ချိတ်ဆက်မှု မကောင်း';
-            loadingEl.classList.add('error');
+            // ✅ Status မပြ -- ဘာမှ မလုပ်
         });
     }
 
@@ -25538,13 +25470,11 @@ if (document.readyState === 'loading') {
         var profile = getCurrentProfileTarget();
         if (!profile) return;
 
-        // ✅ Friends -- IDB / currentUser / friendData ကနေ
         var friendsCountEl = document.getElementById('fsProfileFriendsCount');
         if (friendsCountEl) {
             friendsCountEl.textContent = (profile.friendsList || []).length;
         }
 
-        // ✅ Posts & Likes -- IDB ကနေ ပြ
         idbGet(getStatsKey(profile.serverId, profile.userId)).then(function(cached) {
             var postsCountEl = document.getElementById('fsProfilePostsCount');
             var likesCountEl = document.getElementById('fsProfileLikesCount');
@@ -25649,7 +25579,7 @@ if (document.readyState === 'loading') {
         STATS_INITED = true;
         bindStatButtons();
         startAutoHook();
-        console.log('✅ Profile Stats System v3.0 Ready');
+        console.log('✅ Profile Stats System v4.0 Ready');
     }
 
     if (document.readyState === 'loading') {
@@ -25667,6 +25597,7 @@ if (document.readyState === 'loading') {
     window.showFriendsListPopup = showFriendsListPopup;
 
 })();
+
 
 </script>
 </body>
