@@ -12,6 +12,8 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
+    <link rel="stylesheet" href="style.css" />
+
 <style>
 /* ============================================================
    FILE: style.css (FULL + PROFILE CENTER LAYOUT)
@@ -11285,15 +11287,18 @@ body {
 
                 <div class="fs-screen hidden" id="fs-coin"><div class="screen-center"><p>Diamond balance and transactions</p></div></div>
 
-                <!-- PROFILE -- ✅ ပြင်ပြီး (Banner နဲ့ Info ခွဲ) -->
+                <!-- ============================================================
+                     ✅ PROFILE -- ပြင်ပြီး (Banner → Info → Tab Bar → Content)
+                     ============================================================ -->
                 <div class="fs-screen hidden" id="fs-profile">
                     <div class="profile-fullscreen" id="profileFullscreen">
-                        <!-- ✅ Banner ပုံ ပဲ -->
+
+                        <!-- 1️⃣ Banner ပုံ ပဲ -->
                         <div class="profile-banner" id="profileBanner">
                             <div class="profile-banner-overlay"></div>
                         </div>
 
-                        <!-- ✅ Info -- Banner အောက်မှာ သီးသန့် -->
+                        <!-- 2️⃣ Info -- Banner အောက်မှာ သီးသန့် -->
                         <div class="profile-info-container">
                             <div class="profile-avatar-wrapper" id="profileAvatarWrapper">
                                 <img id="fsProfileAvatar" src="" alt="avatar" />
@@ -11314,7 +11319,7 @@ body {
                             </div>
                         </div>
 
-                        <!-- Tab Bar (About / Post / Gift) -->
+                        <!-- 3️⃣ Tab Bar (About / Post / Gift) -->
                         <div class="profile-tab-bar" id="profileTabBar">
                             <button class="profile-tab-btn active" data-ptab="about">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -11344,7 +11349,7 @@ body {
                             </button>
                         </div>
 
-                        <!-- About Content -->
+                        <!-- 4️⃣ About Content -->
                         <div class="profile-tab-content" id="profileTabAbout">
                             <div class="profile-background-section" id="profileBackgroundSection">
                                 <div class="profile-background-overlay"></div>
@@ -11369,17 +11374,18 @@ body {
                             </div>
                         </div>
 
-                        <!-- Post Content -->
+                        <!-- 5️⃣ Post Content -->
                         <div class="profile-tab-content hidden" id="profileTabPost">
                             <div class="profile-post-list" id="profilePostList"></div>
                         </div>
 
-                        <!-- Gift Content -->
+                        <!-- 6️⃣ Gift Content -->
                         <div class="profile-tab-content hidden" id="profileTabGift">
                             <div class="profile-gift-list" id="profileGiftList">
                                 <div class="profile-gift-empty">Gift မရှိသေးပါ</div>
                             </div>
                         </div>
+
                     </div>
                 </div>
 
