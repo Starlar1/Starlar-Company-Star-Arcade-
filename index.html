@@ -733,7 +733,7 @@ body {
 .fs-screen.hidden { display: none !important; }
 
 /* ============================================================
-   ✅ PROFILE FULLSCREEN -- Banner + Info + Tab Bar
+   ✅ PROFILE FULLSCREEN
    ============================================================ */
 
 .profile-fullscreen {
@@ -749,21 +749,20 @@ body {
 }
 
 /* ============================================================
-   ✅ BANNER -- ပုံ ပဲ (Info မပါ)
+   BANNER -- ပိုမြင့်
    ============================================================ */
 
 .profile-banner {
     width: 100%;
-    height: 300px;
+    aspect-ratio: 16 / 9;
     background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
     position: relative;
     flex-shrink: 0;
     background-size: cover;
     background-position: center;
-    overflow: hidden;
-    aspect-ratio: auto;
-    min-height: 300px;
-    max-height: none;
+    min-height: 240px;
+    max-height: 380px;
+    overflow: visible !important;
 }
 
 .profile-banner-overlay {
@@ -772,18 +771,12 @@ body {
     left: 0;
     right: 0;
     height: 100%;
-    background: linear-gradient(
-        to bottom,
-        transparent 0%,
-        transparent 40%,
-        rgba(10, 10, 15, 0.5) 75%,
-        rgba(10, 10, 15, 0.85) 100%
-    );
+    background: linear-gradient(to bottom, transparent 30%, rgba(10, 10, 15, 0.6) 100%);
     pointer-events: none;
 }
 
 /* ============================================================
-   ✅ PROFILE INFO -- Banner အောက်မှာ သီးသန့်
+   PROFILE INFO
    ============================================================ */
 
 .profile-info-container {
@@ -791,11 +784,12 @@ body {
     flex-direction: column !important;
     align-items: center !important;
     justify-content: center !important;
-    gap: 8px !important;
-    padding: 0 24px 14px !important;
-    position: relative !important;
-    background: var(--bg-body);
-    margin-top: -55px !important;
+    gap: 10px !important;
+    padding: 0 24px !important;
+    position: absolute !important;
+    bottom: -50px !important;
+    left: 0 !important;
+    right: 0 !important;
     z-index: 5 !important;
 }
 
@@ -803,13 +797,12 @@ body {
     width: 90px !important;
     height: 90px !important;
     border-radius: 50% !important;
-    border: 4px solid var(--bg-body) !important;
+    border: 3px solid var(--bg-body) !important;
     background: var(--bg-card) !important;
     flex-shrink: 0 !important;
     box-shadow: 0 6px 24px rgba(0, 0, 0, 0.8) !important;
     position: relative !important;
     overflow: visible !important;
-    z-index: 6 !important;
 }
 
 .profile-avatar-wrapper img {
@@ -856,6 +849,7 @@ body {
     font-weight: 700;
     color: var(--text-main);
     margin: 0;
+    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.7);
 }
 
 .profile-mark {
@@ -940,7 +934,7 @@ body {
 .friends-count:active { transform: scale(0.95); opacity: 0.8; }
 
 /* ============================================================
-   ✅ TAB BAR -- Info အောက်မှာ သီးသန့်
+   TAB BAR -- သေးသေး
    ============================================================ */
 
 .profile-tab-bar {
@@ -949,7 +943,7 @@ body {
     border-top: 1px solid rgba(255, 255, 255, 0.06);
     border-bottom: 1px solid rgba(255, 255, 255, 0.06);
     flex-shrink: 0;
-    margin-top: 0;
+    margin-top: 55px;
     position: relative;
     z-index: 3;
 }
@@ -1289,13 +1283,13 @@ body {
     align-items: center;
     justify-content: center;
     min-height: 120px;
-    max-height: 500px;
+    max-height: 300px;
 }
 
 .profile-post-media img,
 .profile-post-media video {
     width: 100%;
-    max-height: 500px;
+    max-height: 300px;
     object-fit: cover;
     display: block;
     border-radius: 10px;
@@ -1308,38 +1302,6 @@ body {
     text-align: center;
     border: 1px dashed var(--border-light);
     line-height: 1.6;
-}
-
-/* ✅ Post Media Grid -- ၁-၆ ပုံ */
-.profile-post-media-grid {
-    display: grid;
-    width: 100%;
-    gap: 3px;
-    border-radius: 10px;
-    overflow: hidden;
-    background: transparent;
-}
-
-.profile-post-media-grid .media-cell {
-    position: relative;
-    aspect-ratio: 1 / 1;
-    overflow: hidden;
-    background: var(--bg-input);
-    cursor: pointer;
-    border-radius: 4px;
-}
-
-.profile-post-media-grid .media-cell img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-    border-radius: 4px;
-    transition: transform 0.2s ease;
-}
-
-.profile-post-media-grid .media-cell:active img {
-    transform: scale(1.05);
 }
 
 /* Link Preview */
@@ -1596,15 +1558,14 @@ body {
 
 @media (max-width: 480px) {
     .profile-banner {
-        height: 260px;
-        min-height: 260px;
-        max-height: none;
+        min-height: 180px;
+        max-height: 260px;
     }
 
     .profile-info-container {
-        padding: 0 16px 12px !important;
-        gap: 7px !important;
-        margin-top: -50px !important;
+        bottom: -45px !important;
+        padding: 0 16px !important;
+        gap: 8px !important;
     }
 
     .profile-avatar-wrapper {
@@ -1622,7 +1583,7 @@ body {
     .profile-friends { margin-top: 4px; }
     .friends-count { font-size: 10px; padding: 2px 10px; }
 
-    .profile-tab-bar { margin-top: 0; }
+    .profile-tab-bar { margin-top: 50px; }
     .profile-tab-btn { font-size: 10px; padding: 7px 4px; gap: 4px; }
     .profile-tab-btn svg { width: 13px; height: 13px; }
 
@@ -1656,7 +1617,7 @@ body {
 
     .profile-post-list { padding: 10px; gap: 10px; }
     .profile-post-media img,
-    .profile-post-media video { max-height: 400px; }
+    .profile-post-media video { max-height: 250px; }
     .profile-post-item { padding: 10px; }
 
     .profile-gift-list { padding: 10px; }
@@ -1666,6 +1627,8 @@ body {
     .post-info-comment-name { font-size: 11px; }
     .post-info-comment-text { font-size: 12px; }
 }
+
+
 
 
     
@@ -10726,6 +10689,7 @@ body {
         border-radius: 3px;
     }
 }
+
 </style>
 </head>
 <body>
@@ -11282,39 +11246,34 @@ body {
 
                 <div class="fs-screen hidden" id="fs-coin"><div class="screen-center"><p>Diamond balance and transactions</p></div></div>
 
-                <!-- ============================================================
-                     ✅ PROFILE -- ပြင်ပြီး (Banner → Info → Tab Bar → Content)
-                     ============================================================ -->
+                <!-- PROFILE -->
                 <div class="fs-screen hidden" id="fs-profile">
                     <div class="profile-fullscreen" id="profileFullscreen">
-
-                        <!-- 1️⃣ Banner ပုံ ပဲ -->
+                        <!-- Banner + Info အားလုံး Banner အတွင်းမှာ -->
                         <div class="profile-banner" id="profileBanner">
                             <div class="profile-banner-overlay"></div>
-                        </div>
-
-                        <!-- 2️⃣ Info -- Banner အောက်မှာ သီးသန့် -->
-                        <div class="profile-info-container">
-                            <div class="profile-avatar-wrapper" id="profileAvatarWrapper">
-                                <img id="fsProfileAvatar" src="" alt="avatar" />
-                                <div class="profile-frame-overlay" id="profileFrameOverlay"></div>
-                            </div>
-                            <div class="profile-name-section">
-                                <div class="profile-name-row">
-                                    <h2 id="fsProfileName">Player</h2>
-                                    <span class="profile-mark" id="fsProfileMark"></span>
+                            <div class="profile-info-container">
+                                <div class="profile-avatar-wrapper" id="profileAvatarWrapper">
+                                    <img id="fsProfileAvatar" src="" alt="avatar" />
+                                    <div class="profile-frame-overlay" id="profileFrameOverlay"></div>
                                 </div>
-                                <div class="profile-details">
-                                    <span class="profile-id" id="fsProfileId" style="cursor:pointer;">ID 0000000000</span>
-                                    <span class="profile-server" id="fsProfileServer">Server 1</span>
-                                </div>
-                                <div class="profile-friends">
-                                    <span class="friends-count" id="fsProfileFriends">Friends 0</span>
+                                <div class="profile-name-section">
+                                    <div class="profile-name-row">
+                                        <h2 id="fsProfileName">Player</h2>
+                                        <span class="profile-mark" id="fsProfileMark"></span>
+                                    </div>
+                                    <div class="profile-details">
+                                        <span class="profile-id" id="fsProfileId" style="cursor:pointer;">ID 0000000000</span>
+                                        <span class="profile-server" id="fsProfileServer">Server 1</span>
+                                    </div>
+                                    <div class="profile-friends">
+                                        <span class="friends-count" id="fsProfileFriends">Friends 0</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- 3️⃣ Tab Bar (About / Post / Gift) -->
+                        <!-- Tab Bar (About / Post / Gift) -->
                         <div class="profile-tab-bar" id="profileTabBar">
                             <button class="profile-tab-btn active" data-ptab="about">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -11344,7 +11303,7 @@ body {
                             </button>
                         </div>
 
-                        <!-- 4️⃣ About Content -->
+                        <!-- About Content -->
                         <div class="profile-tab-content" id="profileTabAbout">
                             <div class="profile-background-section" id="profileBackgroundSection">
                                 <div class="profile-background-overlay"></div>
@@ -11369,18 +11328,17 @@ body {
                             </div>
                         </div>
 
-                        <!-- 5️⃣ Post Content -->
+                        <!-- Post Content -->
                         <div class="profile-tab-content hidden" id="profileTabPost">
                             <div class="profile-post-list" id="profilePostList"></div>
                         </div>
 
-                        <!-- 6️⃣ Gift Content -->
+                        <!-- Gift Content -->
                         <div class="profile-tab-content hidden" id="profileTabGift">
                             <div class="profile-gift-list" id="profileGiftList">
                                 <div class="profile-gift-empty">Gift မရှိသေးပါ</div>
                             </div>
                         </div>
-
                     </div>
                 </div>
 
