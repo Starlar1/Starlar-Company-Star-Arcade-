@@ -732,6 +732,7 @@ body {
 
 .fs-screen.hidden { display: none !important; }
 
+
 /* ============================================================
    ✅ PROFILE FULLSCREEN
    ============================================================ */
@@ -749,20 +750,21 @@ body {
 }
 
 /* ============================================================
-   BANNER -- ပိုမြင့်
+   BANNER -- Friends အထိ ရောက်
    ============================================================ */
 
 .profile-banner {
     width: 100%;
-    aspect-ratio: 16 / 9;
+    height: 340px;                     /* ✅ အမြင့် တိုး -- Friends အထိ */
     background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
     position: relative;
     flex-shrink: 0;
     background-size: cover;
     background-position: center;
-    min-height: 240px;
-    max-height: 380px;
     overflow: visible !important;
+    aspect-ratio: auto;                /* ✅ aspect-ratio ဖျောက် */
+    min-height: 340px;                 /* ✅ min-height ချိန် */
+    max-height: none;                  /* ✅ max-height ဖျောက် */
 }
 
 .profile-banner-overlay {
@@ -771,26 +773,39 @@ body {
     left: 0;
     right: 0;
     height: 100%;
-    background: linear-gradient(to bottom, transparent 30%, rgba(10, 10, 15, 0.6) 100%);
+    background: linear-gradient(
+        to bottom,
+        transparent 0%,
+        transparent 40%,
+        rgba(10, 10, 15, 0.35) 70%,
+        rgba(10, 10, 15, 0.65) 100%
+    );
     pointer-events: none;
 }
 
 /* ============================================================
-   PROFILE INFO
+   PROFILE INFO -- Banner အောက်ခြေမှာ ကပ်
    ============================================================ */
 
 .profile-info-container {
     display: flex !important;
     flex-direction: column !important;
     align-items: center !important;
-    justify-content: center !important;
+    justify-content: flex-end !important;      /* ✅ အောက်ကို ကပ် */
     gap: 10px !important;
-    padding: 0 24px !important;
+    padding: 0 24px 22px !important;           /* ✅ အောက်က padding */
     position: absolute !important;
-    bottom: -50px !important;
+    bottom: 0 !important;                      /* ✅ -50 → 0 (မကျော်တော့) */
     left: 0 !important;
     right: 0 !important;
     z-index: 5 !important;
+    height: 100% !important;                   /* ✅ Banner အမြင့်အတိုင်း */
+    pointer-events: none !important;           /* ✅ Banner click ဖြတ် */
+}
+
+/* ✅ Info container ရဲ့ child တွေကို click ပြန်ဖွင့် */
+.profile-info-container > * {
+    pointer-events: auto !important;
 }
 
 .profile-avatar-wrapper {
@@ -934,7 +949,7 @@ body {
 .friends-count:active { transform: scale(0.95); opacity: 0.8; }
 
 /* ============================================================
-   TAB BAR -- သေးသေး
+   TAB BAR -- Banner အောက်ခြေမှာ
    ============================================================ */
 
 .profile-tab-bar {
@@ -943,7 +958,7 @@ body {
     border-top: 1px solid rgba(255, 255, 255, 0.06);
     border-bottom: 1px solid rgba(255, 255, 255, 0.06);
     flex-shrink: 0;
-    margin-top: 55px;
+    margin-top: 0;                     /* ✅ 55px → 0 */
     position: relative;
     z-index: 3;
 }
@@ -1558,14 +1573,18 @@ body {
 
 @media (max-width: 480px) {
     .profile-banner {
-        min-height: 180px;
-        max-height: 260px;
+        height: 300px;                 /* ✅ Mobile အတွက် */
+        min-height: 300px;
+        max-height: none;
+        aspect-ratio: auto;
     }
 
     .profile-info-container {
-        bottom: -45px !important;
-        padding: 0 16px !important;
+        bottom: 0 !important;          /* ✅ -45 → 0 */
+        padding: 0 16px 16px !important;
         gap: 8px !important;
+        height: 100% !important;
+        justify-content: flex-end !important;
     }
 
     .profile-avatar-wrapper {
@@ -1583,7 +1602,7 @@ body {
     .profile-friends { margin-top: 4px; }
     .friends-count { font-size: 10px; padding: 2px 10px; }
 
-    .profile-tab-bar { margin-top: 50px; }
+    .profile-tab-bar { margin-top: 0; }        /* ✅ 50 → 0 */
     .profile-tab-btn { font-size: 10px; padding: 7px 4px; gap: 4px; }
     .profile-tab-btn svg { width: 13px; height: 13px; }
 
@@ -1627,9 +1646,6 @@ body {
     .post-info-comment-name { font-size: 11px; }
     .post-info-comment-text { font-size: 12px; }
 }
-
-
-
 
     
 /* ============================================================
@@ -10689,7 +10705,6 @@ body {
         border-radius: 3px;
     }
 }
-
 </style>
 </head>
 <body>
