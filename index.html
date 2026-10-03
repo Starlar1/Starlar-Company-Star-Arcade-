@@ -732,6 +732,7 @@ body {
 
 .fs-screen.hidden { display: none !important; }
 
+
 /* ============================================================
    ✅ PROFILE FULLSCREEN
    ============================================================ */
@@ -932,6 +933,198 @@ body {
 }
 
 .friends-count:active { transform: scale(0.95); opacity: 0.8; }
+
+/* ============================================================
+   ✅ PROFILE STATS ROW (Friends / Likes / Post) -- အသစ်
+   ============================================================ */
+
+.profile-stats-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 6px;
+    padding: 0 4px;
+    width: 100%;
+}
+
+.profile-stat-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    min-width: 70px;
+    padding: 6px 14px;
+    border: 1px solid rgba(255, 109, 31, 0.25);
+    border-radius: 12px;
+    background: rgba(255, 109, 31, 0.08);
+    color: rgba(255, 255, 255, 0.85);
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+.profile-stat-btn:active {
+    transform: scale(0.95);
+    background: rgba(255, 109, 31, 0.18);
+    border-color: var(--accent);
+}
+
+.profile-stat-btn .stat-value {
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--accent);
+    line-height: 1.1;
+}
+
+.profile-stat-btn .stat-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+/* ============================================================
+   ✅ PROFILE STAT POPUP (Like/Post)
+   ============================================================ */
+
+.profile-stat-popup-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 10004;
+    background: rgba(0, 0, 0, 0.75);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+.profile-stat-popup-overlay.hidden { display: none !important; }
+
+.profile-stat-popup {
+    background: var(--bg-header);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    width: 100%;
+    max-width: 340px;
+    max-height: 80vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 16px 64px rgba(0, 0, 0, 0.8);
+    animation: popIn 0.25s ease;
+}
+
+.profile-stat-popup-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 18px 12px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+}
+
+.profile-stat-popup-header h3 {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-main);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.profile-stat-popup-header h3 .stat-count-badge {
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--accent);
+    background: var(--accent-bg);
+    padding: 2px 10px;
+    border-radius: 10px;
+}
+
+.profile-stat-popup-close {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: none;
+    background: var(--bg-input);
+    color: var(--text-muted);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.profile-stat-popup-close:active { transform: scale(0.9); }
+
+.profile-stat-popup-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px 0;
+}
+
+.profile-stat-post-item {
+    padding: 12px 18px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+
+.profile-stat-post-item:active {
+    background: var(--bg-hover);
+}
+
+.profile-stat-post-item:last-child {
+    border-bottom: none;
+}
+
+.profile-stat-post-id {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-family: monospace;
+    margin-bottom: 3px;
+}
+
+.profile-stat-post-caption {
+    font-size: 13px;
+    color: var(--text-main);
+    line-height: 1.4;
+    margin-bottom: 4px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.profile-stat-post-meta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+.profile-stat-post-meta .like-meta {
+    color: #ff3b30;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+}
+
+.profile-stat-popup-loading,
+.profile-stat-popup-empty {
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 13px;
+    padding: 40px 20px;
+}
 
 /* ============================================================
    TAB BAR -- သေးသေး
@@ -1583,6 +1776,12 @@ body {
     .profile-friends { margin-top: 4px; }
     .friends-count { font-size: 10px; padding: 2px 10px; }
 
+    /* ✅ Stats Row -- Mobile */
+    .profile-stats-row { gap: 6px; margin-top: 5px; }
+    .profile-stat-btn { min-width: 60px; padding: 5px 10px; border-radius: 10px; }
+    .profile-stat-btn .stat-value { font-size: 13px; }
+    .profile-stat-btn .stat-label { font-size: 9px; }
+
     .profile-tab-bar { margin-top: 50px; }
     .profile-tab-btn { font-size: 10px; padding: 7px 4px; gap: 4px; }
     .profile-tab-btn svg { width: 13px; height: 13px; }
@@ -1626,10 +1825,17 @@ body {
     .post-info-comment-avatar { width: 32px; height: 32px; }
     .post-info-comment-name { font-size: 11px; }
     .post-info-comment-text { font-size: 12px; }
+
+    /* ✅ Stat Popup -- Mobile */
+    .profile-stat-popup { max-width: 300px; max-height: 75vh; }
+    .profile-stat-popup-header { padding: 14px 16px 10px; }
+    .profile-stat-popup-header h3 { font-size: 14px; }
+    .profile-stat-popup-header h3 .stat-count-badge { font-size: 12px; }
+    .profile-stat-post-item { padding: 10px 14px; }
+    .profile-stat-post-id { font-size: 10px; }
+    .profile-stat-post-caption { font-size: 12px; }
+    .profile-stat-post-meta { font-size: 10px; }
 }
-
-
-
 
     
 /* ============================================================
@@ -10689,7 +10895,6 @@ body {
         border-radius: 3px;
     }
 }
-
 </style>
 </head>
 <body>
@@ -11266,8 +11471,20 @@ body {
                                         <span class="profile-id" id="fsProfileId" style="cursor:pointer;">ID 0000000000</span>
                                         <span class="profile-server" id="fsProfileServer">Server 1</span>
                                     </div>
-                                    <div class="profile-friends">
-                                        <span class="friends-count" id="fsProfileFriends">Friends 0</span>
+                                    <!-- ✅ NEW STATS ROW (Friends / Likes / Post) -->
+                                    <div class="profile-stats-row" id="profileStatsRow">
+                                        <button class="profile-stat-btn" data-stat="friends" id="fsProfileFriendsBtn">
+                                            <span class="stat-value" id="fsProfileFriendsCount">0</span>
+                                            <span class="stat-label">Friends</span>
+                                        </button>
+                                        <button class="profile-stat-btn" data-stat="likes" id="fsProfileLikesBtn">
+                                            <span class="stat-value" id="fsProfileLikesCount">—</span>
+                                            <span class="stat-label">Likes</span>
+                                        </button>
+                                        <button class="profile-stat-btn" data-stat="posts" id="fsProfilePostsBtn">
+                                            <span class="stat-value" id="fsProfilePostsCount">—</span>
+                                            <span class="stat-label">Post</span>
+                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -24668,6 +24885,496 @@ if (document.readyState === 'loading') {
     window.openCommentReportPopup = openCommentReportPopup;
 
     console.log('✅ Profile Tab System v7.0 Ready');
+
+})();
+
+// ============================================================
+// ✅ PROFILE STATS SYSTEM v1.0 (Friends / Likes / Post)
+//  • Friends → Friends List ဖွင့်
+//  • Likes → IDB မသိမ်း -- နှိပ်တိုင်း Firebase postList → Worker ကို သွားရှာ
+//  • Post → IDB မှာ ရှိရင် ပြ၊ မရှိရင် Firebase postList → Worker ဆွဲပြီး IDB သိမ်း
+//  • Post IDB Cache: profilePostCache_[postId]
+//  • Count IDB Cache: profilePostsCount_[serverId]_[userId]_posts
+// ============================================================
+(function() {
+    'use strict';
+
+    console.log('🚀 Profile Stats System v1.0 Loading...');
+
+    var POST_CACHE_PREFIX = 'profilePostCache_';
+    var PROFILE_POSTS_COUNT_KEY = 'profilePostsCount_';
+    var STATS_INITED = false;
+
+    // ===================================================
+    //  HELPERS
+    // ===================================================
+    function safeEscapeHtml(s) {
+        if (!s) return '';
+        return String(s).replace(/[&<>"']/g, function(c) {
+            return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c];
+        });
+    }
+
+    function idbGet(key) {
+        return new Promise(function(resolve) {
+            if (typeof getFromDB !== 'function') return resolve(null);
+            getFromDB(key).then(function(v) { resolve(v === undefined ? null : v); })
+                .catch(function() { resolve(null); });
+        });
+    }
+
+    function idbSet(key, value) {
+        return new Promise(function(resolve) {
+            if (typeof setToDB !== 'function') return resolve(false);
+            setToDB(key, value).then(function() { resolve(true); })
+                .catch(function() { resolve(false); });
+        });
+    }
+
+    function getProfileKey(serverId, userId) {
+        return String(serverId) + '_' + String(userId);
+    }
+
+    // ===================================================
+    //  CURRENT PROFILE TARGET
+    // ===================================================
+    function getCurrentProfileTarget() {
+        if (typeof currentViewingProfile === 'undefined') return null;
+        if (currentViewingProfile === 'self') {
+            if (!window.currentUser || !window.currentServerId) return null;
+            return {
+                serverId: window.currentServerId,
+                userId: window.currentUser.userId,
+                name: window.currentUser.name || 'Me',
+                friendsList: Array.isArray(window.currentUser.friendsList) ? window.currentUser.friendsList : []
+            };
+        } else {
+            if (!window.currentFriendProfileData) return null;
+            var d = window.currentFriendProfileData;
+            return {
+                serverId: d.serverId,
+                userId: d.userId,
+                name: d.name || 'User',
+                friendsList: Array.isArray(d.friendsList) ? d.friendsList : []
+            };
+        }
+    }
+
+    // ===================================================
+    //  POST COUNT (IDB cache + Worker fetch)
+    // ===================================================
+    function loadPostCount(serverId, userId, forceRefresh) {
+        var profileKey = getProfileKey(serverId, userId);
+        var cacheKey = PROFILE_POSTS_COUNT_KEY + profileKey + '_posts';
+
+        return new Promise(function(resolve) {
+            if (!forceRefresh) {
+                idbGet(cacheKey).then(function(cached) {
+                    if (cached !== null && cached !== undefined && !isNaN(cached)) {
+                        console.log('✅ Post count from IDB:', cached);
+                        resolve(parseInt(cached) || 0);
+                        return;
+                    }
+                    fetchPostCountFromWorker(serverId, userId).then(resolve);
+                });
+            } else {
+                fetchPostCountFromWorker(serverId, userId).then(resolve);
+            }
+        });
+    }
+
+    function fetchPostCountFromWorker(serverId, userId) {
+        return new Promise(function(resolve) {
+            if (typeof getDbForServer !== 'function') return resolve(0);
+            var db = getDbForServer(serverId);
+            if (!db) return resolve(0);
+
+            db.ref('users/' + userId + '/postList').once('value')
+                .then(function(snap) {
+                    var list = snap.val();
+                    if (!list) return resolve(0);
+                    if (!Array.isArray(list)) {
+                        list = Object.keys(list).map(function(k) { return list[k]; });
+                    }
+                    var count = list.length;
+                    var profileKey = getProfileKey(serverId, userId);
+                    idbSet(PROFILE_POSTS_COUNT_KEY + profileKey + '_posts', count).then(function() {
+                        console.log('✅ Post count saved to IDB:', count);
+                    });
+                    resolve(count);
+                })
+                .catch(function() { resolve(0); });
+        });
+    }
+
+    // ===================================================
+    //  POST DETAIL (IDB cache + Worker fetch)
+    // ===================================================
+    function loadSinglePostDetail(postId, workerNo) {
+        return new Promise(function(resolve) {
+            var cacheKey = POST_CACHE_PREFIX + postId;
+
+            idbGet(cacheKey).then(function(cached) {
+                if (cached) {
+                    console.log('✅ Post from IDB:', postId);
+                    resolve(cached);
+                    return;
+                }
+                fetchPostFromWorker(postId, workerNo).then(function(post) {
+                    if (post) {
+                        idbSet(cacheKey, post).then(function() {
+                            console.log('✅ Post saved to IDB:', postId);
+                        });
+                    }
+                    resolve(post);
+                });
+            });
+        });
+    }
+
+    function fetchPostFromWorker(postId, workerNo) {
+        return new Promise(function(resolve) {
+            var W_SERVERS = window.WORKER_SERVERS || [];
+            if (!W_SERVERS || W_SERVERS.length === 0) return resolve(null);
+
+            var srv = W_SERVERS.find(function(s) { return s.number === parseInt(workerNo); });
+            if (!srv) return resolve(null);
+
+            var client = (typeof window.getWorkerClient === 'function')
+                ? window.getWorkerClient(srv.id)
+                : null;
+            if (!client) return resolve(null);
+
+            client.query('SELECT * FROM posts WHERE postId = ? LIMIT 1', [postId])
+                .then(function(rows) {
+                    if (!rows || rows.length === 0) return resolve(null);
+                    var post = (typeof window.parsePostRow === 'function')
+                        ? window.parsePostRow(rows[0], srv.id)
+                        : rows[0];
+                    resolve(post);
+                })
+                .catch(function(err) {
+                    console.warn('fetchPostFromWorker error:', err);
+                    resolve(null);
+                });
+        });
+    }
+
+    // ===================================================
+    //  LOAD POSTS LIST
+    // ===================================================
+    function loadPostsList(serverId, userId) {
+        return new Promise(function(resolve) {
+            if (typeof getDbForServer !== 'function') return resolve([]);
+            var db = getDbForServer(serverId);
+            if (!db) return resolve([]);
+
+            db.ref('users/' + userId + '/postList').once('value')
+                .then(function(snap) {
+                    var list = snap.val();
+                    if (!list) return resolve([]);
+                    if (!Array.isArray(list)) {
+                        list = Object.keys(list).map(function(k) { return list[k]; });
+                    }
+                    if (list.length === 0) return resolve([]);
+
+                    var promises = list.map(function(item) {
+                        return loadSinglePostDetail(item.postId, item.workerNo);
+                    });
+
+                    Promise.all(promises).then(function(posts) {
+                        resolve(posts.filter(function(p) { return p !== null; }));
+                    });
+                })
+                .catch(function() { resolve([]); });
+        });
+    }
+
+    // ===================================================
+    //  ✅ POPUP
+    // ===================================================
+    function showStatPopup(type, serverId, userId, userName) {
+        var existing = document.getElementById('profileStatPopup');
+        if (existing) existing.remove();
+
+        var overlay = document.createElement('div');
+        overlay.id = 'profileStatPopup';
+        overlay.className = 'profile-stat-popup-overlay';
+
+        var titleText = type === 'likes' ? 'Likes' : 'Posts';
+        var iconSvg = type === 'likes'
+            ? '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ff3b30" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>'
+            : '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ff6d1f" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>';
+
+        overlay.innerHTML =
+            '<div class="profile-stat-popup">' +
+                '<div class="profile-stat-popup-header">' +
+                    '<h3>' + iconSvg + '<span>' + titleText + '</span><span class="stat-count-badge" id="statPopupCount">—</span></h3>' +
+                    '<button class="profile-stat-popup-close" id="statPopupClose">' +
+                        '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>' +
+                    '</button>' +
+                '</div>' +
+                '<div class="profile-stat-popup-body" id="statPopupBody">' +
+                    '<div class="profile-stat-popup-loading">Loading...</div>' +
+                '</div>' +
+            '</div>';
+
+        document.body.appendChild(overlay);
+
+        function close() { overlay.remove(); }
+        document.getElementById('statPopupClose').addEventListener('click', close);
+        overlay.addEventListener('click', function(e) {
+            if (e.target === overlay) close();
+        });
+
+        var bodyEl = document.getElementById('statPopupBody');
+        var countEl = document.getElementById('statPopupCount');
+
+        loadPostsList(serverId, userId).then(function(posts) {
+            if (type === 'posts') {
+                countEl.textContent = posts.length;
+                renderPostsList(bodyEl, posts);
+                // Posts count ကို Profile UI မှာလည်း update
+                var profileKey = getProfileKey(serverId, userId);
+                idbSet(PROFILE_POSTS_COUNT_KEY + profileKey + '_posts', posts.length);
+                var postsCountEl = document.getElementById('fsProfilePostsCount');
+                if (postsCountEl) postsCountEl.textContent = posts.length;
+            } else {
+                var totalLikes = 0;
+                posts.forEach(function(p) { totalLikes += (parseInt(p.likeCount) || 0); });
+                countEl.textContent = totalLikes;
+                renderLikesList(bodyEl, posts);
+                // Likes count ကို Profile UI မှာလည်း update
+                var likesCountEl = document.getElementById('fsProfileLikesCount');
+                if (likesCountEl) likesCountEl.textContent = totalLikes;
+            }
+        });
+    }
+
+    function renderPostsList(bodyEl, posts) {
+        if (!posts || posts.length === 0) {
+            bodyEl.innerHTML = '<div class="profile-stat-popup-empty">Post မရှိပါ</div>';
+            return;
+        }
+        bodyEl.innerHTML = '';
+        posts.forEach(function(post) {
+            var item = document.createElement('div');
+            item.className = 'profile-stat-post-item';
+            var workerNo = post.workerNo || 1;
+            var captionText = post.caption
+                ? safeEscapeHtml(String(post.caption).substring(0, 80))
+                : '(No caption)';
+            item.innerHTML =
+                '<div class="profile-stat-post-id">Post.' + workerNo + '.' + safeEscapeHtml(post.postId) + '</div>' +
+                '<div class="profile-stat-post-caption">' + captionText + '</div>' +
+                '<div class="profile-stat-post-meta">' +
+                    '<span class="like-meta">' +
+                        '<svg width="10" height="10" viewBox="0 0 24 24" fill="#ff3b30"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>' +
+                        (parseInt(post.likeCount) || 0) +
+                    '</span>' +
+                    '<span>' + (parseInt(post.commentCount) || 0) + ' comments</span>' +
+                '</div>';
+            item.addEventListener('click', function() {
+                var popup = document.getElementById('profileStatPopup');
+                if (popup) popup.remove();
+                if (typeof window.openPostInfoScreen === 'function') {
+                    window.openPostInfoScreen(post.postId, workerNo);
+                }
+            });
+            bodyEl.appendChild(item);
+        });
+    }
+
+    function renderLikesList(bodyEl, posts) {
+        var postsWithLikes = (posts || []).filter(function(p) {
+            return (parseInt(p.likeCount) || 0) > 0;
+        }).sort(function(a, b) {
+            return (parseInt(b.likeCount) || 0) - (parseInt(a.likeCount) || 0);
+        });
+
+        if (postsWithLikes.length === 0) {
+            bodyEl.innerHTML = '<div class="profile-stat-popup-empty">Like မရှိသေးပါ</div>';
+            return;
+        }
+        bodyEl.innerHTML = '';
+        postsWithLikes.forEach(function(post) {
+            var item = document.createElement('div');
+            item.className = 'profile-stat-post-item';
+            var workerNo = post.workerNo || 1;
+            var captionText = post.caption
+                ? safeEscapeHtml(String(post.caption).substring(0, 80))
+                : '(No caption)';
+            item.innerHTML =
+                '<div class="profile-stat-post-id">Post.' + workerNo + '.' + safeEscapeHtml(post.postId) + '</div>' +
+                '<div class="profile-stat-post-caption">' + captionText + '</div>' +
+                '<div class="profile-stat-post-meta">' +
+                    '<span class="like-meta">' +
+                        '<svg width="10" height="10" viewBox="0 0 24 24" fill="#ff3b30"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>' +
+                        (parseInt(post.likeCount) || 0) +
+                    '</span>' +
+                '</div>';
+            item.addEventListener('click', function() {
+                var popup = document.getElementById('profileStatPopup');
+                if (popup) popup.remove();
+                if (typeof window.openPostInfoScreen === 'function') {
+                    window.openPostInfoScreen(post.postId, workerNo);
+                }
+            });
+            bodyEl.appendChild(item);
+        });
+    }
+
+    // ===================================================
+    //  ✅ SYNC (Profile ဖွင့်တိုင်း ခေါ်)
+    // ===================================================
+    function syncProfileStats() {
+        var profile = getCurrentProfileTarget();
+        if (!profile) return;
+
+        // ✅ Friends -- တိုက်ရိုက်
+        var friendsCountEl = document.getElementById('fsProfileFriendsCount');
+        if (friendsCountEl) {
+            friendsCountEl.textContent = (profile.friendsList || []).length;
+        }
+
+        // ✅ Posts -- IDB စစ်
+        loadPostCount(profile.serverId, profile.userId, false).then(function(count) {
+            var postsCountEl = document.getElementById('fsProfilePostsCount');
+            if (postsCountEl) postsCountEl.textContent = count;
+        });
+
+        // ✅ Likes -- နှိပ်မှ ရှာ -- ဒီမှာ "—" ပဲ ပြ
+        var likesCountEl = document.getElementById('fsProfileLikesCount');
+        if (likesCountEl) likesCountEl.textContent = '—';
+    }
+
+    // ===================================================
+    //  BIND BUTTONS
+    // ===================================================
+    function bindStatButtons() {
+        var friendsBtn = document.getElementById('fsProfileFriendsBtn');
+        var likesBtn = document.getElementById('fsProfileLikesBtn');
+        var postsBtn = document.getElementById('fsProfilePostsBtn');
+
+        if (friendsBtn && !friendsBtn._hooked) {
+            friendsBtn._hooked = true;
+            friendsBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                var profile = getCurrentProfileTarget();
+                if (!profile) return;
+                if (typeof window.openFriendsListScreen === 'function') {
+                    window.openFriendsListScreen(profile.serverId, profile.userId, profile.name);
+                }
+            });
+        }
+
+        if (likesBtn && !likesBtn._hooked) {
+            likesBtn._hooked = true;
+            likesBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                var profile = getCurrentProfileTarget();
+                if (!profile) return;
+
+                var countEl = document.getElementById('fsProfileLikesCount');
+                if (countEl) countEl.textContent = '...';
+
+                showStatPopup('likes', profile.serverId, profile.userId, profile.name);
+            });
+        }
+
+        if (postsBtn && !postsBtn._hooked) {
+            postsBtn._hooked = true;
+            postsBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                var profile = getCurrentProfileTarget();
+                if (!profile) return;
+
+                var countEl = document.getElementById('fsProfilePostsCount');
+                if (countEl) countEl.textContent = '...';
+
+                showStatPopup('posts', profile.serverId, profile.userId, profile.name);
+            });
+        }
+    }
+
+    // ===================================================
+    //  HOOK PROFILE LOADERS (loadProfileData / loadFriendProfileIntoFsProfile)
+    // ===================================================
+    function hookProfileLoaders() {
+        if (typeof window.loadProfileData === 'function' && !window.loadProfileData._statsHooked) {
+            var orig1 = window.loadProfileData;
+            window.loadProfileData = function() {
+                var r = orig1.apply(this, arguments);
+                setTimeout(syncProfileStats, 250);
+                return r;
+            };
+            window.loadProfileData._statsHooked = true;
+            console.log('✅ loadProfileData hooked');
+        }
+
+        if (typeof window.loadFriendProfileIntoFsProfile === 'function' && !window.loadFriendProfileIntoFsProfile._statsHooked) {
+            var orig2 = window.loadFriendProfileIntoFsProfile;
+            window.loadFriendProfileIntoFsProfile = function(d) {
+                var r = orig2.apply(this, arguments);
+                setTimeout(syncProfileStats, 250);
+                return r;
+            };
+            window.loadFriendProfileIntoFsProfile._statsHooked = true;
+            console.log('✅ loadFriendProfileIntoFsProfile hooked');
+        }
+    }
+
+    // ===================================================
+    //  AUTO-DETECT LOADERS (if not yet defined)
+    // ===================================================
+    function startAutoHook() {
+        var tries = 0;
+        var maxTries = 20;
+        function attempt() {
+            tries++;
+            hookProfileLoaders();
+            var ok1 = typeof window.loadProfileData === 'function' && window.loadProfileData._statsHooked;
+            var ok2 = typeof window.loadFriendProfileIntoFsProfile === 'function' && window.loadFriendProfileIntoFsProfile._statsHooked;
+            if ((ok1 && ok2) || tries >= maxTries) {
+                bindStatButtons();
+                return;
+            }
+            setTimeout(attempt, 300);
+        }
+        attempt();
+    }
+
+    // ===================================================
+    //  INIT
+    // ===================================================
+    function start() {
+        if (STATS_INITED) return;
+        if (!document.getElementById('fsProfileFriendsBtn')) {
+            setTimeout(start, 500);
+            return;
+        }
+        STATS_INITED = true;
+
+        bindStatButtons();
+        startAutoHook();
+
+        console.log('✅ Profile Stats System Ready');
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(start, 1800);
+        });
+    } else {
+        setTimeout(start, 1800);
+    }
+
+    // ===================================================
+    //  GLOBAL EXPORT
+    // ===================================================
+    window.syncProfileStats = syncProfileStats;
+    window.loadPostCount = loadPostCount;
+    window.showProfileStatPopup = showStatPopup;
 
 })();
 
