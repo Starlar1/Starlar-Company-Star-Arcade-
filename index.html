@@ -12707,14 +12707,17 @@ body {
     <script src="script.js"></script>
 
 <script>
+
 // ============================================================
 //  STAR ARCADE -- FULL script.js
 //  M Server + Auto Online + Play ID + Red Dot (New Msg)
 //  ✅ Email/Password Auth System (Gmail + Password + Server No)
 //  ✅ First Login Popup (Avatar + Name) -- Account ဖွင့်ပြီးတာနဲ့ ပြ
 //  ✅ Loading on Buttons
-//  ✅ postList -- Account ဖွင့်တာနဲ့ Firebase မှာ ရှိ
-//  Version: 2026-09-29
+//  ✅ postList + giftList -- Account ဖွင့်တာနဲ့ Firebase မှာ ရှိ
+//  ✅ Auto-login: IndexDB ကနေ တန်း Home ပြ (Firebase ကို နောက်ကွယ်မှာ ချိတ်)
+//  ✅ Friend Cache မှာ Post List + Gift List ပါ သိမ်း
+//  Version: 2026-10-05
 // ============================================================
 
 // ===================================================
@@ -13136,7 +13139,8 @@ function saveUserToDB(user) {
                 roleUse: user.roleUse || '',
                 roleOwned: user.roleOwned || [],
                 mServer: user.mServer || [],
-                postList: user.postList || [],        // ✅ ဒါလေး ထည့်
+                postList: user.postList || [],
+                giftList: user.giftList || [],        // ✅ Gift List ပါ ထည့်
                 online: user.online || false,
                 isFirstLogin: user.isFirstLogin !== undefined ? user.isFirstLogin : true
             };
@@ -13208,7 +13212,8 @@ function saveUserToFirebase(userData, serverId) {
             roleUse: userData.roleUse || '',
             roleOwned: userData.roleOwned || [],
             mServer: userData.mServer || [],
-            postList: userData.postList || [],          // ✅ ဒါလေး ထည့်ထားပါတယ်
+            postList: userData.postList || [],
+            giftList: userData.giftList || [],     // ✅ Gift List ပါ
             online: true,
             avatar: userData.avatar || '',
             isFirstLogin: userData.isFirstLogin !== undefined ? userData.isFirstLogin : true
@@ -13290,7 +13295,8 @@ function startSelfDataListener(userId, serverId) {
             roleUse: data.roleUse || currentUser.roleUse,
             roleOwned: data.roleOwned || currentUser.roleOwned,
             mServer: data.mServer || currentUser.mServer,
-            postList: data.postList || currentUser.postList || [],   // ✅ ဒါလေး ထည့်
+            postList: data.postList || currentUser.postList || [],
+            giftList: data.giftList || currentUser.giftList || [],   // ✅ Gift List ပါ
             online: data.online !== undefined ? data.online : currentUser.online,
             isFirstLogin: data.isFirstLogin !== undefined ? data.isFirstLogin : currentUser.isFirstLogin
         };
@@ -13374,7 +13380,8 @@ function fullSyncFromFirebase(email, serverId) {
                 roleUse: data.roleUse || '',
                 roleOwned: data.roleOwned || [],
                 mServer: data.mServer || [],
-                postList: data.postList || [],   // ✅ ဒါလေး ထည့်
+                postList: data.postList || [],
+                giftList: data.giftList || [],   // ✅ Gift List ပါ
                 online: data.online === true,
                 isFirstLogin: data.isFirstLogin !== undefined ? data.isFirstLogin : true
             };
@@ -13403,9 +13410,10 @@ function ensureFirebaseAuth(serverId, email) {
 }
 
 // ===================================================
-//  ENTER APP
+//  ENTER APP -- ✅ Firebase ကို နောက်ကွယ်မှာ ချိတ်
 // ===================================================
-function enterApp(user) {
+function enterApp(user, skipLoading) {
+    // ✅ Auth Overlay ကို ချက်ချင်း ဖျောက်
     authOverlay.style.display = 'none';
     authOverlay.classList.add('hidden');
     appWrapper.classList.remove('hidden');
@@ -13419,37 +13427,41 @@ function enterApp(user) {
 
     if (user.avatar && user.avatar !== '') profileAvatar.src = user.avatar;
 
-    setupMServer().then(function() {
-        if (currentDb && currentUser) {
-            startSelfDataListener(currentUser.userId, currentServerId);
-        }
+    // ✅ UI ကို ချက်ချင်း ပြ
+    applyFrameToSidebar();
 
-        applyFrameToSidebar();
+    var defaultBtn = document.querySelector('.nav-btn[data-tab="home"]');
+    if (defaultBtn) {
+        activeNavBtn = defaultBtn;
+        defaultBtn.classList.add('active');
+    }
+    switchTab('home');
+    history.pushState(null, '', location.href);
 
-        var defaultBtn = document.querySelector('.nav-btn[data-tab="home"]');
-        if (defaultBtn) {
-            activeNavBtn = defaultBtn;
-            defaultBtn.classList.add('active');
-        }
-        switchTab('home');
-        history.pushState(null, '', location.href);
+    clearMemoryMessages();
+    isRenderingChatList = false;
+    if (renderChatListTimer) {
+        clearTimeout(renderChatListTimer);
+        renderChatListTimer = null;
+    }
 
-        clearMemoryMessages();
-        isRenderingChatList = false;
-        if (renderChatListTimer) {
-            clearTimeout(renderChatListTimer);
-            renderChatListTimer = null;
-        }
+    // ✅ Firebase ကို နောက်ကွယ်မှာ ချိတ် (Loading မပြ)
+    setTimeout(function() {
+        setupMServer().then(function() {
+            if (currentDb && currentUser) {
+                startSelfDataListener(currentUser.userId, currentServerId);
+            }
 
-        setTimeout(function() { renderChatList(); }, 100);
-        setTimeout(function() { startFriendsListListener(); }, 500);
-        setTimeout(function() { startAppMessageListeners(); }, 700);
-        setTimeout(function() {
-            goOnline();
-            attachOnlineEventListeners();
-        }, 900);
-        setTimeout(function() { retryPendingMessages(); }, 1500);
-    });
+            setTimeout(function() { renderChatList(); }, 100);
+            setTimeout(function() { startFriendsListListener(); }, 500);
+            setTimeout(function() { startAppMessageListeners(); }, 700);
+            setTimeout(function() {
+                goOnline();
+                attachOnlineEventListeners();
+            }, 900);
+            setTimeout(function() { retryPendingMessages(); }, 1500);
+        });
+    }, 100);
 
     window.addEventListener('beforeunload', function() {
         if (currentUser && currentServerId) {
@@ -13574,7 +13586,6 @@ function handleNewAccount() {
 
     isProcessing = true;
 
-    // ✅ Loading -- Button + Overlay
     var originalText = newAccountSubmitBtn.textContent;
     newAccountSubmitBtn.disabled = true;
     newAccountSubmitBtn.textContent = 'Creating...';
@@ -13603,7 +13614,7 @@ function handleNewAccount() {
                             accNo: accNo,
                             authId: authId,
                             email: email,
-                            name: 'Player',           // ✅ Default -- First Login Popup မှာ ပြင်မယ်
+                            name: 'Player',
                             userId: userId,
                             diamond: 0,
                             inviteCode: inviteCode,
@@ -13615,8 +13626,9 @@ function handleNewAccount() {
                             avatar: '',
                             mServer: mServer,
                             serverId: serverId,
-                            postList: [],              // ✅ ဒါလေး ထည့်
-                            isFirstLogin: true        // ✅ First Login Popup ပြမယ်
+                            postList: [],
+                            giftList: [],              // ✅ Gift List
+                            isFirstLogin: true
                         };
                         return saveUserToFirebase(userData, serverId).then(function(saved) {
                             if (!saved) throw new Error('Save failed');
@@ -13643,7 +13655,6 @@ function handleNewAccount() {
             hideLoading();
             closeNewAccountPopup();
 
-            // ✅ First Login Popup ပြ (ပုံ + Name) -- မူရင်းအတိုင်း
             setTimeout(function() { showFirstLoginPopup(); }, 300);
 
             isProcessing = false;
@@ -13693,7 +13704,6 @@ function handleLogin() {
     var serverId = server.id;
     isProcessing = true;
 
-    // ✅ Loading -- Button + Overlay
     var originalText = loginSubmitBtn.textContent;
     loginSubmitBtn.disabled = true;
     loginSubmitBtn.textContent = 'Logging in...';
@@ -13724,10 +13734,8 @@ function handleLogin() {
             }
             userData.authId = user.uid;
 
-            // ✅ postList မရှိရင် empty array ဖြစ်အောင် သတ်မှတ်
-            if (!Array.isArray(userData.postList)) {
-                userData.postList = [];
-            }
+            if (!Array.isArray(userData.postList)) userData.postList = [];
+            if (!Array.isArray(userData.giftList)) userData.giftList = [];
 
             return { userData: userData, serverId: serverId };
         });
@@ -13735,14 +13743,14 @@ function handleLogin() {
         if (!result) return;
         var db = getDbForServer(result.serverId);
         if (db) {
-            // ✅ authId + postList ကို တစ်ခါတည်း update
             return db.ref('users/' + result.userData.userId)
                 .update({
                     authId: result.userData.authId,
-                    postList: result.userData.postList || []
+                    postList: result.userData.postList || [],
+                    giftList: result.userData.giftList || []
                 })
                 .then(function() { return result; })
-                .catch(function(err) { console.warn('authId/postList update failed:', err); return result; });
+                .catch(function(err) { console.warn('Update failed:', err); return result; });
         }
         return result;
     }).then(function(result) {
@@ -13761,7 +13769,6 @@ function handleLogin() {
             hideLoading();
             closeLoginPopup();
 
-            // ✅ First Login မပြီးသေးရင် First Login Popup ပြ
             if (userData.isFirstLogin === undefined || userData.isFirstLogin === true) {
                 setTimeout(function() { showFirstLoginPopup(); }, 300);
             } else {
@@ -13800,7 +13807,7 @@ function handleLogin() {
 }
 
 // ===================================================
-//  FIRST LOGIN POPUP -- မူရင်းအတိုင်း (ပုံ + Name)
+//  FIRST LOGIN POPUP
 // ===================================================
 function showFirstLoginPopup() { if (firstLoginPopup) firstLoginPopup.classList.remove('hidden'); }
 function closeFirstLoginPopup() { if (firstLoginPopup) firstLoginPopup.classList.add('hidden'); }
@@ -13812,7 +13819,6 @@ function handleFirstLoginSave() {
 
     isFirstLoginProcessing = true;
 
-    // ✅ Loading -- Button + Overlay
     var originalText = firstLoginSaveBtn.textContent;
     firstLoginSaveBtn.disabled = true;
     firstLoginSaveBtn.textContent = 'Saving...';
@@ -13829,20 +13835,22 @@ function handleFirstLoginSave() {
         return;
     }
 
-    // ✅ postList ကို လက်ရှိ value ယူ (မရှိရင် empty array)
     var postList = Array.isArray(currentUser.postList) ? currentUser.postList : [];
+    var giftList = Array.isArray(currentUser.giftList) ? currentUser.giftList : [];
 
     db.ref('users/' + currentUser.userId).update({
         name: name,
         avatar: avatar,
         isFirstLogin: false,
-        postList: postList          // ✅ ဒါလေး ထည့်
+        postList: postList,
+        giftList: giftList
     })
     .then(function() {
         currentUser.name = name;
         currentUser.avatar = avatar;
         currentUser.isFirstLogin = false;
         currentUser.postList = postList;
+        currentUser.giftList = giftList;
         saveUserToDB(currentUser);
 
         userNameEl.textContent = name;
@@ -13882,7 +13890,7 @@ function showLoginPopupError(msg) {
 }
 
 // ===================================================
-//  CHECK SESSION
+//  CHECK SESSION -- ✅ IndexDB ကနေ တန်း Home ပြ
 // ===================================================
 function checkSession() {
     return new Promise(function(resolve) {
@@ -13891,38 +13899,70 @@ function checkSession() {
             var serverId = session.serverId;
             var email = session.email;
 
-            fullSyncFromFirebase(email, serverId).then(function(userData) {
-                if (!userData) {
-                    clearSessionFromDB();
-                    return resolve(false);
-                }
+            // ✅ IndexDB ကနေ user data ယူ -- Firebase မဆွဲ
+            getFromDB('users').then(function(users) {
+                var userData = users ? users[email] : null;
 
-                currentUser = userData;
-                currentServerId = serverId;
-                currentDb = getDbForServer(serverId);
-                currentAuth = getAuthForServer(serverId);
+                if (userData) {
+                    // ✅ IndexDB ထဲမှာ ရှိရင် -- တန်း Home ပြ
+                    userData.serverId = serverId;
+                    currentUser = userData;
+                    currentServerId = serverId;
+                    currentDb = getDbForServer(serverId);
+                    currentAuth = getAuthForServer(serverId);
 
-                saveUserToDB(userData);
-
-                ensureFirebaseAuth(serverId, email).then(function(ok) {
-                    if (!ok) {
-                        console.warn('Auth not ready -- show login');
-                        clearSessionFromDB();
-                        return resolve(false);
-                    }
-
+                    // ✅ ချက်ချင်း Home ပြ
                     if (userData.isFirstLogin === undefined || userData.isFirstLogin === true) {
-                        setTimeout(function() { showFirstLoginPopup(); }, 300);
+                        setTimeout(function() { showFirstLoginPopup(); }, 100);
                     } else {
-                        enterApp(currentUser);
+                        enterApp(currentUser, true);
                     }
                     resolve(true);
-                });
-            }).catch(function(err) {
-                console.warn('Full sync failed:', err);
-                clearSessionFromDB();
-                resolve(false);
-            });
+
+                    // ✅ Firebase ကို နောက်ကွယ်မှာ Sync (Loading မပြ)
+                    setTimeout(function() {
+                        fullSyncFromFirebase(email, serverId).then(function(freshData) {
+                            if (!freshData) return;
+                            if (!Array.isArray(freshData.postList)) freshData.postList = [];
+                            if (!Array.isArray(freshData.giftList)) freshData.giftList = [];
+
+                            // Update memory + IDB
+                            currentUser = Object.assign({}, currentUser, freshData);
+                            saveUserToDB(currentUser);
+                        }).catch(function(err) {
+                            console.warn('Background sync failed:', err);
+                        });
+                    }, 500);
+
+                } else {
+                    // ✅ IndexDB မှာ မရှိရင် Firebase ဆွဲ (Loading ပြ)
+                    fullSyncFromFirebase(email, serverId).then(function(freshData) {
+                        if (!freshData) {
+                            clearSessionFromDB();
+                            return resolve(false);
+                        }
+
+                        currentUser = freshData;
+                        currentServerId = serverId;
+                        currentDb = getDbForServer(serverId);
+                        currentAuth = getAuthForServer(serverId);
+
+                        saveUserToDB(freshData);
+
+                        if (freshData.isFirstLogin === undefined || freshData.isFirstLogin === true) {
+                            setTimeout(function() { showFirstLoginPopup(); }, 300);
+                        } else {
+                            enterApp(currentUser);
+                        }
+                        resolve(true);
+                    }).catch(function(err) {
+                        console.warn('Sync failed:', err);
+                        clearSessionFromDB();
+                        resolve(false);
+                    });
+                }
+            }).catch(function() { resolve(false); });
+
         }).catch(function() { resolve(false); });
     });
 }
@@ -14106,18 +14146,12 @@ function loadProfileData() {
     var fsId = document.getElementById('fsProfileId');
     var fsServer = document.getElementById('fsProfileServer');
     var fsBio = document.getElementById('fsProfileBio');
-    var fsFriends = document.getElementById('fsProfileFriends');
 
     currentViewingProfile = 'self';
     currentFriendProfileData = null;
 
     var editWrap = document.querySelector('.profile-edit-btn-wrapper');
     if (editWrap) editWrap.style.display = '';
-
-    if (fsFriends) {
-        fsFriends.style.cursor = '';
-        fsFriends.onclick = null;
-    }
 
     if (fsAvatar) fsAvatar.src = currentUser.avatar || 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"%3E%3Ccircle cx="50" cy="50" r="45" fill="%2322222e"/%3E%3Ccircle cx="50" cy="35" r="18" fill="%235a5a6a"/%3E%3Cpath d="M20 75c0-18 12-30 30-30s30 12 30 30" fill="%235a5a6a"/%3E%3C/svg%3E';
     if (fsName) fsName.textContent = currentUser.name || 'Player';
@@ -14143,10 +14177,6 @@ function loadProfileData() {
         var server = FIREBASE_SERVERS.find(function(s) { return s.id === currentServerId; });
         fsServer.textContent = server ? server.name : 'Server 1';
     }
-    if (fsFriends) {
-        var list = currentUser.friendsList || [];
-        fsFriends.textContent = 'Friends ' + list.length;
-    }
     if (fsBio) {
         if (currentUser.bio && currentUser.bio.trim() !== '') {
             fsBio.innerHTML = currentUser.bio;
@@ -14160,6 +14190,11 @@ function loadProfileData() {
     applyBackground();
     applyFrameToSidebar();
     loadProfileRoles();
+
+    // ✅ Stats Sync (external hook မှာ ရှိပြီးသား)
+    if (typeof window.syncProfileStats === 'function') {
+        setTimeout(window.syncProfileStats, 200);
+    }
 }
 
 function showMarkPopup(mark) {
@@ -15011,6 +15046,8 @@ function extractUseOnlyData(data, sid, serverNo, uid) {
         blockList: Array.isArray(data.blockList) ? data.blockList : [],
         roleUse: Array.isArray(data.roleUse) ? data.roleUse : [],
         friendsList: Array.isArray(data.friendsList) ? data.friendsList : [],
+        postList: Array.isArray(data.postList) ? data.postList : [],   // ✅ Post List ပါ
+        giftList: Array.isArray(data.giftList) ? data.giftList : [],   // ✅ Gift List ပါ
         mServer: Array.isArray(data.mServer) ? data.mServer : []
     };
 }
@@ -16473,7 +16510,6 @@ function loadFriendProfileIntoFsProfile(d) {
     var fsId = document.getElementById('fsProfileId');
     var fsServer = document.getElementById('fsProfileServer');
     var fsBio = document.getElementById('fsProfileBio');
-    var fsFriends = document.getElementById('fsProfileFriends');
 
     if (fsAvatar) fsAvatar.src = d.avatar || 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"%3E%3Ccircle cx="50" cy="50" r="45" fill="%2322222e"/%3E%3C/svg%3E';
     if (fsName) fsName.textContent = d.name || 'Player';
@@ -16494,11 +16530,6 @@ function loadFriendProfileIntoFsProfile(d) {
     if (fsServer) {
         var server = FIREBASE_SERVERS.find(function(s) { return s.id === d.serverId; });
         fsServer.textContent = server ? server.name : 'Server ' + (d.serverNo || 1);
-    }
-    if (fsFriends) {
-        fsFriends.textContent = 'Friends ' + (Array.isArray(d.friendsList) ? d.friendsList.length : 0);
-        fsFriends.style.cursor = 'pointer';
-        fsFriends.onclick = function(e) { e.stopPropagation(); openFriendsListScreen(d.serverId, d.userId, d.name); };
     }
     if (fsBio) {
         fsBio.innerHTML = (d.bio && d.bio.trim() !== '')
@@ -16561,6 +16592,11 @@ function loadFriendProfileIntoFsProfile(d) {
         editWrap.style.display = 'none';
         editWrap.style.visibility = 'hidden';
         editWrap.style.pointerEvents = 'none';
+    }
+
+    // ✅ Stats Sync (သူများ ဆိုရင် View ပြ)
+    if (typeof window.syncProfileStats === 'function') {
+        setTimeout(window.syncProfileStats, 200);
     }
 }
 
@@ -16883,8 +16919,6 @@ function goBackFullscreen() {
             editWrap.style.visibility = '';
             editWrap.style.pointerEvents = '';
         }
-        var fsFriends = document.getElementById('fsProfileFriends');
-        if (fsFriends) { fsFriends.style.cursor = ''; fsFriends.onclick = null; }
         var fsId = document.getElementById('fsProfileId');
         if (fsId) { fsId.style.display = ''; fsId.onclick = copyUserId; }
         fullscreenOverlay.classList.remove('active');
@@ -17040,7 +17074,6 @@ function calculateAppStorage() {
                                     var size = JSON.stringify(msg).length;
                                     msgSize += size;
                                     msgCount++;
-
                                     if (msg && (msg.messageType === 'image' || msg.messageType === 'gif') && msg.imageData) {
                                         imageCount++;
                                         imageSize += size;
@@ -17530,7 +17563,6 @@ function showLogoutOptionsPopup() {
 document.addEventListener('DOMContentLoaded', function() {
     initDomRefs();
 
-    // ✅ New Account -- Popup ဖွင့်
     if (newAccountBtn) {
         newAccountBtn.addEventListener('click', function() {
             if (!isProcessing) showNewAccountPopup();
@@ -17544,7 +17576,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     if (newAccountSubmitBtn) newAccountSubmitBtn.addEventListener('click', handleNewAccount);
 
-    // ✅ Login -- Popup ဖွင့်
     if (loginBtn) {
         loginBtn.addEventListener('click', function() {
             if (!isProcessing) showLoginPopup();
@@ -17558,16 +17589,13 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     if (loginSubmitBtn) loginSubmitBtn.addEventListener('click', handleLogin);
 
-    // Enter key (Login)
     if (loginEmailInput) loginEmailInput.addEventListener('keypress', function(e) { if (e.key === 'Enter') handleLogin(); });
     if (loginPasswordInput) loginPasswordInput.addEventListener('keypress', function(e) { if (e.key === 'Enter') handleLogin(); });
     if (loginServerInput) loginServerInput.addEventListener('keypress', function(e) { if (e.key === 'Enter') handleLogin(); });
 
-    // Enter key (New Account)
     if (newAccEmailInput) newAccEmailInput.addEventListener('keypress', function(e) { if (e.key === 'Enter') handleNewAccount(); });
     if (newAccPasswordInput) newAccPasswordInput.addEventListener('keypress', function(e) { if (e.key === 'Enter') handleNewAccount(); });
 
-    // First Login Popup -- Avatar + Save
     if (firstLoginAvatar) firstLoginAvatar.addEventListener('click', function() { firstLoginAvatarInput.click(); });
     if (firstLoginAvatarInput) firstLoginAvatarInput.addEventListener('change', function(e) {
         var f = e.target.files[0];
@@ -17797,22 +17825,25 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    // ✅ Auth Overlay ကို ပထမ ဖျောက်ထား (IndexDB စစ်မယ်)
     authOverlay.style.display = 'none';
     authOverlay.classList.add('hidden');
     appWrapper.classList.add('hidden');
 
+    // ✅ Session စစ်
     checkSession().then(function(has) {
-        if (has) console.log('Auto-login success');
-        else {
+        if (has) {
+            console.log('Auto-login success -- Home တန်းပြ');
+        } else {
+            // Session မရှိရင် Auth ပြ
             authOverlay.style.display = 'flex';
             authOverlay.classList.remove('hidden');
         }
         setTimeout(attachChatRoomAvatarClick, 1000);
-        console.log('STAR ARCADE Ready (Email/Password + First Login Popup + Loading + postList)');
+        console.log('STAR ARCADE Ready');
     });
 });
-
-
+```
     
 
 // ============================================================
