@@ -12709,14 +12709,11 @@ body {
 <script>
 // ============================================================
 //  STAR ARCADE -- FULL script.js
-//  M Server + Auto Online + Play ID + Red Dot (New Msg)
-//  ✅ Email/Password Auth System (Gmail + Password + Server No)
-//  ✅ First Login Popup (Avatar + Name) -- Account ဖွင့်ပြီးတာနဲ့ ပြ
-//  ✅ Loading on Buttons
-//  ✅ postList + giftList -- Account ဖွင့်တာနဲ့ Firebase မှာ ရှိ
-//  ✅ Auto-login: IndexDB ကနေ တန်း Home ပြ (Firebase ကို နောက်ကွယ်မှာ ချိတ်)
-//  ✅ Friend Cache မှာ Post List + Gift List ပါ သိမ်း
-//  Version: 2026-10-05
+//  ✅ Auto-login: IndexDB ကနေ တန်း Home ပြ
+//  ✅ သူများ Friends ကြည့်ရင် Firebase Server ကို သွားရှာ
+//  ✅ သူများ Profile: Post/Gift "View" စာသာပဲ ပြ
+//  ✅ သူများ Post List: View ပဲ Delete မပါ
+//  Version: 2026-10-06
 // ============================================================
 
 // ===================================================
@@ -13139,7 +13136,7 @@ function saveUserToDB(user) {
                 roleOwned: user.roleOwned || [],
                 mServer: user.mServer || [],
                 postList: user.postList || [],
-                giftList: user.giftList || [],        // ✅ Gift List ပါ ထည့်
+                giftList: user.giftList || [],
                 online: user.online || false,
                 isFirstLogin: user.isFirstLogin !== undefined ? user.isFirstLogin : true
             };
@@ -13212,7 +13209,7 @@ function saveUserToFirebase(userData, serverId) {
             roleOwned: userData.roleOwned || [],
             mServer: userData.mServer || [],
             postList: userData.postList || [],
-            giftList: userData.giftList || [],     // ✅ Gift List ပါ
+            giftList: userData.giftList || [],
             online: true,
             avatar: userData.avatar || '',
             isFirstLogin: userData.isFirstLogin !== undefined ? userData.isFirstLogin : true
@@ -13295,7 +13292,7 @@ function startSelfDataListener(userId, serverId) {
             roleOwned: data.roleOwned || currentUser.roleOwned,
             mServer: data.mServer || currentUser.mServer,
             postList: data.postList || currentUser.postList || [],
-            giftList: data.giftList || currentUser.giftList || [],   // ✅ Gift List ပါ
+            giftList: data.giftList || currentUser.giftList || [],
             online: data.online !== undefined ? data.online : currentUser.online,
             isFirstLogin: data.isFirstLogin !== undefined ? data.isFirstLogin : currentUser.isFirstLogin
         };
@@ -13380,7 +13377,7 @@ function fullSyncFromFirebase(email, serverId) {
                 roleOwned: data.roleOwned || [],
                 mServer: data.mServer || [],
                 postList: data.postList || [],
-                giftList: data.giftList || [],   // ✅ Gift List ပါ
+                giftList: data.giftList || [],
                 online: data.online === true,
                 isFirstLogin: data.isFirstLogin !== undefined ? data.isFirstLogin : true
             };
@@ -13409,10 +13406,9 @@ function ensureFirebaseAuth(serverId, email) {
 }
 
 // ===================================================
-//  ENTER APP -- ✅ Firebase ကို နောက်ကွယ်မှာ ချိတ်
+//  ENTER APP -- Firebase ကို နောက်ကွယ်မှာ ချိတ်
 // ===================================================
 function enterApp(user, skipLoading) {
-    // ✅ Auth Overlay ကို ချက်ချင်း ဖျောက်
     authOverlay.style.display = 'none';
     authOverlay.classList.add('hidden');
     appWrapper.classList.remove('hidden');
@@ -13426,7 +13422,6 @@ function enterApp(user, skipLoading) {
 
     if (user.avatar && user.avatar !== '') profileAvatar.src = user.avatar;
 
-    // ✅ UI ကို ချက်ချင်း ပြ
     applyFrameToSidebar();
 
     var defaultBtn = document.querySelector('.nav-btn[data-tab="home"]');
@@ -13444,7 +13439,6 @@ function enterApp(user, skipLoading) {
         renderChatListTimer = null;
     }
 
-    // ✅ Firebase ကို နောက်ကွယ်မှာ ချိတ် (Loading မပြ)
     setTimeout(function() {
         setupMServer().then(function() {
             if (currentDb && currentUser) {
@@ -13566,7 +13560,7 @@ function showNewAccountError(msg) {
 }
 
 // ===================================================
-//  NEW ACCOUNT (Gmail + Password ပဲ -- Name က First Login Popup မှာ)
+//  NEW ACCOUNT
 // ===================================================
 function handleNewAccount() {
     if (isProcessing) return;
@@ -13626,7 +13620,7 @@ function handleNewAccount() {
                             mServer: mServer,
                             serverId: serverId,
                             postList: [],
-                            giftList: [],              // ✅ Gift List
+                            giftList: [],
                             isFirstLogin: true
                         };
                         return saveUserToFirebase(userData, serverId).then(function(saved) {
@@ -13684,7 +13678,7 @@ function handleNewAccount() {
 }
 
 // ===================================================
-//  LOGIN (Gmail + Password + Server No)
+//  LOGIN
 // ===================================================
 function handleLogin() {
     if (isProcessing) return;
@@ -13889,7 +13883,7 @@ function showLoginPopupError(msg) {
 }
 
 // ===================================================
-//  CHECK SESSION -- ✅ IndexDB ကနေ တန်း Home ပြ
+//  CHECK SESSION -- IndexDB ကနေ တန်း Home ပြ
 // ===================================================
 function checkSession() {
     return new Promise(function(resolve) {
@@ -13898,19 +13892,16 @@ function checkSession() {
             var serverId = session.serverId;
             var email = session.email;
 
-            // ✅ IndexDB ကနေ user data ယူ -- Firebase မဆွဲ
             getFromDB('users').then(function(users) {
                 var userData = users ? users[email] : null;
 
                 if (userData) {
-                    // ✅ IndexDB ထဲမှာ ရှိရင် -- တန်း Home ပြ
                     userData.serverId = serverId;
                     currentUser = userData;
                     currentServerId = serverId;
                     currentDb = getDbForServer(serverId);
                     currentAuth = getAuthForServer(serverId);
 
-                    // ✅ ချက်ချင်း Home ပြ
                     if (userData.isFirstLogin === undefined || userData.isFirstLogin === true) {
                         setTimeout(function() { showFirstLoginPopup(); }, 100);
                     } else {
@@ -13918,14 +13909,13 @@ function checkSession() {
                     }
                     resolve(true);
 
-                    // ✅ Firebase ကို နောက်ကွယ်မှာ Sync (Loading မပြ)
+                    // Background sync
                     setTimeout(function() {
                         fullSyncFromFirebase(email, serverId).then(function(freshData) {
                             if (!freshData) return;
                             if (!Array.isArray(freshData.postList)) freshData.postList = [];
                             if (!Array.isArray(freshData.giftList)) freshData.giftList = [];
 
-                            // Update memory + IDB
                             currentUser = Object.assign({}, currentUser, freshData);
                             saveUserToDB(currentUser);
                         }).catch(function(err) {
@@ -13934,7 +13924,6 @@ function checkSession() {
                     }, 500);
 
                 } else {
-                    // ✅ IndexDB မှာ မရှိရင် Firebase ဆွဲ (Loading ပြ)
                     fullSyncFromFirebase(email, serverId).then(function(freshData) {
                         if (!freshData) {
                             clearSessionFromDB();
@@ -14190,7 +14179,6 @@ function loadProfileData() {
     applyFrameToSidebar();
     loadProfileRoles();
 
-    // ✅ Stats Sync (external hook မှာ ရှိပြီးသား)
     if (typeof window.syncProfileStats === 'function') {
         setTimeout(window.syncProfileStats, 200);
     }
@@ -15045,8 +15033,8 @@ function extractUseOnlyData(data, sid, serverNo, uid) {
         blockList: Array.isArray(data.blockList) ? data.blockList : [],
         roleUse: Array.isArray(data.roleUse) ? data.roleUse : [],
         friendsList: Array.isArray(data.friendsList) ? data.friendsList : [],
-        postList: Array.isArray(data.postList) ? data.postList : [],   // ✅ Post List ပါ
-        giftList: Array.isArray(data.giftList) ? data.giftList : [],   // ✅ Gift List ပါ
+        postList: Array.isArray(data.postList) ? data.postList : [],
+        giftList: Array.isArray(data.giftList) ? data.giftList : [],
         mServer: Array.isArray(data.mServer) ? data.mServer : []
     };
 }
@@ -16593,7 +16581,6 @@ function loadFriendProfileIntoFsProfile(d) {
         editWrap.style.pointerEvents = 'none';
     }
 
-    // ✅ Stats Sync (သူများ ဆိုရင် View ပြ)
     if (typeof window.syncProfileStats === 'function') {
         setTimeout(window.syncProfileStats, 200);
     }
@@ -17824,17 +17811,14 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // ✅ Auth Overlay ကို ပထမ ဖျောက်ထား (IndexDB စစ်မယ်)
     authOverlay.style.display = 'none';
     authOverlay.classList.add('hidden');
     appWrapper.classList.add('hidden');
 
-    // ✅ Session စစ်
     checkSession().then(function(has) {
         if (has) {
             console.log('Auto-login success -- Home တန်းပြ');
         } else {
-            // Session မရှိရင် Auth ပြ
             authOverlay.style.display = 'flex';
             authOverlay.classList.remove('hidden');
         }
