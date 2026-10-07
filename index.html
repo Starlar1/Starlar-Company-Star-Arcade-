@@ -12710,9 +12710,12 @@ body {
 // ============================================================
 //  STAR ARCADE -- FULL script.js
 //  ✅ Auto-login: IndexDB ကနေ တန်း Home ပြ
-//  ✅ သူများ Friends ကြည့်ရင် Firebase Server ကို သွားရှာ
-//  ✅ သူများ Profile: Post/Gift "View" စာသာပဲ ပြ
-//  ✅ သူများ Post List: View ပဲ Delete မပါ
+//  ✅ Self Profile: Friends/Likes/Post → နံပါတ်ပဲ ပြ
+//  ✅ Other Profile: Friends/Likes/Post → "View" စာသာပဲ ပြ
+//  ✅ View နှိပ်မှ Server သွားဆွဲ (Firebase → Post List → Worker → Like Count)
+//  ✅ သူများ Post List: Delete မပါ
+//  ✅ သူများ Friends List: Delete/Block မပါ (Add ပဲ)
+//  ✅ သူများ Data: IndexDB မသိမ်း (ကိုယ့် Data သာ)
 //  Version: 2026-10-06
 // ============================================================
 
@@ -14179,9 +14182,73 @@ function loadProfileData() {
     applyFrameToSidebar();
     loadProfileRoles();
 
-    if (typeof window.syncProfileStats === 'function') {
-        setTimeout(window.syncProfileStats, 200);
+    // ✅ Self Stats Sync -- နံပါတ်ပဲ ပြ
+    syncSelfProfileStats();
+}
+
+// ===================================================
+//  ✅ SELF PROFILE STATS -- နံပါတ်ပဲ ပြ
+// ===================================================
+function syncSelfProfileStats() {
+    if (!currentUser) return;
+
+    var friendsCountEl = document.getElementById('fsProfileFriendsCount');
+    var postsCountEl = document.getElementById('fsProfilePostsCount');
+    var likesCountEl = document.getElementById('fsProfileLikesCount');
+
+    // Friends -- currentUser.friendsList.length
+    if (friendsCountEl) {
+        friendsCountEl.textContent = (currentUser.friendsList || []).length;
     }
+
+    // Likes & Posts -- Post List ရဲ့ length
+    if (postsCountEl) {
+        postsCountEl.textContent = (currentUser.postList || []).length;
+    }
+
+    // Like Count -- Server ကနေ စစ် (နောက်ကွယ်မှာ)
+    fetchSelfLikeCount().then(function(totalLikes) {
+        if (likesCountEl) likesCountEl.textContent = totalLikes;
+    });
+}
+
+function fetchSelfLikeCount() {
+    return new Promise(function(resolve) {
+        if (!currentUser || !currentServerId) return resolve(0);
+        var postList = Array.isArray(currentUser.postList) ? currentUser.postList : [];
+        if (postList.length === 0) return resolve(0);
+
+        var W_SERVERS = window.WORKER_SERVERS || [];
+        var promises = postList.map(function(item) {
+            return fetchSingleLikeCount(W_SERVERS, item.postId, item.workerNo);
+        });
+
+        Promise.all(promises).then(function(counts) {
+            var total = 0;
+            counts.forEach(function(c) { if (typeof c === 'number' && c > 0) total += c; });
+            resolve(total);
+        }).catch(function() { resolve(0); });
+    });
+}
+
+function fetchSingleLikeCount(W_SERVERS, postId, workerNo) {
+    return new Promise(function(resolve) {
+        if (!W_SERVERS || W_SERVERS.length === 0) return resolve(0);
+        var srv = W_SERVERS.find(function(s) { return s.number === parseInt(workerNo); });
+        if (!srv) return resolve(0);
+
+        var client = (typeof window.getWorkerClient === 'function')
+            ? window.getWorkerClient(srv.id)
+            : null;
+        if (!client) return resolve(0);
+
+        client.query('SELECT likeCount FROM posts WHERE postId = ? LIMIT 1', [postId])
+            .then(function(rows) {
+                if (!rows || rows.length === 0) return resolve(0);
+                resolve(parseInt(rows[0].likeCount) || 0);
+            })
+            .catch(function() { resolve(0); });
+    });
 }
 
 function showMarkPopup(mark) {
@@ -16486,6 +16553,7 @@ function stopAppMessageListeners() {
 
 // ===================================================
 //  FRIEND PROFILE + POPUP
+//  ✅ သူများ Profile -- Stats ကို "View" ပြ
 // ===================================================
 function loadFriendProfileIntoFsProfile(d) {
     currentViewingProfile = 'friend';
@@ -16581,9 +16649,257 @@ function loadFriendProfileIntoFsProfile(d) {
         editWrap.style.pointerEvents = 'none';
     }
 
-    if (typeof window.syncProfileStats === 'function') {
-        setTimeout(window.syncProfileStats, 200);
+    // ✅ သူများ Stats -- Friends/Likes/Post ကို "View" စာသာပဲ ပြ
+    syncOtherProfileStats();
+}
+
+// ===================================================
+//  ✅ OTHER PROFILE STATS -- "View" စာသာပဲ ပြ
+// ===================================================
+function syncOtherProfileStats() {
+    var friendsCountEl = document.getElementById('fsProfileFriendsCount');
+    var postsCountEl = document.getElementById('fsProfilePostsCount');
+    var likesCountEl = document.getElementById('fsProfileLikesCount');
+
+    // Friends -- count ပြ (data ထဲ ရှိပြီးသား)
+    if (currentFriendProfileData) {
+        var fList = Array.isArray(currentFriendProfileData.friendsList) ? currentFriendProfileData.friendsList : [];
+        if (friendsCountEl) friendsCountEl.textContent = fList.length;
     }
+
+    // Likes & Post -- "View" ပြ
+    if (postsCountEl) postsCountEl.textContent = 'View';
+    if (likesCountEl) likesCountEl.textContent = 'View';
+}
+
+// ===================================================
+//  ✅ STAT BUTTONS -- Self / Other ခွဲပြီး Bind
+// ===================================================
+function bindStatButtons() {
+    var friendsBtn = document.getElementById('fsProfileFriendsBtn');
+    var likesBtn = document.getElementById('fsProfileLikesBtn');
+    var postsBtn = document.getElementById('fsProfilePostsBtn');
+
+    if (friendsBtn && !friendsBtn._hooked) {
+        friendsBtn._hooked = true;
+        friendsBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            if (currentViewingProfile === 'self') {
+                if (typeof window.showFriendsListPopup === 'function') window.showFriendsListPopup();
+            } else {
+                // သူများ -- Firebase Server ကို သွားရှာ
+                if (currentFriendProfileData) {
+                    openFriendsListScreen(currentFriendProfileData.serverId, currentFriendProfileData.userId, currentFriendProfileData.name);
+                }
+            }
+        });
+    }
+
+    if (likesBtn && !likesBtn._hooked) {
+        likesBtn._hooked = true;
+        likesBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            if (currentViewingProfile === 'self') {
+                if (typeof window.showStatPopup === 'function') {
+                    window.showStatPopup('likes', currentServerId, currentUser.userId, currentUser.name);
+                }
+            } else {
+                // သူများ -- Firebase Server ကို သွားရှာ
+                if (currentFriendProfileData) {
+                    showOtherStatPopup('likes', currentFriendProfileData.serverId, currentFriendProfileData.userId);
+                }
+            }
+        });
+    }
+
+    if (postsBtn && !postsBtn._hooked) {
+        postsBtn._hooked = true;
+        postsBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            if (currentViewingProfile === 'self') {
+                if (typeof window.showStatPopup === 'function') {
+                    window.showStatPopup('posts', currentServerId, currentUser.userId, currentUser.name);
+                }
+            } else {
+                // သူများ -- Firebase Server ကို သွားရှာ
+                if (currentFriendProfileData) {
+                    showOtherStatPopup('posts', currentFriendProfileData.serverId, currentFriendProfileData.userId);
+                }
+            }
+        });
+    }
+}
+
+// ===================================================
+//  ✅ OTHER STAT POPUP -- သူများ Like/Post
+//  • Firebase postList → Worker → likeCount
+//  • Post List ကို Popup မှာ ပြ
+//  • Delete မပါ (View + Open ပဲ)
+// ===================================================
+function showOtherStatPopup(type, serverId, userId) {
+    var existing = document.getElementById('profileStatPopup');
+    if (existing) existing.remove();
+
+    var overlay = document.createElement('div');
+    overlay.id = 'profileStatPopup';
+    overlay.className = 'profile-stat-popup-overlay';
+
+    var titleText = type === 'likes' ? 'Like အရေတွက်' : 'Post အရေတွက်';
+    var iconSvg = type === 'likes'
+        ? '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ff3b30" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>'
+        : '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ff6d1f" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>';
+
+    var subtitleText = type === 'likes' ? 'သူ့ရရှိထားသည်' : 'သူ့ Post အရေတွက်';
+
+    overlay.innerHTML =
+        '<div class="profile-stat-popup" style="max-width:360px;max-height:80vh;">' +
+            '<div class="profile-stat-popup-header" style="justify-content:center;padding:16px 18px 8px;border-bottom:1px solid var(--border);position:relative;">' +
+                '<h3 style="justify-content:center;">' + iconSvg + '<span>' + titleText + '</span></h3>' +
+                '<button class="profile-stat-popup-close" id="statPopupClose" style="position:absolute;top:10px;right:12px;">' +
+                    '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>' +
+                '</button>' +
+            '</div>' +
+            '<div class="profile-stat-popup-body" id="otherStatBody" style="padding:8px 14px 20px;overflow-y:auto;">' +
+                '<div style="text-align:center;color:var(--text-muted);font-size:12px;font-weight:600;padding:4px 0 10px;">' + subtitleText + '</div>' +
+                '<div class="profile-stat-popup-big-number" id="statBigNumber" style="text-align:center;">—</div>' +
+                '<div id="otherStatList" style="margin-top:16px;text-align:left;"></div>' +
+            '</div>' +
+        '</div>';
+
+    document.body.appendChild(overlay);
+
+    function close() { overlay.remove(); }
+    document.getElementById('statPopupClose').addEventListener('click', close);
+    overlay.addEventListener('click', function(e) { if (e.target === overlay) close(); });
+
+    var bigNumEl = document.getElementById('statBigNumber');
+    var listEl = document.getElementById('otherStatList');
+
+    // Firebase Server ကနေ Post List + Like Count ဆွဲ
+    fetchOtherStatsFromServer(serverId, userId, type).then(function(stats) {
+        var finalValue = type === 'likes' ? stats.likes : stats.posts;
+        bigNumEl.textContent = finalValue;
+
+        // Post List ပြ (type = posts)
+        if (type === 'posts' && stats.postList && stats.postList.length > 0) {
+            renderOtherPostsList(listEl, stats.postList, serverId);
+        } else if (type === 'likes' && stats.postList && stats.postList.length > 0) {
+            // Like ရှိတဲ့ Post ပဲ ပြ
+            var withLikes = stats.postList.filter(function(p) { return (parseInt(p.likeCount) || 0) > 0; });
+            if (withLikes.length > 0) {
+                renderOtherPostsList(listEl, withLikes, serverId);
+            }
+        }
+    }).catch(function() {
+        bigNumEl.textContent = '0';
+    });
+}
+
+function fetchOtherStatsFromServer(serverId, userId, type) {
+    return new Promise(function(resolve) {
+        if (typeof getDbForServer !== 'function') return resolve({ posts: 0, likes: 0, postList: [] });
+        var db = getDbForServer(serverId);
+        if (!db) return resolve({ posts: 0, likes: 0, postList: [] });
+
+        db.ref('users/' + userId + '/postList').once('value')
+            .then(function(snap) {
+                var list = snap.val();
+                if (!list) return resolve({ posts: 0, likes: 0, postList: [] });
+                if (!Array.isArray(list)) {
+                    list = Object.keys(list).map(function(k) { return list[k]; });
+                }
+                if (list.length === 0) return resolve({ posts: 0, likes: 0, postList: [] });
+
+                // တစ်ခုချင်း Worker ကနေ likeCount ဆွဲ
+                var W_SERVERS = window.WORKER_SERVERS || [];
+                var promises = list.map(function(item) {
+                    return fetchPostDetailWithLikes(W_SERVERS, item.postId, item.workerNo);
+                });
+
+                Promise.all(promises).then(function(posts) {
+                    var validPosts = posts.filter(function(p) { return p !== null; });
+                    var totalLikes = 0;
+                    validPosts.forEach(function(p) { totalLikes += (parseInt(p.likeCount) || 0); });
+                    resolve({
+                        posts: validPosts.length,
+                        likes: totalLikes,
+                        postList: validPosts
+                    });
+                }).catch(function() {
+                    resolve({ posts: list.length, likes: 0, postList: [] });
+                });
+            })
+            .catch(function() { resolve({ posts: 0, likes: 0, postList: [] }); });
+    });
+}
+
+function fetchPostDetailWithLikes(W_SERVERS, postId, workerNo) {
+    return new Promise(function(resolve) {
+        if (!W_SERVERS || W_SERVERS.length === 0) return resolve(null);
+        var srv = W_SERVERS.find(function(s) { return s.number === parseInt(workerNo); });
+        if (!srv) return resolve(null);
+
+        var client = (typeof window.getWorkerClient === 'function')
+            ? window.getWorkerClient(srv.id)
+            : null;
+        if (!client) return resolve(null);
+
+        client.query('SELECT postId, likeCount, commentCount, caption, postType, mediaUrls, linkData, createdAt, userId, userName, userAvatar, serverId, serverNo, roleId, workerNo FROM posts WHERE postId = ? LIMIT 1', [postId])
+            .then(function(rows) {
+                if (!rows || rows.length === 0) return resolve(null);
+                var post = rows[0];
+                post._serverId = srv.id;
+                post.workerNo = parseInt(workerNo);
+                post.likeCount = parseInt(post.likeCount) || 0;
+                post.commentCount = parseInt(post.commentCount) || 0;
+                try { post.mediaUrls = JSON.parse(post.mediaUrls || '[]'); } catch(e) { post.mediaUrls = []; }
+                try { post.linkData = post.linkData ? JSON.parse(post.linkData) : null; } catch(e) { post.linkData = null; }
+                resolve(post);
+            })
+            .catch(function() { resolve(null); });
+    });
+}
+
+// ===================================================
+//  ✅ OTHER POST LIST RENDER -- Delete မပါ
+// ===================================================
+function renderOtherPostsList(container, posts, serverId) {
+    container.innerHTML = '';
+
+    if (!posts || posts.length === 0) {
+        container.innerHTML = '<div style="text-align:center;color:var(--text-muted);font-size:12px;padding:20px;">Post မရှိပါ</div>';
+        return;
+    }
+
+    posts.forEach(function(post) {
+        var workerNo = post.workerNo || 1;
+        var caption = post.caption ? escapeHtml(String(post.caption).substring(0, 60)) : '(No caption)';
+        var likeCount = parseInt(post.likeCount) || 0;
+        var commentCount = parseInt(post.commentCount) || 0;
+
+        var item = document.createElement('div');
+        item.className = 'profile-stat-post-item';
+        item.style.cssText = 'background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:12px;margin-bottom:10px;cursor:pointer;';
+        item.innerHTML =
+            '<div style="font-size:11px;color:var(--text-muted);font-family:monospace;margin-bottom:4px;">Post.' + workerNo + '.' + escapeHtml(post.postId) + '</div>' +
+            '<div style="font-size:13px;color:var(--text-main);margin-bottom:8px;line-height:1.4;">' + caption + '</div>' +
+            '<div style="display:flex;gap:12px;font-size:11px;color:var(--text-muted);">' +
+                '<span style="color:#ff3b30;font-weight:700;">♥ ' + likeCount + '</span>' +
+                '<span>💬 ' + commentCount + '</span>' +
+                '<span style="margin-left:auto;color:var(--accent);font-weight:700;">View</span>' +
+            '</div>';
+
+        // ✅ နှိပ်ရင် Post Info ဖွင့် (Delete မပါ)
+        item.addEventListener('click', function() {
+            var popup = document.getElementById('profileStatPopup');
+            if (popup) popup.remove();
+            if (typeof window.openPostInfoScreen === 'function') {
+                window.openPostInfoScreen(post.postId, workerNo);
+            }
+        });
+
+        container.appendChild(item);
+    });
 }
 
 function attachChatRoomAvatarClick() {
@@ -16681,6 +16997,11 @@ function renderProfileCardPopup(cached) {
     });
 }
 
+// ===================================================
+//  ✅ FRIENDS LIST SCREEN -- သူများ
+//  • Firebase Server ကို သွားရှာ
+//  • Delete/Block မပါ -- Add ပဲ
+// ===================================================
 function openFriendsListScreen(sid, uid, ownerName) {
     var container = document.getElementById('friendsListContainer');
     if (!container) return;
@@ -16718,6 +17039,7 @@ function renderFriendsList(friends) {
     var html = '<div class="friends-list-items">';
     filtered.forEach(function(f) {
         var already = isFriend(f.serverId, f.userId);
+        // ✅ Delete/Block မပါ -- Add ပဲ
         var action = already ? '<span class="friend-list-already">Already</span>'
                              : '<button class="friend-list-add-btn" data-server-id="' + f.serverId + '" data-user-id="' + f.userId + '">Add</button>';
 
@@ -17000,8 +17322,6 @@ function calculateAppStorage() {
 
                 var friendsCount = 0, friendsSize = 0;
                 var msgCount = 0, msgSize = 0;
-                var textCount = 0, textSize = 0;
-                var imageCount = 0, imageSize = 0;
                 var aiChatSize = 0;
                 var othersSize = 0;
 
@@ -17010,8 +17330,6 @@ function calculateAppStorage() {
                     return resolve({
                         friendsCount: 0, friendsSize: 0,
                         msgCount: 0, msgSize: 0,
-                        textCount: 0, textSize: 0,
-                        imageCount: 0, imageSize: 0,
                         aiChatSize: 0,
                         othersSize: 0, totalSize: 0
                     });
@@ -17026,10 +17344,6 @@ function calculateAppStorage() {
                             friendsSize: friendsSize,
                             msgCount: msgCount,
                             msgSize: msgSize,
-                            textCount: textCount,
-                            textSize: textSize,
-                            imageCount: imageCount,
-                            imageSize: imageSize,
                             aiChatSize: aiChatSize,
                             othersSize: othersSize,
                             totalSize: friendsSize + msgSize + aiChatSize + othersSize
@@ -17060,13 +17374,6 @@ function calculateAppStorage() {
                                     var size = JSON.stringify(msg).length;
                                     msgSize += size;
                                     msgCount++;
-                                    if (msg && (msg.messageType === 'image' || msg.messageType === 'gif') && msg.imageData) {
-                                        imageCount++;
-                                        imageSize += size;
-                                    } else {
-                                        textCount++;
-                                        textSize += size;
-                                    }
                                 });
                             }
                         }
@@ -17088,16 +17395,8 @@ function calculateAppStorage() {
                                             aiChatSize += size;
                                             msgSize += size;
                                             msgCount++;
-                                            textCount++;
-                                            textSize += size;
                                         });
                                     }
-                                    aiChatSize += JSON.stringify({
-                                        id: session.id,
-                                        title: session.title,
-                                        createdAt: session.createdAt,
-                                        updatedAt: session.updatedAt
-                                    }).length;
                                 });
                             }
                         }
@@ -17121,8 +17420,6 @@ function calculateAppStorage() {
                 resolve({
                     friendsCount: 0, friendsSize: 0,
                     msgCount: 0, msgSize: 0,
-                    textCount: 0, textSize: 0,
-                    imageCount: 0, imageSize: 0,
                     aiChatSize: 0,
                     othersSize: 0, totalSize: 0
                 });
@@ -17131,8 +17428,6 @@ function calculateAppStorage() {
             resolve({
                 friendsCount: 0, friendsSize: 0,
                 msgCount: 0, msgSize: 0,
-                textCount: 0, textSize: 0,
-                imageCount: 0, imageSize: 0,
                 aiChatSize: 0,
                 othersSize: 0, totalSize: 0
             });
@@ -17234,25 +17529,13 @@ function clearAllMessagesData() {
             if (typeof memoryMessages !== 'undefined') memoryMessages = {};
             if (typeof pendingSaveKeys !== 'undefined') pendingSaveKeys = {};
 
-            if (typeof starSessions !== 'undefined' && Array.isArray(starSessions)) {
-                starSessions = [];
-                if (typeof currentSessionId !== 'undefined') currentSessionId = null;
-            }
-
             Promise.all(toDelete.map(function(k) {
                 return deleteFromDB(k).catch(function() {});
             })).then(function() {
                 hideLoading(); isProcessing = false;
-                var parts = [];
-                if (msgKeys.length > 0) parts.push(msgKeys.length + ' chats');
-                if (hasAiChat) parts.push('AI Chat');
-                showToast('Cleared: ' + parts.join(' + '));
+                showToast('Cleared');
                 loadStorageMonitor();
                 setTimeout(renderChatList, 300);
-
-                if (typeof starAiRender === 'function') {
-                    try { starAiRender(); } catch(e) {}
-                }
             });
         };
     }).catch(function() {
@@ -17393,14 +17676,6 @@ function resetUIAfterLogout() {
         var si = document.getElementById('searchUserId');
         if (ss) ss.value = '';
         if (si) si.value = '';
-        var cm = document.getElementById('chatRoomMessages');
-        if (cm) cm.innerHTML = '<div class="chat-empty-state"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#5a5a6a" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>Start</span></div>';
-        var ci = document.getElementById('chatMessageInput');
-        if (ci) { ci.value = ''; ci.style.height = ''; }
-        var cc = document.getElementById('chatClipBtn');
-        var cs = document.getElementById('chatSendBtn');
-        if (cc) cc.classList.remove('hidden');
-        if (cs) cs.classList.add('hidden');
     } catch(e) {}
 
     try {
@@ -17408,35 +17683,6 @@ function resetUIAfterLogout() {
         var dn = document.querySelector('.nav-btn[data-tab="home"]');
         if (dn) dn.classList.add('active');
         switchTab('home');
-    } catch(e) {}
-
-    try {
-        var flc = document.getElementById('friendsListContainer');
-        if (flc) flc.innerHTML = '';
-        var tsk = document.getElementById('tasksList');
-        if (tsk) tsk.innerHTML = '';
-    } catch(e) {}
-
-    ['.profile-card-overlay', '.logout-options-overlay', '.msg-menu-popup', '.chat-room-menu-popup',
-     '.mark-popup-overlay', '.report-popup-overlay', '.password-popup-overlay', '.bg-picker-overlay'].forEach(function(sel) {
-        var el = document.querySelector(sel);
-        if (el) el.remove();
-    });
-
-    try {
-        var totalEl = document.getElementById('storageTotalValue');
-        if (totalEl) totalEl.textContent = '0 KB';
-        var fc = document.getElementById('storageFriendsCount'); if (fc) fc.textContent = '0';
-        var fs = document.getElementById('storageFriendsSize'); if (fs) fs.textContent = '0 KB';
-        var mc = document.getElementById('storageMsgCount'); if (mc) mc.textContent = '0';
-        var ms = document.getElementById('storageMsgSize'); if (ms) ms.textContent = '0 KB';
-        var ap = document.getElementById('storageAvailablePercent'); if (ap) ap.textContent = '100';
-        var as = document.getElementById('storageAvailableSize'); if (as) as.textContent = '--';
-    } catch(e) {}
-
-    try {
-        var sf = document.querySelector('.sidebar-frame-overlay');
-        if (sf) sf.remove();
     } catch(e) {}
 }
 
@@ -17448,17 +17694,6 @@ function performCleanupBeforeClear() {
     try { cancelOnDisconnect(); } catch(e) {}
     try { detachOnlineEventListeners(); } catch(e) {}
     stopAllListeners();
-    try {
-        if (chatRoomListener) { chatRoomListener.off(); chatRoomListener = null; }
-        stopChatRoomMessageListeners();
-        stopChatRoomBlockListener();
-        closeBubblePicker();
-        clearReplyState();
-    } catch(e) {}
-    try { stopAppMessageListeners(); } catch(e) {}
-    try { stopFriendsListListener(); } catch(e) {}
-    try { stopSelfDataListener(); } catch(e) {}
-
     return onlinePromise;
 }
 
@@ -17481,7 +17716,7 @@ function logoutUser() {
         resetAllInMemoryState();
         resetUIAfterLogout();
         hideLoading();
-        setTimeout(function() { alert('Logged out\n\nAccount Data ဖျက်ပြီးပါပြီ။\n(Message တွေ ကျန်နေပါတယ်)'); }, 300);
+        setTimeout(function() { alert('Logged out'); }, 300);
     })
     .catch(function(err) {
         console.error('Logout error:', err);
@@ -17704,10 +17939,6 @@ document.addEventListener('DOMContentLoaded', function() {
             if (has) { cb.classList.add('hidden'); cs.classList.remove('hidden'); }
             else { cb.classList.remove('hidden'); cs.classList.add('hidden'); }
             autoResize();
-            var len = ci.value.length;
-            if (len > 9900) ci.style.borderColor = '#ff4444';
-            else if (len > 9000) ci.style.borderColor = '#ffaa44';
-            else ci.style.borderColor = '';
         });
         ci.addEventListener('focus', scrollToBottomDebounced);
         cs.addEventListener('click', sendMessage);
@@ -17740,11 +17971,6 @@ document.addEventListener('DOMContentLoaded', function() {
             else if (loginPopup && !loginPopup.classList.contains('hidden')) closeLoginPopup();
             else if (newAccountPopup && !newAccountPopup.classList.contains('hidden')) closeNewAccountPopup();
         }
-    });
-
-    window.addEventListener('popstate', function() {
-        if (fullscreenOverlay && fullscreenOverlay.classList.contains('active')) closeFullscreen();
-        else if (sidebar && sidebar.classList.contains('open')) closeSidebar();
     });
 
     if (bottomNav) {
@@ -17780,36 +18006,9 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape' && plusMenuOpen) closePlusMenu();
-    });
-
     setTimeout(initSlider, 100);
     setTimeout(initRoleSlider, 200);
-
-    var bioInput = document.getElementById('editBioInput');
-    if (bioInput) {
-        bioInput.addEventListener('input', function() {
-            var lines = this.value.split('\n');
-            if (lines.length > 5) {
-                this.style.borderColor = '#ff4444';
-                var w = document.getElementById('bioWarning');
-                if (!w) {
-                    w = document.createElement('div');
-                    w.id = 'bioWarning';
-                    w.style.color = '#ff4444';
-                    w.style.fontSize = '12px';
-                    w.style.marginTop = '4px';
-                    w.textContent = 'Max 5 lines';
-                    this.parentNode.appendChild(w);
-                }
-            } else {
-                this.style.borderColor = '';
-                var w = document.getElementById('bioWarning');
-                if (w) w.remove();
-            }
-        });
-    }
+    setTimeout(bindStatButtons, 500);
 
     authOverlay.style.display = 'none';
     authOverlay.classList.add('hidden');
@@ -17817,16 +18016,16 @@ document.addEventListener('DOMContentLoaded', function() {
 
     checkSession().then(function(has) {
         if (has) {
-            console.log('Auto-login success -- Home တန်းပြ');
+            console.log('Auto-login success');
         } else {
             authOverlay.style.display = 'flex';
             authOverlay.classList.remove('hidden');
         }
         setTimeout(attachChatRoomAvatarClick, 1000);
+        setTimeout(bindStatButtons, 1000);
         console.log('STAR ARCADE Ready');
     });
-});
-    
+});    
 
 // ============================================================
 // ✅ IMAGE SEND + LINK SYSTEM (GIF မပါ)
