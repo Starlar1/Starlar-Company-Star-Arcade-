@@ -12716,7 +12716,7 @@ body {
 //  ✅ သူများ Post List: Delete မပါ
 //  ✅ သူများ Friends List: Delete/Block မပါ (Add ပဲ)
 //  ✅ သူများ Data: IndexDB မသိမ်း (ကိုယ့် Data သာ)
-//  Version: 2026-10-06
+//  Version: 2026-10-07
 // ============================================================
 
 // ===================================================
@@ -12757,7 +12757,7 @@ var FIREBASE_SERVERS = [
 var M_SERVER_TARGET_COUNT = 10;
 
 // ===================================================
-//  PLAY CONFIG -- G1/G2/G3
+//  PLAY CONFIG
 // ===================================================
 var PLAY_CONFIG = {
     games: {
@@ -12795,7 +12795,6 @@ FIREBASE_SERVERS.forEach(function(server) {
         firebaseDbs[server.id] = firebase.database(app);
         firebaseAuths[server.id] = firebase.auth(app);
         firestoreDbs[server.id] = firebase.firestore(app);
-        console.log('Initialized:', server.name);
     } catch(e) { console.error('Init error', server.name, e); }
 });
 
@@ -13067,11 +13066,6 @@ function escapeHtml(s) {
         return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c];
     });
 }
-function pickRandomFirestoreServer() {
-    if (FIREBASE_SERVERS.length === 0) return null;
-    return FIREBASE_SERVERS[Math.floor(Math.random() * FIREBASE_SERVERS.length)].id;
-}
-
 function pickMServerForUser() {
     var allServerIds = FIREBASE_SERVERS.map(function(s) { return s.id; });
     if (allServerIds.length <= M_SERVER_TARGET_COUNT) return allServerIds.slice();
@@ -13099,15 +13093,6 @@ function getNextAccNo(db) {
 // ===================================================
 //  USER STORAGE
 // ===================================================
-function getUserFromDB(email) {
-    return new Promise(function(resolve) {
-        getFromDB('users').then(function(users) {
-            if (!users) resolve(null);
-            else resolve(users[email] || null);
-        }).catch(function() { resolve(null); });
-    });
-}
-
 function saveUserToDB(user) {
     return new Promise(function(resolve, reject) {
         getFromDB('users').then(function(users) {
@@ -13225,10 +13210,7 @@ function updateUserOnlineStatus(userId, serverId, online) {
         var db = getDbForServer(serverId);
         if (!db) return reject(new Error('No DB'));
         var auth = getAuthForServer(serverId);
-        if (!auth || !auth.currentUser) {
-            console.warn('No auth -- skip online update');
-            return resolve();
-        }
+        if (!auth || !auth.currentUser) return resolve();
         db.ref('users/' + userId + '/online').set(online).then(resolve).catch(reject);
     });
 }
@@ -13238,19 +13220,14 @@ function updateUserOnlineStatus(userId, serverId, online) {
 // ===================================================
 function setupMServer() {
     if (!currentUser || !currentServerId) return Promise.resolve();
-    if (Array.isArray(currentUser.mServer) && currentUser.mServer.length > 0) {
-        console.log('M Server already set:', currentUser.mServer);
-        return Promise.resolve();
-    }
+    if (Array.isArray(currentUser.mServer) && currentUser.mServer.length > 0) return Promise.resolve();
     var mServer = pickMServerForUser();
-    console.log('Setting up M Server:', mServer);
     var db = getDbForServer(currentServerId);
     if (!db) return Promise.resolve();
     return db.ref('users/' + currentUser.userId).update({ mServer: mServer })
         .then(function() {
             currentUser.mServer = mServer;
             saveUserToDB(currentUser);
-            console.log('M Server saved:', mServer);
         })
         .catch(function(err) { console.error('M Server setup failed:', err); });
 }
@@ -13316,27 +13293,6 @@ function stopSelfDataListener() {
 }
 
 // ===================================================
-//  LISTENERS
-// ===================================================
-function listenDiamondUpdates(userId, serverId) {
-    if (authListeners.length > 0) {
-        authListeners.forEach(function(ref) { try { ref.off(); } catch(e) {} });
-        authListeners = [];
-    }
-    var db = getDbForServer(serverId);
-    if (!db) return;
-    var ref = db.ref('users/' + userId + '/diamond');
-    ref.on('value', function(snap) {
-        var val = snap.val();
-        if (val !== null && val !== undefined) {
-            if (coinDisplay) coinDisplay.textContent = val;
-            if (currentUser) currentUser.diamond = val;
-        }
-    });
-    authListeners.push(ref);
-}
-
-// ===================================================
 //  FULL SYNC FROM FIREBASE
 // ===================================================
 function fullSyncFromFirebase(email, serverId) {
@@ -13390,26 +13346,17 @@ function fullSyncFromFirebase(email, serverId) {
     });
 }
 
-// ===================================================
-//  ENSURE FIREBASE AUTH (Email/Password)
-// ===================================================
 function ensureFirebaseAuth(serverId, email) {
     return new Promise(function(resolve) {
         var auth = getAuthForServer(serverId);
         if (!auth) return resolve(false);
-
-        if (auth.currentUser && auth.currentUser.email === email) {
-            console.log('Auth already signed in:', email);
-            return resolve(true);
-        }
-
-        console.log('Auth not active for:', email);
+        if (auth.currentUser && auth.currentUser.email === email) return resolve(true);
         resolve(false);
     });
 }
 
 // ===================================================
-//  ENTER APP -- Firebase ကို နောက်ကွယ်မှာ ချိတ်
+//  ENTER APP
 // ===================================================
 function enterApp(user, skipLoading) {
     authOverlay.style.display = 'none';
@@ -13473,10 +13420,9 @@ function switchTab(tab) {
 }
 
 // ===================================================
-//  PLUS MENU POPUP
+//  PLUS MENU
 // ===================================================
 var plusMenuOpen = false;
-
 function openPlusMenu() {
     if (plusMenuOpen) return;
     plusMenuOpen = true;
@@ -13487,7 +13433,6 @@ function openPlusMenu() {
     if (menu) menu.classList.add('active');
     if (plusBtn) plusBtn.classList.add('active');
 }
-
 function closePlusMenu() {
     if (!plusMenuOpen) return;
     plusMenuOpen = false;
@@ -13498,7 +13443,6 @@ function closePlusMenu() {
     if (menu) menu.classList.remove('active');
     if (plusBtn) plusBtn.classList.remove('active');
 }
-
 function handlePlusMenuAction(action) {
     closePlusMenu();
     setTimeout(function() {
@@ -13534,7 +13478,6 @@ function getLeastLoadedServer() {
                 results.forEach(function(r) { if (r.count < lowest) { lowest = r.count; bestServer = r.id; } });
             }
             if (!bestServer) bestServer = FIREBASE_SERVERS[0].id;
-            console.log('Server counts:', results, '→ Selected:', bestServer);
             resolve(bestServer);
         }).catch(function() { resolve(FIREBASE_SERVERS[0].id); });
     });
@@ -13553,9 +13496,7 @@ function showNewAccountPopup() {
         newAccountPopupError.classList.add('hidden');
     }
 }
-function closeNewAccountPopup() {
-    if (newAccountPopup) newAccountPopup.classList.add('hidden');
-}
+function closeNewAccountPopup() { if (newAccountPopup) newAccountPopup.classList.add('hidden'); }
 function showNewAccountError(msg) {
     if (!newAccountPopupError) return;
     newAccountPopupError.textContent = msg;
@@ -13571,14 +13512,8 @@ function handleNewAccount() {
     var email = newAccEmailInput.value.trim();
     var password = newAccPasswordInput.value.trim();
 
-    if (!email || !email.includes('@')) {
-        showNewAccountError('Gmail မှန်ကန်စွာ ထည့်ပါ');
-        return;
-    }
-    if (!password || password.length < 6) {
-        showNewAccountError('Password အနည်းဆုံး 6 လုံး ထည့်ပါ');
-        return;
-    }
+    if (!email || !email.includes('@')) { showNewAccountError('Gmail မှန်ကန်စွာ ထည့်ပါ'); return; }
+    if (!password || password.length < 6) { showNewAccountError('Password အနည်းဆုံး 6 လုံး ထည့်ပါ'); return; }
 
     isProcessing = true;
 
@@ -13662,7 +13597,6 @@ function handleNewAccount() {
         isProcessing = false;
         newAccountSubmitBtn.disabled = false;
         newAccountSubmitBtn.textContent = originalText;
-        console.error('New account error:', error);
 
         if (error.code === 'auth/email-already-in-use') {
             showNewAccountError('ဒီ Gmail နဲ့ Account ရှိပြီးသား။ Login လုပ်ပါ။');
@@ -13672,8 +13606,6 @@ function handleNewAccount() {
             showNewAccountError('Gmail ပုံစံ မှားနေသည်');
         } else if (error.code === 'auth/network-request-failed') {
             showNewAccountError('Internet ချိတ်ဆက်မှု မကောင်း');
-        } else if (error.code === 'auth/operation-not-allowed') {
-            showNewAccountError('Firebase မှာ Email/Password ကို Enable လုပ်ပါ');
         } else {
             showNewAccountError('Error: ' + error.message);
         }
@@ -13729,7 +13661,6 @@ function handleLogin() {
                 return null;
             }
             userData.authId = user.uid;
-
             if (!Array.isArray(userData.postList)) userData.postList = [];
             if (!Array.isArray(userData.giftList)) userData.giftList = [];
 
@@ -13746,7 +13677,7 @@ function handleLogin() {
                     giftList: result.userData.giftList || []
                 })
                 .then(function() { return result; })
-                .catch(function(err) { console.warn('Update failed:', err); return result; });
+                .catch(function(err) { return result; });
         }
         return result;
     }).then(function(result) {
@@ -13780,25 +13711,14 @@ function handleLogin() {
         isProcessing = false;
         loginSubmitBtn.disabled = false;
         loginSubmitBtn.textContent = originalText;
-        console.error('Login error:', error);
 
-        if (error.code === 'auth/user-not-found') {
-            showLoginPopupError('ဒီ Gmail နဲ့ Account မရှိပါ');
-        } else if (error.code === 'auth/wrong-password') {
-            showLoginPopupError('Password မှားနေသည်');
-        } else if (error.code === 'auth/invalid-email') {
-            showLoginPopupError('Gmail ပုံစံ မှားနေသည်');
-        } else if (error.code === 'auth/invalid-credential') {
-            showLoginPopupError('Gmail / Password မှားနေသည်');
-        } else if (error.code === 'auth/too-many-requests') {
-            showLoginPopupError('အကြိမ်အများကြီး မှားယွင်း။ ခဏနေမှ ပြန်စမ်းပါ');
-        } else if (error.code === 'auth/network-request-failed') {
-            showLoginPopupError('Internet ချိတ်ဆက်မှု မကောင်း');
-        } else if (error.code === 'auth/operation-not-allowed') {
-            showLoginPopupError('Firebase မှာ Email/Password ကို Enable လုပ်ပါ');
-        } else {
-            showLoginPopupError('Error: ' + error.message);
-        }
+        if (error.code === 'auth/user-not-found') showLoginPopupError('ဒီ Gmail နဲ့ Account မရှိပါ');
+        else if (error.code === 'auth/wrong-password') showLoginPopupError('Password မှားနေသည်');
+        else if (error.code === 'auth/invalid-email') showLoginPopupError('Gmail ပုံစံ မှားနေသည်');
+        else if (error.code === 'auth/invalid-credential') showLoginPopupError('Gmail / Password မှားနေသည်');
+        else if (error.code === 'auth/too-many-requests') showLoginPopupError('အကြိမ်အများကြီး မှားယွင်း။ ခဏနေမှ ပြန်စမ်းပါ');
+        else if (error.code === 'auth/network-request-failed') showLoginPopupError('Internet ချိတ်ဆက်မှု မကောင်း');
+        else showLoginPopupError('Error: ' + error.message);
     });
 }
 
@@ -13886,7 +13806,7 @@ function showLoginPopupError(msg) {
 }
 
 // ===================================================
-//  CHECK SESSION -- IndexDB ကနေ တန်း Home ပြ
+//  CHECK SESSION
 // ===================================================
 function checkSession() {
     return new Promise(function(resolve) {
@@ -13912,7 +13832,6 @@ function checkSession() {
                     }
                     resolve(true);
 
-                    // Background sync
                     setTimeout(function() {
                         fullSyncFromFirebase(email, serverId).then(function(freshData) {
                             if (!freshData) return;
@@ -13921,9 +13840,7 @@ function checkSession() {
 
                             currentUser = Object.assign({}, currentUser, freshData);
                             saveUserToDB(currentUser);
-                        }).catch(function(err) {
-                            console.warn('Background sync failed:', err);
-                        });
+                        }).catch(function(err) { console.warn('Background sync failed:', err); });
                     }, 500);
 
                 } else {
@@ -13947,7 +13864,6 @@ function checkSession() {
                         }
                         resolve(true);
                     }).catch(function(err) {
-                        console.warn('Sync failed:', err);
                         clearSessionFromDB();
                         resolve(false);
                     });
@@ -14030,7 +13946,7 @@ var ROLE_CONFIG = {
 };
 
 // ===================================================
-//  PROFILE
+//  PROFILE HELPERS
 // ===================================================
 function applyFrameToSidebar() {
     var profileCircle = document.querySelector('.profile-circle');
@@ -14128,6 +14044,9 @@ function loadProfileRoles() {
     }
 }
 
+// ===================================================
+//  ✅ SELF PROFILE LOAD
+// ===================================================
 function loadProfileData() {
     if (!currentUser) return;
 
@@ -14142,7 +14061,11 @@ function loadProfileData() {
     currentFriendProfileData = null;
 
     var editWrap = document.querySelector('.profile-edit-btn-wrapper');
-    if (editWrap) editWrap.style.display = '';
+    if (editWrap) {
+        editWrap.style.display = '';
+        editWrap.style.visibility = '';
+        editWrap.style.pointerEvents = '';
+    }
 
     if (fsAvatar) fsAvatar.src = currentUser.avatar || 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"%3E%3Ccircle cx="50" cy="50" r="45" fill="%2322222e"/%3E%3Ccircle cx="50" cy="35" r="18" fill="%235a5a6a"/%3E%3Cpath d="M20 75c0-18 12-30 30-30s30 12 30 30" fill="%235a5a6a"/%3E%3C/svg%3E';
     if (fsName) fsName.textContent = currentUser.name || 'Player';
@@ -14182,7 +14105,7 @@ function loadProfileData() {
     applyFrameToSidebar();
     loadProfileRoles();
 
-    // ✅ Self Stats Sync -- နံပါတ်ပဲ ပြ
+    // ✅ Self Stats Sync
     syncSelfProfileStats();
 }
 
@@ -14201,12 +14124,13 @@ function syncSelfProfileStats() {
         friendsCountEl.textContent = (currentUser.friendsList || []).length;
     }
 
-    // Likes & Posts -- Post List ရဲ့ length
+    // Posts -- currentUser.postList.length
     if (postsCountEl) {
         postsCountEl.textContent = (currentUser.postList || []).length;
     }
 
-    // Like Count -- Server ကနေ စစ် (နောက်ကွယ်မှာ)
+    // Likes -- Server ကနေ စစ် (နောက်ကွယ်မှာ)
+    if (likesCountEl) likesCountEl.textContent = '0';
     fetchSelfLikeCount().then(function(totalLikes) {
         if (likesCountEl) likesCountEl.textContent = totalLikes;
     });
@@ -14299,8 +14223,487 @@ function fallbackCopy(text, idEl) {
         idEl.classList.add('copied');
         idEl.textContent = 'Copied!';
         setTimeout(function() { idEl.classList.remove('copied'); idEl.textContent = 'ID ' + text; }, 2000);
-    } catch(e) { alert('Copy: ' + text); }
+    } catch(e) {}
     document.body.removeChild(textarea);
+}
+
+// ===================================================
+//  ✅ FRIEND PROFILE LOAD -- "View" စာသာပဲ ပြ
+// ===================================================
+function loadFriendProfileIntoFsProfile(d) {
+    currentViewingProfile = 'friend';
+    currentFriendProfileData = d;
+
+    var fsAvatar = document.getElementById('fsProfileAvatar');
+    var fsName = document.getElementById('fsProfileName');
+    var fsMark = document.getElementById('fsProfileMark');
+    var fsId = document.getElementById('fsProfileId');
+    var fsServer = document.getElementById('fsProfileServer');
+    var fsBio = document.getElementById('fsProfileBio');
+
+    if (fsAvatar) fsAvatar.src = d.avatar || 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"%3E%3Ccircle cx="50" cy="50" r="45" fill="%2322222e"/%3E%3C/svg%3E';
+    if (fsName) fsName.textContent = d.name || 'Player';
+
+    if (fsMark) {
+        fsMark.onclick = null;
+        if (d.markUse) {
+            var mark = MARK_CONFIG.marks.find(function(m) { return String(m.id) === String(d.markUse); });
+            if (mark) {
+                fsMark.innerHTML = '<img src="' + mark.image + '" />';
+                fsMark.style.display = 'inline-flex';
+                fsMark.onclick = function(e) { e.stopPropagation(); showMarkPopup(mark); };
+            } else fsMark.style.display = 'none';
+        } else fsMark.style.display = 'none';
+    }
+
+    if (fsId) { fsId.style.display = 'none'; fsId.onclick = null; }
+    if (fsServer) {
+        var server = FIREBASE_SERVERS.find(function(s) { return s.id === d.serverId; });
+        fsServer.textContent = server ? server.name : 'Server ' + (d.serverNo || 1);
+    }
+    if (fsBio) {
+        fsBio.innerHTML = (d.bio && d.bio.trim() !== '')
+            ? escapeHtml(d.bio).replace(/\n/g, '<br>')
+            : '<span class="bio-placeholder">No bio yet...</span>';
+    }
+
+    var frameImg = FRAME_CONFIG.frames.find(function(f) { return String(f.id) === String(d.frameUse); });
+    var profileFrameOverlay = document.getElementById('profileFrameOverlay');
+    if (profileFrameOverlay) {
+        if (frameImg) {
+            profileFrameOverlay.style.backgroundImage = 'url("' + frameImg.image + '")';
+            profileFrameOverlay.style.backgroundSize = 'contain';
+            profileFrameOverlay.style.backgroundPosition = 'center';
+            profileFrameOverlay.style.backgroundRepeat = 'no-repeat';
+        } else profileFrameOverlay.style.backgroundImage = 'none';
+    }
+
+    var bannerEl = document.getElementById('profileBanner');
+    if (bannerEl) {
+        var banner = BANNER_CONFIG.banners.find(function(b) { return String(b.id) === String(d.bannerUse); });
+        if (banner) {
+            bannerEl.style.backgroundImage = 'url("' + banner.image + '")';
+            bannerEl.style.backgroundSize = 'cover';
+            bannerEl.style.backgroundPosition = 'center';
+        } else bannerEl.style.backgroundImage = 'linear-gradient(135deg, #1a1a2e, #16213e, #0f3460)';
+    }
+
+    var bgSection = document.getElementById('profileBackgroundSection');
+    if (bgSection) {
+        var bg = BACKGROUND_CONFIG.backgrounds.find(function(b) { return String(b.id) === String(d.backgroundUse); });
+        if (bg) {
+            bgSection.style.backgroundImage = 'url("' + bg.image + '")';
+            bgSection.style.backgroundSize = 'cover';
+            bgSection.style.backgroundPosition = 'center';
+        } else bgSection.style.backgroundImage = 'none';
+    }
+
+    var roleGrid = document.getElementById('profileRoleGrid');
+    if (roleGrid) {
+        roleGrid.innerHTML = '';
+        var equippedRoles = Array.isArray(d.roleUse) ? d.roleUse : [];
+        for (var i = 0; i < 6; i++) {
+            var slot = document.createElement('div');
+            slot.className = 'profile-role-slot';
+            var roleId = equippedRoles[i];
+            var role = roleId ? ROLE_CONFIG.roles.find(function(r) { return String(r.id) === String(roleId); }) : null;
+            if (role) {
+                slot.innerHTML = '<img src="' + role.image + '" class="role-image" /><div class="role-name-tag">' + role.name + '</div>';
+            } else {
+                slot.classList.add('empty');
+                slot.innerHTML = '<span class="empty-slot-icon">+</span>';
+            }
+            roleGrid.appendChild(slot);
+        }
+    }
+
+    var editWrap = document.querySelector('.profile-edit-btn-wrapper');
+    if (editWrap) {
+        editWrap.style.display = 'none';
+        editWrap.style.visibility = 'hidden';
+        editWrap.style.pointerEvents = 'none';
+    }
+
+    // ✅ Other Stats -- "View" စာသာပဲ ပြ
+    syncOtherProfileStats();
+}
+
+// ===================================================
+//  ✅ OTHER PROFILE STATS -- "View" စာသာပဲ ပြ
+// ===================================================
+function syncOtherProfileStats() {
+    var friendsCountEl = document.getElementById('fsProfileFriendsCount');
+    var postsCountEl = document.getElementById('fsProfilePostsCount');
+    var likesCountEl = document.getElementById('fsProfileLikesCount');
+
+    // Friends -- count ပြ (data ထဲ ရှိပြီးသား)
+    if (currentFriendProfileData) {
+        var fList = Array.isArray(currentFriendProfileData.friendsList) ? currentFriendProfileData.friendsList : [];
+        if (friendsCountEl) friendsCountEl.textContent = fList.length;
+    }
+
+    // Likes & Post -- "View" ပြ
+    if (postsCountEl) postsCountEl.textContent = 'View';
+    if (likesCountEl) likesCountEl.textContent = 'View';
+}
+
+// ===================================================
+//  ✅ STAT BUTTONS BINDING
+//  • Self: count popup
+//  • Friend: Server သွားရှာ
+// ===================================================
+function bindStatButtons() {
+    var friendsBtn = document.getElementById('fsProfileFriendsBtn');
+    var likesBtn = document.getElementById('fsProfileLikesBtn');
+    var postsBtn = document.getElementById('fsProfilePostsBtn');
+
+    // Clone လုပ်ပြီး listener အဟောင်း ဖျက်
+    function rebind(btn, handler) {
+        if (!btn) return;
+        var newBtn = btn.cloneNode(true);
+        btn.parentNode.replaceChild(newBtn, btn);
+        newBtn.addEventListener('click', handler);
+        return newBtn;
+    }
+
+    rebind(friendsBtn, function(e) {
+        e.stopPropagation();
+        if (currentViewingProfile === 'self') {
+            if (typeof window.showFriendsListPopup === 'function') window.showFriendsListPopup();
+        } else {
+            if (currentFriendProfileData) {
+                openFriendsListScreen(currentFriendProfileData.serverId, currentFriendProfileData.userId, currentFriendProfileData.name);
+            }
+        }
+    });
+
+    rebind(document.getElementById('fsProfileLikesBtn'), function(e) {
+        e.stopPropagation();
+        if (currentViewingProfile === 'self') {
+            showSelfStatPopup('likes');
+        } else {
+            if (currentFriendProfileData) {
+                showOtherStatPopup('likes', currentFriendProfileData.serverId, currentFriendProfileData.userId);
+            }
+        }
+    });
+
+    rebind(document.getElementById('fsProfilePostsBtn'), function(e) {
+        e.stopPropagation();
+        if (currentViewingProfile === 'self') {
+            showSelfStatPopup('posts');
+        } else {
+            if (currentFriendProfileData) {
+                showOtherStatPopup('posts', currentFriendProfileData.serverId, currentFriendProfileData.userId);
+            }
+        }
+    });
+}
+
+// ===================================================
+//  ✅ SELF STAT POPUP -- နံပါတ်ပဲ ပြ
+// ===================================================
+function showSelfStatPopup(type) {
+    var existing = document.getElementById('profileStatPopup');
+    if (existing) existing.remove();
+
+    var overlay = document.createElement('div');
+    overlay.id = 'profileStatPopup';
+    overlay.className = 'profile-stat-popup-overlay';
+
+    var titleText = type === 'likes' ? 'Like အရေတွက်' : 'Post အရေတွက်';
+    var iconSvg = type === 'likes'
+        ? '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ff3b30" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>'
+        : '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ff6d1f" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>';
+
+    var subtitleText = type === 'likes' ? 'သင့်ရရှိထားသည်' : 'သင့် Post အရေတွက်';
+
+    overlay.innerHTML =
+        '<div class="profile-stat-popup" style="max-width:280px;">' +
+            '<div class="profile-stat-popup-header" style="justify-content:center;padding:16px 18px 8px;border-bottom:none;">' +
+                '<h3 style="justify-content:center;">' + iconSvg + '<span>' + titleText + '</span></h3>' +
+                '<button class="profile-stat-popup-close" id="statPopupClose" style="position:absolute;top:10px;right:12px;">' +
+                    '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>' +
+                '</button>' +
+            '</div>' +
+            '<div class="profile-stat-popup-body" style="text-align:center;padding:8px 20px 24px;">' +
+                '<div class="profile-stat-popup-subtitle">' + subtitleText + '</div>' +
+                '<div class="profile-stat-popup-big-number" id="statBigNumber">—</div>' +
+            '</div>' +
+        '</div>';
+
+    document.body.appendChild(overlay);
+
+    function close() { overlay.remove(); }
+    document.getElementById('statPopupClose').addEventListener('click', close);
+    overlay.addEventListener('click', function(e) { if (e.target === overlay) close(); });
+
+    var bigNumEl = document.getElementById('statBigNumber');
+
+    if (type === 'posts') {
+        // Posts -- currentUser.postList.length
+        bigNumEl.textContent = (currentUser.postList || []).length;
+    } else {
+        // Likes -- Server ကနေ ဆွဲ
+        bigNumEl.textContent = '...';
+        fetchSelfLikeCount().then(function(total) {
+            bigNumEl.textContent = total;
+        });
+    }
+}
+
+// ===================================================
+//  ✅ OTHER STAT POPUP -- သူများ
+//  • Firebase → Post List → Worker → Like Count
+//  • Post List ကို Popup မှာ ပြ
+//  • Delete မပါ
+// ===================================================
+function showOtherStatPopup(type, serverId, userId) {
+    var existing = document.getElementById('profileStatPopup');
+    if (existing) existing.remove();
+
+    var overlay = document.createElement('div');
+    overlay.id = 'profileStatPopup';
+    overlay.className = 'profile-stat-popup-overlay';
+
+    var titleText = type === 'likes' ? 'Like အရေတွက်' : 'Post အရေတွက်';
+    var iconSvg = type === 'likes'
+        ? '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ff3b30" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>'
+        : '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ff6d1f" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>';
+
+    var subtitleText = type === 'likes' ? 'သူ့ရရှိထားသည်' : 'သူ့ Post အရေတွက်';
+
+    overlay.innerHTML =
+        '<div class="profile-stat-popup" style="max-width:360px;max-height:80vh;">' +
+            '<div class="profile-stat-popup-header" style="justify-content:center;padding:16px 18px 8px;border-bottom:1px solid var(--border);position:relative;">' +
+                '<h3 style="justify-content:center;">' + iconSvg + '<span>' + titleText + '</span></h3>' +
+                '<button class="profile-stat-popup-close" id="statPopupClose" style="position:absolute;top:10px;right:12px;">' +
+                    '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>' +
+                '</button>' +
+            '</div>' +
+            '<div class="profile-stat-popup-body" id="otherStatBody" style="padding:8px 14px 20px;overflow-y:auto;">' +
+                '<div style="text-align:center;color:var(--text-muted);font-size:12px;font-weight:600;padding:4px 0 10px;">' + subtitleText + '</div>' +
+                '<div class="profile-stat-popup-big-number" id="statBigNumber" style="text-align:center;">...</div>' +
+                '<div id="otherStatList" style="margin-top:16px;text-align:left;"></div>' +
+            '</div>' +
+        '</div>';
+
+    document.body.appendChild(overlay);
+
+    function close() { overlay.remove(); }
+    document.getElementById('statPopupClose').addEventListener('click', close);
+    overlay.addEventListener('click', function(e) { if (e.target === overlay) close(); });
+
+    var bigNumEl = document.getElementById('statBigNumber');
+    var listEl = document.getElementById('otherStatList');
+
+    // Firebase Server ကနေ Post List + Like Count ဆွဲ
+    fetchOtherStatsFromServer(serverId, userId, type).then(function(stats) {
+        var finalValue = type === 'likes' ? stats.likes : stats.posts;
+        bigNumEl.textContent = finalValue;
+
+        // Post List ပြ
+        if (type === 'posts' && stats.postList && stats.postList.length > 0) {
+            renderOtherPostsList(listEl, stats.postList, serverId);
+        } else if (type === 'likes' && stats.postList && stats.postList.length > 0) {
+            var withLikes = stats.postList.filter(function(p) { return (parseInt(p.likeCount) || 0) > 0; });
+            if (withLikes.length > 0) {
+                renderOtherPostsList(listEl, withLikes, serverId);
+            }
+        }
+    }).catch(function() {
+        bigNumEl.textContent = '0';
+    });
+}
+
+function fetchOtherStatsFromServer(serverId, userId, type) {
+    return new Promise(function(resolve) {
+        if (typeof getDbForServer !== 'function') return resolve({ posts: 0, likes: 0, postList: [] });
+        var db = getDbForServer(serverId);
+        if (!db) return resolve({ posts: 0, likes: 0, postList: [] });
+
+        db.ref('users/' + userId + '/postList').once('value')
+            .then(function(snap) {
+                var list = snap.val();
+                if (!list) return resolve({ posts: 0, likes: 0, postList: [] });
+                if (!Array.isArray(list)) {
+                    list = Object.keys(list).map(function(k) { return list[k]; });
+                }
+                if (list.length === 0) return resolve({ posts: 0, likes: 0, postList: [] });
+
+                var W_SERVERS = window.WORKER_SERVERS || [];
+                var promises = list.map(function(item) {
+                    return fetchPostDetailWithLikes(W_SERVERS, item.postId, item.workerNo);
+                });
+
+                Promise.all(promises).then(function(posts) {
+                    var validPosts = posts.filter(function(p) { return p !== null; });
+                    var totalLikes = 0;
+                    validPosts.forEach(function(p) { totalLikes += (parseInt(p.likeCount) || 0); });
+                    resolve({
+                        posts: validPosts.length,
+                        likes: totalLikes,
+                        postList: validPosts
+                    });
+                }).catch(function() {
+                    resolve({ posts: list.length, likes: 0, postList: [] });
+                });
+            })
+            .catch(function() { resolve({ posts: 0, likes: 0, postList: [] }); });
+    });
+}
+
+function fetchPostDetailWithLikes(W_SERVERS, postId, workerNo) {
+    return new Promise(function(resolve) {
+        if (!W_SERVERS || W_SERVERS.length === 0) return resolve(null);
+        var srv = W_SERVERS.find(function(s) { return s.number === parseInt(workerNo); });
+        if (!srv) return resolve(null);
+
+        var client = (typeof window.getWorkerClient === 'function')
+            ? window.getWorkerClient(srv.id)
+            : null;
+        if (!client) return resolve(null);
+
+        client.query('SELECT postId, likeCount, commentCount, caption, postType, mediaUrls, linkData, createdAt, userId, userName, userAvatar, serverId, serverNo, roleId, workerNo FROM posts WHERE postId = ? LIMIT 1', [postId])
+            .then(function(rows) {
+                if (!rows || rows.length === 0) return resolve(null);
+                var post = rows[0];
+                post._serverId = srv.id;
+                post.workerNo = parseInt(workerNo);
+                post.likeCount = parseInt(post.likeCount) || 0;
+                post.commentCount = parseInt(post.commentCount) || 0;
+                try { post.mediaUrls = JSON.parse(post.mediaUrls || '[]'); } catch(e) { post.mediaUrls = []; }
+                try { post.linkData = post.linkData ? JSON.parse(post.linkData) : null; } catch(e) { post.linkData = null; }
+                resolve(post);
+            })
+            .catch(function() { resolve(null); });
+    });
+}
+
+// ===================================================
+//  ✅ OTHER POST LIST RENDER -- Delete မပါ
+// ===================================================
+function renderOtherPostsList(container, posts, serverId) {
+    container.innerHTML = '';
+
+    if (!posts || posts.length === 0) {
+        container.innerHTML = '<div style="text-align:center;color:var(--text-muted);font-size:12px;padding:20px;">Post မရှိပါ</div>';
+        return;
+    }
+
+    posts.forEach(function(post) {
+        var workerNo = post.workerNo || 1;
+        var caption = post.caption ? escapeHtml(String(post.caption).substring(0, 60)) : '(No caption)';
+        var likeCount = parseInt(post.likeCount) || 0;
+        var commentCount = parseInt(post.commentCount) || 0;
+
+        var item = document.createElement('div');
+        item.className = 'profile-stat-post-item';
+        item.style.cssText = 'background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:12px;margin-bottom:10px;cursor:pointer;';
+        item.innerHTML =
+            '<div style="font-size:11px;color:var(--text-muted);font-family:monospace;margin-bottom:4px;">Post.' + workerNo + '.' + escapeHtml(post.postId) + '</div>' +
+            '<div style="font-size:13px;color:var(--text-main);margin-bottom:8px;line-height:1.4;">' + caption + '</div>' +
+            '<div style="display:flex;gap:12px;font-size:11px;color:var(--text-muted);">' +
+                '<span style="color:#ff3b30;font-weight:700;">♥ ' + likeCount + '</span>' +
+                '<span>💬 ' + commentCount + '</span>' +
+                '<span style="margin-left:auto;color:var(--accent);font-weight:700;">View</span>' +
+            '</div>';
+
+        item.addEventListener('click', function() {
+            var popup = document.getElementById('profileStatPopup');
+            if (popup) popup.remove();
+            if (typeof window.openPostInfoScreen === 'function') {
+                window.openPostInfoScreen(post.postId, workerNo);
+            }
+        });
+
+        container.appendChild(item);
+    });
+}
+
+// ===================================================
+//  ✅ FRIENDS LIST POPUP (Self Profile)
+// ===================================================
+function showFriendsListPopup() {
+    if (!currentUser) return;
+
+    var existing = document.getElementById('profileFriendsListPopup');
+    if (existing) existing.remove();
+
+    var overlay = document.createElement('div');
+    overlay.id = 'profileFriendsListPopup';
+    overlay.className = 'profile-stat-popup-overlay';
+
+    overlay.innerHTML =
+        '<div class="profile-stat-popup" style="max-width:360px;max-height:80vh;">' +
+            '<div class="profile-stat-popup-header" style="justify-content:space-between;padding:16px 18px 12px;border-bottom:1px solid var(--border);">' +
+                '<h3 style="font-size:16px;">' +
+                    '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ff6d1f" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>' +
+                    '<span>Friends</span>' +
+                    '<span class="stat-count-badge" id="friendsPopupCount">0</span>' +
+                '</h3>' +
+                '<button class="profile-stat-popup-close" id="friendsPopupClose" style="position:static;width:32px;height:32px;">' +
+                    '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>' +
+                '</button>' +
+            '</div>' +
+            '<div class="profile-stat-popup-body" id="friendsPopupBody" style="padding:6px 0;overflow-y:auto;">' +
+                '<div class="profile-stat-popup-loading">Loading...</div>' +
+            '</div>' +
+        '</div>';
+
+    document.body.appendChild(overlay);
+
+    function close() { overlay.remove(); }
+    document.getElementById('friendsPopupClose').addEventListener('click', close);
+    overlay.addEventListener('click', function(e) { if (e.target === overlay) close(); });
+
+    var bodyEl = document.getElementById('friendsPopupBody');
+    var countEl = document.getElementById('friendsPopupCount');
+
+    var list = Array.isArray(currentUser.friendsList) ? currentUser.friendsList : [];
+    countEl.textContent = list.length;
+
+    if (list.length === 0) {
+        bodyEl.innerHTML = '<div class="profile-stat-popup-empty">Friend မရှိပါ</div>';
+        return;
+    }
+
+    getFriendsCacheList(list).then(function(enriched) {
+        bodyEl.innerHTML = '';
+        enriched.forEach(function(item) {
+            var entry = item.entry;
+            var data = item.data || {};
+            var avatar = data.avatar || 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 100 100"%3E%3Ccircle cx="50" cy="50" r="45" fill="%2322222e"/%3E%3C/svg%3E';
+            var name = data.name || 'Loading...';
+
+            var row = document.createElement('div');
+            row.className = 'friends-list-row';
+            row.innerHTML =
+                '<div class="friends-list-row-left">' +
+                    '<img src="' + avatar + '" class="friends-list-row-avatar" onerror="this.style.display=\'none\'" />' +
+                    '<div class="friends-list-row-name">' + escapeHtml(name) + '</div>' +
+                '</div>';
+
+            bodyEl.appendChild(row);
+        });
+    });
+}
+
+function getFriendsCacheList(list) {
+    return new Promise(function(resolve) {
+        if (typeof getFriendsCache !== 'function') {
+            return resolve(list.map(function(e) { return { entry: e, data: null }; }));
+        }
+        getFriendsCache().then(function(cache) {
+            var results = list.map(function(entry) {
+                var key = String(entry.serverId) + ':' + String(entry.userId);
+                return { entry: entry, data: cache[key] || null };
+            });
+            resolve(results);
+        }).catch(function() {
+            resolve(list.map(function(e) { return { entry: e, data: null }; }));
+        });
+    });
 }
 
 // ===================================================
@@ -14334,8 +14737,6 @@ function loadOwnedItems() {
         noneDiv.className = 'edit-owned-item';
         noneDiv.dataset.id = 'none';
         noneDiv.innerHTML = '<span class="empty-slot" style="font-size:24px;font-weight:bold;">X</span>';
-        noneDiv.style.borderColor = 'var(--border-light)';
-        noneDiv.style.background = 'var(--bg-input)';
         noneDiv.addEventListener('click', function() { selectOwnedItem('frame', 'none'); });
         framesGrid.appendChild(noneDiv);
         frames.forEach(function(frameId) {
@@ -14533,11 +14934,7 @@ function renderShopItems(type, items, ownedKey, gridId) {
     });
 }
 
-// ===================================================
-//  BUY POPUP
-// ===================================================
 var currentBuyItem = null;
-
 function openBuyPopup(type, id, price) {
     var configs = { frames: FRAME_CONFIG.frames, banners: BANNER_CONFIG.banners, backgrounds: BACKGROUND_CONFIG.backgrounds, bubbles: BUBBLE_CONFIG.bubbles };
     var items = configs[type] || [];
@@ -14557,12 +14954,10 @@ function openBuyPopup(type, id, price) {
     circle.classList.remove('completed');
     document.getElementById('buyPopup').classList.remove('hidden');
 }
-
 function closeBuyPopup() {
     document.getElementById('buyPopup').classList.add('hidden');
     currentBuyItem = null;
 }
-
 function confirmPurchase() {
     if (!currentBuyItem || !currentUser || !currentServerId) return;
     var server = FIREBASE_SERVERS.find(function(s) { return s.id === currentServerId; });
@@ -14766,9 +15161,6 @@ function handleRoleAction(roleId, action, slotIndex) {
     }
 }
 
-// ===================================================
-//  ROLE BUY POPUP
-// ===================================================
 var currentRoleBuyId = null;
 var currentRoleBuyPrice = 0;
 
@@ -14790,13 +15182,11 @@ function openRoleBuyPopup(roleId, price) {
     circle.classList.remove('completed');
     document.getElementById('roleBuyPopup').classList.remove('hidden');
 }
-
 function closeRoleBuyPopup() {
     document.getElementById('roleBuyPopup').classList.add('hidden');
     currentRoleBuyId = null;
     currentRoleBuyPrice = 0;
 }
-
 function confirmRolePurchase() {
     if (!currentRoleBuyId || !currentUser || !currentServerId) return;
     var role = ROLE_CONFIG.roles.find(function(r) { return r.id === currentRoleBuyId; });
@@ -14816,7 +15206,7 @@ function confirmRolePurchase() {
 }
 
 // ===================================================
-//  FRIENDS CACHE / PIN / LOCK / BG / NEW MSG FLAG
+//  FRIENDS CACHE / PIN / LOCK / BG
 // ===================================================
 var FRIENDS_CACHE_KEY = 'friendsCache';
 var PINNED_FRIENDS_KEY = 'pinnedFriends';
@@ -14856,13 +15246,8 @@ function markFriendOnline(sid, uid) {
             if (friend) {
                 friend.online = true;
                 cache[key] = friend;
-                saveFriendsCache(cache).then(function() {
-                    console.log('✅ Marked online:', friend.name);
-                    resolve();
-                });
-            } else {
-                resolve();
-            }
+                saveFriendsCache(cache).then(function() { resolve(); });
+            } else resolve();
         }).catch(function() { resolve(); });
     });
 }
@@ -14889,7 +15274,6 @@ function clearNewMsgFlag(sid, uid) {
 
 function getPinnedFriends() { return getFromDB(PINNED_FRIENDS_KEY).then(function(p) { return p || {}; }).catch(function() { return {}; }); }
 function savePinnedFriends(p) { return setToDB(PINNED_FRIENDS_KEY, p); }
-
 function pinFriend(sid, uid) {
     return getPinnedFriends().then(function(p) {
         var key = sid + ':' + uid;
@@ -14984,7 +15368,6 @@ function saveMessageToLocalDB(msg) {
 
     pendingSaveKeys[key] = true;
     if (!flushTimer) flushTimer = setTimeout(flushPendingSaves, FLUSH_INTERVAL);
-
     return Promise.resolve();
 }
 
@@ -14998,7 +15381,6 @@ function flushPendingSaves() {
         var tx = db.transaction(STORE_NAME, 'readwrite');
         var store = tx.objectStore(STORE_NAME);
         keys.forEach(function(key) { store.put({ key: key, value: memoryMessages[key] || [] }); });
-        tx.oncomplete = function() { console.log('Flushed ' + keys.length + ' keys to IDB'); };
         tx.onerror = function() {
             keys.forEach(function(key) { pendingSaveKeys[key] = true; });
             if (!flushTimer) flushTimer = setTimeout(flushPendingSaves, 1000);
@@ -15045,9 +15427,6 @@ function clearMemoryMessages() {
     if (flushTimer) { clearTimeout(flushTimer); flushTimer = null; }
 }
 
-// ===================================================
-//  PENDING MESSAGES
-// ===================================================
 var PENDING_MESSAGES_KEY = 'pendingMessages';
 
 function savePendingMessage(item) {
@@ -15159,7 +15538,6 @@ function addFriendAndSync(targetData) {
         openChatRoom({ serverId: targetData.serverId, userId: targetData.userId, serverNo: targetData.serverNo });
     })
     .catch(function(err) {
-        console.error('Add friend:', err);
         hideLoading();
         alert('Failed');
     });
@@ -15354,10 +15732,7 @@ function renderChatListRow(listEl, item) {
 
     var lockHtml = item.locked ? '<span class="chat-list-lock-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>' : '';
 
-    var redDotHtml = '';
-    if (item.hasNewMsg) {
-        redDotHtml = '<span class="chat-list-unread-badge">1</span>';
-    }
+    var redDotHtml = item.hasNewMsg ? '<span class="chat-list-unread-badge">1</span>' : '';
 
     var previewText = item.lastMessageText || 'Tap to open chat';
 
@@ -15610,9 +15985,6 @@ function updateChatBlockUI() {
     }
 }
 
-// ===================================================
-//  CHAT ROOM MESSAGE LISTENERS
-// ===================================================
 function startChatRoomMessageListeners(target) {
     stopChatRoomMessageListeners();
 
@@ -15873,9 +16245,6 @@ function reportMessage(msg) {
     });
 }
 
-// ===================================================
-//  REPLY / COPY / DELETE MESSAGE
-// ===================================================
 function startReply(msg) {
     currentReplyTo = {
         messageId: msg.messageId,
@@ -15920,7 +16289,7 @@ function fallbackCopyText(text) {
     ta.style.opacity = '0';
     document.body.appendChild(ta);
     ta.select();
-    try { document.execCommand('copy'); showToast('Copied'); } catch(e) { alert('Copy: ' + text); }
+    try { document.execCommand('copy'); showToast('Copied'); } catch(e) {}
     document.body.removeChild(ta);
 }
 
@@ -15940,9 +16309,6 @@ function deleteOneMessage(msg) {
     });
 }
 
-// ===================================================
-//  SCROLL
-// ===================================================
 var scrollToBottomTimer = null;
 function scrollToBottomDebounced() {
     if (scrollToBottomTimer) return;
@@ -16036,16 +16402,10 @@ function sendMessage() {
     }, 0);
 }
 
-// ===================================================
-//  FIRESTORE SEND
-// ===================================================
 var MAX_FIRESTORE_RETRY = 20;
-
-function isOnline() { return navigator.onLine; }
 
 function trySendToFirestore(messageId, messageData, localMsg, attempt) {
     if (attempt >= MAX_FIRESTORE_RETRY) {
-        console.log('Max retry → queue');
         savePendingMessage({ messageId: messageId, messageData: messageData, localMsg: localMsg });
         showToast('Saved. Will send when connection back.');
         return;
@@ -16085,7 +16445,6 @@ function trySendToFirestore(messageId, messageData, localMsg, attempt) {
 
         setWithTimeout(fsdb, messageId, messageData, 10000)
         .then(function() {
-            console.log('Sent to ' + chosenServerId + ':', messageId);
             localMsg.serverId = chosenServerId;
             delete localMsg._triedServers;
             saveMessageToLocalDB(localMsg);
@@ -16093,8 +16452,6 @@ function trySendToFirestore(messageId, messageData, localMsg, attempt) {
             renderChatList();
         })
         .catch(function(err) {
-            console.warn('Send error (' + chosenServerId + '):', err.code, '→ trying another server');
-
             if (err.code === 'resource-exhausted') { backoff = 300; }
             else if (err.code === 'permission-denied') { backoff = 300; }
             else if (err.code === 'unavailable') { backoff = 1000; }
@@ -16103,16 +16460,13 @@ function trySendToFirestore(messageId, messageData, localMsg, attempt) {
             else if (err.code === 'internal') { backoff = 1000; }
             else if (err.code === 'cancelled') { return; }
 
-            if (attempt === 0) {
-                showToast('Server busy. Trying another...');
-            }
+            if (attempt === 0) showToast('Server busy. Trying another...');
 
             setTimeout(function() {
                 trySendToFirestore(messageId, messageData, localMsg, attempt + 1);
             }, backoff);
         });
     }).catch(function(err) {
-        console.warn('Cache read failed:', err);
         var chosenServerId = messageData.receiverServer;
         var fsdb = getFirestoreForServer(chosenServerId);
         if (!fsdb) {
@@ -16311,9 +16665,6 @@ function isUserInMyBlockList(uid, sid) {
     return currentUser.blockList.some(function(b) { return b.userId === uid && b.serverId === sid; });
 }
 
-// ===================================================
-//  CHAT LIST ACTION BAR
-// ===================================================
 function showChatListActionBar(friend, item) {
     var ex1 = document.querySelector('.chat-list-action-bar');
     if (ex1) ex1.remove();
@@ -16430,9 +16781,6 @@ function showPasswordSetup(title, callback) {
     });
 }
 
-// ===================================================
-//  BACKGROUND PICKER
-// ===================================================
 function showChatBackgroundPicker() {
     if (!currentChatTarget) return;
     var target = currentChatTarget;
@@ -16505,8 +16853,6 @@ function startAppMessageListeners() {
         ? currentUser.mServer
         : [currentServerId];
 
-    console.log('Listening to M Servers:', mServer);
-
     mServer.forEach(function(sid) {
         var fsdb = getFirestoreForServer(sid);
         if (!fsdb) return;
@@ -16552,356 +16898,8 @@ function stopAppMessageListeners() {
 }
 
 // ===================================================
-//  FRIEND PROFILE + POPUP
-//  ✅ သူများ Profile -- Stats ကို "View" ပြ
+//  PROFILE CARD + AVATAR CLICK
 // ===================================================
-function loadFriendProfileIntoFsProfile(d) {
-    currentViewingProfile = 'friend';
-    currentFriendProfileData = d;
-
-    var fsAvatar = document.getElementById('fsProfileAvatar');
-    var fsName = document.getElementById('fsProfileName');
-    var fsMark = document.getElementById('fsProfileMark');
-    var fsId = document.getElementById('fsProfileId');
-    var fsServer = document.getElementById('fsProfileServer');
-    var fsBio = document.getElementById('fsProfileBio');
-
-    if (fsAvatar) fsAvatar.src = d.avatar || 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"%3E%3Ccircle cx="50" cy="50" r="45" fill="%2322222e"/%3E%3C/svg%3E';
-    if (fsName) fsName.textContent = d.name || 'Player';
-
-    if (fsMark) {
-        fsMark.onclick = null;
-        if (d.markUse) {
-            var mark = MARK_CONFIG.marks.find(function(m) { return String(m.id) === String(d.markUse); });
-            if (mark) {
-                fsMark.innerHTML = '<img src="' + mark.image + '" />';
-                fsMark.style.display = 'inline-flex';
-                fsMark.onclick = function(e) { e.stopPropagation(); showMarkPopup(mark); };
-            } else fsMark.style.display = 'none';
-        } else fsMark.style.display = 'none';
-    }
-
-    if (fsId) { fsId.style.display = 'none'; fsId.onclick = null; }
-    if (fsServer) {
-        var server = FIREBASE_SERVERS.find(function(s) { return s.id === d.serverId; });
-        fsServer.textContent = server ? server.name : 'Server ' + (d.serverNo || 1);
-    }
-    if (fsBio) {
-        fsBio.innerHTML = (d.bio && d.bio.trim() !== '')
-            ? escapeHtml(d.bio).replace(/\n/g, '<br>')
-            : '<span class="bio-placeholder">No bio yet...</span>';
-    }
-
-    var frameImg = FRAME_CONFIG.frames.find(function(f) { return String(f.id) === String(d.frameUse); });
-    var profileFrameOverlay = document.getElementById('profileFrameOverlay');
-    if (profileFrameOverlay) {
-        if (frameImg) {
-            profileFrameOverlay.style.backgroundImage = 'url("' + frameImg.image + '")';
-            profileFrameOverlay.style.backgroundSize = 'contain';
-            profileFrameOverlay.style.backgroundPosition = 'center';
-            profileFrameOverlay.style.backgroundRepeat = 'no-repeat';
-        } else profileFrameOverlay.style.backgroundImage = 'none';
-    }
-
-    var bannerEl = document.getElementById('profileBanner');
-    if (bannerEl) {
-        var banner = BANNER_CONFIG.banners.find(function(b) { return String(b.id) === String(d.bannerUse); });
-        if (banner) {
-            bannerEl.style.backgroundImage = 'url("' + banner.image + '")';
-            bannerEl.style.backgroundSize = 'cover';
-            bannerEl.style.backgroundPosition = 'center';
-        } else bannerEl.style.backgroundImage = 'linear-gradient(135deg, #1a1a2e, #16213e, #0f3460)';
-    }
-
-    var bgSection = document.getElementById('profileBackgroundSection');
-    if (bgSection) {
-        var bg = BACKGROUND_CONFIG.backgrounds.find(function(b) { return String(b.id) === String(d.backgroundUse); });
-        if (bg) {
-            bgSection.style.backgroundImage = 'url("' + bg.image + '")';
-            bgSection.style.backgroundSize = 'cover';
-            bgSection.style.backgroundPosition = 'center';
-        } else bgSection.style.backgroundImage = 'none';
-    }
-
-    var roleGrid = document.getElementById('profileRoleGrid');
-    if (roleGrid) {
-        roleGrid.innerHTML = '';
-        var equippedRoles = Array.isArray(d.roleUse) ? d.roleUse : [];
-        for (var i = 0; i < 6; i++) {
-            var slot = document.createElement('div');
-            slot.className = 'profile-role-slot';
-            var roleId = equippedRoles[i];
-            var role = roleId ? ROLE_CONFIG.roles.find(function(r) { return String(r.id) === String(roleId); }) : null;
-            if (role) {
-                slot.innerHTML = '<img src="' + role.image + '" class="role-image" /><div class="role-name-tag">' + role.name + '</div>';
-            } else {
-                slot.classList.add('empty');
-                slot.innerHTML = '<span class="empty-slot-icon">+</span>';
-            }
-            roleGrid.appendChild(slot);
-        }
-    }
-
-    var editWrap = document.querySelector('.profile-edit-btn-wrapper');
-    if (editWrap) {
-        editWrap.style.display = 'none';
-        editWrap.style.visibility = 'hidden';
-        editWrap.style.pointerEvents = 'none';
-    }
-
-    // ✅ သူများ Stats -- Friends/Likes/Post ကို "View" စာသာပဲ ပြ
-    syncOtherProfileStats();
-}
-
-// ===================================================
-//  ✅ OTHER PROFILE STATS -- "View" စာသာပဲ ပြ
-// ===================================================
-function syncOtherProfileStats() {
-    var friendsCountEl = document.getElementById('fsProfileFriendsCount');
-    var postsCountEl = document.getElementById('fsProfilePostsCount');
-    var likesCountEl = document.getElementById('fsProfileLikesCount');
-
-    // Friends -- count ပြ (data ထဲ ရှိပြီးသား)
-    if (currentFriendProfileData) {
-        var fList = Array.isArray(currentFriendProfileData.friendsList) ? currentFriendProfileData.friendsList : [];
-        if (friendsCountEl) friendsCountEl.textContent = fList.length;
-    }
-
-    // Likes & Post -- "View" ပြ
-    if (postsCountEl) postsCountEl.textContent = 'View';
-    if (likesCountEl) likesCountEl.textContent = 'View';
-}
-
-// ===================================================
-//  ✅ STAT BUTTONS -- Self / Other ခွဲပြီး Bind
-// ===================================================
-function bindStatButtons() {
-    var friendsBtn = document.getElementById('fsProfileFriendsBtn');
-    var likesBtn = document.getElementById('fsProfileLikesBtn');
-    var postsBtn = document.getElementById('fsProfilePostsBtn');
-
-    if (friendsBtn && !friendsBtn._hooked) {
-        friendsBtn._hooked = true;
-        friendsBtn.addEventListener('click', function(e) {
-            e.stopPropagation();
-            if (currentViewingProfile === 'self') {
-                if (typeof window.showFriendsListPopup === 'function') window.showFriendsListPopup();
-            } else {
-                // သူများ -- Firebase Server ကို သွားရှာ
-                if (currentFriendProfileData) {
-                    openFriendsListScreen(currentFriendProfileData.serverId, currentFriendProfileData.userId, currentFriendProfileData.name);
-                }
-            }
-        });
-    }
-
-    if (likesBtn && !likesBtn._hooked) {
-        likesBtn._hooked = true;
-        likesBtn.addEventListener('click', function(e) {
-            e.stopPropagation();
-            if (currentViewingProfile === 'self') {
-                if (typeof window.showStatPopup === 'function') {
-                    window.showStatPopup('likes', currentServerId, currentUser.userId, currentUser.name);
-                }
-            } else {
-                // သူများ -- Firebase Server ကို သွားရှာ
-                if (currentFriendProfileData) {
-                    showOtherStatPopup('likes', currentFriendProfileData.serverId, currentFriendProfileData.userId);
-                }
-            }
-        });
-    }
-
-    if (postsBtn && !postsBtn._hooked) {
-        postsBtn._hooked = true;
-        postsBtn.addEventListener('click', function(e) {
-            e.stopPropagation();
-            if (currentViewingProfile === 'self') {
-                if (typeof window.showStatPopup === 'function') {
-                    window.showStatPopup('posts', currentServerId, currentUser.userId, currentUser.name);
-                }
-            } else {
-                // သူများ -- Firebase Server ကို သွားရှာ
-                if (currentFriendProfileData) {
-                    showOtherStatPopup('posts', currentFriendProfileData.serverId, currentFriendProfileData.userId);
-                }
-            }
-        });
-    }
-}
-
-// ===================================================
-//  ✅ OTHER STAT POPUP -- သူများ Like/Post
-//  • Firebase postList → Worker → likeCount
-//  • Post List ကို Popup မှာ ပြ
-//  • Delete မပါ (View + Open ပဲ)
-// ===================================================
-function showOtherStatPopup(type, serverId, userId) {
-    var existing = document.getElementById('profileStatPopup');
-    if (existing) existing.remove();
-
-    var overlay = document.createElement('div');
-    overlay.id = 'profileStatPopup';
-    overlay.className = 'profile-stat-popup-overlay';
-
-    var titleText = type === 'likes' ? 'Like အရေတွက်' : 'Post အရေတွက်';
-    var iconSvg = type === 'likes'
-        ? '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ff3b30" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>'
-        : '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ff6d1f" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>';
-
-    var subtitleText = type === 'likes' ? 'သူ့ရရှိထားသည်' : 'သူ့ Post အရေတွက်';
-
-    overlay.innerHTML =
-        '<div class="profile-stat-popup" style="max-width:360px;max-height:80vh;">' +
-            '<div class="profile-stat-popup-header" style="justify-content:center;padding:16px 18px 8px;border-bottom:1px solid var(--border);position:relative;">' +
-                '<h3 style="justify-content:center;">' + iconSvg + '<span>' + titleText + '</span></h3>' +
-                '<button class="profile-stat-popup-close" id="statPopupClose" style="position:absolute;top:10px;right:12px;">' +
-                    '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>' +
-                '</button>' +
-            '</div>' +
-            '<div class="profile-stat-popup-body" id="otherStatBody" style="padding:8px 14px 20px;overflow-y:auto;">' +
-                '<div style="text-align:center;color:var(--text-muted);font-size:12px;font-weight:600;padding:4px 0 10px;">' + subtitleText + '</div>' +
-                '<div class="profile-stat-popup-big-number" id="statBigNumber" style="text-align:center;">—</div>' +
-                '<div id="otherStatList" style="margin-top:16px;text-align:left;"></div>' +
-            '</div>' +
-        '</div>';
-
-    document.body.appendChild(overlay);
-
-    function close() { overlay.remove(); }
-    document.getElementById('statPopupClose').addEventListener('click', close);
-    overlay.addEventListener('click', function(e) { if (e.target === overlay) close(); });
-
-    var bigNumEl = document.getElementById('statBigNumber');
-    var listEl = document.getElementById('otherStatList');
-
-    // Firebase Server ကနေ Post List + Like Count ဆွဲ
-    fetchOtherStatsFromServer(serverId, userId, type).then(function(stats) {
-        var finalValue = type === 'likes' ? stats.likes : stats.posts;
-        bigNumEl.textContent = finalValue;
-
-        // Post List ပြ (type = posts)
-        if (type === 'posts' && stats.postList && stats.postList.length > 0) {
-            renderOtherPostsList(listEl, stats.postList, serverId);
-        } else if (type === 'likes' && stats.postList && stats.postList.length > 0) {
-            // Like ရှိတဲ့ Post ပဲ ပြ
-            var withLikes = stats.postList.filter(function(p) { return (parseInt(p.likeCount) || 0) > 0; });
-            if (withLikes.length > 0) {
-                renderOtherPostsList(listEl, withLikes, serverId);
-            }
-        }
-    }).catch(function() {
-        bigNumEl.textContent = '0';
-    });
-}
-
-function fetchOtherStatsFromServer(serverId, userId, type) {
-    return new Promise(function(resolve) {
-        if (typeof getDbForServer !== 'function') return resolve({ posts: 0, likes: 0, postList: [] });
-        var db = getDbForServer(serverId);
-        if (!db) return resolve({ posts: 0, likes: 0, postList: [] });
-
-        db.ref('users/' + userId + '/postList').once('value')
-            .then(function(snap) {
-                var list = snap.val();
-                if (!list) return resolve({ posts: 0, likes: 0, postList: [] });
-                if (!Array.isArray(list)) {
-                    list = Object.keys(list).map(function(k) { return list[k]; });
-                }
-                if (list.length === 0) return resolve({ posts: 0, likes: 0, postList: [] });
-
-                // တစ်ခုချင်း Worker ကနေ likeCount ဆွဲ
-                var W_SERVERS = window.WORKER_SERVERS || [];
-                var promises = list.map(function(item) {
-                    return fetchPostDetailWithLikes(W_SERVERS, item.postId, item.workerNo);
-                });
-
-                Promise.all(promises).then(function(posts) {
-                    var validPosts = posts.filter(function(p) { return p !== null; });
-                    var totalLikes = 0;
-                    validPosts.forEach(function(p) { totalLikes += (parseInt(p.likeCount) || 0); });
-                    resolve({
-                        posts: validPosts.length,
-                        likes: totalLikes,
-                        postList: validPosts
-                    });
-                }).catch(function() {
-                    resolve({ posts: list.length, likes: 0, postList: [] });
-                });
-            })
-            .catch(function() { resolve({ posts: 0, likes: 0, postList: [] }); });
-    });
-}
-
-function fetchPostDetailWithLikes(W_SERVERS, postId, workerNo) {
-    return new Promise(function(resolve) {
-        if (!W_SERVERS || W_SERVERS.length === 0) return resolve(null);
-        var srv = W_SERVERS.find(function(s) { return s.number === parseInt(workerNo); });
-        if (!srv) return resolve(null);
-
-        var client = (typeof window.getWorkerClient === 'function')
-            ? window.getWorkerClient(srv.id)
-            : null;
-        if (!client) return resolve(null);
-
-        client.query('SELECT postId, likeCount, commentCount, caption, postType, mediaUrls, linkData, createdAt, userId, userName, userAvatar, serverId, serverNo, roleId, workerNo FROM posts WHERE postId = ? LIMIT 1', [postId])
-            .then(function(rows) {
-                if (!rows || rows.length === 0) return resolve(null);
-                var post = rows[0];
-                post._serverId = srv.id;
-                post.workerNo = parseInt(workerNo);
-                post.likeCount = parseInt(post.likeCount) || 0;
-                post.commentCount = parseInt(post.commentCount) || 0;
-                try { post.mediaUrls = JSON.parse(post.mediaUrls || '[]'); } catch(e) { post.mediaUrls = []; }
-                try { post.linkData = post.linkData ? JSON.parse(post.linkData) : null; } catch(e) { post.linkData = null; }
-                resolve(post);
-            })
-            .catch(function() { resolve(null); });
-    });
-}
-
-// ===================================================
-//  ✅ OTHER POST LIST RENDER -- Delete မပါ
-// ===================================================
-function renderOtherPostsList(container, posts, serverId) {
-    container.innerHTML = '';
-
-    if (!posts || posts.length === 0) {
-        container.innerHTML = '<div style="text-align:center;color:var(--text-muted);font-size:12px;padding:20px;">Post မရှိပါ</div>';
-        return;
-    }
-
-    posts.forEach(function(post) {
-        var workerNo = post.workerNo || 1;
-        var caption = post.caption ? escapeHtml(String(post.caption).substring(0, 60)) : '(No caption)';
-        var likeCount = parseInt(post.likeCount) || 0;
-        var commentCount = parseInt(post.commentCount) || 0;
-
-        var item = document.createElement('div');
-        item.className = 'profile-stat-post-item';
-        item.style.cssText = 'background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:12px;margin-bottom:10px;cursor:pointer;';
-        item.innerHTML =
-            '<div style="font-size:11px;color:var(--text-muted);font-family:monospace;margin-bottom:4px;">Post.' + workerNo + '.' + escapeHtml(post.postId) + '</div>' +
-            '<div style="font-size:13px;color:var(--text-main);margin-bottom:8px;line-height:1.4;">' + caption + '</div>' +
-            '<div style="display:flex;gap:12px;font-size:11px;color:var(--text-muted);">' +
-                '<span style="color:#ff3b30;font-weight:700;">♥ ' + likeCount + '</span>' +
-                '<span>💬 ' + commentCount + '</span>' +
-                '<span style="margin-left:auto;color:var(--accent);font-weight:700;">View</span>' +
-            '</div>';
-
-        // ✅ နှိပ်ရင် Post Info ဖွင့် (Delete မပါ)
-        item.addEventListener('click', function() {
-            var popup = document.getElementById('profileStatPopup');
-            if (popup) popup.remove();
-            if (typeof window.openPostInfoScreen === 'function') {
-                window.openPostInfoScreen(post.postId, workerNo);
-            }
-        });
-
-        container.appendChild(item);
-    });
-}
-
 function attachChatRoomAvatarClick() {
     var av = document.querySelector('.chat-room-avatar');
     if (!av) return;
@@ -16993,14 +16991,13 @@ function renderProfileCardPopup(cached) {
             openedProfileFromChatList = true;
             fullscreenStack = [];
             openFullscreen('Profile', 'fs-profile');
+            setTimeout(bindStatButtons, 300);
         }, 150);
     });
 }
 
 // ===================================================
-//  ✅ FRIENDS LIST SCREEN -- သူများ
-//  • Firebase Server ကို သွားရှာ
-//  • Delete/Block မပါ -- Add ပဲ
+//  ✅ FRIENDS LIST SCREEN -- သူများ (Add ပဲ)
 // ===================================================
 function openFriendsListScreen(sid, uid, ownerName) {
     var container = document.getElementById('friendsListContainer');
@@ -17039,7 +17036,6 @@ function renderFriendsList(friends) {
     var html = '<div class="friends-list-items">';
     filtered.forEach(function(f) {
         var already = isFriend(f.serverId, f.userId);
-        // ✅ Delete/Block မပါ -- Add ပဲ
         var action = already ? '<span class="friend-list-already">Already</span>'
                              : '<button class="friend-list-add-btn" data-server-id="' + f.serverId + '" data-user-id="' + f.userId + '">Add</button>';
 
@@ -17501,7 +17497,7 @@ function clearAllFriendsData() {
 
 function clearAllMessagesData() {
     if (isProcessing) return;
-    if (!confirm('Clear all messages data?\n(Text + Image + AI Chat အားလုံး ဖျက်မယ်)')) return;
+    if (!confirm('Clear all messages data?')) return;
     isProcessing = true;
     showLoading('Clearing...');
     openDB().then(function(db) {
@@ -17544,9 +17540,6 @@ function clearAllMessagesData() {
     });
 }
 
-// ===================================================
-//  LOG OUT
-// ===================================================
 function getAllKeysWithPrefix(prefix) {
     return new Promise(function(resolve) {
         openDB().then(function(db) {
@@ -17719,7 +17712,6 @@ function logoutUser() {
         setTimeout(function() { alert('Logged out'); }, 300);
     })
     .catch(function(err) {
-        console.error('Logout error:', err);
         isProcessing = false;
         hideLoading();
         alert('Logout failed');
@@ -17728,7 +17720,7 @@ function logoutUser() {
 
 function messageAllUser() {
     if (isProcessing) return;
-    if (!confirm('Message All?\n\nData အားလုံး ဖျက်မယ်။\nပြန်ယူလို့မရဘူး။')) return;
+    if (!confirm('Message All?\n\nData အားလုံး ဖျက်မယ်။')) return;
 
     isProcessing = true;
     showLoading('Clearing all...');
@@ -17744,7 +17736,6 @@ function messageAllUser() {
         setTimeout(function() { alert('All data cleared'); }, 300);
     })
     .catch(function(err) {
-        console.error('Message All error:', err);
         isProcessing = false;
         hideLoading();
         alert('Failed');
@@ -17784,30 +17775,14 @@ function showLogoutOptionsPopup() {
 document.addEventListener('DOMContentLoaded', function() {
     initDomRefs();
 
-    if (newAccountBtn) {
-        newAccountBtn.addEventListener('click', function() {
-            if (!isProcessing) showNewAccountPopup();
-        });
-    }
+    if (newAccountBtn) newAccountBtn.addEventListener('click', function() { if (!isProcessing) showNewAccountPopup(); });
     if (newAccountPopupClose) newAccountPopupClose.addEventListener('click', closeNewAccountPopup);
-    if (newAccountPopup) {
-        newAccountPopup.addEventListener('click', function(e) {
-            if (e.target === newAccountPopup) closeNewAccountPopup();
-        });
-    }
+    if (newAccountPopup) newAccountPopup.addEventListener('click', function(e) { if (e.target === newAccountPopup) closeNewAccountPopup(); });
     if (newAccountSubmitBtn) newAccountSubmitBtn.addEventListener('click', handleNewAccount);
 
-    if (loginBtn) {
-        loginBtn.addEventListener('click', function() {
-            if (!isProcessing) showLoginPopup();
-        });
-    }
+    if (loginBtn) loginBtn.addEventListener('click', function() { if (!isProcessing) showLoginPopup(); });
     if (loginPopupClose) loginPopupClose.addEventListener('click', closeLoginPopup);
-    if (loginPopup) {
-        loginPopup.addEventListener('click', function(e) {
-            if (e.target === loginPopup) closeLoginPopup();
-        });
-    }
+    if (loginPopup) loginPopup.addEventListener('click', function(e) { if (e.target === loginPopup) closeLoginPopup(); });
     if (loginSubmitBtn) loginSubmitBtn.addEventListener('click', handleLogin);
 
     if (loginEmailInput) loginEmailInput.addEventListener('keypress', function(e) { if (e.key === 'Enter') handleLogin(); });
@@ -17854,7 +17829,11 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    if (profileBtn) profileBtn.addEventListener('click', function() { loadProfileData(); openFullscreen('Profile', 'fs-profile'); });
+    if (profileBtn) profileBtn.addEventListener('click', function() {
+        loadProfileData();
+        openFullscreen('Profile', 'fs-profile');
+        setTimeout(bindStatButtons, 300);
+    });
 
     var openEditBtn = document.getElementById('openEditProfileBtn');
     if (openEditBtn) openEditBtn.addEventListener('click', function() {
@@ -18008,7 +17987,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     setTimeout(initSlider, 100);
     setTimeout(initRoleSlider, 200);
-    setTimeout(bindStatButtons, 500);
+    setTimeout(bindStatButtons, 600);
 
     authOverlay.style.display = 'none';
     authOverlay.classList.add('hidden');
@@ -18016,16 +17995,16 @@ document.addEventListener('DOMContentLoaded', function() {
 
     checkSession().then(function(has) {
         if (has) {
-            console.log('Auto-login success');
+            setTimeout(bindStatButtons, 1500);
         } else {
             authOverlay.style.display = 'flex';
             authOverlay.classList.remove('hidden');
         }
         setTimeout(attachChatRoomAvatarClick, 1000);
-        setTimeout(bindStatButtons, 1000);
-        console.log('STAR ARCADE Ready');
     });
-});    
+});
+
+    
 
 // ============================================================
 // ✅ IMAGE SEND + LINK SYSTEM (GIF မပါ)
